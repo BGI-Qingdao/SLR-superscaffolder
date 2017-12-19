@@ -1,14 +1,42 @@
+.PHONY: all clean debug test release
 
-.PHONY: all clean debug test 
+CC 		   =	gcc
+CXX 	   =	g++
+
+CXXFLAGS   =	-I./\
+				-I./common/sam_bam\
+				-I./common/files
+
+source_h   =	contig_barcode.h  \
+		   		common/files/file_reader.h \
+		   		common/files/file_writer.h  \
+		   		common/files/gzstream.h \
+		   		common/sam_bam/sam_parser.h
+
+source_cpp =	contig_barcode.cpp \
+		   		common/files/file_reader.cpp \
+		   		common/files/file_writer.cpp \
+		   		common/files/gzstream.cpp \
+		   		common/sam_bam/sam_parser.cpp  
+
+test_cpp   =	test.cpp
+
+main_cpp   =	main.cpp
+
+main_o 	   =	${main_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+
+test_o 	   =	${test_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
 
+.cpp.o:
+	${CXX} ${CXXFLAGS} -c $<
 
 
-
-
+all: ${main_o}
 
 test:
 
+dirty	   =	${test_o} ${main_o} 
 
 clean:
-	rm xxx
+	rm -rf ${dirty}
