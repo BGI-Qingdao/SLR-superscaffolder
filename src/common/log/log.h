@@ -61,7 +61,8 @@ class logger
 
         logger & operator << (const lstart & )
         {
-            buffer.clear();
+            std::ostringstream ost1;
+            buffer.swap(ost1);;
             return *this;
         }
 
@@ -72,7 +73,8 @@ class logger
                 (*ost)<<theme->logstring(buffer.str())
                       <<std::endl;
             }
-            buffer.clear();
+            std::ostringstream ost1;
+            buffer.swap(ost1);;
             return *this;
         }
 
@@ -101,7 +103,7 @@ class timer
             if(l!= NULL)
             {
                 std::string last = (end-start).to_string();
-                (*l)<<lstart()<<"timer log --"<<jobdec<< "used"<<last<<lend();
+                (*l)<<lstart()<<jobdec<< " finish. used "<<last<<lend();
             }
         }
     private:
