@@ -33,7 +33,8 @@ source_cpp =	contig_barcode.cpp \
 				common/time/timetools.cpp
 
 test_cpp   =	test.cpp\
-				common/time/timetools_test.cpp
+				common/time/timetools_test.cpp\
+				common/sam_bam/sam_parser_test.cpp
 
 main_cpp   =	main.cpp
 
