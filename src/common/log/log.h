@@ -90,7 +90,7 @@ class logger
 class timer
 {
     public:
-        timer( logger * a_logger , std::string job_description)
+        timer( logger & a_logger , const std::string &job_description)
             : start(TIME::timepoint::now())
             , l(a_logger)
             , jobdec(job_description) {}
@@ -98,15 +98,12 @@ class timer
         ~timer()
         {
             TIME::timepoint end = TIME::timepoint::now();
-            if(l!= NULL)
-            {
                 std::string last = (end-start).to_string();
-                (*l)<<lstart()<<jobdec<< " finish. used "<<last<<lend();
-            }
+                (l)<<lstart()<<jobdec<< " finish. used "<<last<<lend();
         }
     private:
         TIME::timepoint start ;
-        logger * l;
+        logger & l;
         std::string jobdec;
 };
 

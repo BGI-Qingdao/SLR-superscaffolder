@@ -82,7 +82,7 @@ struct Test
         struct test_##name{\
             test_##name(){\
                 get_module().push_back([](){\
-                    BGIQD::LOG::timer t(&test_logger,#name);\
+                    BGIQD::LOG::timer t(test_logger,#name);\
                     name();\
                     });\
             }\

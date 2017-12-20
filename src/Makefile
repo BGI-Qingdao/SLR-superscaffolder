@@ -1,4 +1,4 @@
-.PHONY: all clean debug test release
+.PHONY: all clean 
 
 CC 		   =	gcc
 CXX 	   =	g++
@@ -11,7 +11,9 @@ CXXFLAGS   =	-I./\
 				-I./common/test\
 				-I./common/string\
 				-lz\
-				-g
+
+DEUBG_CXX  =	${CXXFLAGS} -g
+RELEASE_CXX=	${CXXFLAGS}
 
 source_h   =	contig_barcode.h  \
 		   		common/files/file_reader.h \
@@ -50,11 +52,16 @@ test_o 	   =	${test_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 .cpp.o:
 	${CXX} ${CXXFLAGS} -c $< -o $@
 
+all : test debug release
 
-all: ${main_o} ${source_h}
+debug : clean ${main_o}
+	${CXX} ${DEUBG_CXX} ${main_o} -o debug 
+	
+release : clean ${main_o}
+	${CXX} ${RELEASE_CXX} ${main_o} -o release
 
 test: clean ${test_o} ${source_h}
-	${CXX} ${CXXFLAGS} ${test_o} -o test
+	${CXX} ${DEUBG_CXX} ${test_o} -o test
 
 dirty	   =	${test_o} ${main_o} 
 

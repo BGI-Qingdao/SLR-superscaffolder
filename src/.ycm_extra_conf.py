@@ -88,13 +88,15 @@ flags = [
 '-isystem',
 '/root/work/Project/Chr19ContigBin/src/common/files',
 '-isystem',
-'/root/work/Project/Chr19ContigBin/src/common/sam_bam',
+'/root/work/Project/Chr19ContigBin/src/biocommon/sam_bam',
 '-isystem',
 '/root/work/Project/Chr19ContigBin/src/common/log',
 '-isystem',
 '/root/work/Project/Chr19ContigBin/src/common/time',
 '-isystem',
 '/root/work/Project/Chr19ContigBin/src/common/test',
+'-isystem',
+'/root/work/Project/Chr19ContigBin/src/common/string',
 ]
 
 
