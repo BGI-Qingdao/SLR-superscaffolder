@@ -20,6 +20,7 @@ struct Test
     static TestMap & the_map()
     {
         static TestMap themap;
+        BGIQD::LOG::logfilter::singleton().get("TEST_main",BGIQD::LOG::loglevel::DEBUG,Test::log);
         return themap;
     }
 
@@ -46,24 +47,29 @@ struct Test
     private:
         static void RunVec(std::string name ,const TestVec & v)
         {
-            std::cout<<"---------------- Start test module "<<name<<" ---------------"<<std::endl;
+            log<<BGIQD::LOG::lstart()
+                <<"---------------- Start test module "<<name<<" ---------------"
+                <<BGIQD::LOG::lend();
             for(auto  i = v.begin() ; i!=v.end() ; i++)
             {
                 (*i)();
             }
-            std::cout<<"---------------- End   test module "<<name<<" ---------------"<<std::endl<<std::endl;
+            log<<BGIQD::LOG::lstart()
+                <<"---------------- End   test module "<<name<<" ---------------"
+                <<BGIQD::LOG::lend();
         }
+        static BGIQD::LOG::logger  log;
 };
 
 
 #define TEST_MODULE_INIT(name) \
-    static BGIQD::LOG::logger * test_logger;\
+    static BGIQD::LOG::logger test_logger;\
     static Test::TestVec & get_module()\
     {\
         static Test::TestVec * thevec = nullptr;\
         if(thevec == nullptr)\
         {\
-            test_logger = BGIQD::LOG::logfilter::singleton().get("TEST"#name,BGIQD::LOG::loglevel::DEBUG);\
+            BGIQD::LOG::logfilter::singleton().get("TEST_"#name,BGIQD::LOG::loglevel::DEBUG,test_logger);\
             thevec = new Test::TestVec();\
             Test::TRun(#name,thevec);\
         }\
@@ -76,7 +82,7 @@ struct Test
         struct test_##name{\
             test_##name(){\
                 get_module().push_back([](){\
-                    BGIQD::LOG::timer t(test_logger,#name);\
+                    BGIQD::LOG::timer t(&test_logger,#name);\
                     name();\
                     });\
             }\

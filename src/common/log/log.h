@@ -79,11 +79,9 @@ class logger
         }
 
         friend class logfilter;
-    protected:
+    private:
         // NOTICE : logge doesn't free ost1 or theme1 .
         //          it's user's duty to manager their life cycle.
-        logger( std::ostream *ost1 , ilogtheme *theme1 ) : ost(ost1) , theme(theme1) {}
-    private:
         std::ostringstream buffer;
         std::ostream * ost;
         ilogtheme * theme;

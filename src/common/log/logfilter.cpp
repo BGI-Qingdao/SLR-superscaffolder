@@ -15,11 +15,13 @@ namespace LOG {
         return *the_one;
     }
 
-    logger * logfilter::get(const std::string module, BGIQD::LOG::loglevel level )
+    void logfilter::get(const std::string module, BGIQD::LOG::loglevel level, logger & ret)
     {
         themes.push_back((ilogtheme*)( new detaillog(module,levelname(level))));
+        //themes.push_back((ilogtheme*)( new simplelog()));
+        ret.ost = & std::cerr ;
+        ret.theme = themes.back();
         //TODO : parse argument and filter!
-        return new logger(&std::cerr, themes.back());
     }
 
     logfilter::~logfilter()

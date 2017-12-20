@@ -1,5 +1,7 @@
 #include  "Test.h"
 
+BGIQD::LOG::logger Test::log ;
+
 static void print_usage()
 {
     std::cout<<"test    [command]"<<std::endl;

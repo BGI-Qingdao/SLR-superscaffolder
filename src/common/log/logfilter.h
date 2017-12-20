@@ -39,7 +39,7 @@ class logfilter
         // 
         // get a logger based on config.
         // it is user's duty to release this logger
-        logger * get(const std::string module,loglevel level);
+        void get(const std::string module,loglevel level, logger & ret);
     private:
 
         struct modulelogrole

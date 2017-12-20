@@ -13,9 +13,9 @@ TEST(timepoint_test)
     timepoint start = timepoint::now();
     sleep(2);
     timepoint end = timepoint::now();
-    (*test_logger)<<lstart()<<start.to_string()<<lend();
-    (*test_logger)<<lstart()<<end.to_string()<<lend();
-    (*test_logger)<<lstart()<<(end-start).to_string()<<lend();
+    (test_logger)<<lstart()<<start.to_string()<<lend();
+    (test_logger)<<lstart()<<end.to_string()<<lend();
+    (test_logger)<<lstart()<<(end-start).to_string()<<lend();
 }
 
 
