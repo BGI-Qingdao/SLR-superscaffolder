@@ -1,12 +1,13 @@
 #include "contig_barcode.h"
 #include "log.h"
+#include "logfilter.h"
 #include "file_reader.h"
 #include "file_writer.h"
 #include "sam_parser.h"
 #include "stringtools.h"
 #include <cassert>
 #include <algorithm>
-
+#include <iostream>
 namespace BGIQD {
 namespace JOB01 {
 
@@ -17,6 +18,11 @@ namespace JOB01 {
 
     static BarcodeNum bn;
     static logger log1;
+
+    void initLog()
+    {
+        logfilter::singleton().get("JOB01",loglevel::INFO,log1);
+    }
 
     int BarcodeNum::barcode2num( const std::string & str )
     {
@@ -29,7 +35,15 @@ namespace JOB01 {
         }
         return itr->second;
     }
-
+    void BarcodeNum::save( const std::string & file) const
+    {
+        auto out = FileWriterFactory::GenerateWriterFromFileName(file);
+        for( const auto & i : data )
+        {
+            (*out)<<i.first<<"\t"<<i.second<<std::endl;
+        }
+        delete out;
+    }
     /************************************************************/
 
     void loadRefBarcodeInfo( const std::string & file, refBarcodeInfo & data )
@@ -84,7 +98,7 @@ namespace JOB01 {
                 }
                 assert( info.end_position_on_ref - info.start_position_on_ref
                         == info.end_position_on_read - info.start_position_on_read);
-                int length = info.end_position_on_ref - info.start_position_on_ref +1;
+                int length = info.end_position_on_ref - info.start_position_on_ref +1 - 63;
                 int read = std::stoi(d0.read_name);
                 for( int j = 0; j<= length; j++ )
                 {
@@ -123,6 +137,8 @@ namespace JOB01 {
     {
         auto ost = FileWriterFactory::GenerateWriterFromFileName(str);
         timer t( log1, std::string("printContigBarcodeInfo"));
+        int len = data.size() ;
+        int index = 1;
         for( const auto i : data )
         {
             (*ost)<<i.first<<"\t";
@@ -131,7 +147,12 @@ namespace JOB01 {
                 (*ost)<<std::get<0>(ii)<<":";
                 for( const auto & iii : std::get<1>(ii) )
                 {
-                    (*ost)<<iii<<"|" ;
+                    (*ost)<<iii;
+                    if(index < len )
+                    {
+                        (*ost)<<"|" ;
+                        index ++ ;
+                    }
                 }
                 (*ost)<<"\t";
             }

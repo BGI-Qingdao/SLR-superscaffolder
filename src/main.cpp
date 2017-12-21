@@ -7,6 +7,7 @@ int main()
     refBarcodeInfo ebi;
     refContigInfo rci;
     contigBarcodeInfo cbi;
+    initLog();
     loadRefBarcodeInfo("../data/barcode_onref_chr19",ebi);
     loadRefContigInfo("../data/chr19.sam",rci);
     generateConrigBarcodeInfo(ebi,rci,cbi);

@@ -29,7 +29,7 @@ struct BarcodeNum
 {
     BarcodeNum() : next(1) {}
     int barcode2num(const std::string & str);
-    void save(const std::string & file);
+    void save(const std::string & file) const;
     barcodeNum data;
     private:
         int next ;

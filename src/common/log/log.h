@@ -61,8 +61,7 @@ class logger
 
         logger & operator << (const lstart & )
         {
-            std::ostringstream ost1;
-            buffer.swap(ost1);;
+            buffer.str("");
             return *this;
         }
 
@@ -73,8 +72,7 @@ class logger
                 (*ost)<<theme->logstring(buffer.str())
                       <<std::endl;
             }
-            std::ostringstream ost1;
-            buffer.swap(ost1);;
+            buffer.str("");
             return *this;
         }
 
