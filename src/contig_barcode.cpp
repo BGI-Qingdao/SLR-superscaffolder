@@ -8,6 +8,7 @@
 #include <cassert>
 #include <algorithm>
 #include <iostream>
+
 namespace BGIQD {
 namespace JOB01 {
 
@@ -70,6 +71,7 @@ namespace JOB01 {
                 data[pos].push_back(bn.barcode2num(d2[i]));
             }
         }
+        bn.save("barcodeId.txt");
         delete in ;
     }
 
@@ -137,14 +139,14 @@ namespace JOB01 {
     {
         auto ost = FileWriterFactory::GenerateWriterFromFileName(str);
         timer t( log1, std::string("printContigBarcodeInfo"));
-        int len = data.size() ;
-        int index = 1;
         for( const auto i : data )
         {
             (*ost)<<i.first<<"\t";
             for( const auto & ii : i.second)
             {
                 (*ost)<<std::get<0>(ii)<<":";
+                int len = std::get<1>(ii).size();
+                int index = 1 ;
                 for( const auto & iii : std::get<1>(ii) )
                 {
                     (*ost)<<iii;

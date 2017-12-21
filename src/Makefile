@@ -3,11 +3,12 @@
 CC 		   =	gcc
 CXX 	   =	g++
 
-CXXFLAGS   =	-I./\
+CXXFLAGS   =	-std=c++11 -I./\
 				-I./biocommon/sam_bam\
 				-I./common/files\
 				-I./common/log\
 				-I./common/time\
+				-I./common/args\
 				-I./common/test\
 				-I./common/string\
 				-lz\
@@ -26,6 +27,7 @@ source_h   =	contig_barcode.h  \
 				common/test/Test.h\
 				common/test/Check.h\
 				common/string/stringtools.h\
+				common/args/argsparser.h\
 
 source_cpp =	contig_barcode.cpp \
 		   		common/files/file_reader.cpp \
@@ -36,11 +38,13 @@ source_cpp =	contig_barcode.cpp \
 				common/log/logfilter.cpp\
 				common/time/timetools.cpp\
 				common/string/stringtools.cpp\
+				common/args/argsparser.cpp\
 
 test_cpp   =	test.cpp\
 				common/time/timetools_test.cpp\
 				common/string/stringtools_test.cpp\
-				biocommon/sam_bam/sam_parser_test.cpp
+				biocommon/sam_bam/sam_parser_test.cpp\
+				common/args/argsparser_test.cpp\
 
 main_cpp   =	main.cpp
 
