@@ -35,6 +35,7 @@ struct BarcodeNum
         int next ;
 };
 
+void initLog();
 
 void loadRefBarcodeInfo(const std::string & file , refBarcodeInfo & data);
 

@@ -40,13 +40,15 @@ namespace JOB01 {
         {
             std::string line;
             std::getline(*in,line);
+            if( in->eof() )
+                break;
             auto d1 = split(line,"\t");
             assert(d1.size() == 2);
             int pos = std::stoi(d1[0]);
             auto d2 = split(d1[1] , "|");
             if( d2.size() < 2 )
             {
-                assert( d2[0] == "0" );
+                assert( d2[0] == "0 " );
                 continue;
             }
             for( size_t i = 1 ; i < d2.size() ; i++ )
@@ -67,6 +69,8 @@ namespace JOB01 {
         {
             std::string line;
             std::getline(*in,line);
+            if( in->eof() )
+                break;
             LineParser p(line);
             if(p.IsHead())
                 continue;

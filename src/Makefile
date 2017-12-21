@@ -50,7 +50,7 @@ test_o 	   =	${test_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
 
 .cpp.o:
-	${CXX} ${CXXFLAGS} -c $< -o $@
+	${CXX} ${DEUBG_CXX} -c $< -o $@
 
 all : test debug release
 
