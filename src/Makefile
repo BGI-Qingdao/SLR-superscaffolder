@@ -48,7 +48,7 @@ test_cpp   =	test.cpp\
 
 job_01_cpp =	job01.cpp
 
-job_02_cpp =	job01.cpp
+job_02_cpp =	job02.cpp
 
 job_01_o   =	${job_01_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
@@ -60,7 +60,7 @@ test_o 	   =	${test_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 .cpp.o:
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
-all : test job01
+all : test job01 job02
 
 job01 : clean ${job_01_o}
 	${CXX} ${DEUBG_CXX} ${job_01_o} -o job01

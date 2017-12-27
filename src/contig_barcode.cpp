@@ -47,6 +47,54 @@ namespace JOB01 {
     }
     /************************************************************/
 
+    void loadRefBarcodeUniqueInfo( const std::string & file, refBarcodeUniqueInfo & data )
+    {
+        timer t( log1, std::string("loadRefBarcodeUniqueInfo"));
+        auto in = FileReaderFactory::GenerateReaderFromFileName(file);
+        while( ! in->eof() )
+        {
+            std::string line;
+            std::getline(*in,line);
+            if( in->eof() )
+                break;
+            auto d1 = split(line," ");
+            assert(d1.size() == 2);
+            int pos = std::stoi(d1[0]);
+            auto d2 = split(d1[1] , "|");
+            if( d2.size() < 2 )
+            {
+                assert( d2[0] == "0 " );
+                continue;
+            }
+            for( size_t i = 1 ; i < d2.size() ; i++ )
+            {
+                data[pos].insert(trim(d2[i]));
+            }
+        }
+        delete in ;
+    }
+    void saveRefBarcodeUniqueInfo(const std::string & file , const refBarcodeUniqueInfo & data)
+    {
+        timer t( log1, std::string("saveRefBarcodeUniqueInfo"));
+        auto out = FileWriterFactory::GenerateWriterFromFileName(file);
+        for( const auto & pair : data )
+        {
+            (*out)<<pair.first<<"\t";
+            for(auto itr = pair.second.begin() ; itr != pair.second.end() ; )
+            {
+                (*out<<*itr);
+                itr = std::next(itr);
+                if ( itr != pair.second.end() )
+                {
+                    (*out) <<"|";
+                }
+            }
+            (*out)<<std::endl;
+        }
+        delete out ;
+    }
+    /************************************************************/
+
     void loadRefBarcodeInfo( const std::string & file, refBarcodeInfo & data )
     {
         timer t( log1, std::string("loadRefBarcodeInfo"));

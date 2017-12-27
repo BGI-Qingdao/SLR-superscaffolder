@@ -34,8 +34,22 @@ struct args_union
 
     type t;
     data d;
-    
+
     args_union() : t(is_bool) {}
+
+    std::string to_string() const 
+    {
+        return *d.s;
+    }
+    std::vector<std::string> to_vector_string() const 
+    {
+        return *d.vs;
+    }
+
+    bool to_bool() const { return d.b ; }
+    int to_int() const { return d.i ; }
+    long to_long() const { return d.l ; }
+    float to_float() const { return d.f ; }
 };
 
 static std::map<int,args_union*>  infos;
