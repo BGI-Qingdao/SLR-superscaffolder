@@ -38,7 +38,7 @@ struct args_union
     args_union() : t(is_bool) {}
 };
 
-static std::map<char,args_union>  infos;
+static std::map<int,args_union*>  infos;
 
 template<class T>
 struct args_traits
@@ -89,10 +89,9 @@ struct args_traits< bool >
 #define START_PARSE_ARGS  
 
 #define DEFINE_ARG( typen , name , flag ) \
-    typen name;\
-    args_union name##u;\
-    name##u.t= args_traits<typen>().type();\
-    infos[flag]=name##u;
+    args_union name;\
+    name.t= args_traits<typen>().type();\
+    infos[flag]=&name;
 
 
 #define END_PARSE_ARGS \
@@ -100,7 +99,7 @@ struct args_traits< bool >
     for( const auto &i : infos )\
     {\
         format += i.first;\
-        if(i.second.t != args_union::is_bool )\
+        if(i.second->t != args_union::is_bool )\
         {\
             format += ":";\
         }\
@@ -111,33 +110,33 @@ struct args_traits< bool >
         auto itr = infos.find( curr_flag ) ;\
         if ( itr == infos.end() )\
         {    continue; }\
-        if( itr->second.t == args_union::is_bool )\
+        if( itr->second->t == args_union::is_bool )\
         {\
-            itr->second.d.b = true;\
+            itr->second->d.b = true;\
         }\
-        if( itr->second.t == args_union::is_string)\
+        if( itr->second->t == args_union::is_string)\
         {\
-            itr->second.d.s = new std::string(optarg);\
+            itr->second->d.s = new std::string(optarg);\
         }\
-        if( itr->second.t == args_union::is_int)\
+        if( itr->second->t == args_union::is_int)\
         {\
-            itr->second.d.i = std::stoi(std::string(optarg));\
+            itr->second->d.i = std::stoi(std::string(optarg));\
         }\
-        if( itr->second.t == args_union::is_long)\
+        if( itr->second->t == args_union::is_long)\
         {\
-            itr->second.d.l = std::stol(std::string(optarg));\
+            itr->second->d.l = std::stol(std::string(optarg));\
         }\
-        if( itr->second.t == args_union::is_float)\
+        if( itr->second->t == args_union::is_float)\
         {\
-            itr->second.d.f = std::stod(std::string(optarg));\
+            itr->second->d.f = std::stod(std::string(optarg));\
         }\
-        if( itr->second.t == args_union::is_vector_string)\
+        if( itr->second->t == args_union::is_vector_string)\
         {\
-            if( itr->second.d.vs == NULL )\
+            if( itr->second->d.vs == NULL )\
             {\
-                itr->second.d.vs = new std::vector<std::string>() ;\
+                itr->second->d.vs = new std::vector<std::string>() ;\
             }\
-            (*(itr->second.d.vs)).push_back(std::string(optarg));\
+            (*(itr->second->d.vs)).push_back(std::string(optarg));\
         }\
     }\
 

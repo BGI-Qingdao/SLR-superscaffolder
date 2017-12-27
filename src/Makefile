@@ -67,7 +67,7 @@ release : clean ${main_o}
 test: clean ${test_o} ${source_h}
 	${CXX} ${DEUBG_CXX} ${test_o} -o test
 
-dirty	   =	${test_o} ${main_o} 
+dirty	   =	${test_o} ${main_o} debug release test
 
 clean:
 	rm -rf ${dirty}

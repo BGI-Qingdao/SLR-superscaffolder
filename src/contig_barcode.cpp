@@ -102,9 +102,9 @@ namespace JOB01 {
                         == info.end_position_on_read - info.start_position_on_read);
                 int length = info.end_position_on_ref - info.start_position_on_ref +1 - 63;
                 int read = std::stoi(d0.read_name);
-                for( int j = 0; j<= length; j++ )
+                for( int j = 0; j< length; j++ )
                 {
-                    data[ info.end_position_on_ref + j ].emplace_back( info.start_position_on_read+j , read );
+                    data[ info.start_position_on_ref + j ].emplace_back( info.start_position_on_read+j , read );
                 }
             }
         }
