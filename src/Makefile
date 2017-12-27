@@ -46,9 +46,13 @@ test_cpp   =	test.cpp\
 				biocommon/sam_bam/sam_parser_test.cpp\
 				common/args/argsparser_test.cpp\
 
-main_cpp   =	main.cpp
+job_01_cpp =	job01.cpp
 
-main_o 	   =	${main_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+job_02_cpp =	job01.cpp
+
+job_01_o   =	${job_01_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+
+job_02_o   =	${job_02_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
 test_o 	   =	${test_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
@@ -56,18 +60,18 @@ test_o 	   =	${test_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 .cpp.o:
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
-all : test debug release
+all : test job01
 
-debug : clean ${main_o}
-	${CXX} ${DEUBG_CXX} ${main_o} -o debug 
+job01 : clean ${job_01_o}
+	${CXX} ${DEUBG_CXX} ${job_01_o} -o job01
 	
-release : clean ${main_o}
-	${CXX} ${RELEASE_CXX} ${main_o} -o release
+job02 : clean ${job_02_o}
+	${CXX} ${DEUBG_CXX} ${job_02_o} -o job02 
 
 test: clean ${test_o} ${source_h}
 	${CXX} ${DEUBG_CXX} ${test_o} -o test
 
-dirty	   =	${test_o} ${main_o} debug release test
+dirty	   =	${test_o} ${job_02_o} ${job_02_o} job01 job02 test
 
 clean:
 	rm -rf ${dirty}
