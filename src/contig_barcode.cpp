@@ -20,9 +20,9 @@ namespace JOB01 {
     static BarcodeNum bn;
     static logger log1;
 
-    void initLog()
+    void initLog(const std::string & module)
     {
-        logfilter::singleton().get("JOB01",loglevel::INFO,log1);
+        logfilter::singleton().get(module,loglevel::INFO,log1);
     }
 
     int BarcodeNum::barcode2num( const std::string & str )
@@ -211,5 +211,71 @@ namespace JOB01 {
         }
         delete ost;
     }
+    void loadContigBarcodeInfo( const std::string & file , contigBarcodeInfo & data)
+    {
+        timer t( log1, std::string("loadContigBarcodeInfo"));
+        auto in = FileReaderFactory::GenerateReaderFromFileName(file);
+        while( ! in->eof() )
+        {
+            std::string line;
+            std::getline(*in,line);
+            if( in->eof() )
+                break;
+            auto d1 = split(line,"\t");
+            assert(d1.size() > 1);
+            int contigId = std::stoi(d1[0]);
+            for( size_t i = 1 ; i < d1.size() ; i++ )
+            {
+                auto d2=split(d1[i],":");
+                assert(d2.size() == 2);
+                int pos = std::stoi(d2[0]);
+                auto d3 = split( d2[1] , "|");
+                barcodeList list;
+                for( const auto &j : d3)
+                {
+                    list.push_back(std::stoi(j));
+                }
+                data[contigId].emplace_back(pos,list);
+            }
+        }
+        delete in;
+    }
+    
+    void generateBinBarcodeInfo(const contigBarcodeInfo & data  , int binSize, binBarcodeInfo & d)
+    {
+        timer t( log1, std::string("generateBinBarcodeInfo"));
+        for(const auto & contig : data)
+        {
+            int contigId = contig.first;
+            for( const auto & posData : contig.second )
+            {
+                int posId= std::get<0>(posData);
+                auto v0 = std::get<1>(posData);
+                auto  &m = d[contigId] ;
+                auto & v= m[posId/binSize];
+                v.insert(v.end() , v0.begin() , v0.end());
+            }
+        }
+    }
+
+    void saveBinBarcodeInfo(const std::string & file ,const  binBarcodeInfo &data)
+    {
+        timer t( log1, std::string("saveRefBarcodeUniqueInfo"));
+        auto out = FileWriterFactory::GenerateWriterFromFileName(file);
+        for( const auto & pair : data )
+        {
+            (*out)<<">"<<pair.first<<std::endl;
+            for( const auto & pp : pair.second )
+            {
+                (*out)<<pp.first;
+                for( auto i : pp.second)
+                {
+                    (*out)<<"\t"<<i;
+                }
+                (*out)<<std::endl;
+            }
+        }
+    }
+
 }//JOB01
 }//BGIQD

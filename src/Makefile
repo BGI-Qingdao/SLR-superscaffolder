@@ -48,11 +48,15 @@ test_cpp   =	test.cpp\
 
 job_01_cpp =	job01.cpp
 
+job_03_cpp =	job03.cpp
+
 job_02_cpp =	job02.cpp
 
 job_01_o   =	${job_01_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
 job_02_o   =	${job_02_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+
+job_03_o   =	${job_03_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
 test_o 	   =	${test_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
@@ -60,7 +64,7 @@ test_o 	   =	${test_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 .cpp.o:
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
-all : test job01 job02
+all : test job01 job02 job03
 
 job01 : clean ${job_01_o}
 	${CXX} ${DEUBG_CXX} ${job_01_o} -o job01
@@ -68,10 +72,13 @@ job01 : clean ${job_01_o}
 job02 : clean ${job_02_o}
 	${CXX} ${DEUBG_CXX} ${job_02_o} -o job02 
 
+job03 : clean ${job_03_o}
+	${CXX} ${DEUBG_CXX} ${job_03_o} -o job03
+
 test: clean ${test_o} ${source_h}
 	${CXX} ${DEUBG_CXX} ${test_o} -o test
 
-dirty	   =	${test_o} ${job_01_o} ${job_02_o} job01 job02 test
+dirty	   =	${test_o} ${job_01_o} ${job_02_o} job01 job02 test job03
 
 clean:
 	rm -rf ${dirty}

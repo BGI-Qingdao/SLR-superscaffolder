@@ -12,14 +12,14 @@ using namespace BGIQD::ARGS;
 
 int main(int argc , char **argv )
 {
-
-    refBarcodeUniqueInfo ebi;
-    initLog();
+    initLog("JOB02");
 
     START_PARSE_ARGS
     DEFINE_ARG(std::string , input , 'i');
     DEFINE_ARG(std::string , output, 'o');
     END_PARSE_ARGS
+
+    refBarcodeUniqueInfo ebi;
 
     loadRefBarcodeUniqueInfo(input.to_string(),ebi);
     saveRefBarcodeUniqueInfo(output.to_string(),ebi);

@@ -6,6 +6,8 @@ using namespace BGIQD::JOB01;
 
 int main(int argc , char ** argv)
 {
+    initLog("JOB01");
+
     START_PARSE_ARGS
     DEFINE_ARG(std::string , refBarcode , 'i');
     DEFINE_ARG(std::string , refContig, 'c');
@@ -15,7 +17,6 @@ int main(int argc , char ** argv)
     refBarcodeInfo ebi;
     refContigInfo rci;
     contigBarcodeInfo cbi;
-    initLog();
     loadRefBarcodeInfo(refBarcode.to_string(),ebi);
     loadRefContigInfo(refContig.to_string(),rci);
     generateConrigBarcodeInfo(ebi,rci,cbi);
