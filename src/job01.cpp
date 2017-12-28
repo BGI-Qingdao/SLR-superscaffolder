@@ -1,15 +1,23 @@
 #include "contig_barcode.h"
+#include "argsparser.h"
 
+using namespace BGIQD::ARGS;
 using namespace BGIQD::JOB01;
 
-int main()
+int main(int argc , char ** argv)
 {
+    START_PARSE_ARGS
+    DEFINE_ARG(std::string , refBarcode , 'i');
+    DEFINE_ARG(std::string , refContig, 'c');
+    DEFINE_ARG(std::string , output, 'o');
+    END_PARSE_ARGS
+
     refBarcodeInfo ebi;
     refContigInfo rci;
     contigBarcodeInfo cbi;
     initLog();
-    loadRefBarcodeInfo("../data/barcode_onref_chr19",ebi);
-    loadRefContigInfo("../data/chr19.sam",rci);
+    loadRefBarcodeInfo(refBarcode.to_string(),ebi);
+    loadRefContigInfo(refContig.to_string(),rci);
     generateConrigBarcodeInfo(ebi,rci,cbi);
-    printContigBarcodeInfo(cbi,"barcode_on_contig.txt");
+    printContigBarcodeInfo(cbi,output.to_string());
 }

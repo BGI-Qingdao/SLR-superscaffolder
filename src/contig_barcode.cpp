@@ -66,6 +66,7 @@ namespace JOB01 {
                 assert( d2[0] == "0 " );
                 continue;
             }
+            data[pos].insert("0");
             for( size_t i = 1 ; i < d2.size() ; i++ )
             {
                 data[pos].insert(trim(d2[i]));
