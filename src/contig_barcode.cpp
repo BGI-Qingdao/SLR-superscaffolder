@@ -252,8 +252,20 @@ namespace JOB01 {
                 int posId= std::get<0>(posData);
                 auto v0 = std::get<1>(posData);
                 auto  &m = d[contigId] ;
+
                 auto & v= m[posId/binSize];
-                v.insert(v.end() , v0.begin() , v0.end());
+
+                for( auto vv : v0)
+                {
+                    auto itr = v.find(vv) ;
+                    if( itr != v.end() )
+                    {
+                        itr->second ++;
+                    }
+                    else
+                        v[vv] = 1;
+                }
+                //v.insert(v.end() , v0.begin() , v0.end());
             }
         }
     }
@@ -264,13 +276,12 @@ namespace JOB01 {
         auto out = FileWriterFactory::GenerateWriterFromFileName(file);
         for( const auto & pair : data )
         {
-            (*out)<<">"<<pair.first<<std::endl;
             for( const auto & pp : pair.second )
             {
-                (*out)<<pp.first;
+                (*out)<<pair.first<<":"<<pp.first;
                 for( auto i : pp.second)
                 {
-                    (*out)<<"\t"<<i;
+                    (*out)<<"\t"<<i.first<<":"<<i.second;
                 }
                 (*out)<<std::endl;
             }

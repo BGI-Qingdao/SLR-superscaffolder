@@ -78,7 +78,7 @@ job03 : clean ${job_03_o}
 test: clean ${test_o} ${source_h}
 	${CXX} ${DEUBG_CXX} ${test_o} -o test
 
-dirty	   =	${test_o} ${job_01_o} ${job_02_o} job01 job02 test job03
+dirty	   =	${test_o} ${job_01_o} ${job_03_o} ${job_02_o} job01 job02 test job03
 
 clean:
 	rm -rf ${dirty}

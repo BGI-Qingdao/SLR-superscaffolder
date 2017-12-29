@@ -84,15 +84,18 @@ void loadContigBarcodeInfo( const std::string & file,  contigBarcodeInfo & data 
  *   file name      :
  *                      barcode_onbin
  *   file format    :
- *                  1   0:123|456|...   1:1234|32423 ...
- *          contigId    bin:barcodeList
+ *                  1:2 33:1
+ *          contigId:bin    barcode:num ...
  *
  * **************************************************************************/
 
-typedef std::map<int , std::map<int,barcodeList> > binBarcodeInfo;
+//typedef std::map<int , std::map<int,barcodeList> > binBarcodeInfo;
+typedef std::map<int, std::map<int, std::map< int, int > > > binBarcodeInfo;
 
 void generateBinBarcodeInfo(const contigBarcodeInfo & data  , int binSize, binBarcodeInfo & d);
 void saveBinBarcodeInfo(const std::string & file ,const  binBarcodeInfo &data);
+
+//void loadBinBarcodeInto
 
 }//JOB01
 }//BGIQD
