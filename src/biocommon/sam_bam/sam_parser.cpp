@@ -9,21 +9,22 @@ MatchData LineParser::ParseAsMatchData() const
     std::istringstream ist(m_line);
     std::string cigar;
     ist>>data.read_name>>data.flag>>data.ref_name>>data.first_match_position>>data.quality>>cigar;
-    ParseStringAsCIGAR(cigar,data.first_match_position,data.detail);
+
+    data.read_len = ParseStringAsCIGAR(cigar,data.first_match_position,data.detail);
     return data;
 }//ParseAsMatchData
 
-void LineParser::ParseStringAsCIGAR( const std::string &str ,size_t first_match_on_ref, MatchDetail & detail) const 
+size_t LineParser::ParseStringAsCIGAR( const std::string &str ,size_t first_match_on_ref, MatchDetail & detail) const 
 {
     std::string  number_buffer;
     MatchInfo info_buffer;
     size_t curr_position_on_ref = first_match_on_ref;
     size_t curr_position_on_read = 0 ;
     size_t len = str.size() ;
-
+    size_t ret = 0;
     auto append_new_info = [ &info_buffer 
         , &curr_position_on_ref , &curr_position_on_read
-        , &detail  ]
+        , &detail  , & ret ]
         ( CIGAR type , int read_move  , int ref_move)
         {
             info_buffer.type = type ;
@@ -35,6 +36,7 @@ void LineParser::ParseStringAsCIGAR( const std::string &str ,size_t first_match_
             {
                 info_buffer.start_position_on_read = curr_position_on_read;
                 info_buffer.end_position_on_read = curr_position_on_read + read_move -1 ;
+                ret = info_buffer.end_position_on_read + 1;
                 curr_position_on_read += read_move ;
             }
             if ( ref_move > 0 )
@@ -57,7 +59,7 @@ void LineParser::ParseStringAsCIGAR( const std::string &str ,size_t first_match_
             case '*':
                 detail.infos.clear();
                 append_new_info( CIGAR::NONE , -1 , -1 );
-                return ;
+                return ret;
             case 'M':
                 {
                     int length = std::stoi(number_buffer);
@@ -120,6 +122,7 @@ void LineParser::ParseStringAsCIGAR( const std::string &str ,size_t first_match_
                 break;
         }
     }
+    return ret;
 }
 
 }//namespace SAM

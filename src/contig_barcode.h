@@ -5,7 +5,12 @@
 #include <map>
 #include <set>
 
+#include "log.h"
+
 namespace BGIQD {
+
+extern BGIQD::LOG::logger log1;
+
 namespace JOB01 {
 
 void initLog(const std::string & module);
@@ -40,11 +45,12 @@ void saveRefBarcodeUniqueInfo(const std::string & file , const refBarcodeUniqueI
  *
  * **************************************************************************/
 // 1 means contig pos , 2 means contig id.
+typedef std::map<int , int > contigLens;
 typedef std::tuple<int,int> contigPosInfo;
 typedef std::vector<contigPosInfo> contigList;
 typedef std::map<int , contigList> refContigInfo;
 
-void loadRefContigInfo( const std::string & file , refContigInfo & data);
+void loadRefContigInfo( const std::string & file , refContigInfo & data , contigLens & lens);
 
 /*****************************************************************************
  *   file name      :
@@ -64,7 +70,7 @@ void loadRefBarcodeInfo(const std::string & file , refBarcodeInfo & data);
  *                      barcode_oncontig
  *   file format    :
  *                  1   0:123|456|...   1:1234|32423 ...
- *          contigId    pos:barcodeList
+ *          contigId:contigLen    pos:barcodeList
  *
  * **************************************************************************/
 typedef std::tuple< int , barcodeList> barcodePosInfo;
@@ -74,9 +80,11 @@ void generateConrigBarcodeInfo( const refBarcodeInfo & i_b ,
                                 const refContigInfo & i_c,
                                 contigBarcodeInfo & data );
 
-void printContigBarcodeInfo( const contigBarcodeInfo & data , const std::string & file );
+void printContigBarcodeInfo( const contigBarcodeInfo & data 
+        , const contigLens & lens
+        , const std::string & file );
 
-void loadContigBarcodeInfo( const std::string & file,  contigBarcodeInfo & data );
+void loadContigBarcodeInfo( const std::string & file,int binsize,  contigBarcodeInfo & data );
 
 
 
@@ -90,11 +98,11 @@ void loadContigBarcodeInfo( const std::string & file,  contigBarcodeInfo & data 
  * **************************************************************************/
 
 //typedef std::map<int , std::map<int,barcodeList> > binBarcodeInfo;
-typedef std::map<int, std::map<int, std::map< int, int > > > binBarcodeInfo;
+typedef std::map<size_t, std::map<size_t, std::map< size_t, size_t> > > binBarcodeInfo;
 
 void generateBinBarcodeInfo(const contigBarcodeInfo & data  , int binSize, binBarcodeInfo & d);
 void saveBinBarcodeInfo(const std::string & file ,const  binBarcodeInfo &data);
-
+void loadBinBarcodeInfo(const std::string & file ,  binBarcodeInfo &data);
 //void loadBinBarcodeInto
 
 }//JOB01

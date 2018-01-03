@@ -10,15 +10,16 @@
 #include <iostream>
 
 namespace BGIQD {
-namespace JOB01 {
+using namespace STRING;
+using namespace FILES;
+using namespace SAM;
+using namespace LOG;
 
-    using namespace STRING;
-    using namespace FILES;
-    using namespace SAM;
-    using namespace LOG;
+logger log1;
+    namespace JOB01 {
+
 
     static BarcodeNum bn;
-    static logger log1;
 
     void initLog(const std::string & module)
     {
@@ -126,7 +127,7 @@ namespace JOB01 {
 
     /************************************************************/
 
-    void loadRefContigInfo( const std::string & file , refContigInfo & data)
+    void loadRefContigInfo( const std::string & file , refContigInfo & data , contigLens & lens )
     {
         timer t( log1, std::string("loadRefBarcodeInfo"));
         auto in = FileReaderFactory::GenerateReaderFromFileName(file);
@@ -140,6 +141,7 @@ namespace JOB01 {
             if(p.IsHead())
                 continue;
             auto d0 = p.ParseAsMatchData();
+            int read = std::stoi(d0.read_name);
             for( size_t i = 0 ; i< d0.detail.infos.size() ; i++ )
             {
                 auto info = d0.detail.infos[i];
@@ -150,12 +152,12 @@ namespace JOB01 {
                 assert( info.end_position_on_ref - info.start_position_on_ref
                         == info.end_position_on_read - info.start_position_on_read);
                 int length = info.end_position_on_ref - info.start_position_on_ref +1 - 63;
-                int read = std::stoi(d0.read_name);
                 for( int j = 0; j< length; j++ )
                 {
                     data[ info.start_position_on_ref + j ].emplace_back( info.start_position_on_read+j , read );
                 }
             }
+            lens[read] = d0.read_len;
         }
         delete in ;
     }
@@ -184,13 +186,16 @@ namespace JOB01 {
         }
     }
 
-    void printContigBarcodeInfo( const contigBarcodeInfo & data, const std::string & str )
+    void printContigBarcodeInfo(
+            const contigBarcodeInfo & data,
+            const contigLens & lens
+            , const std::string & str )
     {
         auto ost = FileWriterFactory::GenerateWriterFromFileName(str);
         timer t( log1, std::string("printContigBarcodeInfo"));
         for( const auto i : data )
         {
-            (*ost)<<i.first<<"\t";
+            (*ost)<<i.first<<":"<<lens.at(i.first)<<"\t";
             for( const auto & ii : i.second)
             {
                 (*ost)<<std::get<0>(ii)<<":";
@@ -211,7 +216,7 @@ namespace JOB01 {
         }
         delete ost;
     }
-    void loadContigBarcodeInfo( const std::string & file , contigBarcodeInfo & data)
+    void loadContigBarcodeInfo( const std::string & file ,int binsize , contigBarcodeInfo & data)
     {
         timer t( log1, std::string("loadContigBarcodeInfo"));
         auto in = FileReaderFactory::GenerateReaderFromFileName(file);
@@ -223,7 +228,11 @@ namespace JOB01 {
                 break;
             auto d1 = split(line,"\t");
             assert(d1.size() > 1);
-            int contigId = std::stoi(d1[0]);
+            auto d0 = split(d1[0],":");
+            int contigId = std::stoi(d0[0]);
+            int len = std::stoi(d0[1]);
+            if( len < binsize )
+                continue ;
             for( size_t i = 1 ; i < d1.size() ; i++ )
             {
                 auto d2=split(d1[i],":");
@@ -286,6 +295,33 @@ namespace JOB01 {
                 (*out)<<std::endl;
             }
         }
+        delete out;
+    }
+
+    void loadBinBarcodeInfo(const std::string & file ,  binBarcodeInfo &data)
+    {
+        timer t( log1, std::string("loadBinBarcodeInfo"));
+        auto in = FileReaderFactory::GenerateReaderFromFileName(file);
+        while( ! in->eof() )
+        {
+            std::string line;
+            std::getline(*in,line);
+            if( in->eof() )
+                break;
+            auto d1 = split(line,"\t");
+            assert(d1.size() >1  );
+            auto d0 = split(d1[0],":");
+            int contigId = std::stoi(d0[0]);
+            int binId = std::stoi(d0[1]);
+            for( size_t i = 1 ; i < d1.size(); i++)
+            {
+                auto d2 = split(d1[i],":");
+                int barcodeId = stoi(d2[0]);
+                int num = stoi(d2[1]);
+                data[contigId][binId][barcodeId] = num;
+            }
+        }
+        delete in;
     }
 
 }//JOB01

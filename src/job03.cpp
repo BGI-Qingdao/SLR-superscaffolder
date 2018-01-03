@@ -16,7 +16,7 @@ int main(int argc ,char **argv)
     END_PARSE_ARGS
 
     contigBarcodeInfo cbi;
-    loadContigBarcodeInfo(input.to_string() , cbi);
+    loadContigBarcodeInfo(input.to_string() ,binsize.to_int() , cbi);
     binBarcodeInfo bbi;
     generateBinBarcodeInfo(cbi,binsize.to_int(),bbi);
     saveBinBarcodeInfo(output.to_string() , bbi);

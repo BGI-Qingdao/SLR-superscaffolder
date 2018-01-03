@@ -17,8 +17,9 @@ int main(int argc , char ** argv)
     refBarcodeInfo ebi;
     refContigInfo rci;
     contigBarcodeInfo cbi;
+    contigLens lens;
     loadRefBarcodeInfo(refBarcode.to_string(),ebi);
-    loadRefContigInfo(refContig.to_string(),rci);
+    loadRefContigInfo(refContig.to_string(),rci,lens);
     generateConrigBarcodeInfo(ebi,rci,cbi);
-    printContigBarcodeInfo(cbi,output.to_string());
+    printContigBarcodeInfo(cbi,lens,output.to_string());
 }

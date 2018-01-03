@@ -48,6 +48,7 @@ struct MatchData
     size_t first_match_position;
     int  quality;
     MatchDetail detail;
+    int read_len;
     //TODO : other columns . 
 };// class MapData
 /******************************************************************************
@@ -67,7 +68,7 @@ class LineParser
     private:
         const std::string m_line;
     private:
-        void ParseStringAsCIGAR(const std::string & str,size_t first_match_on_ref, MatchDetail & detail) const ;
+        size_t ParseStringAsCIGAR(const std::string & str,size_t first_match_on_ref, MatchDetail & detail) const ;
 };// class LineParse
 
 
