@@ -111,7 +111,14 @@ void loadContigTypes( const std::string & file , contigTypes & types )
                     errcontig_len += contigCache.at(0).read_len ;
                     log1<<lstart()<<contigCache.at(0).read_name<<"\t"<<contigCache.at(0).read_len<<"\t"<<err<<lend();
                     err_len += err;
-
+                    if( contigCache.size() > 2)
+                    {
+                        types[read] = 2;
+                    }
+                    else
+                    {
+                        types[read] = 1 ;
+                    }
                 }
                 // for new contig
                 contigCache.clear();
