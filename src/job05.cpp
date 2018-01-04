@@ -33,17 +33,20 @@ bool HasPecfectMatch( const contigMatchData & v)
     return false;
 }
 
-bool ErrConnect( const contigMatchData & v, int thresold)
+bool ErrConnect( const contigMatchData & v, int thresold ,  int & err)
 {
     contigMatchData pre , next ;
+    int a , b;
     for( const auto & i : v)
     {
-        if( i.detail.infos[0].type == CIGAR::H || i.detail.infos[0].type == CIGAR::S )
+        if( ( i.detail.infos[0].type == CIGAR::H || i.detail.infos[0].type == CIGAR::S )&& (i.detail.infos.rbegin()->type != CIGAR::H  && i.detail.infos.rbegin()->type != CIGAR::S ))
         {
+            a = i.detail.infos[0].end_position_on_read - i.detail.infos[0].start_position_on_read ;
             pre.push_back(i);
         }
-        else if ( i.detail.infos.rbegin()->type == CIGAR::H  || i.detail.infos.rbegin()->type == CIGAR::S )
+        else if ( (i.detail.infos[0].type != CIGAR::H && i.detail.infos[0].type != CIGAR::S) &&( i.detail.infos.rbegin()->type == CIGAR::H  || i.detail.infos.rbegin()->type == CIGAR::S ))
         {
+            b = i.detail.infos.rbegin()->end_position_on_read - i.detail.infos.rbegin()->start_position_on_read ;
             next.push_back(i);
         }
     }
@@ -57,6 +60,9 @@ bool ErrConnect( const contigMatchData & v, int thresold)
                 return false ;
         }
     }
+    err = (a < b ? a : b ) +1;
+    if ( err < 6 ) 
+        return false;
     return true;
 }
 
@@ -65,10 +71,11 @@ void loadContigTypes( const std::string & file , contigTypes & types )
     timer t(log1,"loadContigTypes");
     auto in = FileReaderFactory::GenerateReaderFromFileName(file);
     int error_contig  = 0;
-    size_t err_len = 0;
+    int err_len = 0;
+    size_t errcontig_len = 0;
     contigMatchData contigCache;
 
-    float ttt = 1.0f;
+    float ttt = 4.0f;
     while( ! in->eof() )
     {
         std::string line;
@@ -96,12 +103,15 @@ void loadContigTypes( const std::string & file , contigTypes & types )
             }
             else
             {
+                int err ;
                 // deal last contig first
-                if( contigCache.size() >1 && ! HasPecfectMatch(contigCache) && ErrConnect(contigCache , contigCache.at(0).read_len * ttt ) )
+                if( contigCache.size() >1 && ! HasPecfectMatch(contigCache) && ErrConnect(contigCache , contigCache.at(0).read_len * ttt , err) )
                 {
                     error_contig ++ ;
-                    log1<<lstart()<<contigCache.at(0).ref_name<<lend();
-                    err_len += contigCache.at(0).read_len ;
+                    errcontig_len += contigCache.at(0).read_len ;
+                    log1<<lstart()<<contigCache.at(0).read_name<<"\t"<<contigCache.at(0).read_len<<"\t"<<err<<lend();
+                    err_len += err;
+
                 }
                 // for new contig
                 contigCache.clear();
@@ -112,7 +122,8 @@ void loadContigTypes( const std::string & file , contigTypes & types )
     }
     log1<<lstart()
         <<"Total "<<types.size()<<" and err "<<error_contig
-        <<" and total err len "<<err_len
+        <<" and total err len "<<errcontig_len
+        <<" and err  len "<<err_len
         <<lend();
 }
 
