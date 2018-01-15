@@ -73,14 +73,17 @@ job_08_o   =	${job_08_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 job_09_cpp =	job09.cpp
 job_09_o   =	${job_09_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
+job_10_cpp =	job10.cpp
+job_10_o   =	${job_10_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+
 test_o 	   =	${test_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
 
 .cpp.o:
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
-jobs 	   =	job01 job02 job03 job04 job05 job06 job07 job08 job09
-jobs_o 	   =	${job_01_o} ${job_03_o} ${job_02_o}  ${job_04_o} ${job_05_o} ${job_06_o}  ${job_07_o} ${job_08_o} ${job_09_o}
+jobs 	   =	job01 job02 job03 job04 job05 job06 job07 job08 job09 job10
+jobs_o 	   =	${job_01_o} ${job_03_o} ${job_02_o}  ${job_04_o} ${job_05_o} ${job_06_o}  ${job_07_o} ${job_08_o} ${job_09_o}  ${job_10_o}
 
 all : test ${jobs}
 
