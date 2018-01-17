@@ -89,7 +89,9 @@ cluter_show get_show( const std::map<int , float>d1 , const contigRef & data)
 
 void print_show( int seed, const cluter_show & data)
 {
-    std::cout<<seed<<":";
+    int first = std::get<0>(*data.begin());
+    int end = std::get<0>(*data.rbegin());
+    std::cout<<seed<<"\t"<<end-first;
     for( const auto & i : data )
     {
         std::cout<<"\t"<<std::get<0>(i)<<"-"<<std::get<1>(i)<<"("<<std::get<3>(i)<<":"<<std::get<2>(i)<<")";

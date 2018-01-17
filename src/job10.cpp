@@ -10,19 +10,21 @@ int main()
 {
     std::string line ;
     BGIQD::Algorithm::DisJoin_Set<int> dj_set;
-    std::map< int ,int > nodeContig;
+    std::map< int ,std::map<int,int>  > nodeContig;
     while(!std::getline(std::cin,line).eof())
     {
         int fromV , endV , contigId , contigLen;
         sscanf(line.c_str() ,"\tV%d -> V%d[label =\"%d(%d)\"];\n",&fromV , &endV , &contigId, &contigLen);
         dj_set.AddConnect(fromV,endV);
-        nodeContig[fromV] = contigId;
+        nodeContig[fromV][endV] = contigId;
     }
-    
+
     for( const auto & i : nodeContig )
     {
-        std::cout<<i.second<<"\t"<<dj_set.GetGroup(i.first)<<std::endl;
+        for( const auto & j : i.second){
+            std::cout<<j.second<<"\t"<<dj_set.GetGroup(i.first)<<std::endl;
+        }
     }
-    
+
     return 0;
 }
