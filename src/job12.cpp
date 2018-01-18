@@ -7,9 +7,11 @@
 #include <iostream>
 #include <sstream>
 #include <set>
+#include <algorithm/disjoin_set/disjoin_set.h>
 
 using namespace BGIQD::ARGS;
 using namespace BGIQD::JOB01;
+using namespace BGIQD::Algorithm;
 
 typedef std::map< int , std::map< int , int> >  contigPos;
 typedef std::map<std::pair<int , int > ,float> lines;
@@ -31,7 +33,7 @@ void incrMap1(std::map<int,int> & map , int key  )
     else
         itr->second ++ ;
 }
-void print_show(const std::string & line ,contigPos   & data , lines & l )
+void print_show(const std::string & line ,contigPos   & data , lines & l ,DisJoin_Set<int> &d)
 {
     std::istringstream ism(line);
     int contig , gap ;
@@ -48,6 +50,8 @@ void print_show(const std::string & line ,contigPos   & data , lines & l )
         data[c][start]=end;
         if ( f == 1.0f )
             continue ;
+        if(  f < 0.14f )
+            continue;
         if( f > f1 )
         {
             f1 = f ;
@@ -59,28 +63,33 @@ void print_show(const std::string & line ,contigPos   & data , lines & l )
             c2 = c ;
         }
     }
+    if ( f1 > 0.14f )
+    {
     updateMap1(l,contig,c1,f1);
-    updateMap1(l,contig,c2,f2);
+    //updateMap1(l,contig,c2,f2);
+    d.AddConnect(c1,contig);
+    }
 }
 
-void loadGraph(lines & l , contigPos & c)
+void loadGraph(lines & l , contigPos & c , DisJoin_Set<int> & d)
 {
     BGIQD::LOG::timer t(BGIQD::log1,"loadGraph");
     std::string line ;
     while( !std::getline(std::cin, line).eof() )
     {
-        print_show(line,c,l);
+        print_show(line,c,l,d);
     }
 }
 
-void drawGraph( lines & l , contigPos & c)
+void drawGraph( lines & l , contigPos & c , DisJoin_Set<int> & d)
 {
     BGIQD::LOG::timer t(BGIQD::log1,"drawGraph");
     std::cout<<"graph{"<<std::endl;
     for(const auto & i : l)
     {
         std::cout<<i.first.first<<" -- "<<i.first.second
-            <<"[label=\""<<i.second<<"\"]"
+            <<"[label=\""<<i.second<<"\"("
+            <<d.GetGroup(i.first.first)<<")]"
             <<std::endl;
     }
     std::cout<<"}"<<std::endl;
@@ -92,7 +101,8 @@ int main()
     initLog("JOB10");
     contigPos p;
     lines l;
-    loadGraph(l,p);
-    drawGraph(l,p);
+    DisJoin_Set<int> d;
+    loadGraph(l,p,d);
+    drawGraph(l,p,d);
     return 0;
 }
