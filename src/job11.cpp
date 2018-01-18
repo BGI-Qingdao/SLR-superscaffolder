@@ -33,24 +33,28 @@ void print_show(const std::string & line , std::map<int , int > & data )
     std::istringstream ism(line);
     int contig , gap ;
     ism>>contig>>gap;
-    int pend = -1 ;
+    int pend = -1 ; int pstart = -1 ;
     while(!ism.eof())
     {
-        int start , end , c , f ; 
+        int start , end , c ;
+        float f ; 
         char cc;
            // 101   -   104  (  10  :   0.44 )
-        ism>>start>>cc>>end>>cc>>c>>cc>>f>>c;
-        if(pend != -1 )
+        ism>>start>>cc>>end>>cc>>c>>cc>>f>>cc;
+        if(pend != -1 && start != pstart)
         {
             incrMap1(data, start-pend );
-            pend = end ;
+            if( start < pend - 63)
+                std::cerr<<start<<"\t"<<pend<<std::endl;
         }
+        pend = end ;
+        pstart = start;
     }
 }
 int main()
 {
     std::map< int , int > gaps;
-    initLog("JOB10");
+    initLog("JOB11");
     {
         std::string line ;
         while( !std::getline(std::cin, line).eof() )
