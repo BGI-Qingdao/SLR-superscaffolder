@@ -26,6 +26,7 @@ inline size_t sum(   const std::map<size_t , size_t> & hash)
         {
             ret += pair.second;
         }
+        //std::cerr<<"bin size "<<ret<<std::endl;
         return ret;
 }
 
@@ -41,8 +42,10 @@ inline size_t sum(const  binIndex & index ,   const std::map<size_t , size_t> & 
             ret += pair.second;
         }
         sum_cache.emplace( index , ret );
+        //std::cerr<<"bin size "<<ret<<std::endl;
         return ret;
     }
+    //std::cerr<<"bin size "<<itr->second<<std::endl;
     return itr->second;
 }
 
@@ -54,24 +57,29 @@ inline std::tuple<int,int,double> simularity(
     const std::map<size_t , size_t> & hash1
   , const std::map<size_t , size_t> & hash2)
 {
-    auto itr = sim_cache.find( std::make_pair(index1,index2) );
-    if ( itr == sim_cache.end() )
-    {
+    //auto itr = sim_cache.find( std::make_pair(index1,index2) );
+    //if ( itr == sim_cache.end() )
+    //{
         size_t both=0;
+        //std::cerr<<"simularity : "<<std::get<1>(index1)<<":"<<std::get<3>(index1)
+        //    <<"\t"<<std::get<1>(index2)<<":"<<std::get<3>(index2);
         for( auto pair : hash1 )
         {
             auto itr2 = hash2.find(pair.first);
             if( itr2 != hash2.end() )
             {
                 both += min( pair.second , itr2->second);
+                //std::cerr<<"\t"<<pair.first ;
             }
         }
+        //std::cerr<<" -- both"<<both<<std::endl;
         size_t all = sum(index1,hash1) + sum(index2,hash2) - both;
+        //std::cerr<<" -- all "<<all<<std::endl;
         double frac= double( both ) / double(all);
-        sim_cache.emplace( std::make_pair( index1 , index2) , std::make_tuple(all,both,frac));
+        //sim_cache.emplace( std::make_pair( index1 , index2) , std::make_tuple(all,both,frac));
         return std::make_tuple(all,both,frac);
-    }
-    return itr->second;
+    //}
+    //return itr->second;
 }
 
 void buildBinIndexs( const binBarcodeInfo & bbi , binIndexs & indexs)
@@ -108,7 +116,7 @@ std::map<size_t,float>  cluster(const binIndex &seed , const binIndexs & allInde
     std::map<size_t,float>  rets;
     updateMap(rets, std::get<1>(seed) , 1.0f);
     auto const & seedmap = bbi.at(std::get<1>(seed)).at(std::get<3>(seed));
-
+    
     for ( const auto & index : allIndexs)
     //for( const  auto & c : bbi )
     {

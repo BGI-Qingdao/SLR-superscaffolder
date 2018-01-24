@@ -1,18 +1,88 @@
 #include "sam_parser.h"
 #include <sstream>
+#include "stringtools.h"
 namespace BGIQD{
 namespace SAM{
+
+
+
+bool MatchData::IsP() const
+{
+    return ( flags.flags.ox40 & 0x1) == 1 ;
+}
+bool MatchData::IsE() const
+{
+    return ( flags.flags.ox80 & 0x1 )== 1 ;
+}
+
+bool MatchData::IsPrimaryMatch() const
+{
+    return ((flags.flags.ox800 & 0x1) == 0 ) &&( (flags.flags.ox100 & 0x1 ) == 0 ) ;
+}
+bool MatchData::IsPCRduplicae() const
+{
+    return ((flags.flags.ox400 & 0x1) == 1 ) ;
+}
+
+Head LineParser::ParseAsHead()const
+{
+    Head h;
+    std::istringstream ist(m_line);
+    char c;
+    ist>>c;//@
+    std::string tmp;
+    ist>>tmp;
+    if ( tmp == "HD" )
+    {
+        h.type = Head::HeadType::HeadLine;
+    }
+    else if ( tmp == "SQ")
+    {
+        h.type = Head::HeadType::Sequence;
+        while(1)
+        {
+            ist>>tmp;
+            if(ist.eof())
+                break;
+            auto t = BGIQD::STRING::split( tmp , ":");
+
+            if( t[0] == "SN" )
+            {
+                h.d.sequenceData.name = t[1];
+            }
+            else if (t[0] == "LN")
+            {
+                h.d.sequenceData.length = std::stoi(t[1]);
+            }
+        }
+    }
+    else if ( tmp == "RG" )
+    {
+        h.type = Head::HeadType::ReadGroup;
+
+    }
+    else if ( tmp == "PG" )
+    {
+        h.type = Head::HeadType::Program;
+
+    }
+    else if ( tmp == "CO" )
+    {
+        h.type = Head::HeadType::OneLineComment;
+    }
+    return h;
+}
 
 MatchData LineParser::ParseAsMatchData() const 
 {
     MatchData data;
     std::istringstream ist(m_line);
     std::string cigar;
-    ist>>data.read_name>>data.flag>>data.ref_name>>data.first_match_position>>data.quality>>cigar;
-
+    ist>>data.read_name>>data.flags.num>>data.ref_name>>data.first_match_position>>data.quality>>cigar;
     data.read_len = ParseStringAsCIGAR(cigar,data.first_match_position,data.detail);
     return data;
 }//ParseAsMatchData
+
 
 size_t LineParser::ParseStringAsCIGAR( const std::string &str ,size_t first_match_on_ref, MatchDetail & detail) const 
 {

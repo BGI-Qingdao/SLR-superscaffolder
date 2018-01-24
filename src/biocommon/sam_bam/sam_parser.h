@@ -7,10 +7,35 @@
 namespace BGIQD{
 namespace SAM{
 
-class Head
+struct Head
 {
-    //TODO 
-    int todo;
+    enum HeadType
+    {
+        Unknow = -1,
+        HeadLine= 0 ,
+        Sequence = 1 ,
+        ReadGroup = 2 ,
+        Program = 3,
+        OneLineComment = 4
+    };
+
+    struct SequenceData
+    {
+        std::string name ;
+        int length ;
+    };
+
+    struct VersionData
+    {
+        std::string version;
+    };
+    struct Data
+    {
+        SequenceData sequenceData;
+        VersionData  versionData;
+    };
+    HeadType type ;
+    Data d ;
 };
 
 enum CIGAR
@@ -26,6 +51,7 @@ enum CIGAR
     EQUAL = 7 ,
     X = 8 ,
 };
+
 struct MatchInfo
 {
     CIGAR type;
@@ -35,6 +61,29 @@ struct MatchInfo
     int end_position_on_ref;
 };
 
+struct FLAGS
+{
+    int ox1:1;
+    int ox2:1;
+    int ox4:1;
+    int ox8:1;
+    int ox10:1;
+    int ox20:1;
+    int ox40:1;
+    int ox80:1;
+    int ox100:1;
+    int ox200:1;
+    int ox400:1;
+    int ox800:1;
+};
+
+union FLAGS_INT
+{
+    FLAGS flags;
+    int num;
+};
+
+
 struct MatchDetail
 {
     std::vector<MatchInfo> infos;
@@ -43,12 +92,19 @@ struct MatchDetail
 struct MatchData
 {
     std::string read_name;
-    int flag ;
+    FLAGS_INT flags;
+    //int flag ;
     std::string ref_name;
     size_t first_match_position;
     int  quality;
     MatchDetail detail;
     int read_len;
+
+    bool IsP() const ;
+    bool IsE() const ;
+    bool IsPrimaryMatch() const ;
+    bool IsPCRduplicae() const ;
+
     //TODO : other columns . 
 };// class MapData
 /******************************************************************************
@@ -63,8 +119,7 @@ class LineParser
         bool IsVaid() const { return m_line.size() > 0 ; }
         bool IsHead() const { return m_line.at(0) == '@' ; }
         MatchData ParseAsMatchData() const ;
-        //TODO 
-        Head ParseAsHead() const { return Head() ; }
+        Head ParseAsHead() const ;
     private:
         const std::string m_line;
     private:

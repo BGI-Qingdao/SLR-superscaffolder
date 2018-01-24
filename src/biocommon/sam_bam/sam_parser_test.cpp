@@ -14,7 +14,7 @@ TEST(LineParser_test)
     CHECK(data.read_name,"11111");
     CHECK(data.ref_name,"NC_000019.10");
     CHECK(data.first_match_position,3624769);
-    CHECK(data.flag,256);
+    CHECK(data.flags.num,256);
     CHECK(data.detail.infos.size(),1);
     MatchInfo d = data.detail.infos[0];
     CHECK(d.start_position_on_ref , 3624769);
@@ -41,4 +41,17 @@ TEST(LineParser_test)
     CHECK(d2.start_position_on_read , 3 );
     CHECK(d2.end_position_on_read , 9 );
     CHECK(d2.type , CIGAR::M);
+}
+
+TEST(FLAGS_test)
+{
+    FLAGS_INT i;
+    i.num = 2048;
+    CHECK((i.flags.ox800 & 0x1), 1 );
+    CHECK((i.flags.ox400 & 0x1), 0 );
+    i.num = 1024+256;
+    CHECK((i.flags.ox800 & 0x1), 0 );
+    CHECK((i.flags.ox400 & 0x1), 1 );
+    CHECK((i.flags.ox200 & 0x1), 0 );
+    CHECK((i.flags.ox100 & 0x1), 1 );
 }
