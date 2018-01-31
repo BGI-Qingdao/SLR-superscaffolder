@@ -99,23 +99,37 @@ cluter_show filter_repeat(const cluter_show & data )
 {
     std::map<int,int> freq;
     std::set<int> mayerr;
+    int key = -1 ;
     for ( size_t i = 0 ; i < data.size() ; i++ )
     {
         incrMap2(freq,std::get<2>(data[i]));
-        if( i >1 )
+        if( i >=1 )
         {
             if( std::get<0>(data[i]) - std::get<1>(data[i-1]) > 1000000 )
             {
-                mayerr.find(i);
-                mayerr.find(i-1);
+                mayerr.insert(i);
+                mayerr.insert(i-1);
             }
+        }
+        if( std::get<3>(data[i] ) == 1.0f )
+        {
+            key = std::get<2>(data[i]);
         }
     }
     cluter_show newer;
+    bool keyfound = false ;
     for( size_t i = 0 ; i < data.size() ; i++ )
     {
         if ( mayerr.find(i) != mayerr.end()  && freq.at(std::get<2>(data[i])) > 1 )
+        {
+            if( keyfound )
+                break;
+            else
+                newer.clear();
             continue;
+        }
+        if ( std::get<2>(data[i]) == key )
+            keyfound  = true;  
         newer.push_back(data[i]);
     }
     return newer;
@@ -123,6 +137,8 @@ cluter_show filter_repeat(const cluter_show & data )
 
 void print_show( int seed, const cluter_show & data)
 {
+    if ( data.size() < 2 )
+        return ;
     int first = std::get<0>(*data.begin());
     int end = std::get<0>(*data.rbegin());
     std::cout<<seed<<"\t"<<end-first;
