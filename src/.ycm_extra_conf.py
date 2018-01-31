@@ -82,6 +82,8 @@ flags = [
 './tests/gmock/include',
 #Add
 '-isystem',
+'/root/work/Project/Chr19ContigBin/src/stLFR',
+'-isystem',
 '/root/work/Project/Chr19ContigBin/src',
 '-isystem',
 '/root/work/Project/Chr19ContigBin/src/common',
@@ -89,6 +91,8 @@ flags = [
 '/root/work/Project/Chr19ContigBin/src/common/files',
 '-isystem',
 '/root/work/Project/Chr19ContigBin/src/biocommon/sam_bam',
+'-isystem',
+'/root/work/Project/Chr19ContigBin/src/biocommon/pair',
 '-isystem',
 '/root/work/Project/Chr19ContigBin/src/common/log',
 '-isystem',

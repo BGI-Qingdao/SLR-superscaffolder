@@ -1,16 +1,18 @@
-.PHONY: all clean 
+.PHONY: all clean
 
 CC 		   =	gcc
 CXX 	   =	g++
 
 CXXFLAGS   =	-std=c++11 -I./\
 				-I./biocommon/sam_bam\
+				-I./biocommon/pair\
 				-I./common/files\
 				-I./common/log\
 				-I./common/time\
 				-I./common/args\
 				-I./common/test\
 				-I./common/string\
+				-I./stLFR\
 				-lz\
 
 DEUBG_CXX  =	${CXXFLAGS} -g
@@ -34,10 +36,13 @@ source_cpp =	contig_barcode.cpp \
 		   		common/files/file_writer.cpp \
 		   		common/files/gzstream.cpp \
 		   		biocommon/sam_bam/sam_parser.cpp\
+		   		biocommon/pair/pair_sam_parser.cpp\
 				common/log/log.cpp\
 				common/log/logfilter.cpp\
 				common/time/timetools.cpp\
 				common/string/stringtools.cpp\
+				stLFR/barcodeId.cpp\
+				stLFR/readName2Barcode.cpp\
 				common/args/argsparser.cpp\
 
 test_cpp   =	test.cpp\
@@ -82,6 +87,12 @@ job_11_o   =	${job_11_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 job_12_cpp =	job12.cpp
 job_12_o   =	${job_12_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
+job_13_cpp =	job13.cpp
+job_13_o   =	${job_13_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+
+Sam2ReadInContig_cpp 	= Sam2ReadInContig.cpp
+Sam2ReadInContig_o 	 	= ${Sam2ReadInContig_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+
 test_o 	   =	${test_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
 
@@ -89,10 +100,10 @@ test_o 	   =	${test_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
 jobs 	   =	job01 job02 job03 job04 job05 job06 job07 job08 job09 job10 \
-				job11 job12
+				job11 job12 job13 Sam2ReadInContig
 jobs_o 	   =	${job_01_o} ${job_03_o} ${job_02_o}  ${job_04_o} ${job_05_o}\
 				${job_06_o}  ${job_07_o} ${job_08_o} ${job_09_o}  ${job_10_o} \
-				${job_11_o} ${job_12_o}
+				${job_11_o} ${job_12_o} ${job_13_o} ${Sam2ReadInContig_o}
 
 all : test ${jobs}
 
@@ -132,6 +143,12 @@ job11 : clean ${job_11_o}
 
 job12 : clean ${job_12_o}
 	${CXX} ${DEUBG_CXX} ${job_12_o} -o job12
+
+job13 : clean ${job_13_o}
+	${CXX} ${DEUBG_CXX} ${job_13_o} -o job13
+
+Sam2ReadInContig: clean ${Sam2ReadInContig_o}
+	${CXX} ${DEUBG_CXX} ${Sam2ReadInContig_o} -o Sam2ReadInContig 
 
 test: clean ${test_o} ${source_h}
 	${CXX} ${DEUBG_CXX} ${test_o} -o test

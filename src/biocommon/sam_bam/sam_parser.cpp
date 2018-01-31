@@ -23,6 +23,26 @@ bool MatchData::IsPCRduplicae() const
 {
     return ((flags.flags.ox400 & 0x1) == 1 ) ;
 }
+bool MatchData::IsReverseComplete() const
+{
+    return ( flags.flags.ox10 & 0x1 )== 1 ;
+}
+int MatchData::firstMatchInRefNoReverse() const 
+{
+    if( ! IsReverseComplete() )
+        return (int)first_match_position;
+    else
+    {
+        for(size_t i = 0 ; i < detail.infos.size() ; i++)
+        {
+            if( detail.infos[i].type == SAM::CIGAR::M )
+            {
+                return detail.infos[i].start_position_on_ref + read_len - detail.infos[i].start_position_on_read -1  ;
+            }
+        }
+    }
+    return -1 ;
+}
 
 Head LineParser::ParseAsHead()const
 {

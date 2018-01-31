@@ -219,7 +219,7 @@ struct args_traits< bool >
 
 #define __PRINT_USAGE \
     std::cerr<<"Usage : "<<argv[0]<< " args "<<std::endl;\
-    for( const auto &i : infos )\
+    for( const auto &i : BGIQD::ARGS::infos )\
     {\
         std::cerr<<"\t\t"<<"-"<<(char)i.first;\
         if( i.second->optional){\
@@ -229,10 +229,10 @@ struct args_traits< bool >
     }
 #define __CONSTRUCT_FORMAT \
     std::string format;\
-    for( const auto &i : infos )\
+    for( const auto &i : BGIQD::ARGS::infos )\
     {\
         format += i.first;\
-        if(i.second->t != args_union::is_bool )\
+        if(i.second->t != BGIQD::ARGS::args_union::is_bool )\
         {\
             format += ":";\
         }\
@@ -242,31 +242,31 @@ struct args_traits< bool >
     int curr_flag ;\
     while( ( curr_flag = getopt( argc , argv, format.c_str() ) ) != EOF )\
     {\
-        auto itr = infos.find( curr_flag ) ;\
-        if ( itr == infos.end() )\
+        auto itr = BGIQD::ARGS::infos.find( curr_flag ) ;\
+        if ( itr == BGIQD::ARGS::infos.end() )\
         {    continue; }\
         itr->second->setted = true ;\
-        if( itr->second->t == args_union::is_bool )\
+        if( itr->second->t == BGIQD::ARGS::args_union::is_bool )\
         {\
             itr->second->d.b = true;\
         }\
-        if( itr->second->t == args_union::is_string)\
+        if( itr->second->t == BGIQD::ARGS::args_union::is_string)\
         {\
             itr->second->d.s = new std::string(optarg);\
         }\
-        if( itr->second->t == args_union::is_int)\
+        if( itr->second->t == BGIQD::ARGS::args_union::is_int)\
         {\
             itr->second->d.i = std::stoi(std::string(optarg));\
         }\
-        if( itr->second->t == args_union::is_long)\
+        if( itr->second->t == BGIQD::ARGS::args_union::is_long)\
         {\
             itr->second->d.l = std::stol(std::string(optarg));\
         }\
-        if( itr->second->t == args_union::is_float)\
+        if( itr->second->t == BGIQD::ARGS::args_union::is_float)\
         {\
             itr->second->d.f = std::stod(std::string(optarg));\
         }\
-        if( itr->second->t == args_union::is_vector_string)\
+        if( itr->second->t == BGIQD::ARGS::args_union::is_vector_string)\
         {\
             if( itr->second->d.vs == NULL )\
             {\
@@ -278,7 +278,7 @@ struct args_traits< bool >
 
 #define __PRINT_ARGS \
     std::cerr<<argv[0];\
-    for( const auto &i : infos ){\
+    for( const auto &i : BGIQD::ARGS::infos ){\
         if( i.second->setted) {\
         std::cerr<<"\t-"<<(char)i.first<<"\t"<<i.second->args_to_string();\
         }\
@@ -287,7 +287,7 @@ struct args_traits< bool >
 
 #define __CHECK_ARGS \
     bool pass = true ;\
-    for( const auto &i : infos )\
+    for( const auto &i : BGIQD::ARGS::infos )\
     {\
         if( ! i.second->optional &&  ! i.second->setted ){\
             std::cerr<<"ERROR:  unset nacessary args - "<<(char)i.first<<std::endl;\
@@ -302,8 +302,8 @@ struct args_traits< bool >
     }
 
 #define __DEFINE_ARG_DETAIL( typen , name , flag , optional ) \
-    args_union name(args_traits<typen>().type(), optional);\
-    infos[flag]=&name;
+    BGIQD::ARGS::args_union name(BGIQD::ARGS::args_traits<typen>().type(), optional);\
+    BGIQD::ARGS::infos[flag]=&name;
 
 #define START_PARSE_ARGS  
 

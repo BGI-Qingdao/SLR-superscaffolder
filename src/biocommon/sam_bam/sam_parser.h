@@ -1,5 +1,5 @@
-#ifndef __COMMON_SAM_BAM_SAM_PARSER_H__
-#define __COMMON_SAM_BAM_SAM_PARSER_H__
+#ifndef __BIOCOMMON_SAM_BAM_SAM_PARSER_H__
+#define __BIOCOMMON_SAM_BAM_SAM_PARSER_H__
 
 #include <string>
 #include <vector>
@@ -99,12 +99,19 @@ struct MatchData
     int  quality;
     MatchDetail detail;
     int read_len;
+    bool origin ;
+
+    MatchData() : read_name("") , ref_name("")
+                  , first_match_position(0)
+                  , quality(0) , read_len(-1){}
 
     bool IsP() const ;
     bool IsE() const ;
     bool IsPrimaryMatch() const ;
     bool IsPCRduplicae() const ;
-
+    bool Valid() const { return read_len > 0 ;}
+    bool IsReverseComplete() const ;
+    int firstMatchInRefNoReverse() const ;
     //TODO : other columns . 
 };// class MapData
 /******************************************************************************
@@ -129,4 +136,4 @@ class LineParser
 
 } // namespace SAM
 } // namespace BGIQD
-#endif // __COMMON_SAM_BAM_SAM_PARSER_H__
+#endif // __BIOCOMMON_SAM_BAM_SAM_PARSER_H__
