@@ -5,6 +5,14 @@ namespace BGIQD{
 namespace SAM{
 
 
+bool MatchData::UnMap() const 
+{
+    return (flags.flags.ox4 & 0x1) == 1 ;
+}
+bool MatchData::OtherUnMap() const 
+{
+    return (flags.flags.ox8 & 0x1) == 1 ;
+}
 
 bool MatchData::IsP() const
 {

@@ -109,7 +109,9 @@ struct MatchData
     bool IsE() const ;
     bool IsPrimaryMatch() const ;
     bool IsPCRduplicae() const ;
-    bool Valid() const { return read_len > 0 ;}
+    bool Valid() const { return ! detail.infos.empty() ; }
+    bool UnMap() const ;
+    bool OtherUnMap() const ;
     bool IsReverseComplete() const ;
     int firstMatchInRefNoReverse() const ;
     //TODO : other columns . 

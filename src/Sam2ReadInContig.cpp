@@ -45,6 +45,8 @@ int main(int argc , char ** argv)
         auto p = parser.CurrentPair();
         if( ! p.first.Valid() || !p.second.Valid() )
             break;
+        if( p.first.UnMap() || p.second.UnMap() )
+            continue;
         print1read(p.first);
         print1read(p.second);
     }
