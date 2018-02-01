@@ -1,6 +1,7 @@
 #include "file_reader.h"
 #include "gzstream.h"
 #include <fstream>
+#include <stdlib.h>
 namespace BGIQD{
 namespace FILES {
 
@@ -23,5 +24,16 @@ namespace FILES {
         return ret;
     }
 
+
+    void FileReaderFactory::ResizeBuff( std::istream & ist, size_t size )
+    {
+        char * buffer = (char *) calloc( sizeof(char) , size );
+        if( buffer == 0 )
+        {
+            std::cerr<<"Fatal buffer calloc failed . System has no more memory ."<<std::endl;
+            exit(1);
+        }
+        (ist.rdbuf())->pubsetbuf(buffer,size);
+    }
 }
 }

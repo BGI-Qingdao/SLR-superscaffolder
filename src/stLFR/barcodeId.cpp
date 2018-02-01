@@ -1,5 +1,6 @@
 #include "barcodeId.h"
 #include "file_reader.h"
+#include "file_writer.h"
 #include "stringtools.h"
 
 namespace BGIQD{
@@ -22,7 +23,7 @@ namespace stLFR{
         curr ++ ;
         return curr - 1;
     }
-    
+
     int BarcodeId::Id(const std::string & tag ) const 
     {
         auto itr = m_tag2num.find(tag);
@@ -30,7 +31,7 @@ namespace stLFR{
             return itr->second;
         return -1;
     }
-    
+
     bool BarcodeId::AssignTag( const std::string &tag, int number )
     {
         auto itr = m_tag2num.find(tag);
@@ -44,6 +45,15 @@ namespace stLFR{
         return true ;
     }
 
+    void BarcodeId::Print( std::ostream & out ) const 
+    {
+        for( const auto & i : m_tag2num )
+        {
+            out<<i.first<<'\t'<<i.second<<std::endl;
+        }
+    }
+
+    /*********************************************************************/
     bool BarcodeIdHelper::preload = false ;
     int BarcodeIdHelper::Id(const std::string & tag)
     {
@@ -68,6 +78,12 @@ namespace stLFR{
         }
         if( in )
             delete in ;
+    }
+    void BarcodeIdHelper::Print(const std::string & file)
+    {
+        auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(file);
+        BarcodeId::Singleton().Print(*out);
+        delete out;
     }
 }
 }

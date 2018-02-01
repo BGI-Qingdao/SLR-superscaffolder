@@ -16,6 +16,7 @@ namespace FILES{
 class FileReaderFactory {
     public:
         static std::istream* GenerateReaderFromFileName( const std::string & file_name );
+        static void ResizeBuff(std::istream &, size_t size);
 };
 
 } //namespace FILES

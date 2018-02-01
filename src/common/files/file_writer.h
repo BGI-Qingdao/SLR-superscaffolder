@@ -8,6 +8,7 @@ namespace FILES{
 class FileWriterFactory{
     public:
         static std::ostream * GenerateWriterFromFileName( const std::string & file_name );
+        static void ResizeBuff(std::ostream &, size_t size);
 
 };
 

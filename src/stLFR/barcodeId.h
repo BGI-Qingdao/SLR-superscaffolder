@@ -34,6 +34,10 @@ class BarcodeId
         //          or number alread exsist and tag not match.
         bool AssignTag( const std::string & tag , int number );
 
+        // Print barcodeList into file
+        //  format is :
+        //      "tag\tid\n"
+        void Print(std::ostream & ost ) const;
     private:
         std::map<std::string , int > m_tag2num;
         std::map<int , std::string > m_num2tag;
@@ -58,6 +62,8 @@ class BarcodeIdHelper
         //  means:
         //      barcode\tid\n
         static void Load( const std::string & file);
+
+        static void Print( const std::string & file);
 };
 
 } // namespace stLFR

@@ -23,5 +23,18 @@ namespace FILES{
         }
         return ret;
     }
+
+
+    void FileWriterFactory::ResizeBuff( std::ostream & ist, size_t size )
+    {
+        char * buffer = (char *) calloc( sizeof(char) , size );
+        if( buffer == 0 )
+        {
+            std::cerr<<"Fatal buffer calloc failed . System has no more memory ."<<std::endl;
+            exit(1);
+        }
+        (ist.rdbuf())->pubsetbuf(buffer,size);
+    }
+
 }
 }
