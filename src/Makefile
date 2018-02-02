@@ -90,6 +90,10 @@ job_12_o   =	${job_12_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 job_13_cpp =	job13.cpp
 job_13_o   =	${job_13_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
+job_14_cpp =	job14.cpp
+job_14_o   =	${job_14_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+
+
 Sam2ReadInContig_cpp 	= Sam2ReadInContig.cpp
 Sam2ReadInContig_o 	 	= ${Sam2ReadInContig_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
@@ -100,10 +104,10 @@ test_o 	   =	${test_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
 jobs 	   =	job01 job02 job03 job04 job05 job06 job07 job08 job09 job10 \
-				job11 job12 job13 Sam2ReadInContig
+				job11 job12 job13 job14 Sam2ReadInContig
 jobs_o 	   =	${job_01_o} ${job_03_o} ${job_02_o}  ${job_04_o} ${job_05_o}\
 				${job_06_o}  ${job_07_o} ${job_08_o} ${job_09_o}  ${job_10_o} \
-				${job_11_o} ${job_12_o} ${job_13_o} ${Sam2ReadInContig_o}
+				${job_11_o} ${job_12_o} ${job_13_o} ${job_14_o} ${Sam2ReadInContig_o}
 
 all : test ${jobs}
 
@@ -146,6 +150,9 @@ job12 : clean ${job_12_o}
 
 job13 : clean ${job_13_o}
 	${CXX} ${DEUBG_CXX} ${job_13_o} -o job13
+
+job14 : clean ${job_14_o}
+	${CXX} ${DEUBG_CXX} ${job_14_o} -o job14
 
 Sam2ReadInContig: clean ${Sam2ReadInContig_o}
 	${CXX} ${DEUBG_CXX} ${Sam2ReadInContig_o} -o Sam2ReadInContig 

@@ -95,11 +95,12 @@ cluter_show get_show( const std::map<int , float>d1 , const contigRef & data)
     return ret;
 }
 
-cluter_show filter_repeat(const cluter_show & data )
+cluter_show filter_repeat_in_region(const cluter_show & data , int from, int to)
 {
     std::map<int,int> freq;
     std::set<int> mayerr;
     int key = -1 ;
+    cluter_show newer;
     for ( size_t i = 0 ; i < data.size() ; i++ )
     {
         incrMap2(freq,std::get<2>(data[i]));
@@ -111,12 +112,14 @@ cluter_show filter_repeat(const cluter_show & data )
                 mayerr.insert(i-1);
             }
         }
-        if( std::get<2>(data[i] ) == 1.0f )
+        //float sim = std::get<3>(data[i] );
+        if( std::get<2>(data[i] ) - 1.0f >=-0.00001 )
         {
             key = std::get<3>(data[i]);
+            if(! ( (std::get<0>(data[i])>=from && std::get<0>(data[i])<=to) || (std::get<1>(data[i])>=from && std::get<1>(data[i])<=to) ))
+                return newer;
         }
     }
-    cluter_show newer;
     bool keyfound = false ;
     for( size_t i = 0 ; i < data.size() ; i++ )
     {
@@ -135,7 +138,7 @@ cluter_show filter_repeat(const cluter_show & data )
     return newer;
 }
 
-void print_show( int seed, const cluter_show & data)
+void print_show( int seed, const cluter_show & data  )
 {
     if ( data.size() < 2 )
         return ;
@@ -176,9 +179,11 @@ int main(int argc , char ** argv)
     initLog("JOB09");
 
     START_PARSE_ARGS
-    DEFINE_ARG_DETAIL(std::string , refBarcode , 'i', false , "the barcode on ref file");
+    DEFINE_ARG_DETAIL(std::string , refBarcode , 'i', false , "the clusters result");
     DEFINE_ARG_DETAIL(std::string , refContig, 'c', false , "sam file . map contig to ref");
     DEFINE_ARG_DETAIL(bool , ponly, 'p', true , "If this flag setted , it will only print the postion of each contig.");
+    DEFINE_ARG_DETAIL(int , from , 'f', false , " from ");
+    DEFINE_ARG_DETAIL(int , to , 't', false , " to");
     END_PARSE_ARGS
 
     cluters c;
@@ -192,7 +197,7 @@ int main(int argc , char ** argv)
     loadCluterData(refBarcode.to_string(), c);
     for( const auto i : c )
     {
-        print_show(i.first, filter_repeat( get_show( i.second, r )));
+        print_show(i.first, filter_repeat_in_region( get_show( i.second, r ),from.to_int() , to.to_int()));
     }
     return 0;
 }

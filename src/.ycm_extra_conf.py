@@ -103,6 +103,8 @@ flags = [
 '/root/work/Project/Chr19ContigBin/src/common/string',
 '-isystem',
 '/root/work/Project/Chr19ContigBin/src/common/args',
+'-isystem',
+'/root/work/Project/Chr19ContigBin/src/common/multithread',
 ]
 
 

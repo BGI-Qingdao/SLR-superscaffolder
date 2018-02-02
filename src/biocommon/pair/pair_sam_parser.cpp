@@ -51,7 +51,7 @@ namespace SAM{
         m_cache.clear();
         m_cache_next.swap(m_cache);
         return std::make_pair(P,E);
-    } 
+    }
 
 }// namespace SAM
 }// namespace BGIQD

@@ -31,7 +31,7 @@ struct args_union
     static std::string get_type( type t)
     {
         if( t == is_bool )
-            return " ";
+            return "no args";
         if( t == is_int)
             return "int";
         if( t == is_long)
@@ -224,6 +224,7 @@ struct args_traits< bool >
         std::cerr<<"\t\t"<<"-"<<(char)i.first;\
         if( i.second->optional){\
             std::cerr<<"\t"<<"[optional]";}\
+        else{std::cerr<<"\t"<<"[required]";}\
         std::cerr<<"\t"<<BGIQD::ARGS::args_union::get_type(i.second->t)\
                  <<"\t"<<i.second->explain<<std::endl;\
     }
