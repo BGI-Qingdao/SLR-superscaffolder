@@ -72,12 +72,6 @@ ContigGraphType_o   =	${ContigGraphType_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 StaticsticUnique_cpp =	StaticsticUnique.cpp
 StaticsticUnique_o   =	${StaticsticUnique_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
-job_08_cpp =	job08.cpp
-job_08_o   =	${job_08_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
-
-job_09_cpp =	job09.cpp
-job_09_o   =	${job_09_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
-
 UnicomGraph_cpp =	UnicomGraph.cpp
 UnicomGraph_o   =	${UnicomGraph_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
@@ -86,9 +80,6 @@ ClusterGap_o   =	${ClusterGap_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
 job_12_cpp =	job12.cpp
 job_12_o   =	${job_12_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
-
-job_13_cpp =	job13.cpp
-job_13_o   =	${job_13_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
 LinearClusterResult_cpp =	LinearClusterResult.cpp
 LinearClusterResult_o   =	${LinearClusterResult_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
@@ -103,11 +94,11 @@ test_o 	   =	${test_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 .cpp.o:
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
-jobs 	   =	BarcodeOnContig FormatBarcodeOnRef BarcodeOnBin BinCluster ContigTypeByRef ContigGraphType StaticsticUnique job08 job09 UnicomGraph \
-				ClusterGap job12 job13 LinearClusterResult Sam2ReadInContig
+jobs 	   =	BarcodeOnContig FormatBarcodeOnRef BarcodeOnBin BinCluster ContigTypeByRef ContigGraphType StaticsticUnique  UnicomGraph \
+				ClusterGap job12 LinearClusterResult Sam2ReadInContig
 jobs_o 	   =	${BarcodeOnContig_o} ${BarcodeOnBin_o} ${FormatBarcodeOnRef_o}  ${BinCluster_o} ${ContigTypeByRef_o}\
-				${ContigGraphType_o}  ${StaticsticUnique_o} ${job_08_o} ${job_09_o}  ${UnicomGraph_o} \
-				${ClusterGap_o} ${job_12_o} ${job_13_o} ${LinearClusterResult_o} ${Sam2ReadInContig_o}
+				${ContigGraphType_o}  ${StaticsticUnique_o}  ${UnicomGraph_o} \
+				${ClusterGap_o} ${job_12_o} ${LinearClusterResult_o} ${Sam2ReadInContig_o}
 
 all : test ${jobs}
 
@@ -133,12 +124,6 @@ ContigGraphType : clean ${ContigGraphType_o}
 StaticsticUnique : clean ${StaticsticUnique_o}
 	${CXX} ${DEUBG_CXX} ${StaticsticUnique_o} -o StaticsticUnique
 
-job08 : clean ${job_08_o}
-	${CXX} ${DEUBG_CXX} ${job_08_o} -o job08
-
-job09 : clean ${job_09_o}
-	${CXX} ${DEUBG_CXX} ${job_09_o} -o job09
-
 UnicomGraph : clean ${UnicomGraph_o}
 	${CXX} ${DEUBG_CXX} ${UnicomGraph_o} -o UnicomGraph
 
@@ -147,9 +132,6 @@ ClusterGap : clean ${ClusterGap_o}
 
 job12 : clean ${job_12_o}
 	${CXX} ${DEUBG_CXX} ${job_12_o} -o job12
-
-job13 : clean ${job_13_o}
-	${CXX} ${DEUBG_CXX} ${job_13_o} -o job13
 
 LinearClusterResult : clean ${LinearClusterResult_o}
 	${CXX} ${DEUBG_CXX} ${LinearClusterResult_o} -o LinearClusterResult
