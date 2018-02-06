@@ -12,11 +12,11 @@ using namespace BGIQD::ARGS;
 
 int main(int argc , char **argv )
 {
-    initLog("JOB02");
+    initLog("FormatBarcodeOnRef");
 
     START_PARSE_ARGS
-    DEFINE_ARG(std::string , input , 'i');
-    DEFINE_ARG(std::string , output, 'o');
+    DEFINE_ARG_DETAIL(std::string , input , 'i',false,"barcodeOnRef_wenchao");
+    DEFINE_ARG_DETAIL(std::string , output, 'o',false,"output");
     END_PARSE_ARGS
 
     refBarcodeUniqueInfo ebi;

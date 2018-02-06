@@ -57,8 +57,8 @@ BarcodeOnContig_o   =	${BarcodeOnContig_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 BarcodeOnBin_cpp =	BarcodeOnBin.cpp
 BarcodeOnBin_o   =	${BarcodeOnBin_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
-job_02_cpp =	job02.cpp
-job_02_o   =	${job_02_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+FormatBarcodeOnRef_cpp =	FormatBarcodeOnRef.cpp
+FormatBarcodeOnRef_o   =	${FormatBarcodeOnRef_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
 job_04_cpp =	job04.cpp
 job_04_o   =	${job_04_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
@@ -103,9 +103,9 @@ test_o 	   =	${test_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 .cpp.o:
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
-jobs 	   =	BarcodeOnContig job02 BarcodeOnBin job04 job05 job06 job07 job08 job09 job10 \
+jobs 	   =	BarcodeOnContig FormatBarcodeOnRef BarcodeOnBin job04 job05 job06 job07 job08 job09 job10 \
 				job11 job12 job13 job14 Sam2ReadInContig
-jobs_o 	   =	${BarcodeOnContig_o} ${BarcodeOnBin_o} ${job_02_o}  ${job_04_o} ${job_05_o}\
+jobs_o 	   =	${BarcodeOnContig_o} ${BarcodeOnBin_o} ${FormatBarcodeOnRef_o}  ${job_04_o} ${job_05_o}\
 				${job_06_o}  ${job_07_o} ${job_08_o} ${job_09_o}  ${job_10_o} \
 				${job_11_o} ${job_12_o} ${job_13_o} ${job_14_o} ${Sam2ReadInContig_o}
 
@@ -115,8 +115,8 @@ all : test ${jobs}
 BarcodeOnContig : clean ${BarcodeOnContig_o}
 	${CXX} ${DEUBG_CXX} ${BarcodeOnContig_o} -o BarcodeOnContig
 	
-job02 : clean ${job_02_o}
-	${CXX} ${DEUBG_CXX} ${job_02_o} -o job02 
+FormatBarcodeOnRef : clean ${FormatBarcodeOnRef_o}
+	${CXX} ${DEUBG_CXX} ${FormatBarcodeOnRef_o} -o FormatBarcodeOnRef 
 
 BarcodeOnBin : clean ${BarcodeOnBin_o}
 	${CXX} ${DEUBG_CXX} ${BarcodeOnBin_o} -o BarcodeOnBin
