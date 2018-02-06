@@ -1,0 +1,337 @@
+Sam2ReadInConti  3063   619.916305:   10101010 cpu-clock: 
+	           75ba8 _IO_sputbackc (/lib64/libc-2.22.so)
+
+Sam2ReadInConti  3063   619.927076:   10101010 cpu-clock: 
+	          12683c std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::find (/usr/lib64/libstdc++.so.6.0.22)
+	    400000005600 [unknown] ([unknown])
+
+Sam2ReadInConti  3063   619.936930:   10101010 cpu-clock: 
+	           6b452 _IO_ungetc (/lib64/libc-2.22.so)
+
+Sam2ReadInConti  3063   619.946523:   10101010 cpu-clock: 
+	           6b448 _IO_ungetc (/lib64/libc-2.22.so)
+
+Sam2ReadInConti  3063   619.957009:   10101010 cpu-clock: 
+	           70a72 _IO_getc (/lib64/libc-2.22.so)
+
+Sam2ReadInConti  3063   619.967312:   10101010 cpu-clock: 
+	           6b3b0 _IO_ungetc (/lib64/libc-2.22.so)
+
+Sam2ReadInConti  3063   619.976869:   10101010 cpu-clock: 
+	    7fff81086899 __do_softirq ([kernel.kallsyms])
+	    7fff81086dda irq_exit ([kernel.kallsyms])
+	    7fff816164d1 do_IRQ ([kernel.kallsyms])
+	    7fff8161430c ret_from_intr ([kernel.kallsyms])
+	           223ff std::__copy_move_a<true, BGIQD::SAM::MatchInfo*, BGIQD::SAM::MatchInfo*> (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           22320 std::copy<std::move_iterator<BGIQD::SAM::MatchInfo*>, BGIQD::SAM::MatchInfo*> (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           222d9 std::__uninitialized_copy<true>::__uninit_copy<std::move_iterator<BGIQD::SAM::MatchInfo*>, BGIQD::SAM::MatchInfo*> (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           22297 std::uninitialized_copy<std::move_iterator<BGIQD::SAM::MatchInfo*>, BGIQD::SAM::MatchInfo*> (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           221bc std::__uninitialized_copy_a<std::move_iterator<BGIQD::SAM::MatchInfo*>, BGIQD::SAM::MatchInfo*, BGIQD::SAM::MatchInfo> (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           220d3 std::__uninitialized_move_if_noexcept_a<BGIQD::SAM::MatchInfo*, BGIQD::SAM::MatchInfo*, std::allocator<BGIQD::SAM::MatchInfo> > (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           21c69 std::vector<BGIQD::SAM::MatchInfo, std::allocator<BGIQD::SAM::MatchInfo> >::_M_realloc_insert<BGIQD::SAM::MatchInfo const&> (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           21ad0 std::vector<BGIQD::SAM::MatchInfo, std::allocator<BGIQD::SAM::MatchInfo> >::push_back (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           21423 BGIQD::SAM::LineParser::ParseStringAsCIGAR(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, unsigned long, BGIQD::SAM::MatchDetail&) const::{lambda(BGIQD::SAM::CIGAR, int, int)#1}::operator() (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           21713 BGIQD::SAM::LineParser::ParseStringAsCIGAR (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           21262 BGIQD::SAM::LineParser::ParseAsMatchData (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           225c9 BGIQD::SAM::PairedSAMParser::CurrentPair (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            5837 main (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           206e5 __libc_start_main (/lib64/libc-2.22.so)
+
+Sam2ReadInConti  3063   619.986952:   10101010 cpu-clock: 
+	           afef0 std::getline<char, std::char_traits<char>, std::allocator<char> > (/usr/lib64/libstdc++.so.6.0.22)
+
+Sam2ReadInConti  3063   619.997291:   10101010 cpu-clock: 
+	            7914 std::_Vector_base<BGIQD::SAM::MatchInfo, std::allocator<BGIQD::SAM::MatchInfo> >::_M_get_Tp_allocator (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            7164 std::vector<BGIQD::SAM::MatchInfo, std::allocator<BGIQD::SAM::MatchInfo> >::~vector (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            5efc BGIQD::SAM::MatchDetail::~MatchDetail (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            6b3a BGIQD::SAM::MatchData::~MatchData (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            9b07 std::_Destroy<BGIQD::SAM::MatchData> (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            91b7 std::_Destroy_aux<false>::__destroy<BGIQD::SAM::MatchData*> (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            8334 std::_Destroy<BGIQD::SAM::MatchData*> (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            7af7 std::_Destroy<BGIQD::SAM::MatchData*, BGIQD::SAM::MatchData> (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           231d2 std::vector<BGIQD::SAM::MatchData, std::allocator<BGIQD::SAM::MatchData> >::_M_erase_at_end (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           22ace std::vector<BGIQD::SAM::MatchData, std::allocator<BGIQD::SAM::MatchData> >::clear (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           227ce BGIQD::SAM::PairedSAMParser::CurrentPair (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            5837 main (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           206e5 __libc_start_main (/lib64/libc-2.22.so)
+
+Sam2ReadInConti  3063   620.007175:   10101010 cpu-clock: 
+	           70a42 _IO_getc (/lib64/libc-2.22.so)
+
+Sam2ReadInConti  3063   620.017277:   10101010 cpu-clock: 
+	           6b448 _IO_ungetc (/lib64/libc-2.22.so)
+
+Sam2ReadInConti  3063   620.027305:   10101010 cpu-clock: 
+	           f05ad __gnu_cxx::stdio_sync_filebuf<char, std::char_traits<char> >::uflow (/usr/lib64/libstdc++.so.6.0.22)
+
+Sam2ReadInConti  3063   620.037795:   10101010 cpu-clock: 
+	           2159f BGIQD::SAM::LineParser::ParseStringAsCIGAR (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           21262 BGIQD::SAM::LineParser::ParseAsMatchData (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           225c9 BGIQD::SAM::PairedSAMParser::CurrentPair (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            5837 main (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           206e5 __libc_start_main (/lib64/libc-2.22.so)
+
+Sam2ReadInConti  3063   620.048280:   10101010 cpu-clock: 
+	           70a65 _IO_getc (/lib64/libc-2.22.so)
+
+Sam2ReadInConti  3063   620.057655:   10101010 cpu-clock: 
+	    7fffa062dbf0 xlog_grant_sub_space.isra.5 ([kernel.kallsyms])
+	    7fffa062efa7 xlog_ungrant_log_space ([kernel.kallsyms])
+	    7fffa0630d36 xfs_log_done ([kernel.kallsyms])
+	    7fffa06320cf xfs_log_commit_cil ([kernel.kallsyms])
+	    7fffa062c339 __xfs_trans_commit ([kernel.kallsyms])
+	    7fff81223879 file_update_time ([kernel.kallsyms])
+	    7fffa0613bfa xfs_file_aio_write_checks ([kernel.kallsyms])
+	    7fffa06140a5 xfs_file_buffered_aio_write ([kernel.kallsyms])
+	    7fffa061436e xfs_file_write_iter ([kernel.kallsyms])
+	    7fff812099b9 __vfs_write ([kernel.kallsyms])
+	    7fff8120a0ad vfs_write ([kernel.kallsyms])
+	    7fff8120ad72 sys_write ([kernel.kallsyms])
+	    7fff81613832 entry_SYSCALL_64_fastpath ([kernel.kallsyms])
+	           dd2d0 __GI___libc_write (/lib64/libc-2.22.so)
+	3330310931343335 [unknown] ([unknown])
+
+Sam2ReadInConti  3063   620.067876:   10101010 cpu-clock: 
+	           70a83 _IO_getc (/lib64/libc-2.22.so)
+
+Sam2ReadInConti  3063   620.077901:   10101010 cpu-clock: 
+	           22d92 __gnu_cxx::operator!=<BGIQD::SAM::MatchData*, std::vector<BGIQD::SAM::MatchData, std::allocator<BGIQD::SAM::MatchData> > > (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           22704 BGIQD::SAM::PairedSAMParser::CurrentPair (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            5837 main (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           206e5 __libc_start_main (/lib64/libc-2.22.so)
+
+Sam2ReadInConti  3063   620.087909:   10101010 cpu-clock: 
+	    7fffa0607260 __xfs_get_blocks ([kernel.kallsyms])
+	    7fff81240a3b __block_write_begin ([kernel.kallsyms])
+	    7fffa0605a4e xfs_vm_write_begin ([kernel.kallsyms])
+	    7fff8118fcd3 generic_perform_write ([kernel.kallsyms])
+	    7fffa0614140 xfs_file_buffered_aio_write ([kernel.kallsyms])
+	    7fffa061436e xfs_file_write_iter ([kernel.kallsyms])
+	    7fff812099b9 __vfs_write ([kernel.kallsyms])
+	    7fff8120a0ad vfs_write ([kernel.kallsyms])
+	    7fff8120ad72 sys_write ([kernel.kallsyms])
+	    7fff81613832 entry_SYSCALL_64_fastpath ([kernel.kallsyms])
+	           dd2d0 __GI___libc_write (/lib64/libc-2.22.so)
+	3631330935353132 [unknown] ([unknown])
+
+Sam2ReadInConti  3063   620.098417:   10101010 cpu-clock: 
+	    7fff811e9eda kmem_cache_alloc ([kernel.kallsyms])
+	    7fffa062cf8b kmem_zone_alloc ([kernel.kallsyms])
+	    7fffa062c135 xfs_trans_add_item ([kernel.kallsyms])
+	    7fffa061cb95 xfs_vn_update_time ([kernel.kallsyms])
+	    7fff81223879 file_update_time ([kernel.kallsyms])
+	    7fffa0613bfa xfs_file_aio_write_checks ([kernel.kallsyms])
+	    7fffa06140a5 xfs_file_buffered_aio_write ([kernel.kallsyms])
+	    7fffa061436e xfs_file_write_iter ([kernel.kallsyms])
+	    7fff812099b9 __vfs_write ([kernel.kallsyms])
+	    7fff8120a0ad vfs_write ([kernel.kallsyms])
+	    7fff8120ad72 sys_write ([kernel.kallsyms])
+	    7fff81613832 entry_SYSCALL_64_fastpath ([kernel.kallsyms])
+	           dd2d0 __GI___libc_write (/lib64/libc-2.22.so)
+	3432330933313736 [unknown] ([unknown])
+
+Sam2ReadInConti  3063   620.108943:   10101010 cpu-clock: 
+	           70a5f _IO_getc (/lib64/libc-2.22.so)
+
+Sam2ReadInConti  3063   620.118972:   10101010 cpu-clock: 
+	           6b3eb _IO_ungetc (/lib64/libc-2.22.so)
+
+Sam2ReadInConti  3063   620.128497:   10101010 cpu-clock: 
+	            9b39 std::__addressof<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            9215 std::_Destroy_aux<false>::__destroy<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*> (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            8390 std::_Destroy<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*> (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            7b9b std::_Destroy<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            7273 std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::~vector (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           28c40 BGIQD::stLFR::readName2Barcode (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            4b3a main::{lambda(BGIQD::SAM::MatchData const&)#1}::operator() (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            58f0 main (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           206e5 __libc_start_main (/lib64/libc-2.22.so)
+
+Sam2ReadInConti  3063   620.138523:   10101010 cpu-clock: 
+	          148e01 __memcmp_sse4_1 (/lib64/libc-2.22.so)
+	           22c1c std::operator==<char> (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           225fd BGIQD::SAM::PairedSAMParser::CurrentPair (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            5837 main (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           206e5 __libc_start_main (/lib64/libc-2.22.so)
+
+Sam2ReadInConti  3063   620.148548:   10101010 cpu-clock: 
+	           b00b3 std::getline<char, std::char_traits<char>, std::allocator<char> > (/usr/lib64/libstdc++.so.6.0.22)
+
+Sam2ReadInConti  3063   620.159093:   10101010 cpu-clock: 
+	           75ba0 _IO_sputbackc (/lib64/libc-2.22.so)
+
+Sam2ReadInConti  3063   620.169601:   10101010 cpu-clock: 
+	           a8610 std::locale::operator= (/usr/lib64/libstdc++.so.6.0.22)
+
+Sam2ReadInConti  3063   620.179131:   10101010 cpu-clock: 
+	            a075 std::move_iterator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*>::move_iterator (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            99f8 std::__uninitialized_move_if_noexcept_a<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            8eb2 std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::_M_realloc_insert<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            819e std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::emplace_back<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            7722 std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::push_back (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           26c14 BGIQD::STRING::split (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           28c10 BGIQD::stLFR::readName2Barcode (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            4b3a main::{lambda(BGIQD::SAM::MatchData const&)#1}::operator() (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            58f0 main (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           206e5 __libc_start_main (/lib64/libc-2.22.so)
+
+Sam2ReadInConti  3063   620.189176:   10101010 cpu-clock: 
+	           70a1c _IO_getc (/lib64/libc-2.22.so)
+
+Sam2ReadInConti  3063   620.199185:   10101010 cpu-clock: 
+	           70a0f _IO_getc (/lib64/libc-2.22.so)
+
+Sam2ReadInConti  3063   620.209211:   10101010 cpu-clock: 
+	          128a6d __memcpy_avx_unaligned (/lib64/libc-2.22.so)
+	          12750f std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::basic_string (/usr/lib64/libstdc++.so.6.0.22)
+	           22535 BGIQD::SAM::PairedSAMParser::CurrentPair (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            5837 main (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           206e5 __libc_start_main (/lib64/libc-2.22.so)
+
+Sam2ReadInConti  3063   620.219741:   10101010 cpu-clock: 
+	           17152 __gnu_cxx::__aligned_membuf<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, int> >::_M_addr (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           1206e __gnu_cxx::__aligned_membuf<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, int> >::_M_ptr (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            f310 std::_Rb_tree_node<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, int> >::_M_valptr (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           17135 std::_Rb_tree<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, int>, std::_Select1st<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, int> >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, int> > >::_S_value (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           11f4a std::_Rb_tree<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, int>, std::_Select1st<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, int> >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, int> > >::_S_key (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           11906 std::_Rb_tree<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, int>, std::_Select1st<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, int> >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, int> > >::_M_lower_bound (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            f001 std::_Rb_tree<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, int>, std::_Select1st<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, int> >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, int> > >::find (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            d431 std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, int, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, int> > >::find (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           26e11 BGIQD::stLFR::BarcodeId::AddTag (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           2717d BGIQD::stLFR::BarcodeIdHelper::Id (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            4b46 main::{lambda(BGIQD::SAM::MatchData const&)#1}::operator() (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            58f0 main (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           206e5 __libc_start_main (/lib64/libc-2.22.so)
+
+Sam2ReadInConti  3063   620.229774:   10101010 cpu-clock: 
+	           aff81 std::getline<char, std::char_traits<char>, std::allocator<char> > (/usr/lib64/libstdc++.so.6.0.22)
+
+Sam2ReadInConti  3063   620.239936:   10101010 cpu-clock: 
+	    7fff81613241 _raw_spin_unlock_irqrestore ([kernel.kallsyms])
+	    7fffa0082955 ata_scsi_queuecmd ([kernel.kallsyms])
+	    7fffa0016e77 scsi_dispatch_cmd ([kernel.kallsyms])
+	    7fffa0019d8b scsi_request_fn ([kernel.kallsyms])
+	    7fff812fc0ff __blk_run_queue ([kernel.kallsyms])
+	    7fff812fc179 queue_unplugged ([kernel.kallsyms])
+	    7fff81301423 blk_flush_plug_list ([kernel.kallsyms])
+	    7fff81301827 blk_finish_plug ([kernel.kallsyms])
+	    7fff8119d3a1 __do_page_cache_readahead ([kernel.kallsyms])
+	    7fff8119d546 ondemand_readahead ([kernel.kallsyms])
+	    7fff81192232 generic_file_read_iter ([kernel.kallsyms])
+	    7fffa0612d66 xfs_file_read_iter ([kernel.kallsyms])
+	    7fff81209ab6 __vfs_read ([kernel.kallsyms])
+	    7fff81209f6a vfs_read ([kernel.kallsyms])
+	    7fff8120acd2 sys_read ([kernel.kallsyms])
+	    7fff81613832 entry_SYSCALL_64_fastpath ([kernel.kallsyms])
+	           dd270 __GI___libc_read (/lib64/libc-2.22.so)
+	3932390931313937 [unknown] ([unknown])
+
+Sam2ReadInConti  3063   620.249587:   10101010 cpu-clock: 
+	           6b44a _IO_ungetc (/lib64/libc-2.22.so)
+
+Sam2ReadInConti  3063   620.259893:   10101010 cpu-clock: 
+	            a301 std::operator==<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*> (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            a238 std::operator!=<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*> (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            a158 std::__uninitialized_copy<false>::__uninit_copy<std::move_iterator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*>, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*> (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            a0bd std::uninitialized_copy<std::move_iterator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*>, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*> (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            9e58 std::__uninitialized_copy_a<std::move_iterator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*>, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            9a11 std::__uninitialized_move_if_noexcept_a<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            8e71 std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::_M_realloc_insert<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            819e std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::emplace_back<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            7722 std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::push_back (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           26c9c BGIQD::STRING::split (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           28c10 BGIQD::stLFR::readName2Barcode (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            4b3a main::{lambda(BGIQD::SAM::MatchData const&)#1}::operator() (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            590d main (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           206e5 __libc_start_main (/lib64/libc-2.22.so)
+
+Sam2ReadInConti  3063   620.269901:   10101010 cpu-clock: 
+	          114e37 std::ostream::_M_insert<unsigned long> (/usr/lib64/libstdc++.so.6.0.22)
+	          380988 [unknown] (/usr/lib64/libstdc++.so.6.0.22)
+	          113570 std::basic_ostream<char, std::char_traits<char> >::~basic_ostream (/usr/lib64/libstdc++.so.6.0.22)
+	4818c0834808c783 [unknown] ([unknown])
+
+Sam2ReadInConti  3063   620.279957:   10101010 cpu-clock: 
+	    7fff8133ac19 __memcpy ([kernel.kallsyms])
+	           dd2d0 __GI___libc_write (/lib64/libc-2.22.so)
+	3836360933393437 [unknown] ([unknown])
+
+Sam2ReadInConti  3063   620.289962:   10101010 cpu-clock: 
+	            a088 std::move_iterator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*>::move_iterator (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            9e23 std::__make_move_if_noexcept_iterator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::move_iterator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*> > (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            99f8 std::__uninitialized_move_if_noexcept_a<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            8e71 std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::_M_realloc_insert<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            819e std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::emplace_back<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            7722 std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::push_back (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           26c9c BGIQD::STRING::split (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           28c10 BGIQD::stLFR::readName2Barcode (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            4b3a main::{lambda(BGIQD::SAM::MatchData const&)#1}::operator() (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            590d main (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           206e5 __libc_start_main (/lib64/libc-2.22.so)
+
+Sam2ReadInConti  3063   620.300482:   10101010 cpu-clock: 
+	          10d11b std::num_get<char, std::istreambuf_iterator<char, std::char_traits<char> > >::_M_extract_int<unsigned long> (/usr/lib64/libstdc++.so.6.0.22)
+
+Sam2ReadInConti  3063   620.310571:   10101010 cpu-clock: 
+	    7fff81613241 _raw_spin_unlock_irqrestore ([kernel.kallsyms])
+	    7fffa0082955 ata_scsi_queuecmd ([kernel.kallsyms])
+	    7fffa0016e77 scsi_dispatch_cmd ([kernel.kallsyms])
+	    7fffa0019d8b scsi_request_fn ([kernel.kallsyms])
+	    7fff812fc0ff __blk_run_queue ([kernel.kallsyms])
+	    7fff812fc179 queue_unplugged ([kernel.kallsyms])
+	    7fff81301423 blk_flush_plug_list ([kernel.kallsyms])
+	    7fff81301827 blk_finish_plug ([kernel.kallsyms])
+	    7fff8119d3a1 __do_page_cache_readahead ([kernel.kallsyms])
+	    7fff8119d546 ondemand_readahead ([kernel.kallsyms])
+	    7fff81192232 generic_file_read_iter ([kernel.kallsyms])
+	    7fffa0612d66 xfs_file_read_iter ([kernel.kallsyms])
+	    7fff81209ab6 __vfs_read ([kernel.kallsyms])
+	    7fff81209f6a vfs_read ([kernel.kallsyms])
+	    7fff8120acd2 sys_read ([kernel.kallsyms])
+	    7fff81613832 entry_SYSCALL_64_fastpath ([kernel.kallsyms])
+	           dd270 __GI___libc_read (/lib64/libc-2.22.so)
+	3434310931383238 [unknown] ([unknown])
+
+Sam2ReadInConti  3063   620.320312:   10101010 cpu-clock: 
+	          11471e std::__ostream_insert<char, std::char_traits<char> > (/usr/lib64/libstdc++.so.6.0.22)
+	            58f0 main (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           206e5 __libc_start_main (/lib64/libc-2.22.so)
+
+Sam2ReadInConti  3063   620.330571:   10101010 cpu-clock: 
+	           709ed _IO_getc (/lib64/libc-2.22.so)
+
+Sam2ReadInConti  3063   620.340561:   10101010 cpu-clock: 
+	          149c26 __memcmp_sse4_1 (/lib64/libc-2.22.so)
+
+Sam2ReadInConti  3063   620.350594:   10101010 cpu-clock: 
+	           f0890 __gnu_cxx::stdio_sync_filebuf<char, std::char_traits<char> >::xsputn (/usr/lib64/libstdc++.so.6.0.22)
+	          108c1d std::num_put<char, std::ostreambuf_iterator<char, std::char_traits<char> > >::do_put (/usr/lib64/libstdc++.so.6.0.22)
+	          380988 [unknown] (/usr/lib64/libstdc++.so.6.0.22)
+	          113570 std::basic_ostream<char, std::char_traits<char> >::~basic_ostream (/usr/lib64/libstdc++.so.6.0.22)
+	4818c0834808c783 [unknown] ([unknown])
+
+Sam2ReadInConti  3063   620.361115:   10101010 cpu-clock: 
+	           aff03 std::getline<char, std::char_traits<char>, std::allocator<char> > (/usr/lib64/libstdc++.so.6.0.22)
+
+Sam2ReadInConti  3063   620.371156:   10101010 cpu-clock: 
+	           70a72 _IO_getc (/lib64/libc-2.22.so)
+
+Sam2ReadInConti  3063   620.381167:   10101010 cpu-clock: 
+	           70a72 _IO_getc (/lib64/libc-2.22.so)
+
+Sam2ReadInConti  3063   620.391196:   10101010 cpu-clock: 
+	    7fff816137f7 entry_SYSCALL_64_after_swapgs ([kernel.kallsyms])
+	             246 [unknown] ([unknown])
+
+Sam2ReadInConti  3063   620.401265:   10101010 cpu-clock: 
+	           233a2 __gnu_cxx::__normal_iterator<BGIQD::SAM::MatchData*, std::vector<BGIQD::SAM::MatchData, std::allocator<BGIQD::SAM::MatchData> > >::__normal_iterator (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           225d8 BGIQD::SAM::PairedSAMParser::CurrentPair (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	            5837 main (/home/Project/Chr19ContigBin/src/Sam2ReadInContig)
+	           206e5 __libc_start_main (/lib64/libc-2.22.so)
+
+Sam2ReadInConti  3063   620.411250:   10101010 cpu-clock: 
+	           709e0 _IO_getc (/lib64/libc-2.22.so)
+
+Sam2ReadInConti  3063   620.421314:   10101010 cpu-clock: 
+	           70a5f _IO_getc (/lib64/libc-2.22.so)
+
