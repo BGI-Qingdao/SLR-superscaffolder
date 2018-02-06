@@ -60,11 +60,11 @@ BarcodeOnBin_o   =	${BarcodeOnBin_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 FormatBarcodeOnRef_cpp =	FormatBarcodeOnRef.cpp
 FormatBarcodeOnRef_o   =	${FormatBarcodeOnRef_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
-job_04_cpp =	job04.cpp
-job_04_o   =	${job_04_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+BinCluster_cpp =	BinCluster.cpp
+BinCluster_o   =	${BinCluster_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
-job_05_cpp =	job05.cpp
-job_05_o   =	${job_05_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+ContigTypeByRef_cpp =	ContigTypeByRef.cpp
+ContigTypeByRef_o   =	${ContigTypeByRef_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
 job_06_cpp =	job06.cpp
 job_06_o   =	${job_06_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
@@ -103,9 +103,9 @@ test_o 	   =	${test_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 .cpp.o:
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
-jobs 	   =	BarcodeOnContig FormatBarcodeOnRef BarcodeOnBin job04 job05 job06 job07 job08 job09 job10 \
+jobs 	   =	BarcodeOnContig FormatBarcodeOnRef BarcodeOnBin BinCluster ContigTypeByRef job06 job07 job08 job09 job10 \
 				job11 job12 job13 job14 Sam2ReadInContig
-jobs_o 	   =	${BarcodeOnContig_o} ${BarcodeOnBin_o} ${FormatBarcodeOnRef_o}  ${job_04_o} ${job_05_o}\
+jobs_o 	   =	${BarcodeOnContig_o} ${BarcodeOnBin_o} ${FormatBarcodeOnRef_o}  ${BinCluster_o} ${ContigTypeByRef_o}\
 				${job_06_o}  ${job_07_o} ${job_08_o} ${job_09_o}  ${job_10_o} \
 				${job_11_o} ${job_12_o} ${job_13_o} ${job_14_o} ${Sam2ReadInContig_o}
 
@@ -121,11 +121,11 @@ FormatBarcodeOnRef : clean ${FormatBarcodeOnRef_o}
 BarcodeOnBin : clean ${BarcodeOnBin_o}
 	${CXX} ${DEUBG_CXX} ${BarcodeOnBin_o} -o BarcodeOnBin
 
-job04 : clean ${job_04_o}
-	${CXX} ${DEUBG_CXX} ${job_04_o} -o job04
+BinCluster : clean ${BinCluster_o}
+	${CXX} ${DEUBG_CXX} ${BinCluster_o} -o BinCluster
 
-job05 : clean ${job_05_o}
-	${CXX} ${DEUBG_CXX} ${job_05_o} -o job05
+ContigTypeByRef : clean ${ContigTypeByRef_o}
+	${CXX} ${DEUBG_CXX} ${ContigTypeByRef_o} -o ContigTypeByRef
 
 job06 : clean ${job_06_o}
 	${CXX} ${DEUBG_CXX} ${job_06_o} -o job06

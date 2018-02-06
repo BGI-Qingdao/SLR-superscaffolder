@@ -162,13 +162,13 @@ void printClusterData(const std::string & file ,const  std::vector< std::map< si
 }
 int main(int argc ,char **argv)
 {
-    initLog("JOB03");
+    initLog("BinCluster");
 
     START_PARSE_ARGS
-    DEFINE_ARG(std::string , input , 'i');
-    DEFINE_ARG(std::string , output, 'o');
-    DEFINE_ARG(int , seedNum, 'n');
-    DEFINE_ARG(float , thresold, 's');
+    DEFINE_ARG_DETAIL(std::string , input , 'i',false,"barcodeOnBin");
+    DEFINE_ARG_DETAIL(std::string , output, 'o',false,"output");
+    DEFINE_ARG_DETAIL(int , seedNum, 'n',false,"seed num");
+    DEFINE_ARG_DETAIL(float , thresold, 's',false,"simularity thresold");
     END_PARSE_ARGS
 
     binBarcodeInfo bbi;

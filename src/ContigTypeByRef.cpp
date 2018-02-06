@@ -147,7 +147,7 @@ void printContigTypes( const std::string & file , const contigTypes & types)
 
 int main(int argc ,char **argv)
 {
-    initLog("JOB05");
+    initLog("ContigTypeByRef");
 
     START_PARSE_ARGS
     DEFINE_ARG(std::string , input , 'i');
