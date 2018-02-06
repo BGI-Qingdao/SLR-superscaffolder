@@ -123,12 +123,12 @@ void print_contigPos(const contigRef & data)
 
 int main(int argc , char ** argv)
 {
-    initLog("JOB09");
+    initLog("LinearClusterResult");
 
     START_PARSE_ARGS
-    DEFINE_ARG(std::string , refBarcode , 'i');
-    DEFINE_ARG(std::string , refContig, 'c');
-    DEFINE_ARG(std::string , output, 'o');
+    DEFINE_ARG_DETAIL(std::string , refBarcode , 'i' , false ,"");
+    DEFINE_ARG_DETAIL(std::string , refContig, 'c');
+    DEFINE_ARG_DETAIL(std::string , output, 'o');
     DEFINE_ARG(bool , ponly, 'p');
     END_PARSE_ARGS
 

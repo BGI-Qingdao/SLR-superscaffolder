@@ -95,7 +95,7 @@ cluter_show get_show( const std::map<int , float>d1 , const contigRef & data)
     return ret;
 }
 
-cluter_show filter_repeat_in_region(const cluter_show & data , int from, int to)
+cluter_show filter_repeat_in_region(const cluter_show & data ,bool repeat, int from, int to)
 {
     std::map<int,int> freq;
     std::set<int> mayerr;
@@ -112,14 +112,18 @@ cluter_show filter_repeat_in_region(const cluter_show & data , int from, int to)
                 mayerr.insert(i-1);
             }
         }
-        //float sim = std::get<3>(data[i] );
-        if( std::get<2>(data[i] ) - 1.0f >=-0.00001 )
+        if( from >-1 && to > 0 )
         {
-            key = std::get<3>(data[i]);
-            if(! ( (std::get<0>(data[i])>=from && std::get<0>(data[i])<=to) || (std::get<1>(data[i])>=from && std::get<1>(data[i])<=to) ))
-                return newer;
+            if( std::get<2>(data[i] ) - 1.0f >=-0.00001 )
+            {
+                key = std::get<3>(data[i]);
+                if(! ( (std::get<0>(data[i])>=from && std::get<0>(data[i])<=to) || (std::get<1>(data[i])>=from && std::get<1>(data[i])<=to) ))
+                    return newer;
+            }
         }
     }
+    if( repeat )
+        return data;
     bool keyfound = false ;
     for( size_t i = 0 ; i < data.size() ; i++ )
     {
@@ -138,13 +142,15 @@ cluter_show filter_repeat_in_region(const cluter_show & data , int from, int to)
     return newer;
 }
 
-void print_show( int seed, const cluter_show & data  )
+void print_show( int seed, const cluter_show & data , bool s )
 {
     if ( data.size() < 2 )
         return ;
     int first = std::get<0>(*data.begin());
     int end = std::get<0>(*data.rbegin());
     std::cout<<seed<<"\t"<<end-first;
+    if(s)
+        std::cout<<"\t"<<first<<"\t"<<end;
     for( const auto & i : data )
     {
         std::cout<<"\t"<<std::get<0>(i)<<"-"<<std::get<1>(i)<<"("<<std::get<3>(i)<<":"<<std::get<2>(i)<<")";
@@ -176,14 +182,16 @@ void print_contigPos(const contigRef & data)
 
 int main(int argc , char ** argv)
 {
-    initLog("JOB09");
+    initLog("LinearClusterResult");
 
     START_PARSE_ARGS
     DEFINE_ARG_DETAIL(std::string , refBarcode , 'i', false , "the clusters result");
     DEFINE_ARG_DETAIL(std::string , refContig, 'c', false , "sam file . map contig to ref");
     DEFINE_ARG_DETAIL(bool , ponly, 'p', true , "If this flag setted , it will only print the postion of each contig.");
-    DEFINE_ARG_DETAIL(int , from , 'f', false , " from ");
-    DEFINE_ARG_DETAIL(int , to , 't', false , " to");
+    DEFINE_ARG_DETAIL(bool , repeat, 'r', true , "If this flag setted , it will not delete repeat contig from cluster.");
+    DEFINE_ARG_DETAIL(int , from , 'f', true, "from . default[0]");
+    DEFINE_ARG_DETAIL(int , to , 't', true, "to. default [0] , means all position is valid");
+    DEFINE_ARG_DETAIL(bool, show, 's', true, "If this flag setted , it will print total length region in column 3 , 4 .");
     END_PARSE_ARGS
 
     cluters c;
@@ -197,7 +205,7 @@ int main(int argc , char ** argv)
     loadCluterData(refBarcode.to_string(), c);
     for( const auto i : c )
     {
-        print_show(i.first, filter_repeat_in_region( get_show( i.second, r ),from.to_int() , to.to_int()));
+        print_show(i.first, filter_repeat_in_region( get_show( i.second, r ),repeat.to_bool(),from.to_int() , to.to_int()),show.to_bool());
     }
     return 0;
 }

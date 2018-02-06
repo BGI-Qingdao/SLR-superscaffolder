@@ -8,7 +8,7 @@ using namespace BGIQD::ARGS;
 
 int main()
 {
-    initLog("JOB06");
+    initLog("ContigGraphType");
     std::string line ;
     std::map<int , int> inP;
     std::map<int , int> outP;

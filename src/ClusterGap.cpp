@@ -54,7 +54,7 @@ void print_show(const std::string & line , std::map<int , int > & data )
 int main()
 {
     std::map< int , int > gaps;
-    initLog("JOB11");
+    initLog("ClusterGap");
     {
         std::string line ;
         while( !std::getline(std::cin, line).eof() )

@@ -66,11 +66,11 @@ BinCluster_o   =	${BinCluster_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 ContigTypeByRef_cpp =	ContigTypeByRef.cpp
 ContigTypeByRef_o   =	${ContigTypeByRef_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
-job_06_cpp =	job06.cpp
-job_06_o   =	${job_06_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+ContigGraphType_cpp =	ContigGraphType.cpp
+ContigGraphType_o   =	${ContigGraphType_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
-job_07_cpp =	job07.cpp
-job_07_o   =	${job_07_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+StaticsticUnique_cpp =	StaticsticUnique.cpp
+StaticsticUnique_o   =	${StaticsticUnique_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
 job_08_cpp =	job08.cpp
 job_08_o   =	${job_08_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
@@ -78,11 +78,11 @@ job_08_o   =	${job_08_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 job_09_cpp =	job09.cpp
 job_09_o   =	${job_09_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
-job_10_cpp =	job10.cpp
-job_10_o   =	${job_10_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+UnicomGraph_cpp =	UnicomGraph.cpp
+UnicomGraph_o   =	${UnicomGraph_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
-job_11_cpp =	job11.cpp
-job_11_o   =	${job_11_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+ClusterGap_cpp =	ClusterGap.cpp
+ClusterGap_o   =	${ClusterGap_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
 job_12_cpp =	job12.cpp
 job_12_o   =	${job_12_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
@@ -90,8 +90,8 @@ job_12_o   =	${job_12_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 job_13_cpp =	job13.cpp
 job_13_o   =	${job_13_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
-job_14_cpp =	job14.cpp
-job_14_o   =	${job_14_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+LinearClusterResult_cpp =	LinearClusterResult.cpp
+LinearClusterResult_o   =	${LinearClusterResult_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
 
 Sam2ReadInContig_cpp 	= Sam2ReadInContig.cpp
@@ -103,11 +103,11 @@ test_o 	   =	${test_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 .cpp.o:
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
-jobs 	   =	BarcodeOnContig FormatBarcodeOnRef BarcodeOnBin BinCluster ContigTypeByRef job06 job07 job08 job09 job10 \
-				job11 job12 job13 job14 Sam2ReadInContig
+jobs 	   =	BarcodeOnContig FormatBarcodeOnRef BarcodeOnBin BinCluster ContigTypeByRef ContigGraphType StaticsticUnique job08 job09 UnicomGraph \
+				ClusterGap job12 job13 LinearClusterResult Sam2ReadInContig
 jobs_o 	   =	${BarcodeOnContig_o} ${BarcodeOnBin_o} ${FormatBarcodeOnRef_o}  ${BinCluster_o} ${ContigTypeByRef_o}\
-				${job_06_o}  ${job_07_o} ${job_08_o} ${job_09_o}  ${job_10_o} \
-				${job_11_o} ${job_12_o} ${job_13_o} ${job_14_o} ${Sam2ReadInContig_o}
+				${ContigGraphType_o}  ${StaticsticUnique_o} ${job_08_o} ${job_09_o}  ${UnicomGraph_o} \
+				${ClusterGap_o} ${job_12_o} ${job_13_o} ${LinearClusterResult_o} ${Sam2ReadInContig_o}
 
 all : test ${jobs}
 
@@ -127,11 +127,11 @@ BinCluster : clean ${BinCluster_o}
 ContigTypeByRef : clean ${ContigTypeByRef_o}
 	${CXX} ${DEUBG_CXX} ${ContigTypeByRef_o} -o ContigTypeByRef
 
-job06 : clean ${job_06_o}
-	${CXX} ${DEUBG_CXX} ${job_06_o} -o job06
+ContigGraphType : clean ${ContigGraphType_o}
+	${CXX} ${DEUBG_CXX} ${ContigGraphType_o} -o ContigGraphType
 
-job07 : clean ${job_07_o}
-	${CXX} ${DEUBG_CXX} ${job_07_o} -o job07
+StaticsticUnique : clean ${StaticsticUnique_o}
+	${CXX} ${DEUBG_CXX} ${StaticsticUnique_o} -o StaticsticUnique
 
 job08 : clean ${job_08_o}
 	${CXX} ${DEUBG_CXX} ${job_08_o} -o job08
@@ -139,11 +139,11 @@ job08 : clean ${job_08_o}
 job09 : clean ${job_09_o}
 	${CXX} ${DEUBG_CXX} ${job_09_o} -o job09
 
-job10 : clean ${job_10_o}
-	${CXX} ${DEUBG_CXX} ${job_10_o} -o job10
+UnicomGraph : clean ${UnicomGraph_o}
+	${CXX} ${DEUBG_CXX} ${UnicomGraph_o} -o UnicomGraph
 
-job11 : clean ${job_11_o}
-	${CXX} ${DEUBG_CXX} ${job_11_o} -o job11
+ClusterGap : clean ${ClusterGap_o}
+	${CXX} ${DEUBG_CXX} ${ClusterGap_o} -o ClusterGap
 
 job12 : clean ${job_12_o}
 	${CXX} ${DEUBG_CXX} ${job_12_o} -o job12
@@ -151,8 +151,8 @@ job12 : clean ${job_12_o}
 job13 : clean ${job_13_o}
 	${CXX} ${DEUBG_CXX} ${job_13_o} -o job13
 
-job14 : clean ${job_14_o}
-	${CXX} ${DEUBG_CXX} ${job_14_o} -o job14
+LinearClusterResult : clean ${LinearClusterResult_o}
+	${CXX} ${DEUBG_CXX} ${LinearClusterResult_o} -o LinearClusterResult
 
 Sam2ReadInContig: clean ${Sam2ReadInContig_o}
 	${CXX} ${DEUBG_CXX} ${Sam2ReadInContig_o} -o Sam2ReadInContig 

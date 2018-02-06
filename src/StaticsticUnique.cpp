@@ -8,7 +8,7 @@ using namespace BGIQD::ARGS;
 
 int main()
 {
-    initLog("JOB07");
+    initLog("StatictisUnique");
     std::string line ;
     std::map<int , std::tuple<int , float , int > > contigs;
 
