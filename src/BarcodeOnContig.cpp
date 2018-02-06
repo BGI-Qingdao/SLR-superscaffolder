@@ -6,12 +6,12 @@ using namespace BGIQD::JOB01;
 
 int main(int argc , char ** argv)
 {
-    initLog("JOB01");
+    initLog("BarcodeOnContig");
 
     START_PARSE_ARGS
-    DEFINE_ARG_DETAIL(std::string , refBarcode , 'i',false," the sam file");
-    DEFINE_ARG(std::string , refContig, 'c');
-    DEFINE_ARG(std::string , output, 'o');
+    DEFINE_ARG_DETAIL(std::string , refBarcode , 'i',false,"barcodeOnRef");
+    DEFINE_ARG_DETAIL(std::string , refContig, 'c',false, "contigOnRef ");
+    DEFINE_ARG_DETAIL(std::string , output, 'o',false,"output prefix");
     END_PARSE_ARGS
 
     refBarcodeInfo ebi;

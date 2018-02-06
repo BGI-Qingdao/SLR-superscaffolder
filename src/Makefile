@@ -51,8 +51,8 @@ test_cpp   =	test.cpp\
 				biocommon/sam_bam/sam_parser_test.cpp\
 				common/args/argsparser_test.cpp\
 
-job_01_cpp =	job01.cpp
-job_01_o   =	${job_01_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+BarcodeOnContig_cpp =	BarcodeOnContig.cpp
+BarcodeOnContig_o   =	${BarcodeOnContig_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
 job_03_cpp =	job03.cpp
 job_03_o   =	${job_03_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
@@ -103,17 +103,17 @@ test_o 	   =	${test_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 .cpp.o:
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
-jobs 	   =	job01 job02 job03 job04 job05 job06 job07 job08 job09 job10 \
+jobs 	   =	BarcodeOnContig job02 job03 job04 job05 job06 job07 job08 job09 job10 \
 				job11 job12 job13 job14 Sam2ReadInContig
-jobs_o 	   =	${job_01_o} ${job_03_o} ${job_02_o}  ${job_04_o} ${job_05_o}\
+jobs_o 	   =	${BarcodeOnContig_o} ${job_03_o} ${job_02_o}  ${job_04_o} ${job_05_o}\
 				${job_06_o}  ${job_07_o} ${job_08_o} ${job_09_o}  ${job_10_o} \
 				${job_11_o} ${job_12_o} ${job_13_o} ${job_14_o} ${Sam2ReadInContig_o}
 
 all : test ${jobs}
 
 
-job01 : clean ${job_01_o}
-	${CXX} ${DEUBG_CXX} ${job_01_o} -o job01
+BarcodeOnContig : clean ${BarcodeOnContig_o}
+	${CXX} ${DEUBG_CXX} ${BarcodeOnContig_o} -o BarcodeOnContig
 	
 job02 : clean ${job_02_o}
 	${CXX} ${DEUBG_CXX} ${job_02_o} -o job02 
