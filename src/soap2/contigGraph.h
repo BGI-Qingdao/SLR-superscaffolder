@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <stack>
+#include <set>
 #include <functional>
 namespace BGIQD {
 namespace SOAP2 {
@@ -85,7 +86,6 @@ struct Connection
     virtual bool IsUniqueConnected () { return false ; }
     virtual int Level1Count() { return 0 ; }
     virtual int TotalCount() { return 0 ;}
-    unsigned int to ;
 };
 
 struct LinearConnection  : public Connection 
@@ -108,7 +108,31 @@ struct KeyEdge
     unsigned int id ;
     unsigned int edge_id ;
     int flag ;
-    std::map<unsigned int ,Connection * > connections;
+    //std::map<unsigned int ,Connection * > connections;
+    std::set<unsigned int > from ;
+    std::set<unsigned int > to;
+
+    bool IsLinear() const { return flag & 0x1 ; }
+    bool IsTipFrom() const { return flag & 0x2 ; }
+    bool IsJunction() const { return flag & 0x4 ; }
+    bool IsMarked() { return flag & 0x8 ;}
+    bool IsTipTo() const { return flag * 0x10 ; }
+    bool IsSingle() const { return flag & 0x20 ; }
+
+    void Mark() { flag |= 0x8 ; }
+    void SetType() 
+    {
+        if( from.size() == 1 && to.size() == 1 )
+            flag |= 0x1;
+        else if( from.size() == 0 && to.size() == 0 )
+            flag |= 0x20;
+        else if ( from.size() > 0 && to.size() == 0 )
+            flag |= 0x10 ;
+        else if ( from.size() == 0 && to.size() > 0 )
+            flag |= 0x2;
+        else
+            flag |= 0x4;
+    }
 };
 
 }

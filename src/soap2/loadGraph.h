@@ -10,9 +10,9 @@ namespace SOAP2 {
 
 struct GlobalConfig
 {
+    int K;
     Edge * edge_array;
     Arc * arc_array;
-    KeyEdge * key_array;
     std::string updateEdge;
     std::string arc;
     std::string cluster;
@@ -23,6 +23,11 @@ struct GlobalConfig
 
     std::map<unsigned int , std::map<unsigned int,float > > connections;
     std::set<unsigned int> keys;
+
+    KeyEdge * key_array;
+    // edge id --> key id
+    std::map<unsigned int , unsigned int> key_map;
+    std::vector<std::vector<unsigned int> > contigs;
 };
 
 //void loadContigIndex(Edge * array , GlobalConfig & config);
@@ -33,7 +38,7 @@ void loadUpdateEdge( GlobalConfig & config);
 void loadArc( GlobalConfig & config);
 void loadCluster(GlobalConfig & config);
 void buildConnection(GlobalConfig&);
-
+void LinearConnection(GlobalConfig &);
 }
 }
 #endif //__SOAP2_LOADGRAPH_H__

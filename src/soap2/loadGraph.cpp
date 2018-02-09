@@ -27,7 +27,10 @@ void loadUpdateEdge( GlobalConfig & config)
         config.edge_array[index].id = index ;
         config.edge_array[index].bal_id = index+bal;
         config.edge_array[index].cov = cov;
-        config.edge_array[index].length = length;
+        if( length > config.K )
+            config.edge_array[index].length = length;
+        else
+            config.edge_array[index].length = 0 ;
         index ++ ;
     }
     assert( index == config.contigTotalNum +1 );
@@ -81,8 +84,8 @@ void loadCluster(GlobalConfig & config)
     unsigned int to;
     float cov;
     config.connectionNum= 0;
-    // Counting arcs
     auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(config.updateEdge);
+    // load connection 
     while(!std::getline(*in,line).eof())
     {
         std::istringstream ist(line);
@@ -91,15 +94,25 @@ void loadCluster(GlobalConfig & config)
         while(! ist.eof() )
         {
             ist>>to>>cov;
-            config.connectionNum++ ;
             config.connections[contigId][to] = cov;
             config.connections[to][contigId] = cov ;
             config.keys.insert(to);
         }
     }
     delete in ;
+
+    // init keys
+    config.clusterNum = config.keys.size();
+    config.key_array =static_cast<KeyEdge*>( calloc( sizeof(KeyEdge*) , config.clusterNum +1));
+    unsigned int index = 1;
     for( const auto & i : config.keys)
+    {
         config.edge_array[i].SetKey();
+        config.key_array[index].edge_id = i;
+        config.key_array[index].id = index;
+        config.key_map[i] = index ;
+        index++;
+    }
 }
 void buildConnection(GlobalConfig & config )
 {
@@ -110,11 +123,54 @@ void buildConnection(GlobalConfig & config )
         std::map<unsigned int , std::vector<std::stack<Edge> > > paths;
         std::map<unsigned int , std::vector<std::stack<Edge> > > mids;
         config.edge_array[i].DepthSearch( config.edge_array , stack,
-                history, paths , mids ,0 , config.connections.at(i) );
+                history, paths , mids ,config.edge_array[i].length , config.connections.at(i) );
 
-        
+        for(const auto & j : paths)
+        {
+            config.key_array[i].to.insert(j.first);
+            config.key_array[j.first].from.insert(i);
+        }
     }
 }
+
+void LinearConnection(GlobalConfig &config)
+{
+    for( unsigned int i = 1 ; i< config.clusterNum +1 ; i++ )
+    {
+        KeyEdge & curr =  config.key_array[i];
+        if( curr.IsMarked() 
+            ||curr.IsLinear() 
+            || curr.IsTipTo()
+            )
+            continue;
+        if( curr.IsSingle() )
+        {
+            std::vector<unsigned int > a;
+            a.push_back(curr.edge_id) ;
+            config.contigs.push_back(a);
+            curr.Mark();
+        }
+        else
+        {
+            for(auto next : curr.to )
+            {
+                std::vector<unsigned int > path;
+                path.push_back(next) ;
+                unsigned int next_k = config.key_map[next];
+                while( config.key_array[next_k].IsLinear() )
+                {
+                    unsigned int next_i = *config.key_array[next_k].to.begin();
+                    next_k = config.key_map[next_i];
+                    path.push_back(next_i) ;
+                }
+                unsigned int next_e = *config.key_array[next_k].to.begin();
+                path.push_back(next_e) ;
+                config.contigs.push_back(path);
+            }
+        }
+    }
+}
+
 
 }
 }

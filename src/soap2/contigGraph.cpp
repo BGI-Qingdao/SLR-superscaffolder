@@ -22,7 +22,7 @@ namespace SOAP2{
             top.arc = top.arc->next;
             if( next.IsKey() )
             {
-                if(neibs.find( next.id ) != neibs.end())
+                if(neibs.find( next.id ) != neibs.end()|| neibs.find( next.bal_id) != neibs.end() )
                 {
                     paths[next.id].push_back(stack);
                     step = true;
