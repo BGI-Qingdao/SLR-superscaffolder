@@ -88,6 +88,9 @@ LinearClusterResult_o   =	${LinearClusterResult_cpp:%.cpp=%.o} ${source_cpp:%.cp
 Sam2ReadInContig_cpp 	= Sam2ReadInContig.cpp
 Sam2ReadInContig_o 	 	= ${Sam2ReadInContig_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
+MergeClusterResult_cpp	= MergeClusterResult.cpp
+MergeClusterResult_o 	= ${MergeClusterResult_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o} 
+
 test_o 	   =	${test_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
 
@@ -95,10 +98,11 @@ test_o 	   =	${test_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
 jobs 	   =	BarcodeOnContig FormatBarcodeOnRef BarcodeOnBin BinCluster ContigTypeByRef ContigGraphType StaticsticUnique  UnicomGraph \
-				ClusterGap job12 LinearClusterResult Sam2ReadInContig
+				ClusterGap job12 LinearClusterResult Sam2ReadInContig MergeClusterResult
 jobs_o 	   =	${BarcodeOnContig_o} ${BarcodeOnBin_o} ${FormatBarcodeOnRef_o}  ${BinCluster_o} ${ContigTypeByRef_o}\
 				${ContigGraphType_o}  ${StaticsticUnique_o}  ${UnicomGraph_o} \
-				${ClusterGap_o} ${job_12_o} ${LinearClusterResult_o} ${Sam2ReadInContig_o}
+				${ClusterGap_o} ${job_12_o} ${LinearClusterResult_o} ${Sam2ReadInContig_o} \
+				${MergeClusterResult_o}
 
 all : test ${jobs}
 
@@ -138,6 +142,8 @@ LinearClusterResult : clean ${LinearClusterResult_o}
 
 Sam2ReadInContig: clean ${Sam2ReadInContig_o}
 	${CXX} ${DEUBG_CXX} ${Sam2ReadInContig_o} -o Sam2ReadInContig 
+MergeClusterResult : clean ${MergeClusterResult_o}
+	${CXX} ${DEUBG_CXX} ${MergeClusterResult_o} -o MergeClusterResult
 
 test: clean ${test_o} ${source_h}
 	${CXX} ${DEUBG_CXX} ${test_o} -o test
