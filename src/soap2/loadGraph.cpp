@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sstream>
-
+#include "soap2/contigGraph.h"
 namespace BGIQD {
 namespace SOAP2 {
 
@@ -74,11 +74,47 @@ void loadArc(GlobalConfig & config)
     delete in1;
     assert(index == config.arcNum +1 );
 }
-void loadCluster(KeyEdge * array , GlobalConfig & config)
+void loadCluster(GlobalConfig & config)
 {
-    
+    std::string line;
+    unsigned int contigId;
+    unsigned int to;
+    float cov;
+    config.connectionNum= 0;
+    // Counting arcs
+    auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(config.updateEdge);
+    while(!std::getline(*in,line).eof())
+    {
+        std::istringstream ist(line);
+        ist>>contigId;
+        config.keys.insert(contigId);
+        while(! ist.eof() )
+        {
+            ist>>to>>cov;
+            config.connectionNum++ ;
+            config.connections[contigId][to] = cov;
+            config.connections[to][contigId] = cov ;
+            config.keys.insert(to);
+        }
+    }
+    delete in ;
+    for( const auto & i : config.keys)
+        config.edge_array[i].SetKey();
 }
-void buildConnection(KeyEdge * array , Edge * e_array);
+void buildConnection(GlobalConfig & config )
+{
+    for( const auto & i : config.keys)
+    {
+        std::stack<Edge> stack;
+        std::map<unsigned int , Edge > history;
+        std::map<unsigned int , std::vector<std::stack<Edge> > > paths;
+        std::map<unsigned int , std::vector<std::stack<Edge> > > mids;
+        config.edge_array[i].DepthSearch( config.edge_array , stack,
+                history, paths , mids ,0 , config.connections.at(i) );
+
+        
+    }
+}
 
 }
 }

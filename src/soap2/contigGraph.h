@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <map>
+#include <stack>
+#include <functional>
 namespace BGIQD {
 namespace SOAP2 {
 
@@ -23,12 +25,18 @@ struct Edge
     int flag ; // bits marker
     Arc * arc;
 
+    //Flag 
     bool IsDelete() const { return flag & 0x1 ; }
     bool IsRepeat() const { return flag & 0x2 ; }
     bool IsUnique() const { return flag & 0x4 ; }
     bool IsLinear() const { return flag & 0x8 ; }
     bool IsTipStart() const { return flag & 0x10 ; }
     bool IsTipEnd() const { return flag & 0x20 ; }
+    bool IsKey() const { return flag & 0x40 ; }
+    bool IsJumpStep() const { return flag & 0x80 ; }
+
+    void SetKey() { flag |= 0x40 ; }
+    void JumpStep() { flag |= 0x80 ;}
 
     static void CheckLinear( Edge & a , Edge & b_a )
     {
@@ -61,6 +69,14 @@ struct Edge
             b_a.flag |= 0x2;
         }
     }
+
+    void DepthSearch(Edge * array 
+            ,std::stack<Edge> & stack
+            ,std::map<unsigned int , Edge> & history
+            ,std::map<unsigned int , std::vector<std::stack<Edge>> > paths
+            ,std::map<unsigned int , std::vector<std::stack<Edge>> > mids 
+            ,int total_length
+            ,const std::map<unsigned int , float> & neibs);
 };
 
 struct Connection

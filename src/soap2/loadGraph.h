@@ -3,6 +3,7 @@
 
 #include <string>
 #include "soap2/contigGraph.h"
+#include <set>
 
 namespace BGIQD {
 namespace SOAP2 {
@@ -16,22 +17,22 @@ struct GlobalConfig
     std::string arc;
     std::string cluster;
     unsigned int contigTotalNum;
-    unsigned int contigNum;
     unsigned int clusterNum;
     long long arcNum;
     long long connectionNum;
 
-    std::map<unsigned int , unsigned int> connections;
+    std::map<unsigned int , std::map<unsigned int,float > > connections;
+    std::set<unsigned int> keys;
 };
 
 //void loadContigIndex(Edge * array , GlobalConfig & config);
 //void loadContig(Edge * array);
 //
 // 
-void loadUpdateEdge(Edge * array , GlobalConfig & config);
-void loadArc( Edge * array , GlobalConfig & config);
-void loadCluster(KeyEdge * array , GlobalConfig & config);
-void buildConnection(KeyEdge * array , Edge * e_array);
+void loadUpdateEdge( GlobalConfig & config);
+void loadArc( GlobalConfig & config);
+void loadCluster(GlobalConfig & config);
+void buildConnection(GlobalConfig&);
 
 }
 }
