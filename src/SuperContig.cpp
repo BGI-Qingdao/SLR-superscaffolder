@@ -2,6 +2,8 @@
 #include "soap2/loadGraph.h"
 #include <iostream>
 #include "common/args/argsparser.h"
+#include "common/log/log.h"
+#include "common/log/logfilter.h"
 
 void report(const  BGIQD::SOAP2::GlobalConfig & config)
 {
@@ -29,22 +31,30 @@ void report(const  BGIQD::SOAP2::GlobalConfig & config)
 
 int main(int argc , char **argv)
 {
-
+    BGIQD::LOG::logger lger;
+    BGIQD::LOG::logfilter::singleton().get("SuperContig",BGIQD::LOG::loglevel::INFO , lger);
+    BGIQD::LOG::timer t(lger,"SuperContig");
     START_PARSE_ARGS
     DEFINE_ARG_DETAIL(std::string , prefix, 'o',false,"prefix");
     DEFINE_ARG_DETAIL(int , kvalue, 'K',false,"K value");
     END_PARSE_ARGS
+    lger<<BGIQD::LOG::lstart()<<"parse args end ... "<<BGIQD::LOG::lend();
 
     BGIQD::SOAP2::GlobalConfig config;
     config.K = kvalue.to_int();
     config.arc = prefix.to_string() +".Arc";
-    config.updateEdge = prefix.to_string() +".update.edge";
+    config.updateEdge = prefix.to_string() +".updated.edge";
     config.cluster= prefix.to_string() +".cluster";
 
+    lger<<BGIQD::LOG::lstart()<<"loadUpdateEdge start ... "<<BGIQD::LOG::lend();
     BGIQD::SOAP2::loadUpdateEdge(config);
+    lger<<BGIQD::LOG::lstart()<<"loadArc start ... "<<BGIQD::LOG::lend();
     BGIQD::SOAP2::loadArc(config);
+    lger<<BGIQD::LOG::lstart()<<"loadCluster start ... "<<BGIQD::LOG::lend();
     BGIQD::SOAP2::loadCluster(config);
+    lger<<BGIQD::LOG::lstart()<<"buildConnection start ... "<<BGIQD::LOG::lend();
     BGIQD::SOAP2::buildConnection(config);
+    lger<<BGIQD::LOG::lstart()<<"report start ... "<<BGIQD::LOG::lend();
     report(config);
     return 0;
 }

@@ -15,7 +15,7 @@ void loadUpdateEdge( GlobalConfig & config)
     auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(config.updateEdge);
     std::string line;
     std::getline(*in,line);
-    sscanf(line.c_str(),"EDGES %u",&config.contigTotalNum);
+    sscanf(line.c_str(),"EDGEs %u",&config.contigTotalNum);
     config.edge_array = static_cast<Edge*>( calloc(sizeof(Edge) , config.contigTotalNum + 1 ));
     int length;
     int bal;
