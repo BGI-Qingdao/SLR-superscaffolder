@@ -16,6 +16,7 @@ CXXFLAGS   =	-std=c++11 -I./\
 				-I./soap2\
 				-I./stLFR\
 				-lz\
+				-lpthread\
 
 DEUBG_CXX  =	${CXXFLAGS} -g
 RELEASE_CXX=	${CXXFLAGS}

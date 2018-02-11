@@ -136,6 +136,8 @@ void buildConnection(GlobalConfig & config )
     }
 }
 
+
+
 void LinearConnection(GlobalConfig &config)
 {
     for( const auto & m : config.keys)

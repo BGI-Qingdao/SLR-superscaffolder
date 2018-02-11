@@ -39,7 +39,7 @@ namespace SOAP2{
                 }
                 continue;
             }
-            next.DepthSearch(array,stack,history,paths,mids,length + next.length,neibs);
+            next.DepthSearch(array,stack,history,paths,mids,total_length + next.length,neibs);
         }
         if(step)
             top.JumpStep();
