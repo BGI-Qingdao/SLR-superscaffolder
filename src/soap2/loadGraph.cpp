@@ -45,7 +45,7 @@ void loadArc(GlobalConfig & config)
     int cov;
     config.arcNum = 0;
     // Counting arcs
-    auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(config.updateEdge);
+    auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(config.arc);
     while(!std::getline(*in,line).eof())
     {
         std::istringstream ist(line);
@@ -57,9 +57,9 @@ void loadArc(GlobalConfig & config)
         }
     }
     delete in ;
-    config.arc_array =static_cast<Arc*>( calloc(sizeof(Arc),config.arcNum));
+    config.arc_array =static_cast<Arc*>( calloc(sizeof(Arc),config.arcNum + 1));
     long long index = 1 ;
-    auto in1 = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(config.updateEdge);
+    auto in1 = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(config.arc);
     while(!std::getline(*in1,line).eof())
     {
         std::istringstream ist(line);
@@ -84,12 +84,14 @@ void loadCluster(GlobalConfig & config)
     unsigned int to;
     float cov;
     config.connectionNum= 0;
-    auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(config.updateEdge);
+    auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(config.cluster);
     // load connection 
     while(!std::getline(*in,line).eof())
     {
         std::istringstream ist(line);
         ist>>contigId;
+        config.connections[contigId][contigId] = 1.0f;
+
         config.keys.insert(contigId);
         while(! ist.eof() )
         {
@@ -103,11 +105,12 @@ void loadCluster(GlobalConfig & config)
 
     // init keys
     config.clusterNum = config.keys.size();
-    config.key_array =static_cast<KeyEdge*>( calloc( sizeof(KeyEdge*) , config.clusterNum +1));
+    config.key_array =static_cast<KeyEdge*>( calloc( sizeof(KeyEdge) , config.clusterNum +1));
     unsigned int index = 1;
     for( const auto & i : config.keys)
     {
         config.edge_array[i].SetKey();
+        config.key_array[index] = KeyEdge();
         config.key_array[index].edge_id = i;
         config.key_array[index].id = index;
         config.key_map[i] = index ;
@@ -127,14 +130,18 @@ void buildConnection(GlobalConfig & config )
 
         for(const auto & j : paths)
         {
-            config.key_array[i].to.insert(j.first);
-            config.key_array[j.first].from.insert(i);
+            config.key_array[config.key_map[i]].to.insert(j.first);
+            config.key_array[config.key_map[j.first]].from.insert(i);
         }
     }
 }
 
 void LinearConnection(GlobalConfig &config)
 {
+    for( const auto & m : config.keys)
+    {
+        config.key_array[config.key_map[m]].SetType();
+    }
     for( unsigned int i = 1 ; i< config.clusterNum +1 ; i++ )
     {
         KeyEdge & curr =  config.key_array[i];

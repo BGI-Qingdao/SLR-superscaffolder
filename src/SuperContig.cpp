@@ -54,6 +54,8 @@ int main(int argc , char **argv)
     BGIQD::SOAP2::loadCluster(config);
     lger<<BGIQD::LOG::lstart()<<"buildConnection start ... "<<BGIQD::LOG::lend();
     BGIQD::SOAP2::buildConnection(config);
+    lger<<BGIQD::LOG::lstart()<<"linear start ... "<<BGIQD::LOG::lend();
+    BGIQD::SOAP2::LinearConnection(config);
     lger<<BGIQD::LOG::lstart()<<"report start ... "<<BGIQD::LOG::lend();
     report(config);
     return 0;

@@ -6,8 +6,8 @@ namespace SOAP2{
     void Edge::DepthSearch(Edge * array 
             ,std::stack<Edge> & stack
             ,std::map<unsigned int , Edge> & history
-            ,std::map<unsigned int , std::vector<std::stack<Edge>> > paths
-            ,std::map<unsigned int , std::vector<std::stack<Edge>> > mids 
+            ,std::map<unsigned int , std::vector<std::stack<Edge>> > & paths
+            ,std::map<unsigned int , std::vector<std::stack<Edge>> > & mids 
             ,int total_length
             ,const std::map<unsigned int , float> & neibs)
     {
