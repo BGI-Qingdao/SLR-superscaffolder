@@ -106,6 +106,7 @@ void loadCluster(GlobalConfig & config)
     // init keys
     config.clusterNum = config.keys.size();
     config.key_array =static_cast<KeyEdge*>( calloc( sizeof(KeyEdge) , config.clusterNum +1));
+    config.key_mutex = new std::mutex[config.clusterNum+1];
     unsigned int index = 1;
     for( const auto & i : config.keys)
     {

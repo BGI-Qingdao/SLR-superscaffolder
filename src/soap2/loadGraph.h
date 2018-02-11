@@ -4,6 +4,7 @@
 #include <string>
 #include "soap2/contigGraph.h"
 #include <set>
+#include <mutex>
 
 namespace BGIQD {
 namespace SOAP2 {
@@ -25,8 +26,10 @@ struct GlobalConfig
     std::set<unsigned int> keys;
 
     KeyEdge * key_array;
+    std::mutex * key_mutex;
     // edge id --> key id
     std::map<unsigned int , unsigned int> key_map;
+    std::mutex contig_mutex;
     std::vector<std::vector<unsigned int> > contigs;
 };
 

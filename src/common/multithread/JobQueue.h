@@ -27,17 +27,12 @@ namespace MultiThread{
             std::pair<bool , Job> Get()
             {
                 std::unique_lock<std::mutex> lk(m_mutex);
-                int index = 0 ;
                 while( m_queue.empty() )
                 {
                     if( end )
                         return std::make_pair(false , Job());
                     m_condition_variable.wait(lk);
-                    index ++ ;
-                    if( index > 1 )
-                    {
-                        std::cerr<<"Warning : thread waited for nothing "<<index<<std::endl;
-                    }
+                    continue ;
                 }
                 Job j =  m_queue.front();
                 m_queue.pop();
@@ -46,8 +41,11 @@ namespace MultiThread{
             }
             void End()
             {
-                std::lock_guard<std::mutex> lk(m_mutex);
-                end = true ;
+                {
+                    std::lock_guard<std::mutex> lk(m_mutex);
+                    end = true ;
+                }
+                m_condition_variable.notify_all();
             }
         private:
             std::mutex m_mutex;
