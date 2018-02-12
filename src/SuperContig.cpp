@@ -26,8 +26,15 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
     //auto set = [paths , i , &config ]()
     //{
         index ++ ;
-        for(const auto & j : paths)
+        for(auto & j : paths)
         {
+            /*std::cerr<<j.first<<'\t'<<j.second[0].size()<<'\t';
+            while(j.second[0].size() > 0 )
+            {
+                std::cerr<<j.second[0].top().id<<"\t";
+                j.second[0].pop();
+            }
+            std::cerr<<std::endl;*/
             {
                 std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[i]]);
                 config.key_array[config.key_map[i]].to.insert(j.first);

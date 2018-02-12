@@ -98,7 +98,7 @@ void loadCluster(GlobalConfig & config)
             ist>>to>>cov;
             config.connections[contigId][to] = cov;
             config.connections[to][contigId] = cov ;
-            config.keys.insert(to);
+            //config.keys.insert(to);
         }
     }
     delete in ;

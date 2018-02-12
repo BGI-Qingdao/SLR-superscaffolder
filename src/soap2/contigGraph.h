@@ -116,7 +116,7 @@ struct KeyEdge
     bool IsTipFrom() const { return flag & 0x2 ; }
     bool IsJunction() const { return flag & 0x4 ; }
     bool IsMarked() { return flag & 0x8 ;}
-    bool IsTipTo() const { return flag * 0x10 ; }
+    bool IsTipTo() const { return flag & 0x10 ; }
     bool IsSingle() const { return flag & 0x20 ; }
 
     void Mark() { flag |= 0x8 ; }
