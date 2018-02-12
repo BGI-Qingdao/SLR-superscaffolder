@@ -59,9 +59,9 @@ void linearConnection(BGIQD::SOAP2::GlobalConfig &config , unsigned int key_id)/
         return ;
     index ++ ;
     std::vector<unsigned int > path;
-    path.push_back(curr.edge_id) ;
     if( curr.IsSingle() )
     {
+        path.push_back(curr.edge_id) ;
         {
             std::lock_guard<std::mutex> lm(config.contig_mutex);
             config.contigs.push_back(path);
@@ -71,6 +71,8 @@ void linearConnection(BGIQD::SOAP2::GlobalConfig &config , unsigned int key_id)/
     {
         for(auto next : curr.to )
         {
+            path.clear();
+            path.push_back(curr.edge_id) ;
             path.push_back(next) ;
             unsigned int next_k = config.key_map[next];
             while( config.key_array[next_k].IsLinear() )
