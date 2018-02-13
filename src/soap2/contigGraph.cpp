@@ -22,12 +22,22 @@ namespace SOAP2{
             top.arc = top.arc->next;
             if( next.IsKey() )
             {
-                if(neibs.find( next.id ) != neibs.end()|| neibs.find( next.bal_id) != neibs.end() )
+                if(neibs.find( next.id ) != neibs.end() ) 
                 {
+                    stack.push(next);
                     paths[next.id].push_back(stack);
+                    stack.pop();
                     step = true;
+                    continue;
                 }
-                continue;
+                if( neibs.find( next.bal_id) != neibs.end() )
+                {
+                    stack.push(next);
+                    paths[next.bal_id].push_back(stack);
+                    stack.pop();
+                    step = true;
+                    continue;
+                }
             }
             auto itr = history.find(next.id);
             if( itr != history.end() )

@@ -109,8 +109,13 @@ struct KeyEdge
     unsigned int edge_id ;
     int flag ;
     //std::map<unsigned int ,Connection * > connections;
-    std::set<unsigned int > from ;
-    std::set<unsigned int > to;
+    //  for each edge , it has positive and reverse order.
+    //  let the small id be positice
+    //  let the bigger id be reverse
+    //  from map is the downstream of reverse order
+    //  to map is the downstream of positive order
+    std::map<unsigned int , bool > from ;
+    std::map<unsigned int , bool> to;
 
     bool IsLinear() const { return flag & 0x1 ; }
     bool IsTipFrom() const { return flag & 0x2 ; }

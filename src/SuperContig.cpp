@@ -10,21 +10,26 @@
 
 BGIQD::LOG::logger lger;
 std::atomic<int> index ;
+
+
 void findConnection(BGIQD::SOAP2::GlobalConfig & config
         , unsigned int edge_id
-        /*, BGIQD::MultiThread::MultiThread& queue*/
+        , bool order
         )
 {
+    BGIQD::SOAP2::Edge & root = config.edge_array[edge_id];
     unsigned int i = edge_id;
     std::stack<BGIQD::SOAP2::Edge> stack;
     std::map<unsigned int , BGIQD::SOAP2::Edge > history;
     std::map<unsigned int , std::vector<std::stack<BGIQD::SOAP2::Edge> > > paths;
     std::map<unsigned int , std::vector<std::stack<BGIQD::SOAP2::Edge> > > mids;
-    config.edge_array[i].DepthSearch( config.edge_array , stack,
-            history, paths , mids ,config.edge_array[i].length , config.connections.at(i) );
+    if ( order )
+        config.edge_array[i].DepthSearch( config.edge_array , stack,
+            history, paths , mids ,config.edge_array[i].length , config.connections.at(root.bal_id) );
+    else 
+        config.edge_array[i].DepthSearch( config.edge_array , stack,
+            history, paths , mids ,config.edge_array[i].length , config.connections.at(root.id) );
 
-    //auto set = [paths , i , &config ]()
-    //{
         index ++ ;
         for(auto & j : paths)
         {
@@ -35,13 +40,67 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
                 j.second[0].pop();
             }
             std::cerr<<std::endl;*/
+            unsigned int to_id = j.first ;
+            unsigned int to_id_in_path = j.second[0].top().id ;
+            //
+            //  A1->B1
+            //  A2<-B2
+            //
+            if( !order && to_id == to_id_in_path)
             {
-                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[i]]);
-                config.key_array[config.key_map[i]].to.insert(j.first);
+                {
+                    std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[i]]);
+                    config.key_array[config.key_map[i]].to[j.first]= true;
+                }
+                {
+                    std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[j.first]]);
+                    config.key_array[config.key_map[j.first]].from[(i)] = true ;
+                }
             }
+            //
+            // A1->B2
+            // A2<-B1
+            //
+            else if( !order && to_id != to_id_in_path )
             {
-                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[j.first]]);
-                config.key_array[config.key_map[j.first]].from.insert(i);
+                {
+                    std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[i]]);
+                    config.key_array[config.key_map[i]].to[j.first]= false;
+                }
+                {
+                    std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[j.first]]);
+                    config.key_array[config.key_map[j.first]].to[(i)] = false;
+                }
+            }
+            //
+            // A2->B1
+            // A1<-B2
+            //
+            else if ( order && to_id == to_id_in_path )
+            {
+                {
+                    std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[root.bal_id]]);
+                    config.key_array[config.key_map[root.bal_id]].from[j.first]= false;
+                }
+                {
+                    std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[j.first]]);
+                    config.key_array[config.key_map[j.first]].from[(root.bal_id)] = false;
+                }
+            }
+            //
+            // A2->B2
+            // A1<-B1
+            //
+            else
+            {
+                {
+                    std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[root.bal_id]]);
+                    config.key_array[config.key_map[root.bal_id]].from[j.first]= true;
+                }
+                {
+                    std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[j.first]]);
+                    config.key_array[config.key_map[j.first]].to[(root.bal_id)] = true;
+                }
             }
         }
         if( index %100 == 0 )
@@ -49,9 +108,6 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
             std::lock_guard<std::mutex> lm(config.contig_mutex);
             lger<<BGIQD::LOG::lstart()<<"process "<<index<<" ..."<<BGIQD::LOG::lend();
         }
-    //};
-
-    //queue.AddJob(set);
 }
 
 void linearConnection(BGIQD::SOAP2::GlobalConfig &config , unsigned int key_id)// , BGIQD::MultiThread::MultiThread & queue)
@@ -61,38 +117,95 @@ void linearConnection(BGIQD::SOAP2::GlobalConfig &config , unsigned int key_id)/
     BGIQD::SOAP2::KeyEdge & curr =  config.key_array[i];
     if( curr.IsMarked() 
             ||curr.IsLinear() 
-            || curr.IsTipTo()
       )
         return ;
     index ++ ;
-    std::vector<unsigned int > path;
     if( curr.IsSingle() )
     {
+        std::vector<unsigned int > path;
         path.push_back(curr.edge_id) ;
         {
             std::lock_guard<std::mutex> lm(config.contig_mutex);
             config.contigs.push_back(path);
         }
+        curr.Mark();
     }
     else
     {
-        for(auto next : curr.to )
+
+        std::vector<unsigned int > path;
+        auto extractPath = [&config,&curr,&path]( unsigned int to , bool to_order, bool search_order)
         {
             path.clear();
             path.push_back(curr.edge_id) ;
-            path.push_back(next) ;
-            unsigned int next_k = config.key_map[next];
+            path.push_back(to) ;
+            unsigned int next_k = config.key_map[to];
+            bool order = search_order;
+            bool torder = to_order;
+            if( config.key_array[next_k].IsMarked())
+                return ;
             while( config.key_array[next_k].IsLinear() )
             {
-                unsigned int next_i = *config.key_array[next_k].to.begin();
+                config.key_array[next_k].Mark();
+                unsigned int next_i;
+                //downstream
+                if( order )
+                {
+                    //
+                    //A1->B1
+                    if( torder )
+                    {
+                        auto itr = config.key_array[next_k].to.begin() ;
+                        next_i = itr->first;
+                        torder = itr->second;
+                    }
+                    //A1->B2
+                    else
+                    {
+                        auto itr = config.key_array[next_k].from.begin() ;
+                        next_i = itr->first;
+                        torder = itr->second;
+                        order = false;
+                    }
+                }
+                //upstream
+                else
+                {
+                    //A1<-B1
+                    if( torder )
+                    {
+                        auto itr = config.key_array[next_k].from.begin() ;
+                        next_i = itr->first;
+                        torder = itr->second;
+                    }
+                    //A1<-B2
+                    else
+                    {
+                        auto itr = config.key_array[next_k].to.begin() ;
+                        next_i = itr->first;
+                        torder = itr->second;
+                        order = true;
+                    }
+                }
                 next_k = config.key_map[next_i];
                 path.push_back(next_i) ;
             }
+
             {
                 std::lock_guard<std::mutex> lm(config.contig_mutex);
                 config.contigs.push_back(path);
             }
+
+        };
+        for(auto next : curr.to )
+        {
+            extractPath(next.first,next.second,true);
         }
+        for(auto next : curr.from)
+        {
+            extractPath(next.first,next.second,false);
+        }
+        curr.Mark();
     }
     if( index %100 == 0 )
     {
@@ -158,9 +271,17 @@ int main(int argc , char **argv)
         for( auto j : config.keys )
         {
             t_jobs.AddJob([&config, j](){
-                    findConnection(config,j);
+                    findConnection(config,j,false);
                     }
                     );
+            if( config.edge_array[j].id != config.edge_array[j].bal_id )
+            {
+                unsigned int k = config.edge_array[j].bal_id;
+                t_jobs.AddJob([&config, k](){
+                        findConnection(config, k,true);
+                        }
+                        );
+            }
         }
         t_jobs.End();
         t_jobs.WaitingStop();
@@ -175,7 +296,9 @@ int main(int argc , char **argv)
             config.key_array[config.key_map[m]].SetType();
         }
         BGIQD::FREQ::Freq<int> freq;
-        for( const auto & m : config.keys)
+        BGIQD::FREQ::Freq<int> from;
+        BGIQD::FREQ::Freq<int> to;
+        for( const auto & m : config.keys )
         {
             if( config.key_array[config.key_map[m]].IsSingle() )
                 freq.Touch(0);
@@ -187,8 +310,12 @@ int main(int argc , char **argv)
                 freq.Touch(1);
             else 
                 freq.Touch(3);
+            from.Touch(config.key_array[config.key_map[m]].from.size());
+            to.Touch(config.key_array[config.key_map[m]].to.size());
         }
-        std::cerr<< freq.ToString() << std::endl;
+        lger<<BGIQD::LOG::lstart()<<"key type freq"<<'\n'<< freq.ToString() << BGIQD::LOG::lend();
+        lger<<BGIQD::LOG::lstart()<<"from freq"<< '\n'<<from.ToString() << BGIQD::LOG::lend();
+        lger<<BGIQD::LOG::lstart()<<"to freq"<< '\n'<<to.ToString() << BGIQD::LOG::lend();
 
         BGIQD::MultiThread::MultiThread t_jobs;
         index = 0;

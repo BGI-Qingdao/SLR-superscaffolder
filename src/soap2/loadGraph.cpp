@@ -118,6 +118,7 @@ void loadCluster(GlobalConfig & config)
         index++;
     }
 }
+/*
 void buildConnection(GlobalConfig & config )
 {
     for( const auto & i : config.keys)
@@ -180,7 +181,7 @@ void LinearConnection(GlobalConfig &config)
         }
     }
 }
-
+*/
 
 }
 }
