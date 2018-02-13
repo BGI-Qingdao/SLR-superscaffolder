@@ -103,6 +103,18 @@ struct BubblesConnection : public Connection
     std::vector<std::vector<std::vector<int>>> all;
 };
 
+struct KeyConn
+{
+    unsigned int to;
+    int length;
+    int flag ;
+
+    bool IsPositive() const { return flag & 0x2 ; }
+    void SetPostive() { flag |= 0x2 ;}
+    bool IsJumpConn() const { return flag & 0x1 ;}
+    void SetJump() { flag |= 0x1 ; }
+};
+
 struct KeyEdge
 {
     unsigned int id ;
@@ -114,8 +126,25 @@ struct KeyEdge
     //  let the bigger id be reverse
     //  from map is the downstream of reverse order
     //  to map is the downstream of positive order
-    std::map<unsigned int , bool > from ;
-    std::map<unsigned int , bool> to;
+    std::map<unsigned int , KeyConn> from ;
+    std::map<unsigned int , KeyConn> to;
+
+    // connect ? up/down ? p/r
+    std::tuple<bool,bool,bool> Relationship(unsigned int id)
+    {
+        auto itr1 = from.find(id);
+        if(itr1 != from.end() )
+        {
+            return std::make_tuple(true , false , itr1->second.IsPositive());
+        }
+
+        auto itr2 = to.find(id);
+        if(itr2 != to.end() )
+        {
+            return std::make_tuple(true , true , itr2->second.IsPositive() );
+        }
+        return std::make_tuple(false ,false ,false);
+    }
 
     bool IsLinear() const { return flag & 0x1 ; }
     bool IsTipFrom() const { return flag & 0x2 ; }
@@ -127,13 +156,27 @@ struct KeyEdge
     void Mark() { flag |= 0x8 ; }
     void SetType() 
     {
-        if( from.size() == 1 && to.size() == 1 )
+        int from_size = 0 , to_size = 0;
+        for( const auto & i : from)
+        {
+            if( i.second.IsJumpConn() )
+                    continue;
+            from_size ++ ;
+        }
+        for( const auto & i : to)
+        {
+            if( i.second.IsJumpConn() )
+                    continue;
+            to_size ++ ;
+        }
+
+        if( from_size == 1 && to_size == 1 )
             flag |= 0x1;
-        else if( from.size() == 0 && to.size() == 0 )
+        else if( from_size == 0 && to_size == 0 )
             flag |= 0x20;
-        else if ( from.size() > 0 && to.size() == 0 )
+        else if ( from_size > 0 && to_size == 0 )
             flag |= 0x10 ;
-        else if ( from.size() == 0 && to.size() > 0 )
+        else if ( from_size == 0 && to_size > 0 )
             flag |= 0x2;
         else
             flag |= 0x4;

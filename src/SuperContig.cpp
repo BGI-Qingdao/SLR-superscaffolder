@@ -50,11 +50,16 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
             {
                 {
                     std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[i]]);
-                    config.key_array[config.key_map[i]].to[j.first]= true;
+                    BGIQD::SOAP2::KeyConn conn{j.first ,0,0};
+                    conn.SetPostive();
+                    //conn.length = 
+                    config.key_array[config.key_map[i]].to[j.first]= conn;
                 }
                 {
                     std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[j.first]]);
-                    config.key_array[config.key_map[j.first]].from[(i)] = true ;
+                    BGIQD::SOAP2::KeyConn conn{i,0,0};
+                    conn.SetPostive();
+                    config.key_array[config.key_map[j.first]].from[(i)] = conn;
                 }
             }
             //
@@ -65,11 +70,13 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
             {
                 {
                     std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[i]]);
-                    config.key_array[config.key_map[i]].to[j.first]= false;
+                    BGIQD::SOAP2::KeyConn conn{j.first,0,0};
+                    config.key_array[config.key_map[i]].to[j.first]= conn;
                 }
                 {
                     std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[j.first]]);
-                    config.key_array[config.key_map[j.first]].to[(i)] = false;
+                    BGIQD::SOAP2::KeyConn conn{i,0,0};
+                    config.key_array[config.key_map[j.first]].to[(i)] = conn;
                 }
             }
             //
@@ -80,11 +87,13 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
             {
                 {
                     std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[root.bal_id]]);
-                    config.key_array[config.key_map[root.bal_id]].from[j.first]= false;
+                    BGIQD::SOAP2::KeyConn conn{j.first,0,0};
+                    config.key_array[config.key_map[root.bal_id]].from[j.first]= conn;
                 }
                 {
                     std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[j.first]]);
-                    config.key_array[config.key_map[j.first]].from[(root.bal_id)] = false;
+                    BGIQD::SOAP2::KeyConn conn{root.bal_id,0,0};
+                    config.key_array[config.key_map[j.first]].from[(root.bal_id)] = conn;
                 }
             }
             //
@@ -95,11 +104,15 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
             {
                 {
                     std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[root.bal_id]]);
-                    config.key_array[config.key_map[root.bal_id]].from[j.first]= true;
+                    BGIQD::SOAP2::KeyConn conn{j.first,0,0};
+                    conn.SetPostive();
+                    config.key_array[config.key_map[root.bal_id]].from[j.first]= conn;
                 }
                 {
                     std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[j.first]]);
-                    config.key_array[config.key_map[j.first]].to[(root.bal_id)] = true;
+                    BGIQD::SOAP2::KeyConn conn{root.bal_id,0,0};
+                    conn.SetPostive();
+                    config.key_array[config.key_map[j.first]].to[(root.bal_id)] = conn;
                 }
             }
         }
@@ -108,6 +121,71 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
             std::lock_guard<std::mutex> lm(config.contig_mutex);
             lger<<BGIQD::LOG::lstart()<<"process "<<index<<" ..."<<BGIQD::LOG::lend();
         }
+}
+
+
+
+//
+// if 
+//  A->B->C && A->C
+// delete 
+//   A->C
+// return the number of deleted conns.
+// 
+int deleteConns(BGIQD::SOAP2::GlobalConfig &config)
+{
+    int count = 0;
+    for(size_t i = 1 ; i<= config.keys.size() ; i++)
+    {
+        auto & curr = config.key_array[config.key_map[i]];
+        if( curr.IsSingle() || curr.IsLinear() )
+            continue;
+
+        auto flush_map = [&config]( std::map<unsigned int , BGIQD::SOAP2::KeyConn> & map , bool order)
+        {
+            std::vector<BGIQD::SOAP2::KeyConn*> vecs;
+            for( auto & i: map )
+            {
+                vecs.emplace_back(&i.second);
+            }
+            for(size_t m = 0 ;m< vecs.size() ; m++ )
+            {
+                for( size_t n = m+1; n< vecs.size() ; n++ )
+                {
+                    if( m == n )
+                        continue;
+                    if( vecs[m]->IsJumpConn() && vecs[n]->IsJumpConn() ) 
+                        continue;
+                    auto & B = config.key_array[config.key_map[vecs[m]->to]];
+                    bool f1 ,f2 ,f3 ;
+                    std::tie(f1,f2,f3) = B.Relationship(vecs[n]->to) ;
+                    if( f1 )
+                        continue;
+                    // A->B->C
+                    // A<-B<-C
+                    if( !(f2 ^ order) )
+                    {
+                        vecs[n]->SetJump();
+                    }
+                    //A->C->B
+                    //A<-C<-B
+                    else
+                    {
+                        vecs[m]->SetJump();
+                    }
+                }
+            }
+        };
+        if( curr.to.size() > 1 )
+        {
+            flush_map(curr.to,true);
+        }
+        if ( curr.from.size() > 1)
+        {
+            flush_map(curr.to,false);
+        }
+    }
+    return count;
 }
 
 void linearConnection(BGIQD::SOAP2::GlobalConfig &config , unsigned int key_id)// , BGIQD::MultiThread::MultiThread & queue)
@@ -144,6 +222,15 @@ void linearConnection(BGIQD::SOAP2::GlobalConfig &config , unsigned int key_id)/
             bool torder = to_order;
             if( config.key_array[next_k].IsMarked())
                 return ;
+            auto  get_nonjump = [] ( const std::map<unsigned int , BGIQD::SOAP2::KeyConn> & map)
+            {
+                for(const auto & i : map)
+                {
+                    if( i.second.IsJumpConn() )
+                        return std::ref(i.second);
+                }
+                return std::ref(map.begin()->second);
+            };
             while( config.key_array[next_k].IsLinear() )
             {
                 config.key_array[next_k].Mark();
@@ -155,16 +242,16 @@ void linearConnection(BGIQD::SOAP2::GlobalConfig &config , unsigned int key_id)/
                     //A1->B1
                     if( torder )
                     {
-                        auto itr = config.key_array[next_k].to.begin() ;
-                        next_i = itr->first;
-                        torder = itr->second;
+                        const auto & conn  = get_nonjump(config.key_array[next_k].to ) ;
+                        next_i = conn.get().to;
+                        torder = conn.get().IsPositive();;
                     }
                     //A1->B2
                     else
                     {
-                        auto itr = config.key_array[next_k].from.begin() ;
-                        next_i = itr->first;
-                        torder = itr->second;
+                        const auto & conn  = get_nonjump(config.key_array[next_k].from) ;
+                        next_i = conn.get().to;
+                        torder = conn.get().IsPositive();;
                         order = false;
                     }
                 }
@@ -174,16 +261,16 @@ void linearConnection(BGIQD::SOAP2::GlobalConfig &config , unsigned int key_id)/
                     //A1<-B1
                     if( torder )
                     {
-                        auto itr = config.key_array[next_k].from.begin() ;
-                        next_i = itr->first;
-                        torder = itr->second;
+                        const auto & conn  = get_nonjump(config.key_array[next_k].from) ;
+                        next_i = conn.get().to;
+                        torder = conn.get().IsPositive();;
                     }
                     //A1<-B2
                     else
                     {
-                        auto itr = config.key_array[next_k].to.begin() ;
-                        next_i = itr->first;
-                        torder = itr->second;
+                        const auto & conn  = get_nonjump(config.key_array[next_k].to ) ;
+                        next_i = conn.get().to;
+                        torder = conn.get().IsPositive();;
                         order = true;
                     }
                 }
@@ -197,13 +284,17 @@ void linearConnection(BGIQD::SOAP2::GlobalConfig &config , unsigned int key_id)/
             }
 
         };
-        for(auto next : curr.to )
+        for( auto next : curr.to )
         {
-            extractPath(next.first,next.second,true);
+            if( next.second.IsJumpConn() )
+                continue;
+            extractPath(next.first,next.second.IsPositive(),true);
         }
         for(auto next : curr.from)
         {
-            extractPath(next.first,next.second,false);
+            if( next.second.IsJumpConn() )
+                continue;
+            extractPath(next.first,next.second.IsPositive(),false);
         }
         curr.Mark();
     }
@@ -295,21 +386,25 @@ int main(int argc , char **argv)
         {
             config.key_array[config.key_map[m]].SetType();
         }
-        BGIQD::FREQ::Freq<int> freq;
+        BGIQD::FREQ::Freq<std::string> freq;
         BGIQD::FREQ::Freq<int> from;
         BGIQD::FREQ::Freq<int> to;
         for( const auto & m : config.keys )
         {
             if( config.key_array[config.key_map[m]].IsSingle() )
-                freq.Touch(0);
+                freq.Touch("Single");
             else if ( config.key_array[config.key_map[m]].IsLinear() )
-                freq.Touch(2);
-            else if ( config.key_array[config.key_map[m]].IsTipTo() )
-                freq.Touch(-1);
-            else if ( config.key_array[config.key_map[m]].IsTipFrom() )
-                freq.Touch(1);
+                freq.Touch("Linear");
+            else if ( config.key_array[config.key_map[m]].IsTipTo() && config.key_array[config.key_map[m]].from.size() ==1 )
+                freq.Touch("Tipto 1");
+            else if ( config.key_array[config.key_map[m]].IsTipTo() && config.key_array[config.key_map[m]].from.size() > 1 )
+                freq.Touch("Tipto >1");
+            else if ( config.key_array[config.key_map[m]].IsTipFrom() && config.key_array[config.key_map[m]].to.size() ==1 )
+                freq.Touch("Tipfrom 1");
+            else if ( config.key_array[config.key_map[m]].IsTipFrom() && config.key_array[config.key_map[m]].to.size() > 1 )
+                freq.Touch("Tipfrom >1");
             else 
-                freq.Touch(3);
+                freq.Touch("Multi");
             from.Touch(config.key_array[config.key_map[m]].from.size());
             to.Touch(config.key_array[config.key_map[m]].to.size());
         }
@@ -319,7 +414,8 @@ int main(int argc , char **argv)
 
         BGIQD::MultiThread::MultiThread t_jobs;
         index = 0;
-        t_jobs.Start(t_num.to_int());
+        //TODO : make it thread safe
+        t_jobs.Start(1);
         for(size_t i = 1 ; i<= config.keys.size() ; i++)
         {
             t_jobs.AddJob([&config,i](){ linearConnection(config,i); });
