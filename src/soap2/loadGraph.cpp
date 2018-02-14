@@ -90,7 +90,7 @@ void loadCluster(GlobalConfig & config)
     {
         std::istringstream ist(line);
         ist>>contigId;
-        config.connections[contigId][contigId] = 1.0f;
+        //config.connections[contigId][contigId] = 1.0f;
 
         config.keys.insert(contigId);
         while(! ist.eof() )

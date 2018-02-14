@@ -156,7 +156,8 @@ struct KeyEdge
     void Mark() { flag |= 0x8 ; }
     void SetType() 
     {
-        int from_size = 0 , to_size = 0;
+        from_size = 0 ; to_size = 0;
+        total_size = 0 ;
         for( const auto & i : from)
         {
             if( i.second.IsJumpConn() )
@@ -169,7 +170,7 @@ struct KeyEdge
                     continue;
             to_size ++ ;
         }
-
+        total_size = from_size + to_size ;
         if( from_size == 1 && to_size == 1 )
             flag |= 0x1;
         else if( from_size == 0 && to_size == 0 )
@@ -181,6 +182,9 @@ struct KeyEdge
         else
             flag |= 0x4;
     }
+    int from_size ;
+    int to_size ;
+    int total_size;
 };
 
 }

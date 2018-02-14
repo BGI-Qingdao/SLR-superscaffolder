@@ -135,13 +135,11 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
 int deleteConns(BGIQD::SOAP2::GlobalConfig &config)
 {
     int count = 0;
-    for(size_t i = 1 ; i<= config.keys.size() ; i++)
+    for(auto i: config.keys)
     {
         auto & curr = config.key_array[config.key_map[i]];
-        if( curr.IsSingle() || curr.IsLinear() )
-            continue;
 
-        auto flush_map = [&config]( std::map<unsigned int , BGIQD::SOAP2::KeyConn> & map , bool order)
+        auto flush_map = [&config,&count]( std::map<unsigned int , BGIQD::SOAP2::KeyConn> & map , bool order)
         {
             std::vector<BGIQD::SOAP2::KeyConn*> vecs;
             for( auto & i: map )
@@ -154,12 +152,12 @@ int deleteConns(BGIQD::SOAP2::GlobalConfig &config)
                 {
                     if( m == n )
                         continue;
-                    if( vecs[m]->IsJumpConn() && vecs[n]->IsJumpConn() ) 
+                    if( vecs[m]->IsJumpConn() || vecs[n]->IsJumpConn() ) 
                         continue;
                     auto & B = config.key_array[config.key_map[vecs[m]->to]];
                     bool f1 ,f2 ,f3 ;
                     std::tie(f1,f2,f3) = B.Relationship(vecs[n]->to) ;
-                    if( f1 )
+                    if( ! f1 )
                         continue;
                     // A->B->C
                     // A<-B<-C
@@ -173,6 +171,7 @@ int deleteConns(BGIQD::SOAP2::GlobalConfig &config)
                     {
                         vecs[m]->SetJump();
                     }
+                    count++;
                 }
             }
         };
@@ -183,6 +182,11 @@ int deleteConns(BGIQD::SOAP2::GlobalConfig &config)
         if ( curr.from.size() > 1)
         {
             flush_map(curr.to,false);
+        }
+        index ++ ;
+        if( index % 1000 == 0 )
+        {
+            lger<<BGIQD::LOG::lstart()<<"process "<<index<<" ..."<<BGIQD::LOG::lend();
         }
     }
     return count;
@@ -231,7 +235,7 @@ void linearConnection(BGIQD::SOAP2::GlobalConfig &config , unsigned int key_id)/
                 }
                 return std::ref(map.begin()->second);
             };
-            while( config.key_array[next_k].IsLinear() )
+            while( config.key_array[next_k].IsLinear() && !config.key_array[next_k].IsMarked() )
             {
                 config.key_array[next_k].Mark();
                 unsigned int next_i;
@@ -379,6 +383,18 @@ int main(int argc , char **argv)
     }
     //lger<<BGIQD::LOG::lstart()<<"buildConnection start ... "<<BGIQD::LOG::lend();
     //BGIQD::SOAP2::buildConnection(config);
+    lger<<BGIQD::LOG::lstart()<<"deleteConn start ... "<<BGIQD::LOG::lend();
+    {
+        index = 0 ;
+        while(1)
+        {
+            int d = deleteConns(config);
+            lger<<BGIQD::LOG::lstart()<<"deleteConn delete  "<<d<<" conn"<<BGIQD::LOG::lend();
+
+            if( d == 0)
+                break;
+        }
+    }
     lger<<BGIQD::LOG::lstart()<<"linear start ... "<<BGIQD::LOG::lend();
     //BGIQD::SOAP2::LinearConnection(config);
     {
@@ -389,6 +405,7 @@ int main(int argc , char **argv)
         BGIQD::FREQ::Freq<std::string> freq;
         BGIQD::FREQ::Freq<int> from;
         BGIQD::FREQ::Freq<int> to;
+        BGIQD::FREQ::Freq<int> total;
         for( const auto & m : config.keys )
         {
             if( config.key_array[config.key_map[m]].IsSingle() )
@@ -405,8 +422,9 @@ int main(int argc , char **argv)
                 freq.Touch("Tipfrom >1");
             else 
                 freq.Touch("Multi");
-            from.Touch(config.key_array[config.key_map[m]].from.size());
-            to.Touch(config.key_array[config.key_map[m]].to.size());
+            from.Touch(config.key_array[config.key_map[m]].from_size);
+            to.Touch(config.key_array[config.key_map[m]].to_size);
+            total.Touch(config.key_array[config.key_map[m]].total_size);
         }
         lger<<BGIQD::LOG::lstart()<<"key type freq"<<'\n'<< freq.ToString() << BGIQD::LOG::lend();
         lger<<BGIQD::LOG::lstart()<<"from freq"<< '\n'<<from.ToString() << BGIQD::LOG::lend();
