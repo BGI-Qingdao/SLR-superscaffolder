@@ -152,7 +152,7 @@ int deleteConns(BGIQD::SOAP2::GlobalConfig &config)
                 {
                     if( m == n )
                         continue;
-                    if( vecs[m]->IsJumpConn() || vecs[n]->IsJumpConn() ) 
+                    if( vecs[m]->IsJumpConn() &&  vecs[n]->IsJumpConn() ) 
                         continue;
                     auto & B = config.key_array[config.key_map[vecs[m]->to]];
                     bool f1 ,f2 ,f3 ;
@@ -161,17 +161,24 @@ int deleteConns(BGIQD::SOAP2::GlobalConfig &config)
                         continue;
                     // A->B->C
                     // A<-B<-C
-                    if( !(f2 ^ order) )
+                    if( !(f2 ^ order) )  
                     {
-                        vecs[n]->SetJump();
+                        if( !vecs[n]->IsJumpConn() )
+                        {
+                            vecs[n]->SetJump();
+                            count++;
+                        }
                     }
                     //A->C->B
                     //A<-C<-B
-                    else
+                    else 
                     {
-                        vecs[m]->SetJump();
+                        if ( ! vecs[m]->IsJumpConn() )
+                        {
+                            vecs[m]->SetJump();
+                            count ++ ;
+                        }
                     }
-                    count++;
                 }
             }
         };
@@ -181,7 +188,7 @@ int deleteConns(BGIQD::SOAP2::GlobalConfig &config)
         }
         if ( curr.from.size() > 1)
         {
-            flush_map(curr.to,false);
+            flush_map(curr.from,false);
         }
         index ++ ;
         if( index % 1000 == 0 )
@@ -406,6 +413,7 @@ int main(int argc , char **argv)
         BGIQD::FREQ::Freq<int> from;
         BGIQD::FREQ::Freq<int> to;
         BGIQD::FREQ::Freq<int> total;
+        BGIQD::FREQ::Freq<int> del;
         for( const auto & m : config.keys )
         {
             if( config.key_array[config.key_map[m]].IsSingle() )
@@ -425,10 +433,13 @@ int main(int argc , char **argv)
             from.Touch(config.key_array[config.key_map[m]].from_size);
             to.Touch(config.key_array[config.key_map[m]].to_size);
             total.Touch(config.key_array[config.key_map[m]].total_size);
+            del.Touch(config.key_array[config.key_map[m]].jump_conn);
         }
         lger<<BGIQD::LOG::lstart()<<"key type freq"<<'\n'<< freq.ToString() << BGIQD::LOG::lend();
         lger<<BGIQD::LOG::lstart()<<"from freq"<< '\n'<<from.ToString() << BGIQD::LOG::lend();
         lger<<BGIQD::LOG::lstart()<<"to freq"<< '\n'<<to.ToString() << BGIQD::LOG::lend();
+        lger<<BGIQD::LOG::lstart()<<"total freq"<< '\n'<<total.ToString() << BGIQD::LOG::lend();
+        lger<<BGIQD::LOG::lstart()<<"delete freq"<< '\n'<<del.ToString() << BGIQD::LOG::lend();
 
         BGIQD::MultiThread::MultiThread t_jobs;
         index = 0;

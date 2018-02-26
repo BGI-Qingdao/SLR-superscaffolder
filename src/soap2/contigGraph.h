@@ -158,16 +158,23 @@ struct KeyEdge
     {
         from_size = 0 ; to_size = 0;
         total_size = 0 ;
+        jump_conn = 0 ;
         for( const auto & i : from)
         {
             if( i.second.IsJumpConn() )
-                    continue;
+            {
+                jump_conn ++ ;
+                continue;
+            }
             from_size ++ ;
         }
         for( const auto & i : to)
         {
             if( i.second.IsJumpConn() )
-                    continue;
+            {
+                jump_conn ++ ;
+                continue;
+            }
             to_size ++ ;
         }
         total_size = from_size + to_size ;
@@ -185,6 +192,7 @@ struct KeyEdge
     int from_size ;
     int to_size ;
     int total_size;
+    int jump_conn;
 };
 
 }
