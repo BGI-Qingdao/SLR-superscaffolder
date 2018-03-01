@@ -19,8 +19,9 @@ namespace SOAP2{
         while(top.arc)
         {
             Edge & next = array[top.arc->to];
+            Edge & next_bal = array[next.bal_id];
             top.arc = top.arc->next;
-            if( next.IsKey() )
+            if( next.IsKey() || next_bal.IsKey() )
             {
                 if(neibs.find( next.id ) != neibs.end() ) 
                 {
@@ -38,6 +39,18 @@ namespace SOAP2{
                     step = true;
                     continue;
                 }
+                continue;
+            }
+
+            auto itr1 = history.find(next.bal_id);
+            if( itr1 != history.end() )
+            {
+                if(itr1->second.IsJumpStep() )
+                {
+                    step = true;
+                    mids[next.bal_id].push_back(stack);
+                }
+                continue;
             }
             auto itr = history.find(next.id);
             if( itr != history.end() )

@@ -152,8 +152,22 @@ struct KeyEdge
     bool IsMarked() { return flag & 0x8 ;}
     bool IsTipTo() const { return flag & 0x10 ; }
     bool IsSingle() const { return flag & 0x20 ; }
+    bool IsCircle() const { return flag & 0x40 ; }
 
     void Mark() { flag |= 0x8 ; }
+
+    void CheckCircle()
+    {
+        for( const auto & f : from )
+        {
+            if( to.find(f.first) != to.end() )
+            {
+                flag |= 0x40;
+                return ;
+            }
+        }
+    }
+
     void SetType() 
     {
         from_size = 0 ; to_size = 0;
@@ -188,6 +202,7 @@ struct KeyEdge
             flag |= 0x2;
         else
             flag |= 0x4;
+        CheckCircle();
     }
     int from_size ;
     int to_size ;
