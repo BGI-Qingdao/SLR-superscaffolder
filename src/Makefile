@@ -99,6 +99,9 @@ MergeClusterResult_o 	= ${MergeClusterResult_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%
 SuperContig_cpp 		= SuperContig.cpp
 SuperContig_o			= ${SuperContig_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
+LinkCheck_cpp			= LinkCheck.cpp
+LinkCheck_o				= ${LinkCheck_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+
 test_o 	   =	${test_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
 
@@ -106,11 +109,11 @@ test_o 	   =	${test_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
 jobs 	   =	BarcodeOnContig FormatBarcodeOnRef BarcodeOnBin BinCluster ContigTypeByRef ContigGraphType StaticsticUnique  UnicomGraph \
-				ClusterGap job12 LinearClusterResult Sam2ReadInContig MergeClusterResult SuperContig
+				ClusterGap job12 LinearClusterResult Sam2ReadInContig MergeClusterResult SuperContig LinkCheck
 jobs_o 	   =	${BarcodeOnContig_o} ${BarcodeOnBin_o} ${FormatBarcodeOnRef_o}  ${BinCluster_o} ${ContigTypeByRef_o}\
 				${ContigGraphType_o}  ${StaticsticUnique_o}  ${UnicomGraph_o} \
 				${ClusterGap_o} ${job_12_o} ${LinearClusterResult_o} ${Sam2ReadInContig_o} \
-				${MergeClusterResult_o} ${SuperContig_o}
+				${MergeClusterResult_o} ${SuperContig_o} ${LinkCheck_o}
 
 all : test ${jobs}
 
@@ -156,6 +159,9 @@ MergeClusterResult : clean ${MergeClusterResult_o}
 
 SuperContig: clean ${SuperContig_o}
 	${CXX} ${DEUBG_CXX} ${SuperContig_o} -o SuperContig
+
+LinkCheck: clean ${LinkCheck_o}
+	${CXX} ${DEUBG_CXX} ${LinkCheck_o} -o LinkCheck
 
 test: clean ${test_o} ${source_h}
 	${CXX} ${DEUBG_CXX} ${test_o} -o test
