@@ -187,7 +187,8 @@ int deleteConns(BGIQD::SOAP2::GlobalConfig &config)
     for(auto i: config.keys)
     {
         auto & curr = config.key_array[config.key_map[i]];
-
+        if( curr.IsCircle() )
+            continue;
         auto flush_map = [&config,&count]( std::map<unsigned int , BGIQD::SOAP2::KeyConn> & map , bool order)
         {
             std::vector<BGIQD::SOAP2::KeyConn*> vecs;
@@ -260,23 +261,28 @@ void linearConnection(BGIQD::SOAP2::GlobalConfig &config , unsigned int key_id)/
     index ++ ;
     if( curr.IsSingle() )
     {
-        std::vector<unsigned int > path;
-        path.push_back(curr.edge_id) ;
-        {
-            std::lock_guard<std::mutex> lm(config.contig_mutex);
-            config.contigs.push_back(path);
-        }
         curr.Mark();
     }
     else
     {
-
-        std::vector<unsigned int > path;
+        BGIQD::SOAP2::ContigRoad path;
         auto extractPath = [&config,&curr,&path]( unsigned int to , bool to_order, bool search_order)
         {
-            path.clear();
-            path.push_back(curr.edge_id) ;
-            path.push_back(to) ;
+            path.contig.clear();
+            if( search_order && curr.to_size == 1 )
+            {
+                path.headin = true;
+            }
+            else if ( ! search_order && curr.from_size == 1 )
+            {
+                path.headin = true;
+            }
+            else
+            {
+                path.headin = false ;
+            }
+            path.contig.push_back(curr.edge_id) ;
+            path.contig.push_back(to) ;
             unsigned int next_k = config.key_map[to];
             bool order = search_order;
             bool torder = to_order;
@@ -335,8 +341,32 @@ void linearConnection(BGIQD::SOAP2::GlobalConfig &config , unsigned int key_id)/
                     }
                 }
                 next_k = config.key_map[next_i];
-                path.push_back(next_i) ;
+                path.contig.push_back(next_i) ;
             }
+            if( config.key_array[next_k].IsMarked() )
+                return ;
+            // line->next_k->
+            // <-next_k<-line
+            path.tailin = false;
+            if( ( torder && order ) || ( !to_order && !order ))
+            {
+                if( config.key_array[next_k].from_size == 1 )
+                {
+                    path.tailin = true;
+                }
+            }
+            else
+            {
+                if( config.key_array[next_k].to_size == 1 )
+                {
+                    path.tailin = true;
+                }
+            }
+            path.length = path.contig.size();
+            if(! path.headin )
+                path.length --;
+            if(!path.tailin )
+                path.length -- ;
 
             {
                 std::lock_guard<std::mutex> lm(config.contig_mutex);
@@ -371,8 +401,20 @@ void report(const  BGIQD::SOAP2::GlobalConfig & config)
     std::cout<<"--- Paths start  ----"<<std::endl;
     for(const auto & i : config.contigs)
     {
-        freq.Touch(i.size());
-        for( auto j : i)
+        freq.Touch(i.length);
+        if( i.headin )
+            std::cout<<'[';
+        else
+            std::cout<<'(';
+        std::cout<<*i.contig.begin()<<'\t'<<*i.contig.rbegin();
+        if( i.tailin )
+            std::cout<<']';
+        else
+            std::cout<<')';
+        std::cout<<'\t'<<i.length<<'\t';
+        std::cout<<*i.contig.begin()<<'\t'<<*i.contig.rbegin();
+
+        for( auto j : i.contig)
             std::cout<<j<<'\t';
         std::cout<<std::endl;
     }
@@ -441,6 +483,10 @@ int main(int argc , char **argv)
     }
     //lger<<BGIQD::LOG::lstart()<<"buildConnection start ... "<<BGIQD::LOG::lend();
     //BGIQD::SOAP2::buildConnection(config);
+    for( const auto & m : config.keys)
+    {
+        config.key_array[config.key_map[m]].CheckCircle();
+    }
     lger<<BGIQD::LOG::lstart()<<"deleteConn start ... "<<BGIQD::LOG::lend();
     {
         index = 0 ;
@@ -449,7 +495,7 @@ int main(int argc , char **argv)
             int d = deleteConns(config);
             lger<<BGIQD::LOG::lstart()<<"deleteConn delete  "<<d<<" conn"<<BGIQD::LOG::lend();
 
-            if( d == 0)
+            if( d == 0 )
                 break;
         }
     }
@@ -460,6 +506,7 @@ int main(int argc , char **argv)
             config.key_array[config.key_map[m]].SetType();
         }
         BGIQD::FREQ::Freq<std::string> freq;
+        BGIQD::FREQ::Freq<std::string> basefreq;
         BGIQD::FREQ::Freq<int> from;
         BGIQD::FREQ::Freq<int> to;
         BGIQD::FREQ::Freq<int> total;
@@ -470,6 +517,24 @@ int main(int argc , char **argv)
 
         for( const auto & m : config.keys )
         {
+
+            auto & curr = config.key_array[config.key_map[m]];
+            if( curr.from.size() == 0 && curr.to.size() == 0 )
+                basefreq.Touch("Single");
+            else if( curr.from.size() == 0 && curr.to.size() == 1 )
+                basefreq.Touch("Tipto 1");
+            else if( curr.from.size() == 0 && curr.to.size() > 1 )
+                basefreq.Touch("Tipto >1");
+            else if( curr.from.size() == 1 && curr.to.size() ==0 )
+                basefreq.Touch("Tipfrom 1");
+            else if( curr.from.size() > 1 && curr.to.size() ==0 )
+                basefreq.Touch("Tipfrom >1");
+            else if( curr.from.size() == 1 && curr.to.size() == 1 )
+                basefreq.Touch("Linear");
+            else
+                basefreq.Touch("Multi");
+
+
             if( config.key_array[config.key_map[m]].IsSingle() )
                 freq.Touch("Single");
             else if ( config.key_array[config.key_map[m]].IsLinear() )
@@ -492,6 +557,7 @@ int main(int argc , char **argv)
             base_to.Touch( config.key_array[config.key_map[m]].to.size());
             in_circle.Touch(config.key_array[config.key_map[m]].IsCircle());
         }
+        lger<<BGIQD::LOG::lstart()<<"base key type freq"<<'\n'<<basefreq.ToString() << BGIQD::LOG::lend();
         lger<<BGIQD::LOG::lstart()<<"key type freq"<<'\n'<< freq.ToString() << BGIQD::LOG::lend();
         lger<<BGIQD::LOG::lstart()<<"from freq"<< '\n'<<from.ToString() << BGIQD::LOG::lend();
         lger<<BGIQD::LOG::lstart()<<"to freq"<< '\n'<<to.ToString() << BGIQD::LOG::lend();

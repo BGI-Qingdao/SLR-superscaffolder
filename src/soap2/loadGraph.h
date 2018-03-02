@@ -9,6 +9,14 @@
 namespace BGIQD {
 namespace SOAP2 {
 
+struct ContigRoad
+{
+    bool headin;
+    bool tailin;
+    int length;
+    std::vector<unsigned int> contig;
+};
+
 struct GlobalConfig
 {
     int K;
@@ -33,7 +41,7 @@ struct GlobalConfig
 
     // super conitgs
     std::mutex contig_mutex;
-    std::vector<std::vector<unsigned int> > contigs;
+    std::vector<ContigRoad> contigs ;//std::vector<unsigned int> > contigs;
 };
 
 //void loadContigIndex(Edge * array , GlobalConfig & config);
