@@ -167,7 +167,6 @@ int main(int argc ,char **argv)
     START_PARSE_ARGS
     DEFINE_ARG_DETAIL(std::string , input , 'i',false,"barcodeOnBin");
     DEFINE_ARG_DETAIL(std::string , output, 'o',false,"output");
-    DEFINE_ARG_DETAIL(int , seedNum, 'n',false,"seed num");
     DEFINE_ARG_DETAIL(float , thresold, 's',false,"simularity thresold");
     END_PARSE_ARGS
 
@@ -176,11 +175,9 @@ int main(int argc ,char **argv)
     binIndexs allIndexs;
     buildBinIndexs(bbi,allIndexs);
 
-    binIndexs seedIndexs;
-    seedIndexs.insert(seedIndexs.end(),allIndexs.end() - seedNum.to_int() , allIndexs.end());
 
     std::vector< std::map< size_t ,float > > results;
-    for( const auto & seed : seedIndexs) 
+    for( const auto & seed : allIndexs) 
     {
         results.push_back(cluster(seed,allIndexs, bbi, thresold.to_float()));
     }

@@ -17,7 +17,7 @@ struct ConfigBarcodeInfo
     std::string format(unsigned int id) const 
     {
         std::ostringstream ost;
-        ost<<id<<'\t'<<length;
+        ost<<id<<'\t'<<length<<'\t';
         for( const auto & i : barcodesOnPos)
         {
             ost<<i.first<<':'<<i.second[0];
