@@ -56,6 +56,9 @@ test_cpp   =	test.cpp\
 				biocommon/sam_bam/sam_parser_test.cpp\
 				common/args/argsparser_test.cpp\
 
+BarcodeOnContig_NoRef_cpp =	BarcodeOnContig_NoRef.cpp
+BarcodeOnContig_NoRef_o   =	${BarcodeOnContig_NoRef_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+
 BarcodeOnContig_cpp =	BarcodeOnContig.cpp
 BarcodeOnContig_o   =	${BarcodeOnContig_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
@@ -108,14 +111,21 @@ test_o 	   =	${test_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 .cpp.o:
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
-jobs 	   =	BarcodeOnContig FormatBarcodeOnRef BarcodeOnBin BinCluster ContigTypeByRef ContigGraphType StaticsticUnique  UnicomGraph \
+jobs 	   =	BarcodeOnContig BarcodeOnContig_NoRef FormatBarcodeOnRef BarcodeOnBin BinCluster \
+				ContigTypeByRef ContigGraphType StaticsticUnique  UnicomGraph \
 				ClusterGap job12 LinearClusterResult Sam2ReadInContig MergeClusterResult SuperContig LinkCheck
-jobs_o 	   =	${BarcodeOnContig_o} ${BarcodeOnBin_o} ${FormatBarcodeOnRef_o}  ${BinCluster_o} ${ContigTypeByRef_o}\
+jobs_o 	   =	${BarcodeOnContig_o} ${BarcodeOnContig_NoRef_o}  ${BarcodeOnBin_o} ${FormatBarcodeOnRef_o} \
+				${BinCluster_o} ${ContigTypeByRef_o}\
 				${ContigGraphType_o}  ${StaticsticUnique_o}  ${UnicomGraph_o} \
 				${ClusterGap_o} ${job_12_o} ${LinearClusterResult_o} ${Sam2ReadInContig_o} \
 				${MergeClusterResult_o} ${SuperContig_o} ${LinkCheck_o}
 
 all : test ${jobs}
+
+
+
+BarcodeOnContig_NoRef : clean ${BarcodeOnContig_NoRef_o}
+	${CXX} ${DEUBG_CXX} ${BarcodeOnContig_NoRef_o} -o BarcodeOnContig_NoRef
 
 
 BarcodeOnContig : clean ${BarcodeOnContig_o}

@@ -249,7 +249,7 @@ logger log1;
         }
         delete in;
     }
-    
+
     void generateBinBarcodeInfo(const contigBarcodeInfo & data  , int binSize, binBarcodeInfo & d)
     {
         timer t( log1, std::string("generateBinBarcodeInfo"));

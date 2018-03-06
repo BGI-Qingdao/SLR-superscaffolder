@@ -131,7 +131,7 @@ int main(int argc , char **argv)
         {
             correct.Touch(line.size());
             if( go )
-                len.Touch(std::abs( ref_keys[ref_keys_map[line[0]]].start- ref_keys[ref_keys_map[*line.rbegin()]].end));
+                len.Touch(std::abs( ref_keys[ref_keys_map[line[0]]].start- ref_keys[ref_keys_map[*line.rbegin()]].end ));
             else
                 len.Touch(std::abs( ref_keys[ref_keys_map[line[0]]].end- ref_keys[ref_keys_map[*line.rbegin()]].start));
         }
