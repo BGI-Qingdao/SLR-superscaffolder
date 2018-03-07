@@ -17,7 +17,7 @@ struct ConfigBarcodeInfo
     std::string format(unsigned int id) const 
     {
         std::ostringstream ost;
-        ost<<id<<'\t'<<length<<'\t';
+        ost<<id<<':'<<length<<'\t';
         for( const auto & i : barcodesOnPos)
         {
             ost<<i.first<<':'<<i.second[0];
@@ -55,14 +55,17 @@ int main(int argc , char ** argv)
     DEFINE_ARG_DETAIL(std::string , seed, 's',false, "seed.txt");
     END_PARSE_ARGS
     BGIQD::LOG::logfilter::singleton().get("BarcodeOnContig_NoRef",BGIQD::LOG::loglevel::INFO,log);
+    BGIQD::LOG::timer t(log,"BarcodeOnContig_NoRef");
     BarcodeOnContig boc;
     LoadSeeds(seed.to_string() , boc);
 
     {
+        BGIQD::LOG::timer t(log,"parse all input");
         std::string line;   
         while(!std::getline(std::cin,line).eof())
         {
-            long readId , contigId, pos , barcode;
+            long readId ;
+            unsigned int contigId, pos , barcode;
             char dir;
             std::istringstream ist(line);
             ist>>readId>>contigId>>pos>>dir>>barcode;

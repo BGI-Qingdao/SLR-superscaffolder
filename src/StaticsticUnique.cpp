@@ -52,7 +52,7 @@ int main(int argc , char ** argv)
         if(cov > UniqueLow && cov < UniqueHigh && len > min.to_int() - kvalue.to_int())
         {
             index ++ ;
-            std::cout<<contig.first<<'\t'<<len<<std::endl;
+            std::cout<<contig.first<<'\t'<<len+kvalue.to_int()<<std::endl;
         }
     }
 
