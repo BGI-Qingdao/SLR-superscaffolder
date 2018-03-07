@@ -3,7 +3,7 @@
 #include "argsparser.h"
 #include <algorithm>
 #include <iostream>
-
+#include <common/multithread/MultiThread.h>
 using namespace BGIQD;
 using namespace BGIQD::JOB01;
 using namespace BGIQD::ARGS;
@@ -11,7 +11,20 @@ using namespace BGIQD::LOG;
 using namespace BGIQD::FILES;
 
 //                length  contig  sd      bin
-typedef std::tuple<size_t,size_t,size_t, size_t> binIndex;
+//typedef std::tuple<size_t,size_t,size_t, size_t> binIndex;
+
+struct binIndex
+{
+    unsigned int contig;
+    int bin;
+
+    bool operator < ( const binIndex & a ) const 
+    {
+        return contig < a.contig ? true : bin<a.bin ;
+    }
+};
+typedef std::vector<binIndex> binIndexs;
+
 typedef std::vector<binIndex> binIndexs;
 
 inline size_t min(size_t i , size_t j) 
@@ -19,17 +32,9 @@ inline size_t min(size_t i , size_t j)
     return i < j ? i : j ;
 }
 
-inline size_t sum(   const std::map<size_t , size_t> & hash)
-{
-        size_t ret = 0 ;
-        for( auto pair : hash )
-        {
-            ret += pair.second;
-        }
-        //std::cerr<<"bin size "<<ret<<std::endl;
-        return ret;
-}
-
+//
+// not thread safe . do not edit sum_cache in multi-thread
+//
 static std::map<binIndex, size_t> sum_cache;
 inline size_t sum(const  binIndex & index ,   const std::map<size_t , size_t> & hash)
 {
@@ -49,7 +54,6 @@ inline size_t sum(const  binIndex & index ,   const std::map<size_t , size_t> & 
     return itr->second;
 }
 
-static std::map< std::pair<binIndex,binIndex> , std::tuple<int,int,double> > sim_cache;
 
 inline std::tuple<int,int,double> simularity(
     const  binIndex & index1 ,
@@ -57,50 +61,36 @@ inline std::tuple<int,int,double> simularity(
     const std::map<size_t , size_t> & hash1
   , const std::map<size_t , size_t> & hash2)
 {
-    //auto itr = sim_cache.find( std::make_pair(index1,index2) );
-    //if ( itr == sim_cache.end() )
-    //{
         size_t both=0;
-        //std::cerr<<"simularity : "<<std::get<1>(index1)<<":"<<std::get<3>(index1)
-        //    <<"\t"<<std::get<1>(index2)<<":"<<std::get<3>(index2);
         for( auto pair : hash1 )
         {
             auto itr2 = hash2.find(pair.first);
             if( itr2 != hash2.end() )
             {
                 both += min( pair.second , itr2->second);
-                //std::cerr<<"\t"<<pair.first ;
             }
         }
         //std::cerr<<" -- both"<<both<<std::endl;
         size_t all = sum(index1,hash1) + sum(index2,hash2) - both;
         //std::cerr<<" -- all "<<all<<std::endl;
         double frac= double( both ) / double(all);
-        //sim_cache.emplace( std::make_pair( index1 , index2) , std::make_tuple(all,both,frac));
         return std::make_tuple(all,both,frac);
-    //}
-    //return itr->second;
 }
 
 void buildBinIndexs( const binBarcodeInfo & bbi , binIndexs & indexs)
 {
     timer t(log1,"buildBinIndexs");
-    size_t all1 = 0 , all_2 = 0;
     for( const  auto & c : bbi )
     {
-        all1 ++;
-        all_2 += c.second.size() ;
-    }
-    int mid1 = all_2/all1;
-    for( const  auto & c : bbi )
-    {
-        int mid = c.second.size() /2 ;
         for( const auto & b : c.second )
         {
-            indexs.emplace_back(3000000- abs(mid1 - (int)sum(b.second)) ,c.first, abs(int(b.first) - mid) , b.first );
+            binIndex tmp ;
+            tmp.contig = c.first;
+            tmp.bin = b.first ;
+            sum(tmp, b.second);
+            indexs.push_back(tmp);//( c.first , b.first );
         }
     }
-    std::sort(indexs.begin() , indexs.end());
 }
 
 void updateMap( std::map<size_t,float> & data , size_t key ,float i )
@@ -114,35 +104,18 @@ std::map<size_t,float>  cluster(const binIndex &seed , const binIndexs & allInde
 {
     timer t(log1,"cluster");
     std::map<size_t,float>  rets;
-    updateMap(rets, std::get<1>(seed) , 1.0f);
-    auto const & seedmap = bbi.at(std::get<1>(seed)).at(std::get<3>(seed));
-    
+    updateMap(rets, seed.contig , 1.0f);
+    auto const & seedmap = bbi.at(seed.contig).at( seed.bin) ;// std::get<1>(seed)).at(std::get<3>(seed));
+
     for ( const auto & index : allIndexs)
-    //for( const  auto & c : bbi )
     {
-        auto const & curr = bbi.at(std::get<1>(index)).at(std::get<3>(index));
-        if( index < seed ) 
+        auto const & curr = bbi.at(seed.contig).at(seed.bin);
+        auto ret = simularity( index , seed , curr , seedmap );
+        if( std::get<2>(ret) >= thresold )
         {
-            auto ret = simularity( index , seed , curr , seedmap );
-            if( std::get<2>(ret) >= thresold )
-            {
-                updateMap(rets,std::get<1>(index),std::get<2>(ret));
-            }
-        }
-        else
-        {
-            auto ret = simularity( seed , index ,  seedmap , curr );
-            if( std::get<2>(ret) >= thresold )
-            {
-                updateMap(rets,std::get<1>(index),std::get<2>(ret));
-            }
+            updateMap(rets,index.contig,std::get<2>(ret));
         }
     }
-    for( const auto p : rets )
-    {
-        std::cout<<p.first<<":"<<p.second<<"\t";
-    }
-    std::cout<<std::endl;
     return rets;
 }
 
@@ -163,12 +136,20 @@ void printClusterData(const std::string & file ,const  std::vector< std::map< si
 int main(int argc ,char **argv)
 {
     initLog("BinCluster");
-
+    timer t(log1,"binCluster");
+    int t_num = 8;
+    float thresold_f;
     START_PARSE_ARGS
     DEFINE_ARG_DETAIL(std::string , input , 'i',false,"barcodeOnBin");
     DEFINE_ARG_DETAIL(std::string , output, 'o',false,"output");
+    DEFINE_ARG_DETAIL(int , thread, 't',true,"thread num [ default 8] ");
     DEFINE_ARG_DETAIL(float , thresold, 's',false,"simularity thresold");
     END_PARSE_ARGS
+    if( thread.setted )
+    {
+       t_num = thread.to_int(); 
+    }
+    thresold_f = thresold.to_float();
 
     binBarcodeInfo bbi;
     loadBinBarcodeInfo(input.to_string() , bbi);
@@ -176,11 +157,35 @@ int main(int argc ,char **argv)
     buildBinIndexs(bbi,allIndexs);
 
 
+    std::mutex ret_mut;
     std::vector< std::map< size_t ,float > > results;
-    for( const auto & seed : allIndexs) 
+    int   index = 0;
+
+    auto cluster_job = [&results , &allIndexs ,&bbi ,
+         thresold_f,&ret_mut,&index ]
+             ( const binIndex & seed )
     {
-        results.push_back(cluster(seed,allIndexs, bbi, thresold.to_float()));
+        auto ret = cluster(seed,allIndexs,bbi,thresold_f);
+        {
+            std::lock_guard<std::mutex> l(ret_mut);
+            results.push_back(ret);
+            index ++ ;
+            if( index % 1000 == 0 )
+            {
+                log1<<BGIQD::LOG::lstart()<<"cluster "<<index<<" ... "<<BGIQD::LOG::lend();
+            }
+        }
+    };
+    BGIQD::MultiThread::MultiThread t_jobs;
+    //TODO : make it thread safe
+    t_jobs.Start(t_num);
+    for( const auto & seed : allIndexs)
+    {
+        t_jobs.AddJob(std::bind(cluster_job,seed));
     }
+    t_jobs.End();
+    t_jobs.WaitingStop();
+
     printClusterData(output.to_string(),results);
     return 0;
 }
