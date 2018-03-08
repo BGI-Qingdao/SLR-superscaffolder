@@ -20,9 +20,10 @@ struct binIndex
 
     bool operator < ( const binIndex & a ) const 
     {
-        return contig < a.contig ? true : bin<a.bin ;
+        return contig < a.contig ? true : ( contig>a.contig ?  false : bin<a.bin );
     }
 };
+
 typedef std::vector<binIndex> binIndexs;
 
 typedef std::vector<binIndex> binIndexs;
@@ -107,9 +108,9 @@ std::map<size_t,float>  cluster(const binIndex &seed , const binIndexs & allInde
     updateMap(rets, seed.contig , 1.0f);
     auto const & seedmap = bbi.at(seed.contig).at( seed.bin) ;// std::get<1>(seed)).at(std::get<3>(seed));
 
-    for ( const auto & index : allIndexs)
+    for ( const auto & index : allIndexs )
     {
-        auto const & curr = bbi.at(seed.contig).at(seed.bin);
+        auto const & curr = bbi.at(index.contig).at(index.bin);
         auto ret = simularity( index , seed , curr , seedmap );
         if( std::get<2>(ret) >= thresold )
         {
@@ -133,6 +134,7 @@ void printClusterData(const std::string & file ,const  std::vector< std::map< si
     }
     delete out;
 }
+
 int main(int argc ,char **argv)
 {
     initLog("BinCluster");
