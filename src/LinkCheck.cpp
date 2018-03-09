@@ -56,7 +56,7 @@ int main(int argc , char **argv)
         int length;
         std::istringstream ist(line);
         ist>>headin>>head>>dot>>tail>>tailin>>length;
-        if( length < 1 )
+        if( length < 2 )
             continue;
 
         if( headin == '(' )
@@ -78,7 +78,7 @@ int main(int argc , char **argv)
                 continue;
             line.push_back(next);
         }
-        
+
         auto findR = [&ref_keys, &ref_keys_map]( unsigned int from , unsigned int to )
         {
             int root = ref_keys_map[from];

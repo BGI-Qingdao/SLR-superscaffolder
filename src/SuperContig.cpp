@@ -412,7 +412,6 @@ void report(const  BGIQD::SOAP2::GlobalConfig & config)
         else
             std::cout<<')';
         std::cout<<'\t'<<i.length<<'\t';
-        std::cout<<*i.contig.begin()<<'\t'<<*i.contig.rbegin();
 
         for( auto j : i.contig)
             std::cout<<j<<'\t';

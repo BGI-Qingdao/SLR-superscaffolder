@@ -52,6 +52,8 @@ int main()
     for( const auto i : c )
     {
         int key = i.first;
+        if( i.second.empty() )
+            continue ;
         std::cout<<i.first;
         for( const auto j : i.second)
         {
