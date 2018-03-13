@@ -10,72 +10,78 @@
 namespace BGIQD {
 namespace SOAP2 {
 
+// ------------------ struct GraphEA -----------------------------------
+// ------------------global interface implement -----------------------------------
 void loadUpdateEdge( GlobalConfig & config)
 {
-    auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(config.updateEdge);
-    std::string line;
-    std::getline(*in,line);
-    sscanf(line.c_str(),"EDGEs %u",&config.contigTotalNum);
-    config.edge_array = static_cast<Edge*>( calloc(sizeof(Edge) , config.contigTotalNum + 1 ));
-    int length;
-    int bal;
-    int cov;
-    unsigned int index = 1 ;
-    while(!std::getline(*in,line).eof())
-    {
-        sscanf(line.c_str(),">length %d,%d,%d",&length,&bal,&cov);
-        config.edge_array[index].id = index ;
-        config.edge_array[index].bal_id = index+bal;
-        config.edge_array[index].cov = cov;
-        if( length > config.K )
-            config.edge_array[index].length = length;
-        else
-            config.edge_array[index].length = 0 ;
-        index ++ ;
-    }
-    assert( index == config.contigTotalNum +1 );
-    return ;
+    config.graph_ea.LoadEdge(config.updateEdge,config.K);
+    config.edge_array = config.graph_ea.edge_array;
+//    auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(config.updateEdge);
+//    std::string line;
+//    std::getline(*in,line);
+//    sscanf(line.c_str(),"EDGEs %u",&config.contigTotalNum);
+//    config.edge_array = static_cast<Edge*>( calloc(sizeof(Edge) , config.contigTotalNum + 1 ));
+//    int length;
+//    int bal;
+//    int cov;
+//    unsigned int index = 1 ;
+//    while(!std::getline(*in,line).eof())
+//    {
+//        sscanf(line.c_str(),">length %d,%d,%d",&length,&bal,&cov);
+//        config.edge_array[index].id = index ;
+//        config.edge_array[index].bal_id = index+bal;
+//        config.edge_array[index].cov = cov;
+//        if( length > config.K )
+//            config.edge_array[index].length = length;
+//        else
+//            config.edge_array[index].length = 0 ;
+//        index ++ ;
+//    }
+//    assert( index == config.contigTotalNum +1 );
+//    return ;
+
 }
 
 void loadArc(GlobalConfig & config)
 {
-    std::string line;
-    unsigned int contigId;
-    unsigned int to;
-    int cov;
-    config.arcNum = 0;
-    // Counting arcs
-    auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(config.arc);
-    while(!std::getline(*in,line).eof())
-    {
-        std::istringstream ist(line);
-        ist>>contigId;
-        while(! ist.eof() )
-        {
-            ist>>to>>cov;
-            config.arcNum ++ ;
-        }
-    }
-    delete in ;
-    config.arc_array =static_cast<Arc*>( calloc(sizeof(Arc),config.arcNum + 1));
-    long long index = 1 ;
-    auto in1 = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(config.arc);
-    while(!std::getline(*in1,line).eof())
-    {
-        std::istringstream ist(line);
-        ist>>contigId;
-        while(! ist.eof() )
-        {
-            ist>>to>>cov;
-            config.arc_array[index].to = to;
-            config.arc_array[index].cov = cov;
-            config.arc_array[index].next = config.edge_array[contigId].arc;
-            config.edge_array[contigId].arc = &config.arc_array[index];
-            index ++ ;
-        }
-    }
-    delete in1;
-    assert(index == config.arcNum +1 );
+    config.graph_ea.LoadArc(config.arc);
+//    std::string line;
+//    unsigned int contigId;
+//    unsigned int to;
+//    int cov;
+//    config.arcNum = 0;
+//    // Counting arcs
+//    auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(config.arc);
+//    while(!std::getline(*in,line).eof())
+//    {
+//        std::istringstream ist(line);
+//        ist>>contigId;
+//        while(! ist.eof() )
+//        {
+//            ist>>to>>cov;
+//            config.arcNum ++ ;
+//        }
+//    }
+//    delete in ;
+//    config.arc_array =static_cast<Arc*>( calloc(sizeof(Arc),config.arcNum + 1));
+//    long long index = 1 ;
+//    auto in1 = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(config.arc);
+//    while(!std::getline(*in1,line).eof())
+//    {
+//        std::istringstream ist(line);
+//        ist>>contigId;
+//        while(! ist.eof() )
+//        {
+//            ist>>to>>cov;
+//            config.arc_array[index].to = to;
+//            config.arc_array[index].cov = cov;
+//            config.arc_array[index].next = config.edge_array[contigId].arc;
+//            config.edge_array[contigId].arc = &config.arc_array[index];
+//            index ++ ;
+//        }
+//    }
+//    delete in1;
+//    assert(index == config.arcNum +1 );
 }
 void loadCluster(GlobalConfig & config)
 {
