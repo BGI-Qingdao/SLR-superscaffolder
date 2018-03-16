@@ -26,7 +26,7 @@ namespace BGIQD {
             //Arc * arc_array;
             //long long arcNum;
             //unsigned int contigTotalNum;
-    
+
             // base config
             int K;
             std::string updateEdge;
@@ -52,8 +52,8 @@ namespace BGIQD {
         void loadUpdateEdge( GlobalConfig & config);
         void loadArc( GlobalConfig & config);
         void loadCluster(GlobalConfig & config);
-        void buildConnection(GlobalConfig&);
-        void LinearConnection(GlobalConfig &);
+        //void buildConnection(GlobalConfig&);
+        //void LinearConnection(GlobalConfig &);
     }
 }
 #endif //__SOAP2_LOADGRAPH_H__

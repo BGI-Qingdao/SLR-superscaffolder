@@ -1,0 +1,166 @@
+#include "stLFR/barcodeOnContig.h"
+#include <cassert>
+#include <algorithm>
+#include "common/files/file_reader.h"
+#include <sstream>
+namespace BGIQD {
+    namespace stLFR {
+
+        // ---------------- P2PGraph -------------------------
+        void P2PGraph::Init( unsigned int from , unsigned int to)
+        {
+            target = to ;
+            root= from;
+            InitEdge(to);
+            InitEdge(from);
+            GraphEA_withBarcode::Union(base_graph->barcode_on_contig[from] ,base_graph->barcode_on_contig[to],root_target_union);
+        }
+
+        void P2PGraph::InitEdge( unsigned int id)
+        {
+            if(sub_graph.find(id) == sub_graph.end() )
+            {
+                auto & node = base_graph->graph_ea.edge_array[id];
+                sub_graph[id].id = id;
+                sub_graph[id].length =  node.id;
+                sub_graph[id].cov = node.cov;
+                if( id != root && id != target )
+                {
+                    BarcodeOnContig tmp;
+                    if( base_graph->barcode_on_contig.find(id)  != base_graph->barcode_on_contig.end() )
+                        sub_graph[id].barcode_cov = GraphEA_withBarcode::Union(base_graph->barcode_on_contig[id],root_target_union,tmp);
+                }
+            }
+        }
+
+        void P2PGraph::AddPath( unsigned int to, const std::vector<std::list<SOAP2::Edge> > & paths )
+        {
+            assert( root_graph.target == to ) ;
+            if ( paths.empty() )
+                return ;
+            assert ( root_graph.root== (paths[0].rbegin()->id) ) ;
+
+            for( const auto & l : paths )
+            {
+                unsigned int next = target ;
+                for( auto i = l.begin() ; i != l.end() ; i++)
+                {
+                    if( i->id == to )
+                        continue;
+                    InitEdge( i->id );
+                    //sub_graph[next].froms.insert(i->id);
+                    sub_graph[i->id].tos.insert(next);
+                }
+            }
+        }
+
+        void P2PGraph::AddMid( unsigned int to, const std::vector<std::list<SOAP2::Edge> > & paths )
+        {
+            //assert(root_graph.target == to) ;
+            if ( paths.empty() )
+                return ;
+            assert(root_graph.root== (paths[0].rbegin()->id)) ;
+
+            for( const auto & l : paths )
+            {
+                unsigned int next = to ;
+                for( auto i = l.begin() ; i != l.end() ; i++)
+                {
+                    if( i->id == to )
+                        continue;
+                    InitEdge( i->id );
+                    //sub_graph[next].froms.insert(i->id);
+                    sub_graph[i->id].tos.insert(next);
+                }
+            }
+        }
+
+        void P2PGraph::findAllPath()
+        {
+            Path p;
+            p.Init();
+            auto & node = sub_graph[root];
+            for( const auto &i : node.tos)
+            {
+                findAllPath(i, p);
+            }
+        }
+
+        void P2PGraph::findAllPath(  unsigned int id  ,Path p)
+        {
+            unsigned int curr = id;
+            while ( sub_graph[curr].tos.size() == 1 && curr != target )
+            {
+                p.AddEdge(curr,sub_graph[curr].length, sub_graph[curr].cov,sub_graph[curr].barcode_cov);
+                curr = * sub_graph[curr].tos.begin();
+            }
+
+            if ( curr == target )
+            {
+                allPaths.push_back(p);
+            }
+            else
+            {
+                assert( sub_graph[curr].tos.size() >1 );
+                p.AddEdge(curr,sub_graph[curr].length, sub_graph[curr].cov,sub_graph[curr].barcode_cov);
+                for( const auto & i : sub_graph[curr].tos )
+                {
+                    findAllPath(i ,p);
+                }
+            }
+        }
+
+        void P2PGraph::ScoreAllPath()
+        {
+            if( allPaths.size() > 1 )
+            {
+                for(auto & i : allPaths )
+                {
+                    i.CalcCov();
+                }
+                std::sort( allPaths.rbegin() ,allPaths.rend() );
+            }
+        }
+
+        void P2PGraph::CleanAndSavePath()
+        {
+            final_path = * allPaths.begin();
+            path_num = allPaths.size();
+            allPaths.clear();
+        }
+
+
+        void P2PGraph::GeneratePath()
+        {
+            findAllPath();
+            ScoreAllPath();
+            CleanAndSavePath();
+        }
+
+        ////        void P2PGraph::ConstructSubP2pGraph()
+        //       {
+        //           ConstructSubP2pGraph(root_graph);
+        //       }
+
+        void GraphEA_withBarcode::LoadBarcodeOnConfig(const std::string & file)
+        {
+            auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(file);
+            std::string line;
+            while(!std::getline(*in,line).eof())
+            {
+                long readId ;
+                unsigned int contigId, pos , barcode;
+                char dir;
+                std::istringstream ist(line);
+                ist>>readId>>contigId>>pos>>dir>>barcode;
+                if( barcode_on_contig[contigId].find(barcode)
+                        == barcode_on_contig[contigId].end())
+                    barcode_on_contig[contigId][barcode] =1 ;
+                else
+                    barcode_on_contig[contigId][barcode] ++ ;
+            }
+            delete in;
+        }
+
+    }// namespace stLFR
+}// namespace BGIQD

@@ -86,7 +86,7 @@ class MultiLine : public ILine
 class LineFactory
 {
     public:
-
+        
 };
 
 

@@ -21,64 +21,64 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
     BGIQD::SOAP2::Edge & root = config.edge_array[edge_id];
     unsigned int path_i = edge_id;
     //unsigned int base_i = order ? config.edge_array[edge_id].bal_id : edge_id ;
-    std::stack<BGIQD::SOAP2::Edge> stack;
+    std::list<BGIQD::SOAP2::Edge> stack;
     std::map<unsigned int , BGIQD::SOAP2::Edge > history;
-    std::map<unsigned int , std::vector<std::stack<BGIQD::SOAP2::Edge> > > paths;
-    std::map<unsigned int , std::vector<std::stack<BGIQD::SOAP2::Edge> > > mids;
+    std::map<unsigned int , std::vector<std::list<BGIQD::SOAP2::Edge> > > paths;
+    std::map<unsigned int , std::vector<std::list<BGIQD::SOAP2::Edge> > > mids;
     if ( order )
         config.edge_array[path_i].DepthSearch( config.edge_array , stack,
             history, paths , mids ,config.edge_array[path_i].length , config.connections.at(root.bal_id) );
     else 
         config.edge_array[path_i].DepthSearch( config.edge_array , stack,
             history, paths , mids ,config.edge_array[path_i].length , config.connections.at(root.id) );
-    if( detail )
-    {
-        for( auto const & i : paths )
-        {
-            std::cerr<<"@Path\t"<<edge_id<<'\t'<<i.first<<"\t"<<paths.size()<<std::endl;
-            for( auto j : i.second )
-            {
-                int length = 0 ;
-                std::stack<BGIQD::SOAP2::Edge> go;
-                while( !j.empty() )
-                {
-                    go.push(j.top());
-                    length+=j.top().length;
-                    j.pop();
-                }
-                std::cerr<<length;
-                while(! go.empty() )
-                {
-                    std::cerr<<go.top().id<<"\t";
-                    go.pop();
-                }
-                std::cerr<<"\n";
-            }
-        }
+    //if( detail )
+    //{
+    //    for( auto const & i : paths )
+    //    {
+    //        std::cerr<<"@Path\t"<<edge_id<<'\t'<<i.first<<"\t"<<paths.size()<<std::endl;
+    //        for( auto j : i.second )
+    //        {
+    //            int length = 0 ;
+    //            std::stack<BGIQD::SOAP2::Edge> go;
+    //            while( !j.empty() )
+    //            {
+    //                go.push(j.front());
+    //                length+=j.top().length;
+    //                j.pop();
+    //            }
+    //            std::cerr<<length;
+    //            while(! go.empty() )
+    //            {
+    //                std::cerr<<go.top().id<<"\t";
+    //                go.pop();
+    //            }
+    //            std::cerr<<"\n";
+    //        }
+    //    }
 
-        for( auto & i : mids)
-        {
-            std::cerr<<"@Mids\t"<<edge_id<<'\t'<<i.first<<"\t"<<paths.size()<<std::endl;
-            for( auto & j : i.second )
-            {
-                int length = 0 ;
-                std::stack<BGIQD::SOAP2::Edge> go;
-                while( !j.empty() )
-                {
-                    go.push(j.top());
-                    length+=j.top().length;
-                    j.pop();
-                }
-                std::cerr<<length;
-                while( go.empty() )
-                {
-                    std::cerr<<go.top().id<<"\t";
-                    go.pop();
-                }
-                std::cerr<<"\n";
-            }
-        }
-    }
+    //    for( auto & i : mids)
+    //    {
+    //        std::cerr<<"@Mids\t"<<edge_id<<'\t'<<i.first<<"\t"<<paths.size()<<std::endl;
+    //        for( auto & j : i.second )
+    //        {
+    //            int length = 0 ;
+    //            std::stack<BGIQD::SOAP2::Edge> go;
+    //            while( !j.empty() )
+    //            {
+    //                go.push(j.top());
+    //                length+=j.top().length;
+    //                j.pop();
+    //            }
+    //            std::cerr<<length;
+    //            while( go.empty() )
+    //            {
+    //                std::cerr<<go.top().id<<"\t";
+    //                go.pop();
+    //            }
+    //            std::cerr<<"\n";
+    //        }
+    //    }
+    //}
     index ++ ;
     for(auto & j : paths)
     {
@@ -90,7 +90,7 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
           }
           std::cerr<<std::endl;*/
         unsigned int to_id = j.first ;
-        unsigned int to_id_in_path = j.second[0].top().id ;
+        unsigned int to_id_in_path = j.second[0].front().id ;
         //
         //  A1->B1
         //  A2<-B2

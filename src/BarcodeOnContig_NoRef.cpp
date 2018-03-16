@@ -47,7 +47,6 @@ void LoadSeeds(const std::string & file , BarcodeOnContig & boc )
     delete in ;
 }
 
-
 int main(int argc , char ** argv)
 {
 

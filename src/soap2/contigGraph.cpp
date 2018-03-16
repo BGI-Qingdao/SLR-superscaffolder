@@ -45,17 +45,17 @@ namespace BGIQD{
         }
 
         void Edge::DepthSearch(Edge * array 
-                ,std::stack<Edge> & stack
+                ,std::list<Edge> & stack
                 ,std::map<unsigned int , Edge> & history
-                ,std::map<unsigned int , std::vector<std::stack<Edge>> > & paths
-                ,std::map<unsigned int , std::vector<std::stack<Edge>> > & mids 
+                ,std::map<unsigned int , std::vector<std::list<Edge>> > & paths
+                ,std::map<unsigned int , std::vector<std::list<Edge>> > & mids 
                 ,int total_length
                 ,const std::map<unsigned int , float> & neibs)
         {
-            if( total_length >= 1000000 || length == 0 )
+            if ( total_length >= 1000000 || length == 0 )
                 return ;
-            stack.push(*this);
-            auto & top = stack.top();
+            stack.push_front(*this);
+            auto & top = stack.front();
             bool step = false;
             while(top.arc)
             {
@@ -66,17 +66,17 @@ namespace BGIQD{
                 {
                     if(neibs.find( next.id ) != neibs.end() ) 
                     {
-                        stack.push(next);
+                        stack.push_front(next);
                         paths[next.id].push_back(stack);
-                        stack.pop();
+                        stack.pop_front();
                         step = true;
                         continue;
                     }
                     if( neibs.find( next.bal_id) != neibs.end() )
                     {
-                        stack.push(next);
+                        stack.push_front(next);
                         paths[next.bal_id].push_back(stack);
-                        stack.pop();
+                        stack.pop_front();
                         step = true;
                         continue;
                     }
@@ -114,7 +114,7 @@ namespace BGIQD{
             if(step)
                 top.JumpStep();
             history[top.id]=top;
-            stack.pop();
+            stack.pop_front();
         }
 
         // -------------------------- struct KeyEdge ------------------------------

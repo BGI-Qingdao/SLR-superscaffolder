@@ -4,17 +4,20 @@
 #include <vector>
 #include <map>
 #include <stack>
+#include <list>
 #include <set>
 #include <functional>
 namespace BGIQD {
     namespace SOAP2 {
 
+        // --------------------Graph Edge Arc --------------------
         struct Arc
         {
             unsigned int to;
             int cov;
             Arc * next ;
         };
+
 
         struct Edge
         {
@@ -45,15 +48,35 @@ namespace BGIQD {
 
             static void CheckRepeat(Edge &a , Edge &b_a );
 
+            // Depth seach with neibs
             void DepthSearch(Edge * array 
-                    ,std::stack<Edge> & stack
+                    ,std::list<Edge> & stack
                     ,std::map<unsigned int , Edge> & history
-                    ,std::map<unsigned int , std::vector<std::stack<Edge>> > &paths
-                    ,std::map<unsigned int , std::vector<std::stack<Edge>> > &mids 
+                    ,std::map<unsigned int , std::vector<std::list<Edge>> > &paths
+                    ,std::map<unsigned int , std::vector<std::list<Edge>> > &mids 
                     ,int total_length
                     ,const std::map<unsigned int , float> & neibs);
+
+
+
         };
 
+
+        // contig as vertex.
+        // arc between contig as directed edge.
+        // The Edge Arc graph of SOAPdenovo contig.
+        //
+        struct  GraphEA
+        {
+            Edge * edge_array;
+            Arc * arc_array;
+            unsigned int contigTotalNum;
+            long long arcNum;
+            void LoadEdge( const std::string & file, int K);
+            void LoadArc( const std::string & file);
+        }; // struct GraphEA
+
+        // --------------------Key Edge&Cluster --------------------
         struct KeyConn
         {
             unsigned int to;
@@ -103,44 +126,6 @@ namespace BGIQD {
             int jump_conn;
         }; // struct KeyEdge
 
-        //
-        // contig as vertex.
-        // arc between contig as directed edge.
-        // The Edge Arc graph of SOAPdenovo contig.
-        //
-        struct  GraphEA
-        {
-            Edge * edge_array;
-            Arc * arc_array;
-            unsigned int contigTotalNum;
-            long long arcNum;
-            void LoadEdge( const std::string & file, int K);
-            void LoadArc( const std::string & file);
-        }; // struct GraphEA
-
-
-        //struct Connection
-        //{
-        //    virtual bool IsConnected () { return false ; }
-        //    virtual bool IsUniqueConnected () { return false ; }
-        //    virtual int Level1Count() { return 0 ; }
-        //    virtual int TotalCount() { return 0 ;}
-        //};
-        //
-        //struct LinearConnection  : public Connection 
-        //{
-        //    std::vector<int> line;
-        //};
-        //
-        //struct BubbleConnection : public Connection
-        //{
-        //    std::vector<std::vector<int>> bubbles;
-        //};
-        //
-        //struct BubblesConnection : public Connection
-        //{
-        //    std::vector<std::vector<std::vector<int>>> all;
-        //};
 
     }//namespace SOAP2
 }//namespace BGIQD
