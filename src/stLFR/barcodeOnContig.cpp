@@ -6,6 +6,29 @@
 namespace BGIQD {
     namespace stLFR {
 
+        // ---------------- GraphEA_withBarcode----------------
+
+        int GraphEA_withBarcode::Union(const std::map<int,int> & m1 
+                    , const std::map<int,int> & m2 
+                    , std::map<int, int> & um )
+        {
+
+            int ret = 0 ;
+            for(const auto pair : m2)
+            {
+                if( m1.find( pair.first ) != m1.end() )
+                {
+                    int min = pair.second < m1.at(pair.first)
+                        ? pair.second
+                        : m1.at(pair.first) ;
+
+                    ret += min ;
+                    um[pair.first] = min ;
+                }
+                ret += pair.second;
+            }
+            return ret;
+        }
         // ---------------- P2PGraph -------------------------
         void P2PGraph::Init( unsigned int from , unsigned int to)
         {
@@ -35,10 +58,10 @@ namespace BGIQD {
 
         void P2PGraph::AddPath( unsigned int to, const std::vector<std::list<SOAP2::Edge> > & paths )
         {
-            assert( root_graph.target == to ) ;
+            assert( target == to ) ;
             if ( paths.empty() )
                 return ;
-            assert ( root_graph.root== (paths[0].rbegin()->id) ) ;
+            assert ( root== (paths[0].rbegin()->id) ) ;
 
             for( const auto & l : paths )
             {
@@ -59,7 +82,7 @@ namespace BGIQD {
             //assert(root_graph.target == to) ;
             if ( paths.empty() )
                 return ;
-            assert(root_graph.root== (paths[0].rbegin()->id)) ;
+            assert(root== (paths[0].rbegin()->id)) ;
 
             for( const auto & l : paths )
             {

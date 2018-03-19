@@ -46,9 +46,13 @@ source_cpp =	contig_barcode.cpp \
 				common/string/stringtools.cpp\
 				stLFR/barcodeId.cpp\
 				stLFR/readName2Barcode.cpp\
+				stLFR/barcodeOnContig.cpp\
+				stLFR/ContigCluster.cpp\
+				stLFR/LineGroup.cpp\
 				common/args/argsparser.cpp\
 				soap2/loadGraph.cpp\
 				soap2/contigGraph.cpp\
+
 
 test_cpp   =	test.cpp\
 				common/time/timetools_test.cpp\
@@ -105,6 +109,9 @@ SuperContig_o			= ${SuperContig_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 LinkCheck_cpp			= LinkCheck.cpp
 LinkCheck_o				= ${LinkCheck_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
+FillContigRoad_cpp		= FillContigRoad.cpp
+FillContigRoad_o 		= ${FillContigRoad_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+
 test_o 	   =	${test_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
 
@@ -113,12 +120,14 @@ test_o 	   =	${test_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
 jobs 	   =	BarcodeOnContig BarcodeOnContig_NoRef FormatBarcodeOnRef BarcodeOnBin BinCluster \
 				ContigTypeByRef ContigGraphType StaticsticUnique  UnicomGraph \
-				ClusterGap job12 LinearClusterResult Sam2ReadInContig MergeClusterResult SuperContig LinkCheck
+				ClusterGap job12 LinearClusterResult Sam2ReadInContig MergeClusterResult \
+				SuperContig LinkCheck FillContigRoad 
 jobs_o 	   =	${BarcodeOnContig_o} ${BarcodeOnContig_NoRef_o}  ${BarcodeOnBin_o} ${FormatBarcodeOnRef_o} \
 				${BinCluster_o} ${ContigTypeByRef_o}\
 				${ContigGraphType_o}  ${StaticsticUnique_o}  ${UnicomGraph_o} \
 				${ClusterGap_o} ${job_12_o} ${LinearClusterResult_o} ${Sam2ReadInContig_o} \
-				${MergeClusterResult_o} ${SuperContig_o} ${LinkCheck_o}
+				${MergeClusterResult_o} ${SuperContig_o} ${LinkCheck_o} \
+				${FillContigRoad_o}
 
 all : test ${jobs}
 
@@ -172,6 +181,10 @@ SuperContig: clean ${SuperContig_o}
 
 LinkCheck: clean ${LinkCheck_o}
 	${CXX} ${DEUBG_CXX} ${LinkCheck_o} -o LinkCheck
+
+FillContigRoad: clean ${FillContigRoad_o}
+	${CXX} ${DEUBG_CXX} ${FillContigRoad_o} -o FillContigRoad 
+
 
 test: clean ${test_o} ${source_h}
 	${CXX} ${DEUBG_CXX} ${test_o} -o test
