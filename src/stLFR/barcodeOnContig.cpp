@@ -71,8 +71,8 @@ namespace BGIQD {
                     if( i->id == to )
                         continue;
                     InitEdge( i->id );
-                    //sub_graph[next].froms.insert(i->id);
                     sub_graph[i->id].tos.insert(next);
+                    next  = i->id ;
                 }
             }
         }
@@ -92,8 +92,8 @@ namespace BGIQD {
                     if( i->id == to )
                         continue;
                     InitEdge( i->id );
-                    //sub_graph[next].froms.insert(i->id);
                     sub_graph[i->id].tos.insert(next);
+                    next  = i->id ;
                 }
             }
         }

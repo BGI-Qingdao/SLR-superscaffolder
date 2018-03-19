@@ -398,7 +398,7 @@ void linearConnection(BGIQD::SOAP2::GlobalConfig &config , unsigned int key_id)/
 void report(const  BGIQD::SOAP2::GlobalConfig & config)
 {
     BGIQD::FREQ::Freq<unsigned int > freq;
-    std::cout<<"--- Paths start  ----"<<std::endl;
+    //std::cout<<"--- Paths start  ----"<<std::endl;
     for(const auto & i : config.contigs)
     {
         freq.Touch(i.length);
@@ -417,13 +417,10 @@ void report(const  BGIQD::SOAP2::GlobalConfig & config)
             std::cout<<j<<'\t';
         std::cout<<std::endl;
     }
-    std::cout<<"--- Paths end ----"<<std::endl;
 
-    std::cout<<"clusterNum "<<config.clusterNum<<std::endl;
-    std::cout<<"pathNum "<<config.contigs.size()<<std::endl;
-    std::cout<<"--- freq start ---- "<<std::endl;
-        std::cout<<freq.ToString();
-    std::cout<<"--- freq end ---- "<<std::endl;
+    lger<<BGIQD::LOG::lstart()<<"clusterNum "<<config.clusterNum<<BGIQD::LOG::lend();
+    lger<<BGIQD::LOG::lstart()<<"pathNum "<<config.contigs.size()<<BGIQD::LOG::lend();
+    lger<<BGIQD::LOG::lstart()<<"linear length freq\n"<<freq.ToString()<<BGIQD::LOG::lend();
 }
 
 int main(int argc , char **argv)

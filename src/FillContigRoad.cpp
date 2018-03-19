@@ -118,7 +118,7 @@ DepthSearchResult SearchAllPath(unsigned int from  , unsigned int to){
         return ret;
     }
     //detect relationship
-    unsigned int true_target = ret.paths.begin()->first ;
+    unsigned int true_target = (ret.paths.begin()->second)[0].front().id;
 
     ret.true_from = search_id ;
     ret.true_to = true_target ;
@@ -157,7 +157,7 @@ void FindCorrectPath(unsigned int from , unsigned int to, const DepthSearchResul
 {
     p2pgrapg.Init(from,to);
     for( const auto & i : result.paths )
-        p2pgrapg.AddMid(i.first , i.second);
+        p2pgrapg.AddPath(to , i.second);
     for( const auto & i : result.mids )
         p2pgrapg.AddMid(i.first , i.second);
     p2pgrapg.GeneratePath();
@@ -230,7 +230,7 @@ void FillContigRoad( BGIQD::stLFR::ContigRoad & road)
                 break ;
             }
             BGIQD::stLFR::P2PGraph p2pgrapg;
-
+            p2pgrapg.base_graph = &config.graph_eab;
             FindCorrectPath(ret.true_from , ret.true_to , ret , p2pgrapg);
 
             if( fill== 0 )
@@ -264,11 +264,14 @@ int  main(int argc, char **argv)
     BGIQD::LOG::logfilter::singleton().get("SuperContig",BGIQD::LOG::loglevel::INFO , config.lger);
     BGIQD::LOG::timer t(config.lger,"SuperContig");
     START_PARSE_ARGS
-    DEFINE_ARG_DETAIL(std::string , prefix, 'o',false,"prefix");
+    DEFINE_ARG_DETAIL(std::string , prefix, 'o',false,"prefix \n \
+                                            need    xxx.Arc\n\
+                                                    xxx.updated.edge\n\
+                                                    xxx.cluster\n\
+                                                    xxx.contigroad\n\
+                                                    xxx.read2contig");
     DEFINE_ARG_DETAIL(int , kvalue, 'K',false,"K value");
     DEFINE_ARG_DETAIL(int , t_num, 't',true,"thread num . default[8]");
-    DEFINE_ARG_DETAIL(bool , super, 's',true,"super contig ? default false");
-    DEFINE_ARG_DETAIL(bool , detail, 'd',true,"print detail ? default false");
     END_PARSE_ARGS
 
     config.K = kvalue.to_int();

@@ -94,7 +94,7 @@ namespace BGIQD {
                     barcode_cov = total_barcode / total_length ;
                 }
 
-                bool operator < ( const Path & a)
+                bool operator < ( const Path & a) const
                 {
                     if( barcode_cov != a.barcode_cov )
                         return barcode_cov < a.barcode_cov ;
