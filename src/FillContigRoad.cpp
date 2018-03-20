@@ -7,7 +7,7 @@
 #include "common/log/logfilter.h"
 #include "common/multithread/MultiThread.h"
 #include "common/files/file_reader.h"
-
+#include "common/freq/freq.h"
 struct GlobalConfig
 {
     BGIQD::stLFR::GraphEA_withBarcode graph_eab;
@@ -30,7 +30,8 @@ struct GlobalConfig
             graph_eab.graph_ea.edge_array[i.first].SetKey();
         }
     }
-
+    BGIQD::FREQ::Freq<int> path_num_freq;
+    BGIQD::FREQ::Freq<std::string> road_fill_freq;
 } config;
 
 struct DepthSearchResult
@@ -190,7 +191,8 @@ bool AppendPath( const  BGIQD::stLFR::P2PGraph & p2pgrapg , const DepthSearchRes
 
 void FillContigRoad( BGIQD::stLFR::ContigRoad & road)
 {
-
+    static std::mutex write_mutex;
+    static std::mutex path_num_mutex;
     if ( ! road.needMerge() )
         return ;
 
@@ -232,7 +234,22 @@ void FillContigRoad( BGIQD::stLFR::ContigRoad & road)
             BGIQD::stLFR::P2PGraph p2pgrapg;
             p2pgrapg.base_graph = &config.graph_eab;
             FindCorrectPath(ret.true_from , ret.true_to , ret , p2pgrapg);
-
+            // check if allpath find a correct path ?
+            {
+                std::lock_guard<std::mutex> l(path_num_mutex);
+                config.path_num_freq.Touch( p2pgrapg.path_num);
+            }
+            if( p2pgrapg.path_num < 1 )
+            {
+                if( road.status  == BGIQD::stLFR::ContigRoad::FillStatus::None )
+                {
+                    continue ;
+                }
+                else
+                {
+                    break;
+                }
+            }
             if( fill== 0 )
             {
                 if( ret.head_tail )
@@ -256,6 +273,34 @@ void FillContigRoad( BGIQD::stLFR::ContigRoad & road)
         {
             road.status = BGIQD::stLFR::ContigRoad::FillStatus::Complete;
         }
+
+    }
+
+    {
+        std::lock_guard<std::mutex> l(write_mutex);
+        if (road.status == BGIQD::stLFR::ContigRoad::FillStatus::Conflict)
+        {
+            config.road_fill_freq.Touch("Conflict");
+            return;
+        }
+        if( road.status == BGIQD::stLFR::ContigRoad::FillStatus::None )
+        {
+            config.road_fill_freq.Touch("None");
+            return;
+        }
+        if (road.status == BGIQD::stLFR::ContigRoad::FillStatus::Complete)
+        {
+            config.road_fill_freq.Touch("Complete");
+        }
+        if ( road.status == BGIQD::stLFR::ContigRoad::FillStatus::PartSucc)
+        {
+            config.road_fill_freq.Touch("PartSucc");
+        }
+        for( const auto i : road.contig_path )
+        {
+            std::cout<<i<<'\t';
+        }
+        std::cout<<std::endl;
     }
 }
 
@@ -313,7 +358,11 @@ int  main(int argc, char **argv)
         t_jobs.End();
         t_jobs.WaitingStop();
     }
-    for( const auto & road :  config.roads.roads )
+
+    config.lger<<BGIQD::LOG::lstart()<<"all path freq \n"<<config.path_num_freq.ToString()<<BGIQD::LOG::lend();
+    config.lger<<BGIQD::LOG::lstart()<<"road fill freq \n"<<config.road_fill_freq.ToString()<<BGIQD::LOG::lend();
+
+    /*for( const auto & road :  config.roads.roads )
     {
         if(road.needMerge()
                 && ( road.status != BGIQD::stLFR::ContigRoad::FillStatus::Conflict 
@@ -325,6 +374,6 @@ int  main(int argc, char **argv)
             }
             std::cout<<std::endl;
         }
-    }
+    }*/
     //step2 print road ... 
 }

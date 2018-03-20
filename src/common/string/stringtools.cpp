@@ -33,5 +33,34 @@ namespace STRING{
     {
         return ltrim(rtrim(str));
     }
+
+    std::vector<std::string>  split( const std::string & str) 
+    {
+        std::vector<std::string> ret;
+        bool nb = false ;
+        size_t nb_index = 0;
+        for( size_t i = 0 ; i<str.size() ; i++ )
+        {
+            if( str[i] == ' ' || str[i] == '\n' || str[i] == '\r' || str[i] == '\t' )
+            {
+                if(nb)
+                {
+                    ret.push_back(str.substr(nb_index,i-nb_index));
+                    nb = false ;
+                }
+            }
+            else
+            {
+                if( !nb )
+                {
+                    nb =true ;
+                    nb_index = i ;
+                }
+            }
+        }
+        return ret ;
+    }
+
+
 }
 }

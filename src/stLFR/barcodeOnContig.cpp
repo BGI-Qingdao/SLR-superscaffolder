@@ -102,10 +102,21 @@ namespace BGIQD {
         {
             Path p;
             p.Init();
+            path_num = 0 ;
             auto & node = sub_graph[root];
             for( const auto &i : node.tos)
             {
                 findAllPath(i, p);
+                if( path_num < 0 )
+                    return ;
+            }
+            if( path_num < 0 )
+            {
+                allPaths.clear();
+            }
+            else
+            {
+                path_num = allPaths.size();
             }
         }
 
@@ -114,10 +125,15 @@ namespace BGIQD {
             unsigned int curr = id;
             while ( sub_graph[curr].tos.size() == 1 && curr != target )
             {
-                p.AddEdge(curr,sub_graph[curr].length, sub_graph[curr].cov,sub_graph[curr].barcode_cov);
+                if( !p.AddEdge(curr,sub_graph[curr].length, sub_graph[curr].cov,sub_graph[curr].barcode_cov) )
+                {
+                    path_num = -1 ; //circle
+                    break;
+                }
                 curr = * sub_graph[curr].tos.begin();
             }
-
+            if( path_num < 0 )
+                return ;
             if ( curr == target )
             {
                 allPaths.push_back(p);
@@ -125,17 +141,23 @@ namespace BGIQD {
             else
             {
                 assert( sub_graph[curr].tos.size() >1 );
-                p.AddEdge(curr,sub_graph[curr].length, sub_graph[curr].cov,sub_graph[curr].barcode_cov);
+                if( p.AddEdge(curr,sub_graph[curr].length, sub_graph[curr].cov,sub_graph[curr].barcode_cov) )
+                {
+                    path_num = -1 ; //circle
+                    return ;
+                }
                 for( const auto & i : sub_graph[curr].tos )
                 {
                     findAllPath(i ,p);
+                    if( path_num < 0 )
+                        return ;
                 }
             }
         }
 
         void P2PGraph::ScoreAllPath()
         {
-            if( allPaths.size() > 1 )
+            if( path_num > 1 )
             {
                 for(auto & i : allPaths )
                 {
@@ -147,9 +169,11 @@ namespace BGIQD {
 
         void P2PGraph::CleanAndSavePath()
         {
-            final_path = * allPaths.begin();
-            path_num = allPaths.size();
-            allPaths.clear();
+            if( path_num > 0 )
+            {
+                final_path = * allPaths.begin();
+                allPaths.clear();
+            }
         }
 
 

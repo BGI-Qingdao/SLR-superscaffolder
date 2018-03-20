@@ -67,6 +67,7 @@ namespace BGIQD {
             struct Path 
             {
                 std::vector<unsigned int > paths;
+                std::set<unsigned int > nodes;
                 int total_length;
                 float cov;
                 float barcode_cov ;
@@ -80,12 +81,19 @@ namespace BGIQD {
                     barcode_cov = 0;
                 }
 
-                void AddEdge( int id , int length , float cov , int barcode ) 
+                bool AddEdge( int id , int length , float cov , int barcode ) 
                 {
-                    paths.push_back(id);
-                    total_length += length ;
-                    total_cov += length * cov ;
-                    total_barcode += barcode ;
+                    if( nodes.find( id ) == nodes.end() )
+                    {
+                        paths.push_back(id);
+                        total_length += length ;
+                        total_cov += length * cov ;
+                        total_barcode += barcode ;
+                        nodes.insert(id);
+                        return true;
+                    }
+                    else
+                        return false; //circle detected.
                 }
 
                 void CalcCov()
