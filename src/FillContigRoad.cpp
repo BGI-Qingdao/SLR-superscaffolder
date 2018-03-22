@@ -69,6 +69,7 @@ DepthSearchResult SearchAllPath(unsigned int from  , unsigned int to){
     unsigned int search_id = head_id;
     unsigned int target_id = tail_id;
 
+    /*
     if( edge_array[head_id].bal_id == head_id && edge_array[tail_id].bal_id != tail_id)
     {
         ret.head_tail = !ret.head_tail ;
@@ -76,6 +77,7 @@ DepthSearchResult SearchAllPath(unsigned int from  , unsigned int to){
         search_id = tail_id;
         target_id = tmp;
     }
+    */
 
     std::list<BGIQD::SOAP2::Edge> stack;
     std::map<unsigned int , BGIQD::SOAP2::Edge > history;
@@ -84,7 +86,7 @@ DepthSearchResult SearchAllPath(unsigned int from  , unsigned int to){
     // try downstream 
     edge_array[search_id].DepthSearch(edge_array,stack,
             history, ret.paths , ret.mids ,edge_array[search_id].length , neibs);
-
+    /*
     if( ret.paths.empty() )
     {
         if( edge_array[search_id].bal_id  == search_id )
@@ -112,6 +114,7 @@ DepthSearchResult SearchAllPath(unsigned int from  , unsigned int to){
         edge_array[search_id].DepthSearch(edge_array,stack,
                 history, ret.paths , ret.mids ,edge_array[search_id].length , neibs);
     }
+    */
 
     if( ret.paths.empty() )
     {
@@ -123,6 +126,10 @@ DepthSearchResult SearchAllPath(unsigned int from  , unsigned int to){
 
     ret.true_from = search_id ;
     ret.true_to = true_target ;
+    assert( true_target == target_id );
+    ret.status = DepthSearchResult::A1B1_B2A2 ;
+
+    /*
     if(  ret.head_tail ) 
     {
         // Start from A contig
@@ -151,6 +158,7 @@ DepthSearchResult SearchAllPath(unsigned int from  , unsigned int to){
             else 
                 ret.status = DepthSearchResult::A1B1_B2A2 ;
     }
+    */
     return ret ;
 }
 
@@ -275,9 +283,12 @@ void FillContigRoad( BGIQD::stLFR::ContigRoad & road)
         }
 
     }
+}
 
+void report()
+{
+    for( const auto &road : config.roads.roads)
     {
-        std::lock_guard<std::mutex> l(write_mutex);
         if (road.status == BGIQD::stLFR::ContigRoad::FillStatus::Conflict)
         {
             config.road_fill_freq.Touch("Conflict");
@@ -359,6 +370,11 @@ int  main(int argc, char **argv)
         t_jobs.WaitingStop();
     }
 
+    config.lger<<BGIQD::LOG::lstart()<<"fill contig road end ... "<<BGIQD::LOG::lend();
+
+    report();
+
+    config.lger<<BGIQD::LOG::lstart()<<"report end ... "<<BGIQD::LOG::lend();
     config.lger<<BGIQD::LOG::lstart()<<"all path freq \n"<<config.path_num_freq.ToString()<<BGIQD::LOG::lend();
     config.lger<<BGIQD::LOG::lstart()<<"road fill freq \n"<<config.road_fill_freq.ToString()<<BGIQD::LOG::lend();
 

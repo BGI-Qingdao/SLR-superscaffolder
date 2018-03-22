@@ -270,7 +270,7 @@ void linearConnection(BGIQD::SOAP2::GlobalConfig &config , unsigned int key_id)/
         auto extractPath = [&config,&curr,&path]( unsigned int to , bool to_order, bool search_order)
         {
             path.contig.clear();
-
+            path.real_contig.clear();
             if( search_order )
             {
                 path.downstream = true ;
