@@ -256,7 +256,7 @@ void linearConnection(BGIQD::SOAP2::GlobalConfig &config , unsigned int key_id)/
     unsigned int i = key_id;
     BGIQD::SOAP2::KeyEdge & curr =  config.key_array[i];
     if( curr.IsMarked() 
-            ||curr.IsLinear() 
+            ||curr.IsLinear() || curr.IsCircle()
       )
         return ;
     index ++ ;
@@ -318,7 +318,7 @@ void linearConnection(BGIQD::SOAP2::GlobalConfig &config , unsigned int key_id)/
                 }
                 return std::ref(map.begin()->second);
             };
-            while( config.key_array[next_k].IsLinear() && !config.key_array[next_k].IsMarked() )
+            while( (! config.key_array[next_k].IsCircle())&& config.key_array[next_k].IsLinear() && !config.key_array[next_k].IsMarked() )
             {
                 config.key_array[next_k].Mark();
                 unsigned int next_i;
@@ -408,18 +408,22 @@ void linearConnection(BGIQD::SOAP2::GlobalConfig &config , unsigned int key_id)/
             // line->next_k->
             // <-next_k<-line
             path.tailin = false;
-            if( ( torder && order ) || ( !to_order && !order ))
+            if(! config.key_array[next_k].IsCircle() )
             {
-                if( config.key_array[next_k].from_size == 1 )
+
+                if( ( torder && order ) || ( !to_order && !order ))
                 {
-                    path.tailin = true;
+                    if( config.key_array[next_k].from_size == 1 )
+                    {
+                        path.tailin = true;
+                    }
                 }
-            }
-            else
-            {
-                if( config.key_array[next_k].to_size == 1 )
+                else
                 {
-                    path.tailin = true;
+                    if( config.key_array[next_k].to_size == 1 )
+                    {
+                        path.tailin = true;
+                    }
                 }
             }
             path.length = path.contig.size();
@@ -427,12 +431,10 @@ void linearConnection(BGIQD::SOAP2::GlobalConfig &config , unsigned int key_id)/
                 path.length --;
             if(!path.tailin )
                 path.length -- ;
-
             {
                 std::lock_guard<std::mutex> lm(config.contig_mutex);
                 config.contigs.push_back(path);
             }
-
         };
         for( auto next : curr.to )
         {
@@ -459,7 +461,6 @@ void report(const  BGIQD::SOAP2::GlobalConfig & config)
 {
     BGIQD::FREQ::Freq<unsigned int > freq;
 
-    auto fout= BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(config.contigroad);
 
     //std::cout<<"--- Paths start  ----"<<std::endl;
     for(const auto & i : config.contigs)
@@ -481,21 +482,21 @@ void report(const  BGIQD::SOAP2::GlobalConfig & config)
         std::cout<<std::endl;
     }
 
+    auto fout= BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(config.contigroad);
     for(const auto & i : config.contigs)
     {
+        if( i.length < 2 )
+            continue;
+        (*fout)<<i.length<<'\t';
+        int start = 1 ;
         if( i.headin )
-            (*fout)<<'[';
-        else
-            (*fout)<<'(';
-        (*fout)<<*i.real_contig.begin()<<'\t'<<*i.real_contig.rbegin();
-        if( i.tailin )
-            (*fout)<<']';
-        else
-            (*fout)<<')';
-        (*fout)<<'\t'<<i.length<<'\t';
-
-        for( auto j : i.real_contig)
-            (*fout)<<j<<'\t';
+        {
+            start --;
+        }
+        for( int j =0 ; j<i.length ; j++ )
+        {
+            (*fout)<<i.real_contig[start+j]<<"\t";
+        }
         (*fout)<<std::endl;
     }
     delete fout;
