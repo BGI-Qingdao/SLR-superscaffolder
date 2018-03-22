@@ -119,6 +119,7 @@ void loadCluster(GlobalConfig & config)
         config.edge_array[i].SetKey();
         config.key_array[index] = KeyEdge();
         config.key_array[index].edge_id = i;
+        config.key_array[index].bal_id = config.edge_array[i].bal_id;
         config.key_array[index].id = index;
         config.key_map[i] = index ;
         index++;

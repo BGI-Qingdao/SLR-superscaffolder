@@ -5,6 +5,7 @@
 #include "common/log/log.h"
 #include "common/log/logfilter.h"
 #include "common/multithread/MultiThread.h"
+#include "common/files/file_writer.h"
 #include "common/freq/freq.h"
 #include <atomic>
 
@@ -269,6 +270,18 @@ void linearConnection(BGIQD::SOAP2::GlobalConfig &config , unsigned int key_id)/
         auto extractPath = [&config,&curr,&path]( unsigned int to , bool to_order, bool search_order)
         {
             path.contig.clear();
+
+            if( search_order )
+            {
+                path.downstream = true ;
+                path.real_contig.push_back(curr.edge_id);
+            }
+            else
+            {
+                path.downstream = false ;
+                path.real_contig.push_back(curr.bal_id);
+            }
+            //detect headin
             if( search_order && curr.to_size == 1 )
             {
                 path.headin = true;
@@ -284,6 +297,14 @@ void linearConnection(BGIQD::SOAP2::GlobalConfig &config , unsigned int key_id)/
             path.contig.push_back(curr.edge_id) ;
             path.contig.push_back(to) ;
             unsigned int next_k = config.key_map[to];
+            if( search_order ^ to_order )
+            {
+                path.real_contig.push_back(config.key_array[next_k].bal_id);
+            }
+            else
+            {
+                path.real_contig.push_back(config.key_array[next_k].edge_id);
+            }
             bool order = search_order;
             bool torder = to_order;
             if( config.key_array[next_k].IsMarked())
@@ -311,6 +332,14 @@ void linearConnection(BGIQD::SOAP2::GlobalConfig &config , unsigned int key_id)/
                         const auto & conn  = get_nonjump(config.key_array[next_k].to ) ;
                         next_i = conn.get().to;
                         torder = conn.get().IsPositive();;
+                        if( torder )
+                        {
+                            path.real_contig.push_back(config.key_array[config.key_map[next_i]].edge_id );
+                        }
+                        else
+                        {
+                            path.real_contig.push_back(config.key_array[config.key_map[next_i]].bal_id);
+                        }
                     }
                     //A1->B2
                     else
@@ -318,6 +347,15 @@ void linearConnection(BGIQD::SOAP2::GlobalConfig &config , unsigned int key_id)/
                         const auto & conn  = get_nonjump(config.key_array[next_k].from) ;
                         next_i = conn.get().to;
                         torder = conn.get().IsPositive();;
+                        if( torder )
+                        {
+                            path.real_contig.push_back(config.key_array[config.key_map[next_i]].bal_id);
+                        }
+                        else
+                        {
+                            path.real_contig.push_back(config.key_array[config.key_map[next_i]].edge_id);
+                        }
+
                         order = false;
                     }
                 }
@@ -325,19 +363,41 @@ void linearConnection(BGIQD::SOAP2::GlobalConfig &config , unsigned int key_id)/
                 else
                 {
                     //A1<-B1
+                    //A2->B2
                     if( torder )
                     {
                         const auto & conn  = get_nonjump(config.key_array[next_k].from) ;
                         next_i = conn.get().to;
                         torder = conn.get().IsPositive();;
+
+                        if( torder )
+                        {
+                            path.real_contig.push_back(config.key_array[config.key_map[next_i]].bal_id);
+                        }
+                        else
+                        {
+                            path.real_contig.push_back(config.key_array[config.key_map[next_i]].edge_id);
+                        }
+
+                        order = false;
                     }
                     //A1<-B2
+                    //A2->B1
                     else
                     {
                         const auto & conn  = get_nonjump(config.key_array[next_k].to ) ;
                         next_i = conn.get().to;
                         torder = conn.get().IsPositive();;
                         order = true;
+
+                        if( torder )
+                        {
+                            path.real_contig.push_back(config.key_array[config.key_map[next_i]].edge_id);
+                        }
+                        else
+                        {
+                            path.real_contig.push_back(config.key_array[config.key_map[next_i]].bal_id);
+                        }
                     }
                 }
                 next_k = config.key_map[next_i];
@@ -398,6 +458,9 @@ void linearConnection(BGIQD::SOAP2::GlobalConfig &config , unsigned int key_id)/
 void report(const  BGIQD::SOAP2::GlobalConfig & config)
 {
     BGIQD::FREQ::Freq<unsigned int > freq;
+
+    auto fout= BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(config.contigroad);
+
     //std::cout<<"--- Paths start  ----"<<std::endl;
     for(const auto & i : config.contigs)
     {
@@ -417,6 +480,25 @@ void report(const  BGIQD::SOAP2::GlobalConfig & config)
             std::cout<<j<<'\t';
         std::cout<<std::endl;
     }
+
+    for(const auto & i : config.contigs)
+    {
+        if( i.headin )
+            (*fout)<<'[';
+        else
+            (*fout)<<'(';
+        (*fout)<<*i.real_contig.begin()<<'\t'<<*i.real_contig.rbegin();
+        if( i.tailin )
+            (*fout)<<']';
+        else
+            (*fout)<<')';
+        (*fout)<<'\t'<<i.length<<'\t';
+
+        for( auto j : i.real_contig)
+            (*fout)<<j<<'\t';
+        (*fout)<<std::endl;
+    }
+    delete fout;
 
     lger<<BGIQD::LOG::lstart()<<"clusterNum "<<config.clusterNum<<BGIQD::LOG::lend();
     lger<<BGIQD::LOG::lstart()<<"pathNum "<<config.contigs.size()<<BGIQD::LOG::lend();
@@ -446,6 +528,7 @@ int main(int argc , char **argv)
     config.arc = prefix.to_string() +".Arc";
     config.updateEdge = prefix.to_string() +".updated.edge";
     config.cluster= prefix.to_string() +".cluster";
+    config.contigroad =  prefix.to_string() +".contigroad";
 
     lger<<BGIQD::LOG::lstart()<<"loadUpdateEdge start ... "<<BGIQD::LOG::lend();
     BGIQD::SOAP2::loadUpdateEdge(config);

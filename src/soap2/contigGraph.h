@@ -93,6 +93,7 @@ namespace BGIQD {
         {
             unsigned int id ;
             unsigned int edge_id ;
+            unsigned int bal_id;
             int flag ;
             //std::map<unsigned int ,Connection * > connections;
             //  for each edge , it has positive and reverse order.

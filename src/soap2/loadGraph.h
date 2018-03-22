@@ -14,7 +14,9 @@ namespace BGIQD {
             bool headin;
             bool tailin;
             int length;
+            bool downstream;
             std::vector<unsigned int> contig;
+            std::vector<unsigned int> real_contig;
         };
 
 
@@ -32,7 +34,7 @@ namespace BGIQD {
             std::string updateEdge;
             std::string arc;
             std::string cluster;
-
+            std::string contigroad;
             // cluster(key) data
             unsigned int clusterNum;
             std::set<unsigned int> keys;
