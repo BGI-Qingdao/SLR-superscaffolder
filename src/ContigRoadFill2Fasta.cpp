@@ -280,6 +280,7 @@ int main(int argc , char ** argv)
 
     std::string line;
 
+    std::set<unsigned int> allused;
     while(!std::getline(std::cin,line).eof())
     {
         auto items = BGIQD::STRING::split(line,"\t");
@@ -290,7 +291,6 @@ int main(int argc , char ** argv)
         }
         else
         {
-            std::set<unsigned int> allused;
             for( const auto i : items )
             {
                 unsigned int id =std::stoul(i);
@@ -303,10 +303,13 @@ int main(int argc , char ** argv)
                     allused.insert(id-1);
                 }
             }
-            for( const auto i : allused)
-            {
-                std::cout<<config.contigs[i].ToString()<<std::endl;
-            }
+        }
+    }
+    if( use.to_bool() )
+    {
+        for( const auto i : allused)
+        {
+            std::cout<<config.contigs[i].ToString()<<std::endl;
         }
     }
     if( left.to_bool() )
