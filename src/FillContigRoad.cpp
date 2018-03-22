@@ -277,11 +277,37 @@ void FillContigRoad( BGIQD::stLFR::ContigRoad & road)
             road.status = BGIQD::stLFR::ContigRoad::FillStatus::PartSucc ;
             fill ++ ;
         }
-        if ( fill == road.linear_length - 1 )
-        {
-            road.status = BGIQD::stLFR::ContigRoad::FillStatus::Complete;
-        }
+    }
 
+    if ( fill == road.linear_length - 1 )
+    {
+        road.status = BGIQD::stLFR::ContigRoad::FillStatus::Complete;
+    }
+    {
+        std::lock_guard<std::mutex> l(write_mutex);
+        if (road.status == BGIQD::stLFR::ContigRoad::FillStatus::Conflict)
+        {
+            config.road_fill_freq.Touch("Conflict");
+            return;
+        }
+        if( road.status == BGIQD::stLFR::ContigRoad::FillStatus::None )
+        {
+            config.road_fill_freq.Touch("None");
+            return;
+        }
+        if (road.status == BGIQD::stLFR::ContigRoad::FillStatus::Complete)
+        {
+            config.road_fill_freq.Touch("Complete");
+        }
+        if ( road.status == BGIQD::stLFR::ContigRoad::FillStatus::PartSucc)
+        {
+            config.road_fill_freq.Touch("PartSucc");
+        }
+        for( const auto i : road.contig_path )
+        {
+            std::cout<<i<<'\t';
+        }
+        std::cout<<std::endl;
     }
 }
 
@@ -372,7 +398,7 @@ int  main(int argc, char **argv)
 
     config.lger<<BGIQD::LOG::lstart()<<"fill contig road end ... "<<BGIQD::LOG::lend();
 
-    report();
+    //report();
 
     config.lger<<BGIQD::LOG::lstart()<<"report end ... "<<BGIQD::LOG::lend();
     config.lger<<BGIQD::LOG::lstart()<<"all path freq \n"<<config.path_num_freq.ToString()<<BGIQD::LOG::lend();
