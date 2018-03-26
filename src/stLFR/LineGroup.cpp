@@ -27,13 +27,11 @@ namespace BGIQD{
 
         void ContigRoad::init(const std::string & buff)
         {
-            unsigned int head , tail ;
-            char headin1, tailin1,dot;
             std::istringstream ist(buff);
-            ist>>headin1>>head>>dot>>tail>>tailin1>>linear_length;
-
+            //ist>>headin1>>head>>dot>>tail>>tailin1>>linear_length;
+            ist>>linear_length;
             int length = linear_length;
-            if( headin1 == '(' )
+            /*if( headin1 == '(' )
             {
                 length ++ ;
                 headin = false;
@@ -47,7 +45,9 @@ namespace BGIQD{
             }
             else
                 tailin = true;
-
+            */
+            headin = true;
+            tailin = true ;
             int left = length ;
             while( left > 0 )
             {
@@ -56,7 +56,6 @@ namespace BGIQD{
                 left -- ;
                 group.push_back(next);
             }
-
         }
 
         std::pair<unsigned int, unsigned int>  ContigRoad::getLinearStep(int index)
