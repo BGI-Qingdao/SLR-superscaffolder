@@ -89,11 +89,11 @@ namespace BGIQD {
             bool IsJumpConn() const { return flag & 0x1 ;}
             void SetJump() { flag |= 0x1 ; }
 
-            void SetBiSuppert() { flag |= 0x4 ; }
-            bool IsBiSupport() const { return flag & 0x4 ;}
+            void SetBiNotSuppert() { flag |= 0x4 ; }
+            bool IsBiNotSupport() const { return flag & 0x4 ;}
 
 
-            bool IsValid() const { return  ! ( IsBiSupport() ||  IsJumpConn() ); }
+            bool IsValid() const { return  ! ( IsBiNotSupport() ||  IsJumpConn() ); }
         };
 
         struct KeyEdge

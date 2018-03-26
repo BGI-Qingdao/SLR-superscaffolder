@@ -179,7 +179,7 @@ namespace BGIQD{
                     jump_conn ++ ;
                     continue;
                 }
-                if( i.second.IsBiSupport() )
+                if( i.second.IsBiNotSupport() )
                 {
                     jump_conn ++ ;
                     continue;
@@ -193,7 +193,7 @@ namespace BGIQD{
                     jump_conn ++ ;
                     continue;
                 }
-                if( i.second.IsBiSupport() )
+                if( i.second.IsBiNotSupport() )
                 {
                     jump_conn ++ ;
                     continue;

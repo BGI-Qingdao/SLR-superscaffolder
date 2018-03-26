@@ -260,13 +260,13 @@ int deleteConns(BGIQD::SOAP2::GlobalConfig &config)
 int deleteNotBiSupport(BGIQD::SOAP2::GlobalConfig &config)
 {
     int count = 0;
-    for(auto i: config.keys)
+    for(auto & i: config.keys)
     {
         auto & curr = config.key_array[config.key_map[i]];
         if( curr.IsCircle() )
             continue;
 
-        for( auto i : curr.to )
+        for( auto & i : curr.to )
         {
             if( i.second.IsJumpConn() )
                 continue;
@@ -275,12 +275,12 @@ int deleteNotBiSupport(BGIQD::SOAP2::GlobalConfig &config)
             std::tie(f1,f2,f3) = next.Relationship_nojump( curr.edge_id , false ) ;
             if( ! f1 )
             {
-                i.second.SetBiSuppert();
+                i.second.SetBiNotSuppert();
                 count ++;
             }
         }
 
-        for( auto i : curr.from)
+        for( auto & i : curr.from)
         {
             if( i.second.IsJumpConn() )
                 continue;
@@ -289,7 +289,7 @@ int deleteNotBiSupport(BGIQD::SOAP2::GlobalConfig &config)
             std::tie(f1,f2,f3) = next.Relationship_nojump( curr.edge_id , true) ;
             if( ! f1 )
             {
-                i.second.SetBiSuppert();
+                i.second.SetBiNotSuppert();
                 count ++;
             }
         }
@@ -362,6 +362,7 @@ void linearConnection(BGIQD::SOAP2::GlobalConfig &config , unsigned int key_id)/
                     if( i.second.IsValid() )
                         return std::ref(i.second);
                 }
+                assert(0);
                 return std::ref(map.begin()->second);
             };
             while( (! config.key_array[next_k].IsCircle())&& config.key_array[next_k].IsLinear() && !config.key_array[next_k].IsMarked() )
