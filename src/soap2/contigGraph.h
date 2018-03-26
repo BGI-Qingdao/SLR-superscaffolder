@@ -85,8 +85,15 @@ namespace BGIQD {
 
             bool IsPositive() const { return flag & 0x2 ; }
             void SetPostive() { flag |= 0x2 ;}
+
             bool IsJumpConn() const { return flag & 0x1 ;}
             void SetJump() { flag |= 0x1 ; }
+
+            void SetBiSuppert() { flag |= 0x4 ; }
+            bool IsBiSupport() const { return flag & 0x4 ;}
+
+
+            bool IsValid() const { return  ! ( IsBiSupport() ||  IsJumpConn() ); }
         };
 
         struct KeyEdge
@@ -105,7 +112,8 @@ namespace BGIQD {
             std::map<unsigned int , KeyConn> to;
 
             // connect ? up/down ? p/r
-            std::tuple<bool,bool,bool> Relationship(unsigned int id);
+            std::tuple<bool,bool,bool> Relationship(unsigned int id) const ;
+            std::tuple<bool,bool,bool> Relationship_nojump(unsigned int id, bool to_order) const ;
 
             bool IsLinear() const { return flag & 0x1 ; }
             bool IsTipFrom() const { return flag & 0x2 ; }

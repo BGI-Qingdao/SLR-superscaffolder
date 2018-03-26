@@ -118,7 +118,7 @@ namespace BGIQD{
         }
 
         // -------------------------- struct KeyEdge ------------------------------
-        std::tuple<bool,bool,bool> KeyEdge::Relationship(unsigned int id)
+        std::tuple<bool,bool,bool> KeyEdge::Relationship(unsigned int id) const 
         {
             auto itr1 = from.find(id);
             if(itr1 != from.end() )
@@ -134,6 +134,26 @@ namespace BGIQD{
             return std::make_tuple(false ,false ,false);
         }
 
+        std::tuple<bool,bool,bool> KeyEdge::Relationship_nojump(unsigned int id,bool to_order) const 
+        {
+            if( to_order )
+            {
+                auto itr2 = to.find(id);
+                if(itr2 != to.end() && ! itr2->second.IsJumpConn())
+                {
+                    return std::make_tuple(true , true , itr2->second.IsPositive() );
+                }
+            }
+            else
+            {
+                auto itr1 = from.find(id);
+                if(itr1 != from.end() && ! itr1->second.IsJumpConn())
+                {
+                    return std::make_tuple(true , false , itr1->second.IsPositive());
+                }
+            }
+            return std::make_tuple(false ,false ,false);
+        }
 
         void KeyEdge::CheckCircle()
         {
@@ -159,11 +179,21 @@ namespace BGIQD{
                     jump_conn ++ ;
                     continue;
                 }
+                if( i.second.IsBiSupport() )
+                {
+                    jump_conn ++ ;
+                    continue;
+                }
                 from_size ++ ;
             }
             for( const auto & i : to)
             {
                 if( i.second.IsJumpConn() )
+                {
+                    jump_conn ++ ;
+                    continue;
+                }
+                if( i.second.IsBiSupport() )
                 {
                     jump_conn ++ ;
                     continue;
@@ -181,7 +211,7 @@ namespace BGIQD{
                 flag |= 0x2;
             else
                 flag |= 0x4;
-            CheckCircle();
+            //CheckCircle();
         }
 
         // -------------------------- struct GraphEA------------------------------

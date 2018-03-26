@@ -16,6 +16,7 @@ struct A
     int start ;
     int end;
 };
+
 int main(int argc , char **argv)
 {
     BGIQD::LOG::logfilter::singleton().get("SuperContig",BGIQD::LOG::loglevel::INFO , lger);
@@ -25,14 +26,14 @@ int main(int argc , char **argv)
     END_PARSE_ARGS
 
     auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(pos.to_string());
-    std::string line;
+    std::string line_1;
 
     std::vector<A> ref_keys;
     std::map<unsigned int,int> ref_keys_map;
     int index = 0 ;
-    while(!std::getline(*in,line).eof())
+    while(!std::getline(*in,line_1).eof())
     {
-        auto items = BGIQD::STRING::split(line,"\t");
+        auto items = BGIQD::STRING::split(line_1,"\t");
         assert(items.size()>0);
         A a;
         a.contig = std::stoi(items[0]);
@@ -47,14 +48,15 @@ int main(int argc , char **argv)
     BGIQD::FREQ::Freq<int>  wrong;
     BGIQD::FREQ::Freq<int>  len;
     BGIQD::FREQ::Freq<int>  del;
-
+    BGIQD::FREQ::Freq<unsigned int>  seeds;
+    
     int total = 0;
-    while(!std::getline(std::cin,line).eof())
+    while(!std::getline(std::cin,line_1).eof())
     {
         unsigned int head , tail ;
         char headin, tailin,dot;
         int length;
-        std::istringstream ist(line);
+        std::istringstream ist(line_1);
         ist>>headin>>head>>dot>>tail>>tailin>>length;
         if( length < 2 )
             continue;
@@ -96,6 +98,11 @@ int main(int argc , char **argv)
             }
             return 0;
         };
+
+        for( int i =0 ; i< (int)line.size() ; i++ )
+        {
+            seeds.Touch(line[i]);
+        }
 
         int order = 0;
         bool correct1 = true;
@@ -144,4 +151,11 @@ int main(int argc , char **argv)
     std::cout<<"wrong freq\n"<<wrong.ToString()<<std::endl;
     std::cout<<"del freq\n"<<del.ToString()<<std::endl;
     std::cout<<"len freq\n"<<len.ToString()<<std::endl;
+    for( const auto i: seeds.data)
+    {
+        if( i.second > 1 )
+        {
+            std::cout<<"err 2 "<<i.first<<"\t"<<i.second<<std::endl;
+        }
+    }
 }

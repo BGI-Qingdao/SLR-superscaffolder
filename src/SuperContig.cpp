@@ -185,54 +185,61 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
 int deleteConns(BGIQD::SOAP2::GlobalConfig &config)
 {
     int count = 0;
+
+    auto flush_map = [&config,&count]( std::map<unsigned int , BGIQD::SOAP2::KeyConn> & map , bool order)
+    {
+        std::vector<BGIQD::SOAP2::KeyConn*> vecs;
+        for( auto & i: map )
+        {
+            vecs.emplace_back(&i.second);
+        }
+        for(size_t m = 0 ;m< vecs.size() ; m++ )
+        {
+            for( size_t n = m+1; n< vecs.size() ; n++ )
+            {
+                if( m == n )
+                    continue;
+                if( vecs[m]->IsJumpConn() &&  vecs[n]->IsJumpConn() )
+                    continue;
+                auto & B = config.key_array[config.key_map[vecs[m]->to]];
+                auto & A = config.key_array[config.key_map[vecs[n]->to]];
+                bool f11 ,f21 ,f31 ;
+                bool f12 ,f22 ,f32 ;
+                std::tie(f11,f21,f31) = B.Relationship(vecs[n]->to) ;
+                std::tie(f12,f22,f32) = A.Relationship(vecs[m]->to) ;
+                if( !f11 || !f21 )
+                    continue;
+                if( f21 == f22 )
+                    continue;
+                // A->B->C
+                // A<-B<-C
+                if( !(f21 ^ order) )  
+                {
+                    if( !vecs[n]->IsJumpConn() )
+                    {
+                        vecs[n]->SetJump();
+                        count++;
+                    }
+                }
+                //A->C->B
+                //A<-C<-B
+                else 
+                {
+                    if ( ! vecs[m]->IsJumpConn() )
+                    {
+                        vecs[m]->SetJump();
+                        count ++ ;
+                    }
+                }
+            }
+        }
+    };
+
     for(auto i: config.keys)
     {
         auto & curr = config.key_array[config.key_map[i]];
         if( curr.IsCircle() )
             continue;
-        auto flush_map = [&config,&count]( std::map<unsigned int , BGIQD::SOAP2::KeyConn> & map , bool order)
-        {
-            std::vector<BGIQD::SOAP2::KeyConn*> vecs;
-            for( auto & i: map )
-            {
-                vecs.emplace_back(&i.second);
-            }
-            for(size_t m = 0 ;m< vecs.size() ; m++ )
-            {
-                for( size_t n = m+1; n< vecs.size() ; n++ )
-                {
-                    if( m == n )
-                        continue;
-                    if( vecs[m]->IsJumpConn() &&  vecs[n]->IsJumpConn() ) 
-                        continue;
-                    auto & B = config.key_array[config.key_map[vecs[m]->to]];
-                    bool f1 ,f2 ,f3 ;
-                    std::tie(f1,f2,f3) = B.Relationship(vecs[n]->to) ;
-                    if( ! f1 )
-                        continue;
-                    // A->B->C
-                    // A<-B<-C
-                    if( !(f2 ^ order) )  
-                    {
-                        if( !vecs[n]->IsJumpConn() )
-                        {
-                            vecs[n]->SetJump();
-                            count++;
-                        }
-                    }
-                    //A->C->B
-                    //A<-C<-B
-                    else 
-                    {
-                        if ( ! vecs[m]->IsJumpConn() )
-                        {
-                            vecs[m]->SetJump();
-                            count ++ ;
-                        }
-                    }
-                }
-            }
-        };
         if( curr.to.size() > 1 )
         {
             flush_map(curr.to,true);
@@ -250,6 +257,45 @@ int deleteConns(BGIQD::SOAP2::GlobalConfig &config)
     return count;
 }
 
+int deleteNotBiSupport(BGIQD::SOAP2::GlobalConfig &config)
+{
+    int count = 0;
+    for(auto i: config.keys)
+    {
+        auto & curr = config.key_array[config.key_map[i]];
+        if( curr.IsCircle() )
+            continue;
+
+        for( auto i : curr.to )
+        {
+            if( i.second.IsJumpConn() )
+                continue;
+            const auto & next = config.key_array[config.key_map[i.second.to]];
+            bool f1 , f2 , f3 ;
+            std::tie(f1,f2,f3) = next.Relationship_nojump( curr.edge_id , false ) ;
+            if( ! f1 )
+            {
+                i.second.SetBiSuppert();
+                count ++;
+            }
+        }
+
+        for( auto i : curr.from)
+        {
+            if( i.second.IsJumpConn() )
+                continue;
+            const auto & next = config.key_array[config.key_map[i.second.to]];
+            bool f1 , f2 , f3 ;
+            std::tie(f1,f2,f3) = next.Relationship_nojump( curr.edge_id , true) ;
+            if( ! f1 )
+            {
+                i.second.SetBiSuppert();
+                count ++;
+            }
+        }
+    }
+    return count;
+}
 void linearConnection(BGIQD::SOAP2::GlobalConfig &config , unsigned int key_id)// , BGIQD::MultiThread::MultiThread & queue)
 {
 
@@ -313,7 +359,7 @@ void linearConnection(BGIQD::SOAP2::GlobalConfig &config , unsigned int key_id)/
             {
                 for(const auto & i : map)
                 {
-                    if( i.second.IsJumpConn() )
+                    if( i.second.IsValid() )
                         return std::ref(i.second);
                 }
                 return std::ref(map.begin()->second);
@@ -438,13 +484,13 @@ void linearConnection(BGIQD::SOAP2::GlobalConfig &config , unsigned int key_id)/
         };
         for( auto next : curr.to )
         {
-            if( next.second.IsJumpConn() )
+            if(! next.second.IsValid() )
                 continue;
             extractPath(next.first,next.second.IsPositive(),true);
         }
         for(auto next : curr.from)
         {
-            if( next.second.IsJumpConn() )
+            if( ! next.second.IsValid() )
                 continue;
             extractPath(next.first,next.second.IsPositive(),false);
         }
@@ -466,6 +512,11 @@ void report(const  BGIQD::SOAP2::GlobalConfig & config)
     for(const auto & i : config.contigs)
     {
         freq.Touch(i.length);
+        if( i.downstream )
+            std::cout<<'>';
+        else
+            std::cout<<'<';
+
         if( i.headin )
             std::cout<<'[';
         else
@@ -578,6 +629,9 @@ int main(int argc , char **argv)
             if( d == 0 )
                 break;
         }
+        int dd = deleteNotBiSupport(config);
+        lger<<BGIQD::LOG::lstart()<<"deleteNotBiSupport "<<dd<<" conn"<<BGIQD::LOG::lend();
+
     }
     lger<<BGIQD::LOG::lstart()<<"freq report... "<<BGIQD::LOG::lend();
     {
