@@ -121,13 +121,13 @@ namespace BGIQD{
         std::tuple<bool,bool,bool> KeyEdge::Relationship(unsigned int id) const 
         {
             auto itr1 = from.find(id);
-            if(itr1 != from.end() )
+            if( itr1 != from.end() )
             {
                 return std::make_tuple(true , false , itr1->second.IsPositive());
             }
 
             auto itr2 = to.find(id);
-            if(itr2 != to.end() )
+            if( itr2 != to.end() )
             {
                 return std::make_tuple(true , true , itr2->second.IsPositive() );
             }

@@ -28,10 +28,10 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
     std::map<unsigned int , std::vector<std::list<BGIQD::SOAP2::Edge> > > mids;
     if ( order )
         config.edge_array[path_i].DepthSearch( config.edge_array , stack,
-            history, paths , mids ,config.edge_array[path_i].length , config.connections.at(root.bal_id) );
+                history, paths , mids ,config.edge_array[path_i].length , config.connections.at(root.bal_id) );
     else 
         config.edge_array[path_i].DepthSearch( config.edge_array , stack,
-            history, paths , mids ,config.edge_array[path_i].length , config.connections.at(root.id) );
+                history, paths , mids ,config.edge_array[path_i].length , config.connections.at(root.id) );
     //if( detail )
     //{
     //    for( auto const & i : paths )
@@ -98,88 +98,88 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
         //
         if( !order && to_id == to_id_in_path)
         {
-                {
-                    std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[path_i]]);
-                    BGIQD::SOAP2::KeyConn conn{j.first ,0,0};
-                    conn.SetPostive();
-                    //conn.length = 
-                    config.key_array[config.key_map[path_i]].to[j.first]= conn;
-                }
-                {
-                    std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[j.first]]);
-                    BGIQD::SOAP2::KeyConn conn{path_i,0,0};
-                    conn.SetPostive();
-                    config.key_array[config.key_map[j.first]].from[(path_i)] = conn;
-                }
-            }
-            //
-            // A1->B2
-            // A2<-B1
-            //
-            else if( !order && to_id != to_id_in_path )
             {
-                {
-                    std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[path_i]]);
-                    BGIQD::SOAP2::KeyConn conn{j.first,0,0};
-                    config.key_array[config.key_map[path_i]].to[j.first]= conn;
-                }
-                {
-                    std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[j.first]]);
-                    BGIQD::SOAP2::KeyConn conn{path_i,0,0};
-                    config.key_array[config.key_map[j.first]].to[(path_i)] = conn;
-                }
+                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[path_i]]);
+                BGIQD::SOAP2::KeyConn conn{j.first ,0,0};
+                conn.SetPostive();
+                //conn.length = 
+                config.key_array[config.key_map[path_i]].to[j.first]= conn;
             }
-            //
-            // A2->B1
-            // A1<-B2
-            //
-            else if ( order && to_id == to_id_in_path )
             {
-                {
-                    std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[root.bal_id]]);
-                    BGIQD::SOAP2::KeyConn conn{j.first,0,0};
-                    config.key_array[config.key_map[root.bal_id]].from[j.first]= conn;
-                }
-                {
-                    std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[j.first]]);
-                    BGIQD::SOAP2::KeyConn conn{root.bal_id,0,0};
-                    config.key_array[config.key_map[j.first]].from[(root.bal_id)] = conn;
-                }
-            }
-            //
-            // A2->B2
-            // A1<-B1
-            //
-            else
-            {
-                {
-                    std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[root.bal_id]]);
-                    BGIQD::SOAP2::KeyConn conn{j.first,0,0};
-                    conn.SetPostive();
-                    config.key_array[config.key_map[root.bal_id]].from[j.first]= conn;
-                }
-                {
-                    std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[j.first]]);
-                    BGIQD::SOAP2::KeyConn conn{root.bal_id,0,0};
-                    conn.SetPostive();
-                    config.key_array[config.key_map[j.first]].to[(root.bal_id)] = conn;
-                }
+                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[j.first]]);
+                BGIQD::SOAP2::KeyConn conn{path_i,0,0};
+                conn.SetPostive();
+                config.key_array[config.key_map[j.first]].from[(path_i)] = conn;
             }
         }
-        if( index %100 == 0 )
+        //
+        // A1->B2
+        // A2<-B1
+        //
+        else if( !order && to_id != to_id_in_path )
         {
-            std::lock_guard<std::mutex> lm(config.contig_mutex);
-            lger<<BGIQD::LOG::lstart()<<"process "<<index<<" ..."<<BGIQD::LOG::lend();
+            {
+                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[path_i]]);
+                BGIQD::SOAP2::KeyConn conn{j.first,0,0};
+                config.key_array[config.key_map[path_i]].to[j.first]= conn;
+            }
+            {
+                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[j.first]]);
+                BGIQD::SOAP2::KeyConn conn{path_i,0,0};
+                config.key_array[config.key_map[j.first]].to[(path_i)] = conn;
+            }
         }
+        //
+        // A2->B1
+        // A1<-B2
+        //
+        else if ( order && to_id == to_id_in_path )
+        {
+            {
+                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[root.bal_id]]);
+                BGIQD::SOAP2::KeyConn conn{j.first,0,0};
+                config.key_array[config.key_map[root.bal_id]].from[j.first]= conn;
+            }
+            {
+                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[j.first]]);
+                BGIQD::SOAP2::KeyConn conn{root.bal_id,0,0};
+                config.key_array[config.key_map[j.first]].from[(root.bal_id)] = conn;
+            }
+        }
+        //
+        // A2->B2
+        // A1<-B1
+        //
+        else
+        {
+            {
+                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[root.bal_id]]);
+                BGIQD::SOAP2::KeyConn conn{j.first,0,0};
+                conn.SetPostive();
+                config.key_array[config.key_map[root.bal_id]].from[j.first]= conn;
+            }
+            {
+                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[j.first]]);
+                BGIQD::SOAP2::KeyConn conn{root.bal_id,0,0};
+                conn.SetPostive();
+                config.key_array[config.key_map[j.first]].to[(root.bal_id)] = conn;
+            }
+        }
+    }
+    if( index %100 == 0 )
+    {
+        std::lock_guard<std::mutex> lm(config.contig_mutex);
+        lger<<BGIQD::LOG::lstart()<<"process "<<index<<" ..."<<BGIQD::LOG::lend();
+    }
 }
 
 
 
 //
 // if 
-//  A->B->C && A->C
+//  O->A->B && O->B
 // delete 
-//   A->C
+//   O->C
 // return the number of deleted conns.
 // 
 int deleteConns(BGIQD::SOAP2::GlobalConfig &config)
@@ -193,51 +193,103 @@ int deleteConns(BGIQD::SOAP2::GlobalConfig &config)
         {
             vecs.emplace_back(&i.second);
         }
-        for(size_t m = 0 ;m< vecs.size() ; m++ )
+        for( size_t b = 0 ;b< vecs.size() ; b++ )
         {
-            for( size_t n = m+1; n< vecs.size() ; n++ )
+            for( size_t a = b+1; a< vecs.size() ; a++ )
             {
-                if( m == n )
+                if( a == b )
                     continue;
-                if( vecs[m]->IsJumpConn() &&  vecs[n]->IsJumpConn() )
+                if( vecs[a]->IsJumpConn() &&  vecs[b]->IsJumpConn() )
                     continue;
-                auto & B = config.key_array[config.key_map[vecs[m]->to]];
-                auto & A = config.key_array[config.key_map[vecs[n]->to]];
-                if ( A.IsCircle() || B.IsCircle() )
+                auto & B = config.key_array[config.key_map[vecs[b]->to]];
+                auto & A = config.key_array[config.key_map[vecs[a]->to]];
+                if( A.IsCircle() || B.IsCircle() )
                     continue;
                 bool f11 ,f21 ,f31 ;
                 bool f12 ,f22 ,f32 ;
-                std::tie(f11,f21,f31) = B.Relationship(vecs[n]->to) ;
-                std::tie(f12,f22,f32) = A.Relationship(vecs[m]->to) ;
+                std::tie(f11,f21,f31) = B.Relationship(vecs[a]->to) ;
+                std::tie(f12,f22,f32) = A.Relationship(vecs[b]->to) ;
                 if( !f11 || !f21 )
                     continue;
-                if( f21 == f22 )
-                    continue;
-                // A->B->C
-                // A<-B<-C
-                if( !(f21 ^ order) )  
+                bool useA1 = false;
+                if( vecs[a]->IsPositive() )
                 {
-                    if( !vecs[n]->IsJumpConn() )
+                    useA1 = true ;
+                }
+
+                if( order )
+                {
+                    if( useA1 )
                     {
-                        vecs[n]->SetJump();
-                        count++;
+                        //O1->A1 O1->B1 A1->B2
+                        if ( f32 != vecs[b]->IsPositive() )
+                            continue ;
+                        if( f22 ) // O1->A1->B
+                            if ( ! vecs[b]->IsJumpConn() )
+                            {
+                                vecs[b]->SetJump();
+                                count ++;
+                            }
+                            else {}
+                        else //O1->A1<-B
+                            if ( ! vecs[a]->IsJumpConn() )
+                            {
+                                vecs[a]->SetJump();
+                                count ++;
+                            }
+                            else {}
+                    }
+                    else
+                    {
+                        //O1->A2 O1->B2 A1->B2
+                        if( f32 == vecs[b]->IsPositive() )
+                            continue ;
+                        if( f22 ) // O1->A2<-B
+                            if ( ! vecs[a]->IsJumpConn() )
+                            {   vecs[a]->SetJump(); count ++; }
+                            else {}
+                        else //O1->A2->B
+                            if ( ! vecs[b]->IsJumpConn() )
+                            {   vecs[b]->SetJump(); count ++; }
+                            else {}
                     }
                 }
-                //A->C->B
-                //A<-C<-B
-                else 
+                else
                 {
-                    if ( ! vecs[m]->IsJumpConn() )
+                    if( useA1)
                     {
-                        vecs[m]->SetJump();
-                        count ++ ;
+                        //O1<-A1 O1<-B1 A1->B2
+                        if ( f32 != vecs[b]->IsPositive() )
+                            continue;
+                        if ( f22 ) //O1<-A1->B
+                            if ( ! vecs[a]->IsJumpConn() )
+                            {   vecs[a]->SetJump(); count ++; }
+                            else {}
+                        else    // O1<-A1<-B
+                            if ( ! vecs[b]->IsJumpConn() )
+                            {   vecs[b]->SetJump(); count ++; }
+                            else {}
+                    }
+                    else
+                    {
+                        // O1<-A2 O1<-B2 A1->B2
+                        if ( f32 == vecs[b]->IsPositive() )
+                            continue ;
+                        if (! f22 ) //O1<-A2->B
+                            if ( ! vecs[a]->IsJumpConn() )
+                            {   vecs[a]->SetJump(); count ++; }
+                            else {}
+                        else    // O1<-A2<-B
+                            if ( ! vecs[b]->IsJumpConn() )
+                            {   vecs[b]->SetJump(); count ++; }
+                            else {}
                     }
                 }
             }
         }
     };
 
-    for(auto i: config.keys)
+    for( auto i: config.keys )
     {
         auto & curr = config.key_array[config.key_map[i]];
         if( curr.IsCircle() )
@@ -572,17 +624,17 @@ int main(int argc , char **argv)
     BGIQD::LOG::logfilter::singleton().get("SuperContig",BGIQD::LOG::loglevel::INFO , lger);
     BGIQD::LOG::timer t(lger,"SuperContig");
     START_PARSE_ARGS
-    DEFINE_ARG_DETAIL(std::string , prefix, 'o',false,"prefix");
+        DEFINE_ARG_DETAIL(std::string , prefix, 'o',false,"prefix");
     DEFINE_ARG_DETAIL(int , kvalue, 'K',false,"K value");
     DEFINE_ARG_DETAIL(int , t_num, 't',true,"thread num . default[8]");
     DEFINE_ARG_DETAIL(bool , super, 's',true,"super contig ? default false");
     DEFINE_ARG_DETAIL(bool , detail, 'd',true,"print detail ? default false");
     END_PARSE_ARGS
-    if(! t_num.setted )
-    {
-        t_num.setted = true ;
-        t_num.d.i = 8 ;
-    }
+        if(! t_num.setted )
+        {
+            t_num.setted = true ;
+            t_num.d.i = 8 ;
+        }
     lger<<BGIQD::LOG::lstart()<<"parse args end ... "<<BGIQD::LOG::lend();
 
     BGIQD::SOAP2::GlobalConfig config;
@@ -631,14 +683,16 @@ int main(int argc , char **argv)
     lger<<BGIQD::LOG::lstart()<<"deleteConn start ... "<<BGIQD::LOG::lend();
     {
         index = 0 ;
-        while(1)
-        {
-            int d = deleteConns(config);
-            lger<<BGIQD::LOG::lstart()<<"deleteConn delete  "<<d<<" conn"<<BGIQD::LOG::lend();
+        //while(1)
+        //{
+        int dd1 = deleteNotBiSupport(config);
+        lger<<BGIQD::LOG::lstart()<<"deleteNotBiSupport "<<dd1<<" conn"<<BGIQD::LOG::lend();
+        int d = deleteConns(config);
+        lger<<BGIQD::LOG::lstart()<<"deleteConn delete  "<<d<<" conn"<<BGIQD::LOG::lend();
 
-            if( d == 0 )
-                break;
-        }
+        //    if( d == 0 )
+        //        break;
+        //}
         int dd = deleteNotBiSupport(config);
         lger<<BGIQD::LOG::lstart()<<"deleteNotBiSupport "<<dd<<" conn"<<BGIQD::LOG::lend();
 
