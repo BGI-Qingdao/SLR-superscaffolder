@@ -161,16 +161,19 @@ int main(int argc , char **argv)
                         del ++ ;
                         start += order;
                     }
-                    if( del > 3 )
+                    if( del > 5 )
                         break;
                 }
-                if( del > 3 ) 
+                if( del > 5 ) 
                     break;
                 else
                     del_total +=del;
             }
             if( i == (int)line.size() )
+            {
+                status = 1 ; //correct
                 break;
+            }
         }
         //int del 
         /*
@@ -204,11 +207,13 @@ int main(int argc , char **argv)
         else if ( status == 1 && del_total > 0 )
         {
             del.Touch(del_total);
+            std::cout<<"D: "<<line_1<<std::endl;
         }
         else
+        {
             wrong.Touch(line.size());
-        if( !correct1)
-            continue;
+            std::cout<<"E: "<<line_1<<std::endl;
+        }
     }
     std::cout<<"correct freq\n"<<correct.ToString()<<std::endl;
     std::cout<<"wrong freq\n"<<wrong.ToString()<<std::endl;

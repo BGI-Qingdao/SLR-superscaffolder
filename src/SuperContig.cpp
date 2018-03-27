@@ -203,6 +203,8 @@ int deleteConns(BGIQD::SOAP2::GlobalConfig &config)
                     continue;
                 auto & B = config.key_array[config.key_map[vecs[m]->to]];
                 auto & A = config.key_array[config.key_map[vecs[n]->to]];
+                if ( A.IsCircle() || B.IsCircle() )
+                    continue;
                 bool f11 ,f21 ,f31 ;
                 bool f12 ,f22 ,f32 ;
                 std::tie(f11,f21,f31) = B.Relationship(vecs[n]->to) ;
@@ -272,7 +274,11 @@ int deleteNotBiSupport(BGIQD::SOAP2::GlobalConfig &config)
                 continue;
             const auto & next = config.key_array[config.key_map[i.second.to]];
             bool f1 , f2 , f3 ;
-            std::tie(f1,f2,f3) = next.Relationship_nojump( curr.edge_id , false ) ;
+            if( i.second.IsPositive() )
+                std::tie(f1,f2,f3) = next.Relationship_nojump( curr.edge_id , false ) ;
+            else 
+                std::tie(f1,f2,f3) = next.Relationship_nojump( curr.edge_id , true) ;
+
             if( ! f1 )
             {
                 i.second.SetBiNotSuppert();
@@ -280,13 +286,16 @@ int deleteNotBiSupport(BGIQD::SOAP2::GlobalConfig &config)
             }
         }
 
-        for( auto & i : curr.from)
+        for( auto & i : curr.from )
         {
             if( i.second.IsJumpConn() )
                 continue;
             const auto & next = config.key_array[config.key_map[i.second.to]];
             bool f1 , f2 , f3 ;
-            std::tie(f1,f2,f3) = next.Relationship_nojump( curr.edge_id , true) ;
+            if( i.second.IsPositive() )
+                std::tie(f1,f2,f3) = next.Relationship_nojump( curr.edge_id , true) ;
+            else 
+                std::tie(f1,f2,f3) = next.Relationship_nojump( curr.edge_id , false) ;
             if( ! f1 )
             {
                 i.second.SetBiNotSuppert();
@@ -351,8 +360,8 @@ void linearConnection(BGIQD::SOAP2::GlobalConfig &config , unsigned int key_id)/
             {
                 path.real_contig.push_back(config.key_array[next_k].edge_id);
             }
-            bool order = search_order;
-            bool torder = to_order;
+            bool order = search_order;//
+            bool torder = to_order; // 
             if( config.key_array[next_k].IsMarked())
                 return ;
             auto  get_nonjump = [] ( const std::map<unsigned int , BGIQD::SOAP2::KeyConn> & map)
@@ -458,7 +467,7 @@ void linearConnection(BGIQD::SOAP2::GlobalConfig &config , unsigned int key_id)/
             if(! config.key_array[next_k].IsCircle() )
             {
 
-                if( ( torder && order ) || ( !to_order && !order ))
+                if( ( torder && order ) || ( !torder && !order ))
                 {
                     if( config.key_array[next_k].from_size == 1 )
                     {
