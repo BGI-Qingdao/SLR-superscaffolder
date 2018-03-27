@@ -139,7 +139,7 @@ namespace BGIQD{
             if( to_order )
             {
                 auto itr2 = to.find(id);
-                if(itr2 != to.end() && ! itr2->second.IsJumpConn())
+                if(itr2 != to.end() && (! itr2->second.IsJumpConn()) )
                 {
                     return std::make_tuple(true , true , itr2->second.IsPositive() );
                 }
@@ -147,7 +147,7 @@ namespace BGIQD{
             else
             {
                 auto itr1 = from.find(id);
-                if(itr1 != from.end() && ! itr1->second.IsJumpConn())
+                if(itr1 != from.end() && (! itr1->second.IsJumpConn()))
                 {
                     return std::make_tuple(true , false , itr1->second.IsPositive());
                 }

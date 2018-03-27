@@ -209,7 +209,7 @@ int deleteConns(BGIQD::SOAP2::GlobalConfig &config)
                 bool f12 ,f22 ,f32 ;
                 std::tie(f11,f21,f31) = B.Relationship(vecs[a]->to) ;
                 std::tie(f12,f22,f32) = A.Relationship(vecs[b]->to) ;
-                if( !f11 || !f21 )
+                if( !f11 || !f12 )
                     continue;
                 bool useA1 = false;
                 if( vecs[a]->IsPositive() )
@@ -222,36 +222,61 @@ int deleteConns(BGIQD::SOAP2::GlobalConfig &config)
                     if( useA1 )
                     {
                         //O1->A1 O1->B1 A1->B2
+                        //O1->A1 O1->B2 A1->B1
+                        //O1->A1 O1->B1 A1<-B2
+                        //O1->A1 O1->B2 A1<-B1
                         if ( f32 != vecs[b]->IsPositive() )
                             continue ;
-                        if( f22 ) // O1->A1->B
-                            if ( ! vecs[b]->IsJumpConn() )
+                        if( f22 ) 
+                            // O1->A1 O1->B1 A1->B1 --> O1->A1->B1 ;
+                            // O1->A1 O1->B2 A1->B2 --> O1->A1->B2 ;
+                            // delete O->B
+                        {    if ( ! vecs[b]->IsJumpConn() )
                             {
                                 vecs[b]->SetJump();
                                 count ++;
                             }
                             else {}
-                        else //O1->A1<-B
+                        }
+                        else 
+                            //O1->A1 O1->B1 A1<-B1 --> O1->B1->A1 ;
+                            //O1->A1 O1->B2 A1<-B2 --> O1->B2->A1 ; 
+                            //delete O->A
+                        {
                             if ( ! vecs[a]->IsJumpConn() )
                             {
                                 vecs[a]->SetJump();
                                 count ++;
                             }
                             else {}
+                        }
                     }
                     else
                     {
                         //O1->A2 O1->B2 A1->B2
+                        //O1->A2 O1->B2 A1<-B2
+                        //O1->A2 O1->B1 A1->B1
+                        //O1->A2 O1->B1 A1<-B1
                         if( f32 == vecs[b]->IsPositive() )
                             continue ;
-                        if( f22 ) // O1->A2<-B
+                        if( f22 ) 
+                            // O1->A2 O1->B1 A1->B2 --> O1->B1->A2 ;
+                            // O1->A2 O1->B2 A1->B1 --> O1->B2->A2;
+                            // delete O->A
+                        {
                             if ( ! vecs[a]->IsJumpConn() )
                             {   vecs[a]->SetJump(); count ++; }
                             else {}
-                        else //O1->A2->B
+                        }
+                        else  
+                            // O1->A2 O1->B1 A1<-B2 --> O1->A2->B1
+                            // O1->A2 O1->B2 A1<-B1 --> O1->A2->B2
+                            // delete O->B
+                        {
                             if ( ! vecs[b]->IsJumpConn() )
                             {   vecs[b]->SetJump(); count ++; }
                             else {}
+                        }
                     }
                 }
                 else
@@ -259,30 +284,56 @@ int deleteConns(BGIQD::SOAP2::GlobalConfig &config)
                     if( useA1)
                     {
                         //O1<-A1 O1<-B1 A1->B2
+                        //O1<-A1 O1<-B1 A1<-B2
+                        //O1<-A1 O1<-B2 A1->B1
+                        //O1<-A1 O1<-B2 A1<-B1
                         if ( f32 != vecs[b]->IsPositive() )
                             continue;
-                        if ( f22 ) //O1<-A1->B
+                        if ( f22 )
+                        //O1<-A1 O1<-B1 A1->B1 --> A1->B1->O1
+                        //O1<-A1 O1<-B2 A1->B2 --> A1->B2->O1
+                        //delete O-A
+                        {
                             if ( ! vecs[a]->IsJumpConn() )
                             {   vecs[a]->SetJump(); count ++; }
                             else {}
-                        else    // O1<-A1<-B
+                        }
+                        //O1<-A1 O1<-B1 A1<-B1 --> O1<-A1<-B1
+                        //O1<-A1 O1<-B2 A1<-B2 --> O1<-A1<-B2
+                        //delete O-B
+                        else
+                        {
                             if ( ! vecs[b]->IsJumpConn() )
                             {   vecs[b]->SetJump(); count ++; }
                             else {}
+                        }
                     }
                     else
                     {
+                        // O1<-A2 O1<-B1 A1->B1
                         // O1<-A2 O1<-B2 A1->B2
+                        // O1<-A2 O1<-B1 A1<-B1
+                        // O1<-A2 O1<-B2 A1<-B2
                         if ( f32 == vecs[b]->IsPositive() )
                             continue ;
-                        if (! f22 ) //O1<-A2->B
+                        if (! f22 )
+                        // O1<-A2 O1<-B1 A1<-B2  --> A2->B1->O1
+                        // O1<-A2 O1<-B2 A1<-B1  --> A2->B2->O1
+                        // delete O-A
+                        {
                             if ( ! vecs[a]->IsJumpConn() )
                             {   vecs[a]->SetJump(); count ++; }
                             else {}
-                        else    // O1<-A2<-B
+                        }
+                        else
+                        // O1<-A2 O1<-B1 A1->B2 --> B1->A2->O1
+                        // O1<-A2 O2<-B2 A1->B1 --> B2->A2->O1
+                        // delete O-B
+                        {
                             if ( ! vecs[b]->IsJumpConn() )
                             {   vecs[b]->SetJump(); count ++; }
                             else {}
+                        }
                     }
                 }
             }
