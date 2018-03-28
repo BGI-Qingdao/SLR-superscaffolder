@@ -679,7 +679,7 @@ int main(int argc , char **argv)
     DEFINE_ARG_DETAIL(int , kvalue, 'K',false,"K value");
     DEFINE_ARG_DETAIL(int , t_num, 't',true,"thread num . default[8]");
     DEFINE_ARG_DETAIL(bool , super, 's',true,"super contig ? default false");
-    DEFINE_ARG_DETAIL(bool , detail, 'd',true,"print detail ? default false");
+    DEFINE_ARG_DETAIL(bool , deleteconn , 'd',true,"delete conn ? default false");
     END_PARSE_ARGS
         if(! t_num.setted )
         {
@@ -709,15 +709,15 @@ int main(int argc , char **argv)
         index  = 0;
         for( auto j : config.keys )
         {
-            t_jobs.AddJob([&config, j,&detail](){
-                    findConnection(config,j,false , detail.to_bool());
+            t_jobs.AddJob([&config, j](){
+                    findConnection(config,j,false );
                     }
                     );
             if( config.edge_array[j].id != config.edge_array[j].bal_id )
             {
                 unsigned int k = config.edge_array[j].bal_id;
-                t_jobs.AddJob([&config, k,&detail](){
-                        findConnection(config, k,true ,detail.to_bool());
+                t_jobs.AddJob([&config, k](){
+                        findConnection(config, k,true );
                         }
                         );
             }
@@ -731,23 +731,16 @@ int main(int argc , char **argv)
     {
         config.key_array[config.key_map[m]].CheckCircle();
     }
-    lger<<BGIQD::LOG::lstart()<<"deleteConn start ... "<<BGIQD::LOG::lend();
+    if( deleteconn.to_bool() )
     {
+        lger<<BGIQD::LOG::lstart()<<"deleteConn start ... "<<BGIQD::LOG::lend();
         index = 0 ;
-        //while(1)
-        //{
-        int dd1 = deleteNotBiSupport(config);
-        lger<<BGIQD::LOG::lstart()<<"deleteNotBiSupport "<<dd1<<" conn"<<BGIQD::LOG::lend();
         int d = deleteConns(config);
         lger<<BGIQD::LOG::lstart()<<"deleteConn delete  "<<d<<" conn"<<BGIQD::LOG::lend();
-
-        //    if( d == 0 )
-        //        break;
-        //}
         int dd = deleteNotBiSupport(config);
         lger<<BGIQD::LOG::lstart()<<"deleteNotBiSupport "<<dd<<" conn"<<BGIQD::LOG::lend();
-
     }
+
     lger<<BGIQD::LOG::lstart()<<"freq report... "<<BGIQD::LOG::lend();
     {
         for( const auto & m : config.keys)

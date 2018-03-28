@@ -49,7 +49,7 @@ int main(int argc , char ** argv)
         index1 ++ ;
         float cov = std::get<1>(contig.second);
         int len = std::get<0>(contig.second);
-        if(cov > UniqueLow && cov < UniqueHigh && len > min.to_int() )
+        if(cov > UniqueLow && cov < UniqueHigh && len >=min.to_int() )
         {
             index ++ ;
             std::cout<<contig.first<<'\t'<<len<<std::endl;
