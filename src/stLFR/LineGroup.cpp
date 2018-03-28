@@ -56,6 +56,7 @@ namespace BGIQD{
                 left -- ;
                 group.push_back(next);
             }
+            fill_num = 0 ;
         }
 
         std::pair<unsigned int, unsigned int>  ContigRoad::getLinearStep(int index)

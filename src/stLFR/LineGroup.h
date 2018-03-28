@@ -30,6 +30,8 @@ namespace BGIQD {
                 PartSucc = 2 ,
                 Complete = 3
             } status;
+
+            int fill_num;
         };
 
         struct ContigRoads

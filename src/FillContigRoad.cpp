@@ -205,7 +205,7 @@ void FillContigRoad( BGIQD::stLFR::ContigRoad & road)
         return ;
 
     road.status = BGIQD::stLFR::ContigRoad::FillStatus::None ;
-    int fill = 0;
+    road.fill_num = 0;
     bool line_down = false;
     for(int i=1  ; i < road.linear_length ; i++ )
     {
@@ -258,7 +258,7 @@ void FillContigRoad( BGIQD::stLFR::ContigRoad & road)
                     break;
                 }
             }
-            if( fill== 0 )
+            if( road.fill_num== 0 )
             {
                 if( ret.head_tail )
                     road.contig_path.push_back( ret.true_from );
@@ -275,15 +275,15 @@ void FillContigRoad( BGIQD::stLFR::ContigRoad & road)
             else 
                 road.contig_path.push_back( ret.true_from );
             road.status = BGIQD::stLFR::ContigRoad::FillStatus::PartSucc ;
-            fill ++ ;
+            road.fill_num ++ ;
         }
     }
 
-    if ( fill == road.linear_length - 1 )
+    if ( road.fill_num == road.linear_length - 1 )
     {
         road.status = BGIQD::stLFR::ContigRoad::FillStatus::Complete;
     }
-    {
+    /*{
         std::lock_guard<std::mutex> l(write_mutex);
         if (road.status == BGIQD::stLFR::ContigRoad::FillStatus::Conflict)
         {
@@ -308,11 +308,12 @@ void FillContigRoad( BGIQD::stLFR::ContigRoad & road)
             std::cout<<i<<'\t';
         }
         std::cout<<std::endl;
-    }
+    }*/
 }
 
 void report()
 {
+    int filled = 0 ;
     for( const auto &road : config.roads.roads)
     {
         if (road.status == BGIQD::stLFR::ContigRoad::FillStatus::Conflict)
@@ -337,8 +338,10 @@ void report()
         {
             std::cout<<i<<'\t';
         }
+        filled += (road.fill_num + 1 );
         std::cout<<std::endl;
     }
+    config.lger<<BGIQD::LOG::lstart()<<"road fill use seed contig \n"<<filled<<BGIQD::LOG::lend();
 }
 
 int  main(int argc, char **argv)
@@ -390,7 +393,7 @@ int  main(int argc, char **argv)
 
         for(int i= 0 ; i<(int)config.roads.roads.size(); i++)
         {
-            t_jobs.AddJob([i](){ FillContigRoad(config.roads.roads[i]); });
+            t_jobs.AddJob([i](){ FillContigRoad(std::ref(config.roads.roads[i])); });
         }
         t_jobs.End();
         t_jobs.WaitingStop();
@@ -398,7 +401,7 @@ int  main(int argc, char **argv)
 
     config.lger<<BGIQD::LOG::lstart()<<"fill contig road end ... "<<BGIQD::LOG::lend();
 
-    //report();
+    report();
 
     config.lger<<BGIQD::LOG::lstart()<<"report end ... "<<BGIQD::LOG::lend();
     config.lger<<BGIQD::LOG::lstart()<<"all path freq \n"<<config.path_num_freq.ToString()<<BGIQD::LOG::lend();
