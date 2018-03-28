@@ -206,9 +206,9 @@ namespace BGIQD{
             else if( from_size == 0 && to_size == 0 )
                 flag |= 0x20;
             else if ( from_size > 0 && to_size == 0 )
-                flag |= 0x10 ;
-            else if ( from_size == 0 && to_size > 0 )
                 flag |= 0x2;
+            else if ( from_size == 0 && to_size > 0 )
+                flag |= 0x10 ;
             else
                 flag |= 0x4;
             //CheckCircle();
