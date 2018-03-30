@@ -316,15 +316,17 @@ void report()
     int filled = 0 ;
     for( const auto &road : config.roads.roads)
     {
+        if( ! road.needMerge() )
+            continue;
         if (road.status == BGIQD::stLFR::ContigRoad::FillStatus::Conflict)
         {
             config.road_fill_freq.Touch("Conflict");
-            return;
+            continue;
         }
         if( road.status == BGIQD::stLFR::ContigRoad::FillStatus::None )
         {
             config.road_fill_freq.Touch("None");
-            return;
+            continue;
         }
         if (road.status == BGIQD::stLFR::ContigRoad::FillStatus::Complete)
         {
