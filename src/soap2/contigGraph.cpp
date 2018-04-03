@@ -50,9 +50,10 @@ namespace BGIQD{
                 ,std::map<unsigned int , std::vector<std::list<Edge>> > & paths
                 ,std::map<unsigned int , std::vector<std::list<Edge>> > & mids 
                 ,int total_length
-                ,const std::map<unsigned int , float> & neibs)
+                ,const std::map<unsigned int , float> & neibs
+                ,int max_depth )
         {
-            if ( total_length >= 1000000 || length == 0 )
+            if ( total_length >= max_depth|| length == 0 )
                 return ;
             stack.push_front(*this);
             auto & top = stack.front();

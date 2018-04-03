@@ -16,9 +16,28 @@ std::atomic<int> index ;
 void findConnection(BGIQD::SOAP2::GlobalConfig & config
         , unsigned int edge_id
         , bool order
-        , bool detail = false 
+        , int max_depth = 1000000
+        , bool detail = false
         )
 {
+
+    auto get_min_length = [](const std::vector<std::list<BGIQD::SOAP2::Edge>> &vec_list)
+    {
+        int min_length = 0;
+        for( const auto & list : vec_list)
+        {
+            int length = 0 ;
+            for( auto i = list.begin() ; i != list.end() ; i = std::next(i))
+            {
+                if( i == list.begin() || std::next(i) == list.end() )
+                    continue ;
+                length += i->length ;
+            }
+            if( min_length == 0 || min_length > length )
+                min_length = length ;
+        }
+        return min_length ;
+    };
     BGIQD::SOAP2::Edge & root = config.edge_array[edge_id];
     unsigned int path_i = edge_id;
     //unsigned int base_i = order ? config.edge_array[edge_id].bal_id : edge_id ;
@@ -92,6 +111,7 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
           std::cerr<<std::endl;*/
         unsigned int to_id = j.first ;
         unsigned int to_id_in_path = j.second[0].front().id ;
+        int length  = get_min_length(j.second);
         //
         //  A1->B1
         //  A2<-B2
@@ -100,14 +120,14 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
         {
             {
                 std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[path_i]]);
-                BGIQD::SOAP2::KeyConn conn{j.first ,0,0};
+                BGIQD::SOAP2::KeyConn conn{j.first ,length,0};
                 conn.SetPostive();
                 //conn.length = 
                 config.key_array[config.key_map[path_i]].to[j.first]= conn;
             }
             {
                 std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[j.first]]);
-                BGIQD::SOAP2::KeyConn conn{path_i,0,0};
+                BGIQD::SOAP2::KeyConn conn{path_i,length,0};
                 conn.SetPostive();
                 config.key_array[config.key_map[j.first]].from[(path_i)] = conn;
             }
@@ -120,12 +140,12 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
         {
             {
                 std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[path_i]]);
-                BGIQD::SOAP2::KeyConn conn{j.first,0,0};
+                BGIQD::SOAP2::KeyConn conn{j.first,length,0};
                 config.key_array[config.key_map[path_i]].to[j.first]= conn;
             }
             {
                 std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[j.first]]);
-                BGIQD::SOAP2::KeyConn conn{path_i,0,0};
+                BGIQD::SOAP2::KeyConn conn{path_i,length,0};
                 config.key_array[config.key_map[j.first]].to[(path_i)] = conn;
             }
         }
@@ -680,11 +700,18 @@ int main(int argc , char **argv)
     DEFINE_ARG_DETAIL(int , t_num, 't',true,"thread num . default[8]");
     DEFINE_ARG_DETAIL(bool , super, 's',true,"super contig ? default false");
     DEFINE_ARG_DETAIL(bool , deleteconn , 'd',true,"delete conn ? default false");
+    DEFINE_ARG_DETAIL(bool , connInfo, 'i',true,"print connInfo ? default false");
+    DEFINE_ARG_DETAIL(int, searchDepth, 'l',true,"search depth (bp) default 10000");
     END_PARSE_ARGS
         if(! t_num.setted )
         {
             t_num.setted = true ;
             t_num.d.i = 8 ;
+        }
+        if(! searchDepth.setted )
+        {
+            searchDepth.setted = true ;
+            searchDepth.d.i = 1000000;
         }
     lger<<BGIQD::LOG::lstart()<<"parse args end ... "<<BGIQD::LOG::lend();
 
@@ -709,15 +736,15 @@ int main(int argc , char **argv)
         index  = 0;
         for( auto j : config.keys )
         {
-            t_jobs.AddJob([&config, j](){
-                    findConnection(config,j,false );
+            t_jobs.AddJob([&config, j, &searchDepth ](){
+                    findConnection(config,j, searchDepth.to_int() ,false  );
                     }
                     );
             if( config.edge_array[j].id != config.edge_array[j].bal_id )
             {
                 unsigned int k = config.edge_array[j].bal_id;
-                t_jobs.AddJob([&config, k](){
-                        findConnection(config, k,true );
+                t_jobs.AddJob([&config, k, &searchDepth](){
+                        findConnection(config, k, searchDepth.to_int() ,true );
                         }
                         );
             }
@@ -757,6 +784,34 @@ int main(int argc , char **argv)
         BGIQD::FREQ::Freq<int> base_to;
         BGIQD::FREQ::Freq<int> in_circle;
 
+        if( connInfo.to_bool() )
+        {
+            auto deg= BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(prefix.to_string()+".connInfo");
+            for( const auto & m : config.keys )
+            {
+
+                auto & curr = config.key_array[config.key_map[m]];
+                if( curr.from.size() > 1 )
+                {
+                    (*deg)<<curr.edge_id<<"\t-\t";
+                    for( auto i: curr.from )
+                    {
+                        (*deg)<<i.second.to<<":"<<i.second.length<<"\t";
+                    }
+                    *(deg)<<std::endl;
+                }
+                if( curr.to.size() > 1 )
+                {
+                    (*deg)<<curr.edge_id<<"\t+\t";
+                    for( auto i: curr.to)
+                    {
+                        (*deg)<<i.second.to<<":"<<i.second.length<<"\t";
+                    }
+                    *(deg)<<std::endl;
+                }
+            }
+            delete deg;
+        }
         for( const auto & m : config.keys )
         {
 
@@ -799,6 +854,7 @@ int main(int argc , char **argv)
             base_to.Touch( config.key_array[config.key_map[m]].to.size());
             in_circle.Touch(config.key_array[config.key_map[m]].IsCircle());
         }
+
         lger<<BGIQD::LOG::lstart()<<"base key type freq"<<'\n'<<basefreq.ToString() << BGIQD::LOG::lend();
         lger<<BGIQD::LOG::lstart()<<"key type freq"<<'\n'<< freq.ToString() << BGIQD::LOG::lend();
         lger<<BGIQD::LOG::lstart()<<"from freq"<< '\n'<<from.ToString() << BGIQD::LOG::lend();
