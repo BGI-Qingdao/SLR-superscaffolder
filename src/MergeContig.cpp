@@ -52,6 +52,30 @@ struct AppConfig
     int K;
     int round ;
 
+    enum ContigStatus 
+    {
+        UNKNOW = 0 ,
+        ORIGINAL = 1 ,
+        SUPER = 2 ,
+        LINEAR = 3 ,
+    };
+
+    std::pair<ContigStatus , BGIQD::SOAP2::Edge & > GetEdge( unsigned int id )
+    {
+        if( id <= graph_ea.contigTotalNum )
+        {
+            return std::make_pair( ORIGINAL , std::ref(graph_ea.edge_array[id]) );
+        }
+        else if ( id < graph_ea.contigTotalNum + new_graph_ea.contigTotalNum ) 
+        {
+            return std::make_pair( ORIGINAL , std::ref(new_graph_ea.edge_array[id-graph_ea.contigTotalNum - 1]) );
+        }
+        //TODO
+        static BGIQD::SOAP2::Edge error ;
+        assert(0);
+        return std::make_pair( UNKNOW , std::ref(error));
+    }
+
     void Init(const std::string & prefix , int rd, int k )
     {
         K = k ;
@@ -85,6 +109,7 @@ struct AppConfig
         unsigned int new_contig_id = graph_ea.contigTotalNum ;
         unsigned int new_contig_id_new = 0 ;
         unsigned int new_arc_id = 0 ;
+        new_graph_ea.contigTotalNum = fills.fills.size() * 2 ;
         for( const auto & fill: fills.fills )
         {
             auto & head = graph_ea.edge_array[fill[0]];
@@ -116,7 +141,10 @@ struct AppConfig
             while( to_me != NULL )
             {
                 unsigned int id = to_me->to ;
-                auto & bal = graph_ea.edge_array[graph_ea.edge_array[id].bal_id];
+                auto ret_to = GetEdge(id) ;
+                auto ret_bal_to = GetEdge(ret_to.second.bal_id);
+                //auto & bal = graph_ea.edge_array[graph_ea.edge_array[id].bal_id];
+                auto & bal = ret_bal_to.second ;
                 auto & curr_arc = new_graph_ea.arc_array[new_arc_id++];
                 curr_arc.to = new_contig.id ;
                 curr_arc.cov = to_me->cov ;
@@ -130,7 +158,10 @@ struct AppConfig
             while( me_to != NULL )
             {
                 unsigned int id = me_to->to ;
-                auto & bal = graph_ea.edge_array[graph_ea.edge_array[id].bal_id];
+                auto ret_to = GetEdge(id) ;
+                auto ret_bal_to = GetEdge(ret_to.second.bal_id);
+                //auto & bal = graph_ea.edge_array[graph_ea.edge_array[id].bal_id];
+                auto & bal = ret_bal_to.second ;
                 auto & curr_arc = new_graph_ea.arc_array[new_arc_id++];
                 curr_arc.to = new_contig_bal.id ;
                 curr_arc.cov = me_to->cov ;
@@ -154,8 +185,8 @@ struct AppConfig
                 }
             }
         }
-        // [ 0 - contigTotalNum ]
-        new_graph_ea.contigTotalNum = new_contig_id ;
+        // [ 0 - contigTotalNum )
+        assert( new_graph_ea.contigTotalNum = new_contig_id) ;
         // [ 0 - arcNum ]
         new_graph_ea.arcNum= new_arc_id -1 ;
     }
@@ -197,7 +228,7 @@ struct AppConfig
 
     void Linear() 
     {
-
+        //TODO
     }
 
     void ReGenerate()
@@ -288,6 +319,7 @@ struct AppConfig
                 if( contig_fasta_map.contigs.at(curr.id).IsParlindorme() )
                     i ++ ;
             }
+            //TODO
             delete out;
         }
 
@@ -336,6 +368,7 @@ struct AppConfig
                 if( contig_fasta_map.contigs.at(curr.id).IsParlindorme() )
                     i++ ;
             }
+            //TODO
             delete out;
         }
 
@@ -354,7 +387,7 @@ struct AppConfig
                     i ++ ;
             }
 
-            for( unsigned int i = 1 ; i <=new_graph_ea.contigTotalNum ; i++ )
+            for( unsigned int i = 0 ; i <=new_graph_ea.contigTotalNum ; i++ )
             {
                 const auto & curr = graph_ea.edge_array[i] ;
                 if ( curr.IsDelete() || curr.length < 1)
@@ -365,6 +398,7 @@ struct AppConfig
                 if( ! c.IsParlindorme() )
                     i ++ ;
             }
+            //TODO
             delete out;
         }
 }config;
