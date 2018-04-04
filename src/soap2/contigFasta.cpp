@@ -82,8 +82,6 @@ namespace BGIQD {
             return ost.str();
         }
 
-
-
         ContigFastA ContigFastAMap::MergeContig(const std::vector<std::string> & line)
         {
             assert(line.size() > 1);
@@ -117,6 +115,39 @@ namespace BGIQD {
             ret.cov = cov / (ret.length + K ) ;
             return ret;
         }
+        ContigFastA ContigFastAMap::MergeContig(const std::vector<unsigned  int> & line)
+        {
+            assert(line.size() > 1);
+            unsigned int start = line[0];
+            auto & first = contigs[start];
+            ContigFastA ret = first;
+            first.MarkMerge();
+            if(! first.IsBase() )
+            {
+                contigs[start-1].MarkMerge();
+            }
+
+            float cov = ret.cov * ret.length + ret.cov * K ;
+
+            for( int i = 1 ; i < (int)line.size() ; i++ )
+            {
+                unsigned int next_id = line[i];
+                auto & next = contigs[next_id] ;
+                ret.linear += next.linear ;
+                ret.length += next.length ;
+                cov += next.cov * next.length ;
+                next.MarkMerge();
+
+                if(! next.IsBase() )
+                {
+                    contigs[next_id-1].MarkMerge();
+                }
+            }
+
+            ret.id = nextContigNum() ;
+            ret.cov = cov / (ret.length + K ) ;
+            return ret;
+        }
 
         void ContigFastAMap::LoadContig(const std::string & file)
         {
@@ -132,6 +163,7 @@ namespace BGIQD {
                     {
                         assert(tmp.IsSeqComplete(K));
                         contigs[tmp.id] = tmp;
+                        contigs[tmp.id].MarkBase() ;
                         if(tmp.id > maxContig )
                         {
                             maxContig = tmp.id;
@@ -149,22 +181,20 @@ namespace BGIQD {
 
         void ContigFastAMap::buildCompeleReverse()
         {
-            for( auto & i : contigs)
-            {
-                i.second.MarkBase();
-            }
-
             for(unsigned int i = 1 ; i<= maxContig ; i++)
             {
                 auto itr = contigs.find( i ) ;
                 if( itr == contigs.end() || ! itr->second.IsBase())
                     continue;
                 const auto & base = itr->second ;
-                if( BGIQD::SEQ::isSeqPalindrome(base.K + base.linear) )
+                if( BGIQD::SEQ::isSeqPalindrome(base.K + base.linear) 
+                        ||
+                    contigs.find(i+1) != contigs.end() )
                     continue;
                 contigs[i+1] = base.ReverseCompelete();
+                if( i == maxContig )
+                    maxContig ++ ;
             }
-            maxContig ++ ;
         }
     }//namespace SOAP2
 }//namespace BGIQD

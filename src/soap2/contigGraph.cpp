@@ -240,7 +240,19 @@ namespace BGIQD{
             unsigned int index = 1 ;
             while(!std::getline(*in,line).eof())
             {
-                sscanf(line.c_str(),">length %d,%d,%d",&length,&bal,&cov);
+                auto & from =  edge_array[index].from ;
+                auto & to =  edge_array[index].to;
+#if K127mer
+                sscanf(line.c_str(),">length %d,%d,%d,%lx %lx %lx %lx,%lx %lx %lx %lx",
+                        &length,&bal,&cov
+                        ,&(from[0]),&(from[1]) ,&(from[2]),&(from[3])
+                        ,&(to[0]),&(to[1]) ,&(to[2]),&(to[3]) );
+#else
+                sscanf(line.c_str(),">length %d,%d,%d,%lx %lx,%lx %lx",
+                        &length,&bal,&cov
+                        ,&(from[0]),&(from[1])
+                        ,&(to[0]),&(to[1]));
+#endif
                 edge_array[index].id = index ;
                 edge_array[index].bal_id = index+bal;
                 edge_array[index].cov = cov;
@@ -248,6 +260,10 @@ namespace BGIQD{
                     edge_array[index].length = length;
                 else
                     edge_array[index].length = 0 ;
+                if( bal == 0 )
+                    edge_array[index].SetPalindrome();
+                if( bal == 1 )
+                    edge_array[index].SetBase();
                 index ++ ;
             }
             assert( index == contigTotalNum +1 );
@@ -294,6 +310,5 @@ namespace BGIQD{
             delete in1;
             assert(index == arcNum +1 );
         }
-
     }//namespace SOAP2
 }//namespace BGIQD

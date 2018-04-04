@@ -22,12 +22,15 @@ namespace BGIQD {
 
             ContigFastA ReverseCompelete() const ;
 
-            void MarkMerge() { flag  |= 0x1 ; }
-            bool IsMerge() const { return flag & 0x1 ; }
-            void MarkSetK() { flag |= 0x2 ; }
-            bool IsKSet() const { return flag & 0x2 ; }
-            void MarkBase() { flag |= 0x4 ; }
-            bool IsBase() const { return flag & 0x4; }
+            void MarkMerge()        {           flag |= 0x1 ; }
+            bool IsMerge() const    { return    flag &  0x1 ; }
+            void MarkSetK()         {           flag |= 0x2 ; }
+            bool IsKSet() const     { return    flag &  0x2 ; }
+            void MarkBase()         {           flag |= 0x4 ; }
+            bool IsBase() const     { return    flag &  0x4; }
+            void MarkParlindorme()  {           flag |= 0x8; }
+            bool IsParlindorme()const{return    flag &  0x8; }
+
             void AddSeq ( const std::string & line, int k) ;
 
             std::string ToString() const ;
@@ -51,10 +54,12 @@ namespace BGIQD {
                 unsigned int nextContigNum()
                 {
                     maxContig += 2 ;
-                    return maxContig;
+                    return maxContig - 1;
                 }
 
                 ContigFastA MergeContig(const std::vector<std::string> & line) ;
+
+                ContigFastA MergeContig(const std::vector<unsigned  int> & line) ;
 
                 void LoadContig(const std::string & file) ;
 

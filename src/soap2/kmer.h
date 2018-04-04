@@ -4,18 +4,11 @@
 namespace BGIQD {
     namespace SOAP2 {
 #if K127mer
-        struct Kmer {
-            uint64_t khh;
-            uint64_t khl;
-            uint64_t klh;
-            uint64_t kll;
-        };
+        typedef uint64_t Kmer[4];
 #else
-        struct Kmer {
-            uint64_t kh;
-            uint64_t kl;
-        };
+        typedef uint64_t Kmer[2];
 #endif
+
     }
 }
 #endif //__SOAP2_KMER_H__
