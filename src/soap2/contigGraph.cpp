@@ -9,9 +9,19 @@
 namespace BGIQD{
     namespace SOAP2{
 
-
         // -------------------------- struct Edge ---------------------------------
-
+        int Edge::ArcNum() const 
+        {
+            int ret = 0 ;
+            Arc * cur_arc =  arc ;
+            while( cur_arc != NULL )
+            {
+                ret ++ ; 
+                cur_arc = cur_arc->next;
+            }
+            return ret ;
+        }
+/*
         void Edge::CheckLinear( Edge & a , Edge & b_a )
         {
             if( a.arc && (a.arc->next == 0) && b_a.arc && (b_a.arc->next == 0) )
@@ -43,7 +53,7 @@ namespace BGIQD{
                 b_a.flag |= 0x2;
             }
         }
-
+*/
         void Edge::DepthSearch(Edge * array 
                 ,std::list<Edge> & stack
                 ,std::map<unsigned int , Edge> & history

@@ -1,5 +1,6 @@
 #include "stLFR/LineGroup.h"
 #include "common/files/file_reader.h"
+#include "common/string/stringtools.h"
 #include <sstream>
 #include <cassert>
 
@@ -82,5 +83,25 @@ namespace BGIQD{
             }
             delete in ;
         }
+
+        /******************************************************************************/
+        void ContigRoadFills::LoadContigRoadFills( const std::string &file )
+        {
+            auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(file);
+            std::string line;
+            while(!std::getline(*in,line).eof())
+            {
+                auto items = BGIQD::STRING::split(line,"\t");
+                ContigRoadFill fill;
+                for( const auto & i : items )
+                {
+                    fill.push_back(std::stoul(i));
+                }
+                fills.push_back(ContigRoadFill());
+                (*fills.rbegin()).swap(fill);
+            }
+            delete in;
+        }
+
     }
 }

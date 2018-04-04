@@ -40,6 +40,13 @@ namespace BGIQD {
             std::vector<ContigRoad>  roads;
         };
 
+
+        typedef std::vector<unsigned int> ContigRoadFill ;
+        struct ContigRoadFills
+        {
+            void LoadContigRoadFills( const std::string & file );
+            std::vector<ContigRoadFill>  fills;
+        };
     }
 }
 

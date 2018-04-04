@@ -178,7 +178,9 @@ struct GlobalContig
         {
             contigs[start-1].MarkMerge();
         }
+
         float cov = ret.cov * ret.length + ret.cov * K ;
+
         for( int i = 1 ; i < (int)line.size() ; i++ )
         {
             unsigned int next_id = std::stoul(line[i]);

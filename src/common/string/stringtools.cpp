@@ -1,7 +1,15 @@
 #include "stringtools.h"
+#include <sstream>
 
 namespace BGIQD{
 namespace STRING{
+
+    std::string itos( int i )
+    {
+        std::ostringstream ost;
+        ost<<i;
+        return ost.str();
+    }
 
     std::vector<std::string>  split( const std::string & str , const std::string & spliter ) 
     {

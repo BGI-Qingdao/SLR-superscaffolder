@@ -7,8 +7,10 @@
 #include <list>
 #include <set>
 #include <functional>
+#include "soap2/kmer.h"
 namespace BGIQD {
     namespace SOAP2 {
+
 
         // --------------------Graph Edge Arc --------------------
         struct Arc
@@ -17,7 +19,6 @@ namespace BGIQD {
             int cov;
             Arc * next ;
         };
-
 
         struct Edge
         {
@@ -28,11 +29,14 @@ namespace BGIQD {
             int cov;
             int flag ; // bits marker
             Arc * arc;
+            Kmer from ;
+            Kmer to ;
+            //Flag
 
-            //Flag 
             bool IsDelete() const { return flag & 0x1 ; }
             bool IsRepeat() const { return flag & 0x2 ; }
             bool IsUnique() const { return flag & 0x4 ; }
+            void SetUnique()      { flag |= 0x4 ; }
             bool IsLinear() const { return flag & 0x8 ; }
             bool IsTipStart() const { return flag & 0x10 ; }
             bool IsTipEnd() const { return flag & 0x20 ; }
@@ -40,14 +44,16 @@ namespace BGIQD {
             bool IsJumpStep() const { return flag & 0x80 ; }
 
             void SetKey() { flag |= 0x40 ; }
-            void JumpStep() { flag |= 0x80 ;}
-
+            void SetDelete() { flag |= 0x1 ; }
+            void JumpStep() { flag |= 0x80 ; }
+            int ArcNum() const ;
+            /*
             static void CheckLinear( Edge & a , Edge & b_a );
 
             static void CheckTip( Edge &a , Edge &b_a );
 
             static void CheckRepeat(Edge &a , Edge &b_a );
-
+            */
             // Depth seach with neibs
             void DepthSearch(Edge * array 
                     ,std::list<Edge> & stack
@@ -58,10 +64,7 @@ namespace BGIQD {
                     ,const std::map<unsigned int , float> & neibs
                     ,int max_length = 1000000);
 
-
-
         };
-
 
         // contig as vertex.
         // arc between contig as directed edge.
@@ -135,8 +138,6 @@ namespace BGIQD {
             int total_size;
             int jump_conn;
         }; // struct KeyEdge
-
-
     }//namespace SOAP2
 }//namespace BGIQD
 

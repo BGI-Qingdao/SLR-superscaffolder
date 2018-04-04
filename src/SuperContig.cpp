@@ -737,14 +737,14 @@ int main(int argc , char **argv)
         for( auto j : config.keys )
         {
             t_jobs.AddJob([&config, j, &searchDepth ](){
-                    findConnection(config,j, searchDepth.to_int() ,false  );
+                    findConnection(config,j ,false  , searchDepth.to_int());
                     }
                     );
             if( config.edge_array[j].id != config.edge_array[j].bal_id )
             {
                 unsigned int k = config.edge_array[j].bal_id;
                 t_jobs.AddJob([&config, k, &searchDepth](){
-                        findConnection(config, k, searchDepth.to_int() ,true );
+                        findConnection(config, k ,true , searchDepth.to_int());
                         }
                         );
             }
@@ -796,7 +796,7 @@ int main(int argc , char **argv)
                     (*deg)<<curr.edge_id<<"\t-\t";
                     for( auto i: curr.from )
                     {
-                        (*deg)<<i.second.to<<":"<<i.second.length<<"\t";
+                        (*deg)<<i.second.to<<":"<<i.second.length<<":"<<(i.second.IsPositive() ? '+' :'-')<<"\t";
                     }
                     *(deg)<<std::endl;
                 }
@@ -805,7 +805,7 @@ int main(int argc , char **argv)
                     (*deg)<<curr.edge_id<<"\t+\t";
                     for( auto i: curr.to)
                     {
-                        (*deg)<<i.second.to<<":"<<i.second.length<<"\t";
+                        (*deg)<<i.second.to<<":"<<i.second.length<<":"<<(i.second.IsPositive() ? '+' :'-')<<"\t";
                     }
                     *(deg)<<std::endl;
                 }
