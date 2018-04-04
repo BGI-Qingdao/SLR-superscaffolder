@@ -52,6 +52,8 @@ source_cpp =	contig_barcode.cpp \
 				common/args/argsparser.cpp\
 				soap2/loadGraph.cpp\
 				soap2/contigGraph.cpp\
+				soap2/contigFasta.cpp\
+				soap2/contigType.cpp\
 
 
 test_cpp   =	test.cpp\
@@ -120,6 +122,9 @@ FillContigRoad_o 		= ${FillContigRoad_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 ContigRoadFill2Fasta_cpp= ContigRoadFill2Fasta.cpp
 ContigRoadFill2Fasta_o	= ${ContigRoadFill2Fasta_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
+MergeContig_cpp			= MergeContig.cpp
+MergeContig_o			= ${MergeContig_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+
 test_o 	   =	${test_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
 
@@ -129,13 +134,15 @@ test_o 	   =	${test_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 jobs 	   =	BarcodeOnContig BarcodeOnContig_NoRef FormatBarcodeOnRef BarcodeOnBin BinCluster \
 				ContigTypeByRef ContigGraphType StaticsticUnique  UnicomGraph \
 				ClusterGap job12 LinearClusterResult Sam2ReadInContig MergeClusterResult \
-				SuperContig LinkCheck LinkCheck_1 FillContigRoad ContigRoadFill2Fasta 
+				SuperContig LinkCheck LinkCheck_1 FillContigRoad ContigRoadFill2Fasta \
+				MergeContig
 jobs_o 	   =	${BarcodeOnContig_o} ${BarcodeOnContig_NoRef_o}  ${BarcodeOnBin_o} ${FormatBarcodeOnRef_o} \
 				${BinCluster_o} ${ContigTypeByRef_o}\
 				${ContigGraphType_o}  ${StaticsticUnique_o}  ${UnicomGraph_o} \
 				${ClusterGap_o} ${job_12_o} ${LinearClusterResult_o} ${Sam2ReadInContig_o} \
 				${MergeClusterResult_o} ${SuperContig_o} ${LinkCheck_o} \
-				${FillContigRoad_o} ${ContigRoadFill2Fasta_o} ${LinkCheck_1}
+				${FillContigRoad_o} ${ContigRoadFill2Fasta_o} ${LinkCheck_1_o} \
+				${MergeContig_o}
 
 all : test ${jobs}
 
@@ -199,6 +206,8 @@ FillContigRoad: clean ${FillContigRoad_o}
 ContigRoadFill2Fasta : clean  ${ContigRoadFill2Fasta_o}
 	${CXX} ${DEUBG_CXX} ${ContigRoadFill2Fasta_o} -o ContigRoadFill2Fasta
 
+MergeContig : clean ${MergeContig_o}
+	${CXX} ${DEUBG_CXX} ${MergeContig_o} -o MergeContig
 
 test: clean ${test_o} ${source_h}
 	${CXX} ${DEUBG_CXX} ${test_o} -o test
