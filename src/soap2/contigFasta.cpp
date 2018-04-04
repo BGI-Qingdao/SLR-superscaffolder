@@ -168,6 +168,7 @@ namespace BGIQD {
                         {
                             maxContig = tmp.id;
                         }
+                        tmp.length = 0 ;
                     }
                     tmp.Init(line,K);
                 }
@@ -175,6 +176,17 @@ namespace BGIQD {
                 {
                     tmp.AddSeq(line,K);
                 }
+            }
+            if( tmp.length > 0 )
+            {
+                assert(tmp.IsSeqComplete(K));
+                contigs[tmp.id] = tmp;
+                contigs[tmp.id].MarkBase() ;
+                if(tmp.id > maxContig )
+                {
+                    maxContig = tmp.id;
+                }
+                tmp.length = 0 ;
             }
             delete in;
         }
