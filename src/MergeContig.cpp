@@ -256,7 +256,7 @@ struct AppConfig
                 unsigned int tail = line[line.size()-1];
                 memcpy ( curr.from , graph_ea.edge_array[head].from , sizeof(BGIQD::SOAP2::Kmer));
                 memcpy ( curr.to, graph_ea.edge_array[tail].to, sizeof(BGIQD::SOAP2::Kmer));
-
+                curr.cov = ret.cov * 10 ;
                 ret.MarkBase() ;
                 if( BGIQD::SEQ::isSeqPalindrome( ret.K + ret.linear))
                     ret.MarkParlindorme();
@@ -264,6 +264,7 @@ struct AppConfig
                 // bal_id
                 auto & bal= new_graph_ea.edge_array[i+1] ;
                 bal.length = curr.length ;
+                bal.cov = curr.cov;
                 unsigned int head_bal = graph_ea.edge_array[tail].bal_id;
                 unsigned int tail_bal = graph_ea.edge_array[head].bal_id;
                 memcpy ( curr.from , graph_ea.edge_array[head_bal].from , sizeof(BGIQD::SOAP2::Kmer));
@@ -435,7 +436,7 @@ struct AppConfig
 
             for( unsigned int i = 0 ; i < new_graph_ea.contigTotalNum ; i++ )
             {
-                const auto & curr = graph_ea.edge_array[i] ;
+                const auto & curr = new_graph_ea.edge_array[i] ;
                 if ( curr.IsDelete() || curr.length < 1)
                     continue;
                 const auto & c = contig_fasta_map.contigs.at(curr.id) ;
