@@ -267,8 +267,8 @@ struct AppConfig
                 bal.cov = curr.cov;
                 unsigned int head_bal = graph_ea.edge_array[tail].bal_id;
                 unsigned int tail_bal = graph_ea.edge_array[head].bal_id;
-                memcpy ( curr.from , graph_ea.edge_array[head_bal].from , sizeof(BGIQD::SOAP2::Kmer));
-                memcpy ( curr.to, graph_ea.edge_array[tail_bal].to, sizeof(BGIQD::SOAP2::Kmer));
+                memcpy ( bal.from , graph_ea.edge_array[head_bal].from , sizeof(BGIQD::SOAP2::Kmer));
+                memcpy ( bal.to, graph_ea.edge_array[tail_bal].to, sizeof(BGIQD::SOAP2::Kmer));
             }
         }
 
