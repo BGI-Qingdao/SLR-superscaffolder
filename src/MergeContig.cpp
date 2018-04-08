@@ -47,7 +47,7 @@ struct AppConfig
     BGIQD::stLFR::ContigRoadFills fills;
     BGIQD::SOAP2::ContigFastAMap contig_fasta_map;
 
-    std::map<unsigned int , unsigned int > id_map;
+    std::map< unsigned int , unsigned int > id_map;
 
     int K;
     int round ;
@@ -60,7 +60,7 @@ struct AppConfig
         LINEAR = 3 ,
     };
 
-    std::pair<ContigStatus , BGIQD::SOAP2::Edge & > GetEdge( unsigned int id )
+    std::pair< ContigStatus , BGIQD::SOAP2::Edge & > GetEdge( unsigned int id )
     {
         if( id <= graph_ea.contigTotalNum )
         {
@@ -110,7 +110,7 @@ struct AppConfig
         unsigned int new_contig_id_new = 0 ;
         unsigned int new_arc_id = 0 ;
         new_graph_ea.contigTotalNum = fills.fills.size() * 2 ;
-        for( const auto & fill: fills.fills )
+        for ( const auto & fill: fills.fills )
         {
             auto & head = graph_ea.edge_array[fill[0]];
             auto & head_bal = graph_ea.edge_array[head.bal_id];
@@ -232,7 +232,70 @@ struct AppConfig
 
     void Linear() 
     {
+        auto detect_node_linear = [&]( BGIQD::SOAP2::Edge  & node )
+        {
+            if ( node.bal_id == node.id )
+                return false ;
+            BGIQD::SOAP2::Arc * arc ;
+            // down 
+            arc = node.arc ;
+            int count_to = 0 , count_from = 0;
+            while( arc != NULL )
+            {
+                auto ret   = GetEdge(arc->to) ;
+                if ( ret.first !=  ContigStatus::UNKNOW &&  ret.second.IsDelete() )
+                {
+                    continue;
+                }
+                count_to ++ ;
+            }
+            // up
+            arc = graph_ea.edge_array[node.bal_id].arc ;
+            while( arc != NULL )
+            {
+                auto ret   = GetEdge(arc->to) ;
+                if ( ret.first !=  ContigStatus::UNKNOW &&  ret.second.IsDelete() )
+                {
+                    continue;
+                }
+                count_from ++ ;
+            }
+
+            return ( count_to == 1 && count_from == 1 );
+        };
+
         //TODO
+        for( unsigned int i = 1 ; i <= graph_ea.contigTotalNum ; i++ )
+        {
+            auto & curr = graph_ea.edge_array[i];
+            if( curr.bal_id != curr.id ) 
+            {
+                i ++ ;
+            }
+            else
+            {
+                curr.SetPalindrome();
+                continue ;
+            }
+            if( curr.IsDelete() )
+                continue ;
+            if( detect_node_linear( curr ) )
+            {
+                curr.SetLinear();
+                graph_ea.edge_array[curr.bal_id].SetLinear() ;
+            }
+        }
+
+        for( unsigned int i = 1 ; i <= graph_ea.contigTotalNum ; i++ )
+        {
+            auto & curr = graph_ea.edge_array[i];
+            if ( curr.IsDelete() || curr.IsPalindrome() || ! curr.IsLinear() || curr.IsMarked() )
+            {
+                continue ;
+            }
+
+            
+        }
     }
 
     void ReGenerate()

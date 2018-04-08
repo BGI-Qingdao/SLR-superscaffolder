@@ -23,6 +23,9 @@ namespace BGIQD {
 
             std::vector<unsigned int > contig_path;
 
+
+            void AddGroup( const std::vector<unsigned int > & a );
+
             enum FillStatus
             {
                 None = 0 ,

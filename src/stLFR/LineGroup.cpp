@@ -69,6 +69,12 @@ namespace BGIQD{
             return std::make_pair(group[start] , group[start+1]);
         }
 
+        void ContigRoad::AddGroup( const std::vector<unsigned int > & a )
+        {
+            headin = true ;
+            tailin = true ;
+            
+        }
 
         void ContigRoads::LoadRoads(const std::string &file)
         {

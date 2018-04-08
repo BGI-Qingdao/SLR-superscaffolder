@@ -33,12 +33,14 @@ namespace BGIQD {
             Kmer to ;
 
             //Flag
-            void SetUnique()        { flag |= 0x4 ; }
-            void SetKey()           { flag |= 0x40 ; }
             void SetDelete()        { flag |= 0x1 ; }
+            void SetUnique()        { flag |= 0x4 ; }
+            void SetLinear()        { flag |= 0x8 ; }
+            void SetKey()           { flag |= 0x40 ; }
             void JumpStep()         { flag |= 0x80 ; }
             void SetPalindrome()    { flag |= 0x100 ; }
             void SetBase()          { flag |= 0x200 ; }
+            void SetMarked()        { flag |= 0x400 ; }
 
             bool IsDelete() const   { return flag & 0x1 ; }
             bool IsRepeat() const   { return flag & 0x2 ; }
@@ -50,7 +52,9 @@ namespace BGIQD {
             bool IsJumpStep() const { return flag & 0x80 ; }
             bool IsPalindrome()const{ return flag & 0x100 ; }
             bool IsBase() const     { return flag & 0x200 ; }
+            bool IsMarked() const   { return flag & 0x400 ; }
             int ArcNum() const ;
+            bool LinearDetect() const ;
             /*
             static void CheckLinear( Edge & a , Edge & b_a );
 

@@ -8,6 +8,7 @@
 #include "common/files/file_writer.h"
 #include "common/freq/freq.h"
 #include <atomic>
+#include <algorithm>
 
 BGIQD::LOG::logger lger;
 std::atomic<int> index ;
@@ -16,12 +17,11 @@ std::atomic<int> index ;
 void findConnection(BGIQD::SOAP2::GlobalConfig & config
         , unsigned int edge_id
         , bool order
-        , int max_depth = 1000000
+        , int max_depth
         , bool detail = false
         )
 {
-
-    auto get_min_length = [](const std::vector<std::list<BGIQD::SOAP2::Edge>> &vec_list)
+    auto get_min_length_v1 = [](const std::vector<std::list<BGIQD::SOAP2::Edge>> &vec_list)
     {
         int min_length = 0;
         for( const auto & list : vec_list)
@@ -38,6 +38,71 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
         }
         return min_length ;
     };
+
+    auto get_min_length_v2 = [](const std::vector<std::list<BGIQD::SOAP2::Edge>> &vec_list 
+            , const std::map<unsigned int , int >& mid_len)
+    {
+        int min_length = 0;
+        for( const auto & list : vec_list)
+        {
+            int length = 0 ;
+            for( auto i = list.begin() ; i != list.end() ; i = std::next(i))
+            {
+                if( i == list.begin() || std::next(i) == list.end() )
+                    continue ;
+                if( mid_len.find( i->id ) != mid_len.end() )
+                {
+                    length += mid_len.at(i->id) ;
+                    break;
+                }
+                length += i->length ;
+            }
+            if( min_length == 0 || min_length > length )
+                min_length = length ;
+        }
+        return min_length ;
+    };
+
+    auto get_mid_min = [&get_min_length_v1, &get_min_length_v2] (const std::map<unsigned int ,std::vector<std::list<BGIQD::SOAP2::Edge> > >&mid_list)
+    {
+        // round 1
+        std::vector<std::tuple<unsigned int , int>> ret_map;
+        for( const auto & i : mid_list )
+        {
+            ret_map.push_back(std::make_tuple(i.first,get_min_length_v1(i.second)));
+        }
+        std::sort( ret_map.begin() ,ret_map.end());
+        // round 2
+        for( size_t i = 0 ; i + 1< ret_map.size() ; i ++ )
+        {
+            unsigned int min_length , min_id ;
+            std::tie(min_id , min_length) = ret_map[i];
+            std::map<unsigned int , int > min_map ;
+            min_map[min_id] = min_length ;
+            for( size_t j = i + 1 ; j < ret_map.size() ; j ++ )
+            {
+                int curr_length ;
+                unsigned int curr_id ;
+                std::tie(curr_id, curr_length) = ret_map[j];
+                const auto a_list= mid_list.at(curr_id);
+                int final_length = get_min_length_v2(a_list , min_map);
+                if( final_length < curr_length )
+                {
+                    std::get<1>(ret_map[j]) = final_length ;
+                }
+            }
+        }
+        std::map<unsigned int , int > ret ;
+        for( const auto & i : ret_map )
+        {
+            unsigned int id ;
+            int len ;
+            std::tie(id,len) = i ;
+            ret[id] = len ;
+        }
+        return ret ;
+    };
+
     BGIQD::SOAP2::Edge & root = config.edge_array[edge_id];
     unsigned int path_i = edge_id;
     //unsigned int base_i = order ? config.edge_array[edge_id].bal_id : edge_id ;
@@ -47,10 +112,12 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
     std::map<unsigned int , std::vector<std::list<BGIQD::SOAP2::Edge> > > mids;
     if ( order )
         config.edge_array[path_i].DepthSearch( config.edge_array , stack,
-                history, paths , mids ,config.edge_array[path_i].length , config.connections.at(root.bal_id) );
+                history, paths , mids ,config.edge_array[path_i].length ,
+                config.connections.at(root.bal_id),max_depth );
     else 
         config.edge_array[path_i].DepthSearch( config.edge_array , stack,
-                history, paths , mids ,config.edge_array[path_i].length , config.connections.at(root.id) );
+                history, paths , mids ,config.edge_array[path_i].length ,
+                config.connections.at(root.id) , max_depth);
     //if( detail )
     //{
     //    for( auto const & i : paths )
@@ -100,6 +167,7 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
     //    }
     //}
     index ++ ;
+    auto mid_map = get_mid_min( mids );
     for(auto & j : paths)
     {
         /*std::cerr<<j.first<<'\t'<<j.second[0].size()<<'\t';
@@ -111,7 +179,7 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
           std::cerr<<std::endl;*/
         unsigned int to_id = j.first ;
         unsigned int to_id_in_path = j.second[0].front().id ;
-        int length  = get_min_length(j.second);
+        int length  = get_min_length_v2(j.second , mid_map);
         //
         //  A1->B1
         //  A2<-B2
@@ -157,12 +225,12 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
         {
             {
                 std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[root.bal_id]]);
-                BGIQD::SOAP2::KeyConn conn{j.first,0,0};
+                BGIQD::SOAP2::KeyConn conn{j.first,length,0};
                 config.key_array[config.key_map[root.bal_id]].from[j.first]= conn;
             }
             {
                 std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[j.first]]);
-                BGIQD::SOAP2::KeyConn conn{root.bal_id,0,0};
+                BGIQD::SOAP2::KeyConn conn{root.bal_id,length,0};
                 config.key_array[config.key_map[j.first]].from[(root.bal_id)] = conn;
             }
         }
@@ -174,13 +242,13 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
         {
             {
                 std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[root.bal_id]]);
-                BGIQD::SOAP2::KeyConn conn{j.first,0,0};
+                BGIQD::SOAP2::KeyConn conn{j.first,length,0};
                 conn.SetPostive();
                 config.key_array[config.key_map[root.bal_id]].from[j.first]= conn;
             }
             {
                 std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[j.first]]);
-                BGIQD::SOAP2::KeyConn conn{root.bal_id,0,0};
+                BGIQD::SOAP2::KeyConn conn{root.bal_id,length,0};
                 conn.SetPostive();
                 config.key_array[config.key_map[j.first]].to[(root.bal_id)] = conn;
             }
@@ -711,7 +779,7 @@ int main(int argc , char **argv)
         if(! searchDepth.setted )
         {
             searchDepth.setted = true ;
-            searchDepth.d.i = 1000000;
+            searchDepth.d.i = 10000;
         }
     lger<<BGIQD::LOG::lstart()<<"parse args end ... "<<BGIQD::LOG::lend();
 
