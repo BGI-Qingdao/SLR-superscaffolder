@@ -271,23 +271,23 @@ struct AppConfig
             while( arc != NULL )
             {
                 auto ret   = GetEdge(arc->to) ;
-                if ( ret.first !=  ContigStatus::UNKNOW &&  ret.second.IsDelete() )
+                arc = arc->next;
+                if ( ret.first !=  ContigStatus::UNKNOW && ret.second.IsDelete() )
                 {
                     continue;
                 }
-                arc = arc->next;
                 count_to ++ ;
             }
             // up
-            arc = graph_ea.edge_array[node.bal_id].arc ;
+            arc = GetEdge(node.bal_id).second.arc ;
             while( arc != NULL )
             {
-                auto ret   = GetEdge(arc->to) ;
+                auto ret  = GetEdge(arc->to) ;
+                arc = arc->next;
                 if ( ret.first !=  ContigStatus::UNKNOW &&  ret.second.IsDelete() )
                 {
                     continue;
                 }
-                arc = arc->next;
                 count_from ++ ;
             }
             return ( count_to == 1 && count_from == 1 );
@@ -481,8 +481,8 @@ struct AppConfig
             BGIQD::SOAP2::Arc* arc = edge.arc ;
             while( arc != NULL )
             {
-                auto ret   = GetEdge(arc->to) ;
-                if ( ret.first !=  ContigStatus::UNKNOW &&! ret.second.IsDelete() )
+                auto ret = GetEdge(arc->to) ;
+                if ( ret.first !=  ContigStatus::UNKNOW && ! ret.second.IsDelete() )
                 {
                     return arc ;
                 }
@@ -490,15 +490,17 @@ struct AppConfig
             }
             return (BGIQD::SOAP2::Arc* )NULL ;
         };
-        auto ret = get_valid_arc(edge) ;
-        if( ret != NULL )
+        BGIQD::SOAP2::Arc * ret = get_valid_arc(edge) ;
+        BGIQD::SOAP2::Edge * next ;
+        std::set<unsigned int> uniques ;
+        uniques.insert(edge.id);
+        next = &GetEdge( ret->to ).second ;
+        while( next && next->IsLinear() && uniques.find( next->id) == uniques.end() )
         {
-            auto next = GetEdge( ret->to ) ;
-            if( next.second.IsLinear())
-            {
-                path.push_back( ret->to ) ;
-                GetLinearFromNode( next.second , path );
-            }
+            uniques.insert( next->id );
+            path.push_back( ret->to ) ;
+            ret = get_valid_arc(*next);
+            next = &GetEdge(ret->to).second;
         }
         return ;
     }
@@ -757,34 +759,28 @@ struct AppConfig
             if ( curr.IsDelete() || curr.length < 1 )
                 continue;
             const auto & c = contig_fasta_map.contigs.at(curr.id) ;
-            (*out)<<c.ToString()<<std::endl;
+            (*out)<<c.ToString(NewId(curr.id))<<std::endl;
             // jump bal_id
             if( curr.bal_id != curr.id )
                 i ++ ;
         }
 
-        for( unsigned int i = 0 ; i < new_graph_ea.contigTotalNum ; i++ )
+        for( unsigned int i = 0 ; i < new_graph_ea.contigTotalNum ; i+=2 )
         {
             const auto & curr = new_graph_ea.edge_array[i] ;
             if ( curr.IsDelete() || curr.length < 1)
                 continue;
             const auto & c = contig_fasta_map.contigs.at(curr.id) ;
-            (*out)<<c.ToString()<<std::endl;
-            // jump bal_id
-            if( ! c.IsParlindorme() )
-                i ++ ;
+            (*out)<<c.ToString(NewId(curr.id))<<std::endl;
         }
 
-        for( unsigned int i = 0 ; i < linear_graph_ea.contigTotalNum ; i++ )
+        for( unsigned int i = 0 ; i < linear_graph_ea.contigTotalNum ; i+=2 )
         {
             const auto & curr = linear_graph_ea.edge_array[i] ;
             if ( curr.IsDelete() || curr.length < 1)
                 continue;
             const auto & c = contig_fasta_map.contigs.at(curr.id) ;
-            (*out)<<c.ToString()<<std::endl;
-            // jump bal_id
-            if( ! c.IsParlindorme() )
-                i ++ ;
+            (*out)<<c.ToString(NewId(curr.id))<<std::endl;
         }
 
         delete out;
