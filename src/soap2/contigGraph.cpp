@@ -120,7 +120,8 @@ namespace BGIQD{
                         ,paths
                         ,mids
                         ,total_length + next.length
-                        ,neibs);
+                        ,neibs
+                        ,max_depth);
             }
             if(step)
                 top.JumpStep();

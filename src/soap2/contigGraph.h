@@ -70,7 +70,7 @@ namespace BGIQD {
                     ,std::map<unsigned int , std::vector<std::list<Edge>> > &mids 
                     ,int total_length
                     ,const std::map<unsigned int , float> & neibs
-                    ,int max_length = 1000000);
+                    ,int max_length );
 
         };
 

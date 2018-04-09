@@ -1,4 +1,3 @@
-
 #include "common/args/argsparser.h"
 #include "common/log/log.h"
 #include "common/log/logfilter.h"
@@ -45,6 +44,7 @@ struct AppConfig
     BGIQD::SOAP2::GraphEA linear_graph_ea; // for new graph from linear step
 
     BGIQD::stLFR::ContigRoadFills fills;
+    BGIQD::stLFR::ContigRoadFills linear_fill;
     BGIQD::SOAP2::ContigFastAMap contig_fasta_map;
 
     std::map< unsigned int , unsigned int > id_map;
@@ -87,7 +87,7 @@ struct AppConfig
         // load original data 
         graph_ea.LoadEdge(fnames.updatedEdge(round),K);
         graph_ea.LoadArc(fnames.Arc(round));
-        // prepare for detect contig type 
+        // prepare for detect contig type
         detector.Init(K);
         for( unsigned int i = 0 ; i < graph_ea.contigTotalNum; i++ )
         {
@@ -208,6 +208,7 @@ struct AppConfig
                 continue;
             id_map[curr.id] = new_id ++ ;
         }
+
         // Reset super
         for( unsigned int i = 0 ; i < new_graph_ea.contigTotalNum ; i++ )
         {
@@ -230,6 +231,7 @@ struct AppConfig
         }
     }
 
+
     void Linear() 
     {
         auto detect_node_linear = [&]( BGIQD::SOAP2::Edge  & node )
@@ -237,7 +239,7 @@ struct AppConfig
             if ( node.bal_id == node.id )
                 return false ;
             BGIQD::SOAP2::Arc * arc ;
-            // down 
+            // down
             arc = node.arc ;
             int count_to = 0 , count_from = 0;
             while( arc != NULL )
@@ -260,7 +262,6 @@ struct AppConfig
                 }
                 count_from ++ ;
             }
-
             return ( count_to == 1 && count_from == 1 );
         };
 
@@ -286,6 +287,7 @@ struct AppConfig
             }
         }
 
+
         for( unsigned int i = 1 ; i <= graph_ea.contigTotalNum ; i++ )
         {
             auto & curr = graph_ea.edge_array[i];
@@ -293,8 +295,52 @@ struct AppConfig
             {
                 continue ;
             }
-
-            
+            // pass bal id
+            i ++ ;
+            // get linear path 
+            auto & bal = graph_ea.edge_array[curr.bal_id];
+            std::vector<unsigned int> path_to ;
+            std::vector<unsigned int> path_from ;
+            GetLinearFromNode( curr , path_to ) ;
+            GetLinearFromNode( bal , path_from );
+            // mark used node
+            if( path_to.size() ==  0 || path_from.size() == 0 )
+            {
+                continue ;
+            }
+            else
+            {
+                curr.SetMarked();
+                bal.SetMarked() ;
+            }
+            for( auto next : path_to )
+            {
+                auto next_1 = GetEdge( next );
+                auto next_2 = GetEdge( next_1.second.bal_id );
+                next_1.second.SetMarked() ;
+                next_2.second.SetMarked() ;
+            }
+            std::stack<unsigned int> path_from_bal ;
+            for( auto next : path_from )
+            {
+                auto next_1 = GetEdge( next );
+                auto next_2 = GetEdge( next_1.second.bal_id );
+                path_from_bal.push(next_1.second.bal_id);
+                next_1.second.SetMarked() ;
+                next_2.second.SetMarked() ;
+            }
+            std::vector<unsigned int> total ;
+            while( ! path_from_bal.empty() )
+            {
+                total.push_back(path_from_bal.top());
+                path_from_bal.pop();
+            }
+            total.push_back(curr.id ) ;
+            for( auto next : path_to )
+            {
+                total.push_back(next) ; 
+            }
+            linear_fill.fills.push_back(total) ;
         }
     }
 
@@ -306,213 +352,242 @@ struct AppConfig
     }
 
     private:
-        void GenerateNewContigSeq_super()
+
+    void GetLinearFromNode(const BGIQD::SOAP2::Edge & edge , std::vector<unsigned int> & path)
+    {
+        auto get_valid_arc = [&](const BGIQD::SOAP2::Edge & edge)
         {
-            for( unsigned int i = 0 ; i < new_graph_ea.contigTotalNum ; i=i+2 )
+            BGIQD::SOAP2::Arc* arc = edge.arc ;
+            while( arc != NULL )
             {
-                auto & curr = new_graph_ea.edge_array[i] ;
-                const auto & line = fills.fills[i/2] ;
-                auto ret = contig_fasta_map.MergeContig(line);
-                assert( ret.id == curr.id );
-                curr.length = ret.length + K ;
-                unsigned int head = line[0];
-                unsigned int tail = line[line.size()-1];
-                memcpy ( curr.from , graph_ea.edge_array[head].from , sizeof(BGIQD::SOAP2::Kmer));
-                memcpy ( curr.to, graph_ea.edge_array[tail].to, sizeof(BGIQD::SOAP2::Kmer));
-                curr.cov = ret.cov * 10 ;
-                ret.MarkBase() ;
-                if( BGIQD::SEQ::isSeqPalindrome( ret.K + ret.linear))
-                    ret.MarkParlindorme();
-                contig_fasta_map.contigs[ret.id] = ret;
-                // bal_id
-                auto & bal= new_graph_ea.edge_array[i+1] ;
-                bal.length = curr.length ;
-                bal.cov = curr.cov;
-                unsigned int head_bal = graph_ea.edge_array[tail].bal_id;
-                unsigned int tail_bal = graph_ea.edge_array[head].bal_id;
-                memcpy ( bal.from , graph_ea.edge_array[head_bal].from , sizeof(BGIQD::SOAP2::Kmer));
-                memcpy ( bal.to, graph_ea.edge_array[tail_bal].to, sizeof(BGIQD::SOAP2::Kmer));
-            }
-        }
-
-        void GenerateNewContigSeq_linear()
-        {
-
-        }
-        unsigned int NewId(unsigned int old)
-        {
-            return id_map.at(old);
-        }
-
-        void AllocNewGraph()
-        {
-            int new_arc_num = 0 ;
-            for( const auto & fill : fills.fills)
-            {
-                const auto & head = graph_ea.edge_array[fill[0]];
-                const auto & head_bal = graph_ea.edge_array[head.bal_id];
-                const auto & tail = graph_ea.edge_array[*fill.rbegin()];
-                const auto & tail_bal = graph_ea.edge_array[tail.bal_id];
-                new_arc_num += head.ArcNum() + head_bal.ArcNum() + tail.ArcNum() + tail_bal.ArcNum() ;
-            }
-            int new_contig_num = fills.fills.size() * 2 ;
-
-            new_graph_ea.edge_array =( BGIQD::SOAP2::Edge* ) calloc ( sizeof(BGIQD::SOAP2::Edge), new_contig_num );
-            new_graph_ea.arc_array = (BGIQD::SOAP2::Arc *) calloc ( sizeof(BGIQD::SOAP2::Arc) , new_arc_num );
-
-            new_graph_ea.contigTotalNum = 0 ;
-            new_graph_ea.arcNum = 0 ;
-        }
-
-        void ReGenerate_Arc()
-        {
-            auto print = [&](std::ostream & ost , const BGIQD::SOAP2::Edge & curr)
-            {
-                if ( curr.IsDelete() )
-                    return ;
-                ost<<NewId(curr.id)<<'\t';
-                volatile BGIQD::SOAP2::Arc * next = curr.arc ;
-                while(next)
+                auto ret   = GetEdge(arc->to) ;
+                if ( ret.first !=  ContigStatus::UNKNOW &&! ret.second.IsDelete() )
                 {
-                    if(! GetEdge(next->to).second.IsDelete() )
-                    { 
-                        ost<<NewId(next->to)<<"\t"<<(int)next->cov<<"\t";
-                    }
-                    next = next->next ;
-                }
-                ost<<std::endl;
-            };
-            auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fnames.Arc(round+1));
-            for( unsigned int i = 1 ; i <= graph_ea.contigTotalNum ; i++ )
-            {
-                const auto & curr = graph_ea.edge_array[i] ;
-                print(*out,curr);
-            }
-            bool base = true ;
-            for( unsigned int i = 0 ; i < new_graph_ea.contigTotalNum ; i++ )
-            {
-                const auto & curr = new_graph_ea.edge_array[i] ;
-                print( *out , curr);
-                /*
-                if ( curr.IsDelete() )
-                    continue;
-                (*out)<<NewId(curr.id)<<"\t";
-                volatile BGIQD::SOAP2::Arc * next = curr.arc ;
-                while(next)
-                {
-                    if(! GetEdge(next->to).second.IsDelete() )
-                    { 
-                        (*out)<<NewId(next->to)<<"\t"<<(int)next->cov<<"\t";
-                    }
-                    next = next->next ;
-                }*/
-                if( base )
-                {
-                    // pass the bal_id that not exsist !
-                    if( contig_fasta_map.contigs.at(curr.id).IsParlindorme() )
-                        i ++ ;
-                    else
-                        base = false ;
-                }
-                else
-                {
-                    base = true ;
+                    return arc ;
                 }
             }
-            //TODO
-            delete out;
-        }
-
-        void ReGenerate_updatedEdge()
+            return (BGIQD::SOAP2::Arc* )NULL ;
+        };
+        auto ret = get_valid_arc(edge) ;
+        if( ret != NULL )
         {
-            auto print = []( std::ostream & out, const BGIQD::SOAP2::Edge & curr )
+            auto next = GetEdge( ret->to ) ;
+            if( next.second.IsLinear())
             {
-                (out)<<">length "<<curr.length
-                    <<','<<(int)(curr.bal_id-curr.id)
-                    <<','<<(int)(curr.cov)
-                    <<','<<std::hex<<curr.from[0]
-                    <<" "<<std::hex<<curr.from[1]
-#if K127mer
-                    <<" "<<std::hex<<curr.from[2]
-                    <<" "<<std::hex<<curr.from[3]
-#endif
-                    <<','<<std::hex<<curr.to[0]
-                    <<" "<<std::hex<<curr.to[1]
-#if K127mer
-                    <<" "<<std::hex<<curr.to[2]
-                    <<" "<<std::hex<<curr.to[3]
-#endif
-                    <<std::dec<<std::endl;
-            };
-            auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fnames.updatedEdge(round+1));
-            unsigned int line_num = 1 ;
-
-            for( unsigned int i = 1 ; i <= graph_ea.contigTotalNum ; i++ )
-            {
-                const auto & curr = graph_ea.edge_array[i] ;
-                if ( curr.IsDelete() )
-                    continue;
-                assert( line_num = NewId(curr.id)) ;
-                print(*out , curr );
-                line_num++;
+                path.push_back( ret->to ) ;
+                GetLinearFromNode( next.second , path );
             }
-            bool base = true ;
-            for( unsigned int i = 0 ; i < new_graph_ea.contigTotalNum ; i++ )
+        }
+        return ;
+    }
+
+    void GenerateNewContigSeq_super()
+    {
+        for( unsigned int i = 0 ; i < new_graph_ea.contigTotalNum ; i=i+2 )
+        {
+            auto & curr = new_graph_ea.edge_array[i] ;
+            const auto & line = fills.fills[i/2] ;
+            auto ret = contig_fasta_map.MergeContig(line);
+            assert( ret.id == curr.id );
+            curr.length = ret.length + K ;
+            unsigned int head = line[0];
+            unsigned int tail = line[line.size()-1];
+            memcpy ( curr.from , graph_ea.edge_array[head].from , sizeof(BGIQD::SOAP2::Kmer));
+            memcpy ( curr.to, graph_ea.edge_array[tail].to, sizeof(BGIQD::SOAP2::Kmer));
+            curr.cov = ret.cov * 10 ;
+            ret.MarkBase() ;
+            if( BGIQD::SEQ::isSeqPalindrome( ret.K + ret.linear))
+                ret.MarkParlindorme();
+            contig_fasta_map.contigs[ret.id] = ret;
+            // bal_id
+            auto & bal= new_graph_ea.edge_array[i+1] ;
+            bal.length = curr.length ;
+            bal.cov = curr.cov;
+            unsigned int head_bal = graph_ea.edge_array[tail].bal_id;
+            unsigned int tail_bal = graph_ea.edge_array[head].bal_id;
+            memcpy ( bal.from , graph_ea.edge_array[head_bal].from , sizeof(BGIQD::SOAP2::Kmer));
+            memcpy ( bal.to, graph_ea.edge_array[tail_bal].to, sizeof(BGIQD::SOAP2::Kmer));
+        }
+    }
+
+    void GenerateNewContigSeq_linear()
+    {
+
+    }
+    unsigned int NewId(unsigned int old)
+    {
+        return id_map.at(old);
+    }
+
+    void AllocNewGraph()
+    {
+        int new_arc_num = 0 ;
+        for( const auto & fill : fills.fills)
+        {
+            const auto & head = graph_ea.edge_array[fill[0]];
+            const auto & head_bal = graph_ea.edge_array[head.bal_id];
+            const auto & tail = graph_ea.edge_array[*fill.rbegin()];
+            const auto & tail_bal = graph_ea.edge_array[tail.bal_id];
+            new_arc_num += head.ArcNum() + head_bal.ArcNum() + tail.ArcNum() + tail_bal.ArcNum() ;
+        }
+        int new_contig_num = fills.fills.size() * 2 ;
+
+        new_graph_ea.edge_array =( BGIQD::SOAP2::Edge* ) calloc ( sizeof(BGIQD::SOAP2::Edge), new_contig_num );
+        new_graph_ea.arc_array = (BGIQD::SOAP2::Arc *) calloc ( sizeof(BGIQD::SOAP2::Arc) , new_arc_num );
+
+        new_graph_ea.contigTotalNum = 0 ;
+        new_graph_ea.arcNum = 0 ;
+    }
+
+    void ReGenerate_Arc()
+    {
+        auto print = [&](std::ostream & ost , const BGIQD::SOAP2::Edge & curr)
+        {
+            if ( curr.IsDelete() )
+                return ;
+            ost<<NewId(curr.id)<<'\t';
+            volatile BGIQD::SOAP2::Arc * next = curr.arc ;
+            while(next)
             {
-                const auto & curr = new_graph_ea.edge_array[i] ;
-                if ( curr.IsDelete() )
-                    continue;
-                assert( line_num = NewId(curr.id)) ;
-                print( *out, curr);
+                if(! GetEdge(next->to).second.IsDelete() )
+                { 
+                    ost<<NewId(next->to)<<"\t"<<(int)next->cov<<"\t";
+                }
+                next = next->next ;
+            }
+            ost<<std::endl;
+        };
+        auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fnames.Arc(round+1));
+        for( unsigned int i = 1 ; i <= graph_ea.contigTotalNum ; i++ )
+        {
+            const auto & curr = graph_ea.edge_array[i] ;
+            print(*out,curr);
+        }
+        bool base = true ;
+        for( unsigned int i = 0 ; i < new_graph_ea.contigTotalNum ; i++ )
+        {
+            const auto & curr = new_graph_ea.edge_array[i] ;
+            print( *out , curr);
+            /*
+               if ( curr.IsDelete() )
+               continue;
+               (*out)<<NewId(curr.id)<<"\t";
+               volatile BGIQD::SOAP2::Arc * next = curr.arc ;
+               while(next)
+               {
+               if(! GetEdge(next->to).second.IsDelete() )
+               { 
+               (*out)<<NewId(next->to)<<"\t"<<(int)next->cov<<"\t";
+               }
+               next = next->next ;
+               }*/
+            if( base )
+            {
                 // pass the bal_id that not exsist !
-                if( base )
-                {
-                    // pass the bal_id that not exsist !
-                    if( contig_fasta_map.contigs.at(curr.id).IsParlindorme() )
-                        i ++ ;
-                    else
-                        base = false ;
-                }
+                if( contig_fasta_map.contigs.at(curr.id).IsParlindorme() )
+                    i ++ ;
                 else
-                {
-                    base = true ;
-                }
+                    base = false ;
             }
-            //TODO
-            delete out;
+            else
+            {
+                base = true ;
+            }
         }
+        //TODO
+        delete out;
+    }
 
-        void ReGenerate_contig()
+    void ReGenerate_updatedEdge()
+    {
+        auto print = []( std::ostream & out, const BGIQD::SOAP2::Edge & curr )
         {
-            auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fnames.contig(round+1));
-            for( unsigned int i = 1 ; i <= graph_ea.contigTotalNum ; i++ )
-            {
-                const auto & curr = graph_ea.edge_array[i] ;
-                if ( curr.IsDelete() || curr.length < 1 )
-                    continue;
-                const auto & c = contig_fasta_map.contigs.at(curr.id) ;
-                (*out)<<c.ToString()<<std::endl;
-                // jump bal_id
-                if( curr.bal_id != curr.id )
-                    i ++ ;
-            }
+            (out)<<">length "<<curr.length
+                <<','<<(int)(curr.bal_id-curr.id)
+                <<','<<(int)(curr.cov)
+                <<','<<std::hex<<curr.from[0]
+                <<" "<<std::hex<<curr.from[1]
+#if K127mer
+                <<" "<<std::hex<<curr.from[2]
+                <<" "<<std::hex<<curr.from[3]
+#endif
+                <<','<<std::hex<<curr.to[0]
+                <<" "<<std::hex<<curr.to[1]
+#if K127mer
+                <<" "<<std::hex<<curr.to[2]
+                <<" "<<std::hex<<curr.to[3]
+#endif
+                <<std::dec<<std::endl;
+        };
+        auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fnames.updatedEdge(round+1));
+        unsigned int line_num = 1 ;
 
-            for( unsigned int i = 0 ; i < new_graph_ea.contigTotalNum ; i++ )
-            {
-                const auto & curr = new_graph_ea.edge_array[i] ;
-                if ( curr.IsDelete() || curr.length < 1)
-                    continue;
-                const auto & c = contig_fasta_map.contigs.at(curr.id) ;
-                (*out)<<c.ToString()<<std::endl;
-                // jump bal_id
-                if( ! c.IsParlindorme() )
-                    i ++ ;
-            }
-            //TODO
-            delete out;
+        for( unsigned int i = 1 ; i <= graph_ea.contigTotalNum ; i++ )
+        {
+            const auto & curr = graph_ea.edge_array[i] ;
+            if ( curr.IsDelete() )
+                continue;
+            assert( line_num = NewId(curr.id)) ;
+            print(*out , curr );
+            line_num++;
         }
-}config;
+        bool base = true ;
+        for( unsigned int i = 0 ; i < new_graph_ea.contigTotalNum ; i++ )
+        {
+            const auto & curr = new_graph_ea.edge_array[i] ;
+            if ( curr.IsDelete() )
+                continue;
+            assert( line_num = NewId(curr.id)) ;
+            print( *out, curr);
+            // pass the bal_id that not exsist !
+            if( base )
+            {
+                // pass the bal_id that not exsist !
+                if( contig_fasta_map.contigs.at(curr.id).IsParlindorme() )
+                    i ++ ;
+                else
+                    base = false ;
+            }
+            else
+            {
+                base = true ;
+            }
+        }
+        //TODO
+        delete out;
+    }
 
+    void ReGenerate_contig()
+    {
+        auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fnames.contig(round+1));
+        for( unsigned int i = 1 ; i <= graph_ea.contigTotalNum ; i++ )
+        {
+            const auto & curr = graph_ea.edge_array[i] ;
+            if ( curr.IsDelete() || curr.length < 1 )
+                continue;
+            const auto & c = contig_fasta_map.contigs.at(curr.id) ;
+            (*out)<<c.ToString()<<std::endl;
+            // jump bal_id
+            if( curr.bal_id != curr.id )
+                i ++ ;
+        }
+
+        for( unsigned int i = 0 ; i < new_graph_ea.contigTotalNum ; i++ )
+        {
+            const auto & curr = new_graph_ea.edge_array[i] ;
+            if ( curr.IsDelete() || curr.length < 1)
+                continue;
+            const auto & c = contig_fasta_map.contigs.at(curr.id) ;
+            (*out)<<c.ToString()<<std::endl;
+            // jump bal_id
+            if( ! c.IsParlindorme() )
+                i ++ ;
+        }
+        //TODO
+        delete out;
+    }
+
+} config;
 
 int main(int argc , char **argv)
 {
@@ -521,16 +596,16 @@ int main(int argc , char **argv)
 
     START_PARSE_ARGS
         DEFINE_ARG_DETAIL(std::string , prefix, 'o',false,"prefix");
-        DEFINE_ARG_DETAIL(int , kvalue, 'K',false,"K value");
-        DEFINE_ARG_DETAIL(int , t_num, 't',true,"thread num . default[8]");
-        DEFINE_ARG_DETAIL(int , round, 'r',true,"round num. default[0]");
+    DEFINE_ARG_DETAIL(int , kvalue, 'K',false,"K value");
+    DEFINE_ARG_DETAIL(int , t_num, 't',true,"thread num . default[8]");
+    DEFINE_ARG_DETAIL(int , round, 'r',true,"round num. default[0]");
     END_PARSE_ARGS
 
-    if(! t_num.setted )
-    {
-        t_num.setted = true;
-        t_num.d.i = 8;
-    }
+        if(! t_num.setted )
+        {
+            t_num.setted = true;
+            t_num.d.i = 8;
+        }
     if( !round.setted )
     {
         round.setted = true ;
