@@ -802,17 +802,18 @@ int main(int argc , char **argv)
         BGIQD::MultiThread::MultiThread t_jobs;
         t_jobs.Start(t_num.to_int());
         index  = 0;
+        int searchDepth_value = searchDepth.to_int();
         for( auto j : config.keys )
         {
-            t_jobs.AddJob([&config, j, &searchDepth ](){
-                    findConnection(config,j ,false  , searchDepth.to_int());
+            t_jobs.AddJob([&config, j, searchDepth_value](){
+                    findConnection(config,j ,false  , searchDepth_value);
                     }
                     );
             if( config.edge_array[j].id != config.edge_array[j].bal_id )
             {
                 unsigned int k = config.edge_array[j].bal_id;
-                t_jobs.AddJob([&config, k, &searchDepth](){
-                        findConnection(config, k ,true , searchDepth.to_int());
+                t_jobs.AddJob([&config, k, searchDepth_value](){
+                        findConnection(config, k ,true , searchDepth_value);
                         }
                         );
             }

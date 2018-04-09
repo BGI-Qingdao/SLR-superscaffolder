@@ -73,7 +73,8 @@ namespace BGIQD{
         {
             headin = true ;
             tailin = true ;
-            
+            linear_length = a.size();
+            group =a ;
         }
 
         void ContigRoads::LoadRoads(const std::string &file)

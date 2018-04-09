@@ -68,9 +68,12 @@ struct AppConfig
         }
         else if ( id <= graph_ea.contigTotalNum + new_graph_ea.contigTotalNum ) 
         {
-            return std::make_pair( ORIGINAL , std::ref(new_graph_ea.edge_array[id-graph_ea.contigTotalNum - 1]) );
+            return std::make_pair( SUPER, std::ref(new_graph_ea.edge_array[id-graph_ea.contigTotalNum - 1]) );
         }
-        //TODO
+        else if ( id <= graph_ea.contigTotalNum + new_graph_ea.contigTotalNum + linear_graph_ea.contigTotalNum )
+        {
+            return std::make_pair( LINEAR, std::ref(linear_graph_ea.edge_array[id-graph_ea.contigTotalNum - new_graph_ea.contigTotalNum - 1]) );
+        }
         static BGIQD::SOAP2::Edge error ;
         assert(0);
         return std::make_pair( UNKNOW , std::ref(error));
@@ -104,7 +107,7 @@ struct AppConfig
 
     void DeleteUniqueContigInSuperContig()
     {
-        AllocNewGraph() ;
+        AllocNewGraph_super() ;
 
         unsigned int new_contig_id = graph_ea.contigTotalNum ;
         unsigned int new_contig_id_new = 0 ;
@@ -229,11 +232,31 @@ struct AppConfig
                 i ++ ;
             }
         }
+        // Reset linear
+        for( unsigned int i = 0 ; i < linear_graph_ea.contigTotalNum ; i++ )
+        {
+            const auto & curr = linear_graph_ea.edge_array[i] ;
+            if ( curr.IsDelete() )
+                continue;
+
+            id_map[curr.id] = new_id ++ ;
+            if( contig_fasta_map.contigs.at(curr.id).IsParlindorme() )
+            {
+                // merge 2 to 1 
+                id_map[curr.id+1]=new_id;
+                i ++ ;
+            }
+            else
+            {
+                id_map[curr.id+1]=new_id ++ ;
+                i ++ ;
+            }
+        }
     }
 
-
-    void Linear() 
+    void Linear()
     {
+        // detect linear node  func
         auto detect_node_linear = [&]( BGIQD::SOAP2::Edge  & node )
         {
             if ( node.bal_id == node.id )
@@ -264,11 +287,10 @@ struct AppConfig
             }
             return ( count_to == 1 && count_from == 1 );
         };
-
-        //TODO
-        for( unsigned int i = 1 ; i <= graph_ea.contigTotalNum ; i++ )
+        // detect linear  for all node
+        for( unsigned int i = 1 ; i <= graph_ea.contigTotalNum +new_graph_ea.contigTotalNum; i++ )
         {
-            auto & curr = graph_ea.edge_array[i];
+            auto & curr = GetEdge(i).second;
             if( curr.bal_id != curr.id ) 
             {
                 i ++ ;
@@ -283,66 +305,21 @@ struct AppConfig
             if( detect_node_linear( curr ) )
             {
                 curr.SetLinear();
-                graph_ea.edge_array[curr.bal_id].SetLinear() ;
+                auto & bal= GetEdge(curr.bal_id).second;
+                bal.SetLinear() ;
             }
         }
-
-
-        for( unsigned int i = 1 ; i <= graph_ea.contigTotalNum ; i++ )
+        // linear contig
+        for( unsigned int i = 1 ; i <= graph_ea.contigTotalNum +new_graph_ea.contigTotalNum ; i++ )
         {
-            auto & curr = graph_ea.edge_array[i];
-            if ( curr.IsDelete() || curr.IsPalindrome() || ! curr.IsLinear() || curr.IsMarked() )
-            {
-                continue ;
-            }
-            // pass bal id
-            i ++ ;
-            // get linear path 
-            auto & bal = graph_ea.edge_array[curr.bal_id];
-            std::vector<unsigned int> path_to ;
-            std::vector<unsigned int> path_from ;
-            GetLinearFromNode( curr , path_to ) ;
-            GetLinearFromNode( bal , path_from );
-            // mark used node
-            if( path_to.size() ==  0 || path_from.size() == 0 )
-            {
-                continue ;
-            }
-            else
-            {
-                curr.SetMarked();
-                bal.SetMarked() ;
-            }
-            for( auto next : path_to )
-            {
-                auto next_1 = GetEdge( next );
-                auto next_2 = GetEdge( next_1.second.bal_id );
-                next_1.second.SetMarked() ;
-                next_2.second.SetMarked() ;
-            }
-            std::stack<unsigned int> path_from_bal ;
-            for( auto next : path_from )
-            {
-                auto next_1 = GetEdge( next );
-                auto next_2 = GetEdge( next_1.second.bal_id );
-                path_from_bal.push(next_1.second.bal_id);
-                next_1.second.SetMarked() ;
-                next_2.second.SetMarked() ;
-            }
-            std::vector<unsigned int> total ;
-            while( ! path_from_bal.empty() )
-            {
-                total.push_back(path_from_bal.top());
-                path_from_bal.pop();
-            }
-            total.push_back(curr.id ) ;
-            for( auto next : path_to )
-            {
-                total.push_back(next) ; 
-            }
-            linear_fill.fills.push_back(total) ;
+            LinearANode(i) ;
         }
+        // alloc graph
+        AllocNewGraph_linear();
+        // rebuild graph
+        DeleteLinearContig();
     }
+
 
     void ReGenerate()
     {
@@ -352,6 +329,145 @@ struct AppConfig
     }
 
     private:
+
+    void LinearANode(unsigned int i)
+    {
+        auto & curr = GetEdge(i).second;
+        if( curr.IsDelete() || curr.IsPalindrome() || ! curr.IsLinear() || curr.IsMarked() )
+        {
+            return ;
+        }
+        // get linear path 
+        auto & bal = GetEdge(curr.bal_id).second;
+        std::vector<unsigned int> path_to ;
+        std::vector<unsigned int> path_from ;
+        GetLinearFromNode( curr , path_to ) ;
+        GetLinearFromNode( bal , path_from );
+        // mark used node
+        if( path_to.size() ==  0 || path_from.size() == 0 )
+        {
+            return ;
+        }
+        else
+        {
+            curr.SetMarked();
+            bal.SetMarked() ;
+        }
+        for( auto next : path_to )
+        {
+            auto next_1 = GetEdge( next );
+            auto next_2 = GetEdge( next_1.second.bal_id );
+            next_1.second.SetMarked() ;
+            next_2.second.SetMarked() ;
+        }
+        std::stack<unsigned int> path_from_bal ;
+        for( auto next : path_from )
+        {
+            auto next_1 = GetEdge( next );
+            auto next_2 = GetEdge( next_1.second.bal_id );
+            path_from_bal.push(next_1.second.bal_id);
+            next_1.second.SetMarked() ;
+            next_2.second.SetMarked() ;
+        }
+        std::vector<unsigned int> total ;
+        while( ! path_from_bal.empty() )
+        {
+            total.push_back(path_from_bal.top());
+            path_from_bal.pop();
+        }
+        total.push_back(curr.id ) ;
+        for( auto next : path_to )
+        {
+            total.push_back(next) ; 
+        }
+        linear_fill.fills.push_back(total) ;
+    }
+
+    void DeleteLinearContig() 
+    {
+        linear_graph_ea.contigTotalNum = linear_fill.fills.size() * 2 ;
+
+        unsigned int new_contig_id = graph_ea.contigTotalNum + new_graph_ea.contigTotalNum ;
+        unsigned int new_contig_id_new= 0 ;
+        unsigned int new_arc_id = 0 ;
+
+        for ( const auto & fill: linear_fill.fills )
+        {
+            auto & head = GetEdge(fill[0]).second ; 
+            auto & head_bal = GetEdge(head.bal_id).second;
+            auto & tail = GetEdge(*fill.rbegin()).second;
+            auto & tail_bal = GetEdge(tail.bal_id).second;
+
+            //delete old head & tail
+            head.SetDelete();
+            head_bal.SetDelete();
+            tail.SetDelete();
+            tail_bal.SetDelete();
+
+            //make new contig
+            new_contig_id ++ ;
+            auto & new_contig = linear_graph_ea.edge_array[new_contig_id_new++];
+            new_contig.id = new_contig_id  ;
+            new_contig.bal_id = new_contig_id +1   ;
+            new_contig.arc = tail.arc ;
+
+            new_contig_id ++ ;
+            auto & new_contig_bal = linear_graph_ea.edge_array[new_contig_id_new++]; 
+            new_contig_bal.id = new_contig_id ;
+            new_contig_bal.bal_id = new_contig_id - 1 ;
+            new_contig_bal.arc = head_bal.arc ;
+
+            // let old data point to new contig
+            volatile BGIQD::SOAP2::Arc * to_me = head_bal.arc ;
+            while( to_me != NULL )
+            {
+                unsigned int id = to_me->to ;
+                auto ret_to = GetEdge(id) ;
+                auto ret_bal_to = GetEdge(ret_to.second.bal_id);
+                //auto & bal = graph_ea.edge_array[graph_ea.edge_array[id].bal_id];
+                auto & bal = ret_bal_to.second ;
+                auto & curr_arc = linear_graph_ea.arc_array[new_arc_id++];
+                curr_arc.to = new_contig.id ;
+                curr_arc.cov = to_me->cov ;
+                curr_arc.next = bal.arc;
+                bal.arc = &curr_arc ;
+                to_me = to_me->next ;
+            }
+
+            // let old data point to new contig
+            volatile BGIQD::SOAP2::Arc * me_to = tail.arc ;
+            while( me_to != NULL )
+            {
+                unsigned int id = me_to->to ;
+                auto ret_to = GetEdge(id) ;
+                auto ret_bal_to = GetEdge(ret_to.second.bal_id);
+                //auto & bal = graph_ea.edge_array[graph_ea.edge_array[id].bal_id];
+                auto & bal = ret_bal_to.second ;
+                auto & curr_arc = linear_graph_ea.arc_array[new_arc_id++] ;
+                curr_arc.to = new_contig_bal.id ;
+                curr_arc.cov = me_to->cov ;
+                curr_arc.next = bal.arc;
+                bal.arc = &curr_arc ;
+
+                me_to = me_to->next ;
+            }
+
+            // delete old contig .
+            for ( size_t i = 1 ; i < fill.size() -1 ; i++ )
+            {
+                auto & curr = GetEdge(fill[i]).second;
+                curr.SetDelete();
+                if( curr.bal_id != curr.id )
+                {
+                    GetEdge(curr.bal_id).second.SetDelete() ;
+                }
+            }
+        }
+        // [ 0 - contigTotalNum )
+        assert(linear_graph_ea.contigTotalNum == new_contig_id_new) ;
+        // [ 0 - arcNum ]
+        linear_graph_ea.arcNum= new_arc_id -1 ;
+    }
 
     void GetLinearFromNode(const BGIQD::SOAP2::Edge & edge , std::vector<unsigned int> & path)
     {
@@ -392,8 +508,8 @@ struct AppConfig
             curr.length = ret.length + K ;
             unsigned int head = line[0];
             unsigned int tail = line[line.size()-1];
-            memcpy ( curr.from , graph_ea.edge_array[head].from , sizeof(BGIQD::SOAP2::Kmer));
-            memcpy ( curr.to, graph_ea.edge_array[tail].to, sizeof(BGIQD::SOAP2::Kmer));
+            memcpy ( curr.from , GetEdge(head).second.from , sizeof(BGIQD::SOAP2::Kmer));
+            memcpy ( curr.to, GetEdge(tail).second.to, sizeof(BGIQD::SOAP2::Kmer));
             curr.cov = ret.cov * 10 ;
             ret.MarkBase() ;
             if( BGIQD::SEQ::isSeqPalindrome( ret.K + ret.linear))
@@ -403,23 +519,48 @@ struct AppConfig
             auto & bal= new_graph_ea.edge_array[i+1] ;
             bal.length = curr.length ;
             bal.cov = curr.cov;
-            unsigned int head_bal = graph_ea.edge_array[tail].bal_id;
-            unsigned int tail_bal = graph_ea.edge_array[head].bal_id;
-            memcpy ( bal.from , graph_ea.edge_array[head_bal].from , sizeof(BGIQD::SOAP2::Kmer));
-            memcpy ( bal.to, graph_ea.edge_array[tail_bal].to, sizeof(BGIQD::SOAP2::Kmer));
+            unsigned int head_bal = GetEdge(tail).second.bal_id;
+            unsigned int tail_bal = GetEdge(head).second.bal_id;
+            memcpy ( bal.from , GetEdge(head_bal).second.from , sizeof(BGIQD::SOAP2::Kmer));
+            memcpy ( bal.to, GetEdge(tail_bal).second.to, sizeof(BGIQD::SOAP2::Kmer));
         }
     }
 
     void GenerateNewContigSeq_linear()
     {
-
+        for( unsigned int i = 0 ; i < linear_graph_ea.contigTotalNum ; i=i+2 )
+        {
+            auto & curr = linear_graph_ea.edge_array[i] ;
+            const auto & line = linear_fill.fills[i/2] ;
+            auto ret = contig_fasta_map.MergeContig(line);
+            assert( ret.id == curr.id );
+            curr.length = ret.length + K ;
+            unsigned int head = line[0];
+            unsigned int tail = line[line.size()-1];
+            memcpy ( curr.from , GetEdge(head).second.from , sizeof(BGIQD::SOAP2::Kmer));
+            memcpy ( curr.to, GetEdge(tail).second.to, sizeof(BGIQD::SOAP2::Kmer));
+            curr.cov = ret.cov * 10 ;
+            ret.MarkBase() ;
+            if( BGIQD::SEQ::isSeqPalindrome( ret.K + ret.linear))
+                ret.MarkParlindorme();
+            contig_fasta_map.contigs[ret.id] = ret;
+            // bal_id
+            auto & bal= linear_graph_ea.edge_array[i+1] ;
+            bal.length = curr.length ;
+            bal.cov = curr.cov;
+            unsigned int head_bal = GetEdge(tail).second.bal_id;
+            unsigned int tail_bal = GetEdge(head).second.bal_id;
+            memcpy ( bal.from , GetEdge(head_bal).second.from , sizeof(BGIQD::SOAP2::Kmer));
+            memcpy ( bal.to, GetEdge(tail_bal).second.to, sizeof(BGIQD::SOAP2::Kmer));
+        }
     }
+
     unsigned int NewId(unsigned int old)
     {
         return id_map.at(old);
     }
 
-    void AllocNewGraph()
+    void AllocNewGraph_super()
     {
         int new_arc_num = 0 ;
         for( const auto & fill : fills.fills)
@@ -437,6 +578,26 @@ struct AppConfig
 
         new_graph_ea.contigTotalNum = 0 ;
         new_graph_ea.arcNum = 0 ;
+    }
+
+    void AllocNewGraph_linear()
+    {
+        int new_arc_num = 0 ;
+        for( const auto & fill : linear_fill.fills)
+        {
+            const auto & head = GetEdge(fill[0]).second ; 
+            const auto & head_bal = GetEdge(head.bal_id).second;
+            const auto & tail = GetEdge(*fill.rbegin()).second;
+            const auto & tail_bal = GetEdge(tail.bal_id).second;
+            new_arc_num += head.ArcNum() + head_bal.ArcNum() + tail.ArcNum() + tail_bal.ArcNum() ;
+        }
+        int new_contig_num = linear_fill.fills.size() * 2 ;
+
+        linear_graph_ea.edge_array =( BGIQD::SOAP2::Edge* ) calloc ( sizeof(BGIQD::SOAP2::Edge), new_contig_num );
+        linear_graph_ea.arc_array = (BGIQD::SOAP2::Arc *) calloc ( sizeof(BGIQD::SOAP2::Arc) , new_arc_num );
+
+        linear_graph_ea.contigTotalNum = 0 ;
+        linear_graph_ea.arcNum = 0 ;
     }
 
     void ReGenerate_Arc()
@@ -468,19 +629,6 @@ struct AppConfig
         {
             const auto & curr = new_graph_ea.edge_array[i] ;
             print( *out , curr);
-            /*
-               if ( curr.IsDelete() )
-               continue;
-               (*out)<<NewId(curr.id)<<"\t";
-               volatile BGIQD::SOAP2::Arc * next = curr.arc ;
-               while(next)
-               {
-               if(! GetEdge(next->to).second.IsDelete() )
-               { 
-               (*out)<<NewId(next->to)<<"\t"<<(int)next->cov<<"\t";
-               }
-               next = next->next ;
-               }*/
             if( base )
             {
                 // pass the bal_id that not exsist !
@@ -494,7 +642,23 @@ struct AppConfig
                 base = true ;
             }
         }
-        //TODO
+        for( unsigned int i = 0 ; i < linear_graph_ea.contigTotalNum ; i++ )
+        {
+            const auto & curr = linear_graph_ea.edge_array[i] ;
+            print( *out , curr);
+            if( base )
+            {
+                // pass the bal_id that not exsist !
+                if( contig_fasta_map.contigs.at(curr.id).IsParlindorme() )
+                    i ++ ;
+                else
+                    base = false ;
+            }
+            else
+            {
+                base = true ;
+            }
+        }
         delete out;
     }
 
@@ -553,13 +717,34 @@ struct AppConfig
                 base = true ;
             }
         }
-        //TODO
+        for( unsigned int i = 0 ; i < linear_graph_ea.contigTotalNum ; i++ )
+        {
+            const auto & curr = linear_graph_ea.edge_array[i] ;
+            if ( curr.IsDelete() )
+                continue;
+            assert( line_num = NewId(curr.id)) ;
+            print( *out, curr);
+            // pass the bal_id that not exsist !
+            if( base )
+            {
+                // pass the bal_id that not exsist !
+                if( contig_fasta_map.contigs.at(curr.id).IsParlindorme() )
+                    i ++ ;
+                else
+                    base = false ;
+            }
+            else
+            {
+                base = true ;
+            }
+        }
         delete out;
     }
 
     void ReGenerate_contig()
     {
         auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fnames.contig(round+1));
+
         for( unsigned int i = 1 ; i <= graph_ea.contigTotalNum ; i++ )
         {
             const auto & curr = graph_ea.edge_array[i] ;
@@ -583,7 +768,19 @@ struct AppConfig
             if( ! c.IsParlindorme() )
                 i ++ ;
         }
-        //TODO
+
+        for( unsigned int i = 0 ; i < linear_graph_ea.contigTotalNum ; i++ )
+        {
+            const auto & curr = linear_graph_ea.edge_array[i] ;
+            if ( curr.IsDelete() || curr.length < 1)
+                continue;
+            const auto & c = contig_fasta_map.contigs.at(curr.id) ;
+            (*out)<<c.ToString()<<std::endl;
+            // jump bal_id
+            if( ! c.IsParlindorme() )
+                i ++ ;
+        }
+
         delete out;
     }
 
