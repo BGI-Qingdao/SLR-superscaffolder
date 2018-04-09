@@ -54,6 +54,33 @@ namespace BGIQD {
             }
         }
 
+        std::string ContigFastA::ToString(int new_id) const 
+        {
+            std::ostringstream ost;
+            //">%d length %d cvg_%f_tip_%d"
+            ost<<'>'<<new_id<<" length "<<length+K.size()<<" cov_"<<cov<<"_tip_"<<tip<<'\n';
+            int index = 0 ;
+            for( size_t i = 0 ; i< K.size(); i++)
+            {
+                ost<<K[i];
+                index ++ ;
+                if( index % 100  == 0 )
+                {
+                    ost<<'\n';
+                }
+            }
+
+            for( size_t i = 0 ; i< linear.size(); i++)
+            {
+                ost<<linear[i];
+                index ++ ;
+                if( index % 100  == 0 )
+                {
+                    ost<<'\n';
+                }
+            }
+            return ost.str();
+        }
         std::string ContigFastA::ToString() const 
         {
             std::ostringstream ost;

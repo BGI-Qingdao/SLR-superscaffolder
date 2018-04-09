@@ -275,6 +275,7 @@ struct AppConfig
                 {
                     continue;
                 }
+                arc = arc->next;
                 count_to ++ ;
             }
             // up
@@ -286,6 +287,7 @@ struct AppConfig
                 {
                     continue;
                 }
+                arc = arc->next;
                 count_from ++ ;
             }
             return ( count_to == 1 && count_from == 1 );
@@ -484,6 +486,7 @@ struct AppConfig
                 {
                     return arc ;
                 }
+                arc = arc->next;
             }
             return (BGIQD::SOAP2::Arc* )NULL ;
         };
