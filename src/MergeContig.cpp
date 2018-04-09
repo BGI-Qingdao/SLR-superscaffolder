@@ -103,6 +103,9 @@ struct AppConfig
         contig_fasta_map.Init(K) ;
         contig_fasta_map.LoadContig(fnames.contig(round));
         contig_fasta_map.buildCompeleReverse();
+        // init extra graph
+        new_graph_ea.contigTotalNum = 0;
+        linear_graph_ea.contigTotalNum = 0;
     }
 
     void DeleteUniqueContigInSuperContig()
@@ -796,6 +799,7 @@ int main(int argc , char **argv)
     DEFINE_ARG_DETAIL(int , kvalue, 'K',false,"K value");
     DEFINE_ARG_DETAIL(int , t_num, 't',true,"thread num . default[8]");
     DEFINE_ARG_DETAIL(int , round, 'r',true,"round num. default[0]");
+    DEFINE_ARG_DETAIL(bool ,linear, 'l',true,"call linear ?. default false");
     END_PARSE_ARGS
 
         if(! t_num.setted )
@@ -813,7 +817,10 @@ int main(int argc , char **argv)
     // graph simplify step 1
     config.DeleteUniqueContigInSuperContig();
     // graph simplify step 2
-    config.Linear();
+    if( linear.to_bool() )
+    {
+        config.Linear();
+    }
     // management  date
     config.GenerateNewContigSeq();
     // management  date order
