@@ -49,9 +49,9 @@ if [[ -f $1 ]] ; then
         echo "ERROR : $STLFR_BIN_PATH is invalid . exit ..."
         exit
     fi
-    file_2_check $SOAP
-    file_2_check $LIB_FILE
-    file_2_check $BWA
+    check_file_exsit $SOAP
+    check_file_exsit $BWA
+    check_file_exsit $LIB_FILE
 else
     echo "ERROR : conf file $1 invalid . exit ..."
     exit
