@@ -3,6 +3,7 @@
 #include "common/log/logfilter.h"
 #include "common/multithread/MultiThread.h"
 #include "common/files/file_writer.h"
+#include "common/freq/freq.h"
 
 #include "biocommon/seq/tool_func.h"
 
@@ -102,6 +103,7 @@ struct AppConfig
         // load contigs fasta
         contig_fasta_map.Init(K) ;
         contig_fasta_map.LoadContig(fnames.contig(round));
+        loger<<BGIQD::LOG::lstart()<<"Load contig "<<graph_ea.contigTotalNum<<" with base "<<contig_fasta_map.contigs.size()<<BGIQD::LOG::lend();
         contig_fasta_map.buildCompeleReverse();
         // init extra graph
         new_graph_ea.contigTotalNum = 0;
@@ -115,7 +117,10 @@ struct AppConfig
         unsigned int new_contig_id = graph_ea.contigTotalNum ;
         unsigned int new_contig_id_new = 0 ;
         unsigned int new_arc_id = 0 ;
+        int del_count = 0;
+
         new_graph_ea.contigTotalNum = fills.fills.size() * 2 ;
+
         for ( const auto & fill: fills.fills )
         {
             auto & head = graph_ea.edge_array[fill[0]];
@@ -128,6 +133,7 @@ struct AppConfig
             head_bal.SetDelete();
             tail.SetDelete();
             tail_bal.SetDelete();
+            del_count += 2 ;
 
             //make new contig
             new_contig_id ++ ;
@@ -184,6 +190,7 @@ struct AppConfig
                 if( detector.ContigType(curr.length , curr.cov ) == BGIQD::SOAP2::ContigTypeDetecter::Type::Unique )
                 {
                     curr.SetDelete();
+                    del_count ++ ;
                     if( curr.bal_id != curr.id )
                     {
                         graph_ea.edge_array[curr.bal_id].SetDelete() ;
@@ -195,6 +202,7 @@ struct AppConfig
         assert( new_graph_ea.contigTotalNum == new_contig_id_new) ;
         // [ 0 - arcNum ]
         new_graph_ea.arcNum= new_arc_id -1 ;
+        loger<<BGIQD::LOG::lstart()<<"DeleteUniqueContigInSuperContig merge "<<fills.fills.size()<<" super contig and delete "<<del_count<<" old contig "<<BGIQD::LOG::lend();
     }
 
     void GenerateNewContigSeq()
@@ -216,7 +224,7 @@ struct AppConfig
         }
 
         // Reset super
-        for( unsigned int i = 0 ; i < new_graph_ea.contigTotalNum ; i++ )
+        for ( unsigned int i = 0 ; i < new_graph_ea.contigTotalNum ; i++ )
         {
             const auto & curr = new_graph_ea.edge_array[i] ;
             if ( curr.IsDelete() )
@@ -235,6 +243,7 @@ struct AppConfig
                 i ++ ;
             }
         }
+
         // Reset linear
         for( unsigned int i = 0 ; i < linear_graph_ea.contigTotalNum ; i++ )
         {
@@ -292,8 +301,9 @@ struct AppConfig
             }
             return ( count_to == 1 && count_from == 1 );
         };
+
         // detect linear  for all node
-        for( unsigned int i = 1 ; i <= graph_ea.contigTotalNum +new_graph_ea.contigTotalNum; i++ )
+        for ( unsigned int i = 1 ; i <= graph_ea.contigTotalNum +new_graph_ea.contigTotalNum; i++ )
         {
             auto & curr = GetEdge(i).second;
             if( curr.bal_id != curr.id ) 
@@ -314,11 +324,16 @@ struct AppConfig
                 bal.SetLinear() ;
             }
         }
+        linear_del = 0 ;
         // linear contig
         for( unsigned int i = 1 ; i <= graph_ea.contigTotalNum +new_graph_ea.contigTotalNum ; i++ )
         {
             LinearANode(i) ;
         }
+
+        loger<<BGIQD::LOG::lstart()<<"Linear merge "<<linear_fill.fills.size()<<"linear contig and delete "<<linear_del<<" old contig "<<BGIQD::LOG::lend();
+        //loger<<BGIQD::LOG::lstart()<<"linear del freq"<<"\n"<<l_del.ToString()<< BGIQD::LOG::lend();
+        //loger<<BGIQD::LOG::lstart()<<"linear result freq"<<"\n"<<l_now.ToString()<< BGIQD::LOG::lend();
         // alloc graph
         AllocNewGraph_linear();
         // rebuild graph
@@ -334,7 +349,9 @@ struct AppConfig
     }
 
     private:
-
+    int linear_del ;
+    //BGIQD::FREQ::Freq<int> l_del;
+    //BGIQD::FREQ::Freq<int> l_now;
     void LinearANode(unsigned int i)
     {
         auto & curr = GetEdge(i).second;
@@ -342,37 +359,47 @@ struct AppConfig
         {
             return ;
         }
-        // get linear path 
+        // get linear path
         auto & bal = GetEdge(curr.bal_id).second;
         std::vector<unsigned int> path_to ;
         std::vector<unsigned int> path_from ;
         GetLinearFromNode( curr , path_to ) ;
         GetLinearFromNode( bal , path_from );
         // mark used node
+        int total_len = 0;
         if( path_to.size() ==  0 || path_from.size() == 0 )
         {
             return ;
         }
         else
         {
+            linear_del ++ ;
             curr.SetMarked();
             bal.SetMarked() ;
+            //total_len += curr.length ;
+           // l_del.Touch(curr.length);
         }
         for( auto next : path_to )
         {
+            linear_del ++ ;
             auto next_1 = GetEdge( next );
             auto next_2 = GetEdge( next_1.second.bal_id );
             next_1.second.SetMarked() ;
             next_2.second.SetMarked() ;
+            //total_len += next_1.second.length ;
+            //l_del.Touch(next_1.second.length);
         }
         std::stack<unsigned int> path_from_bal ;
         for( auto next : path_from )
         {
+            linear_del ++ ;
             auto next_1 = GetEdge( next );
             auto next_2 = GetEdge( next_1.second.bal_id );
             path_from_bal.push(next_1.second.bal_id);
             next_1.second.SetMarked() ;
             next_2.second.SetMarked() ;
+            //total_len += next_1.second.length ;
+            //l_del.Touch(next_1.second.length);
         }
         std::vector<unsigned int> total ;
         while( ! path_from_bal.empty() )
@@ -385,6 +412,7 @@ struct AppConfig
         {
             total.push_back(next) ; 
         }
+        //l_now.Touch(total_len-K*(total.size()-1));
         linear_fill.fills.push_back(total) ;
     }
 
@@ -522,6 +550,10 @@ struct AppConfig
             ret.MarkBase() ;
             if( BGIQD::SEQ::isSeqPalindrome( ret.K + ret.linear))
                 ret.MarkParlindorme();
+            else
+            {
+                contig_fasta_map.contigs[ret.id + 1] = ret.ReverseCompelete() ;
+            }
             contig_fasta_map.contigs[ret.id] = ret;
             // bal_id
             auto & bal= new_graph_ea.edge_array[i+1] ;
@@ -752,18 +784,27 @@ struct AppConfig
     void ReGenerate_contig()
     {
         auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fnames.contig(round+1));
-
+        int final_num = 0 ;
+        int del_count = 0 ;
         for( unsigned int i = 1 ; i <= graph_ea.contigTotalNum ; i++ )
         {
             const auto & curr = graph_ea.edge_array[i] ;
+            // check base
+            if( curr.id > curr.bal_id ) 
+                continue ;
+            // check valid
             if ( curr.IsDelete() || curr.length < 1 )
+            {
+                del_count ++ ;
                 continue;
+            }
             const auto & c = contig_fasta_map.contigs.at(curr.id) ;
             (*out)<<c.ToString(NewId(curr.id))<<std::endl;
-            // jump bal_id
-            if( curr.bal_id != curr.id )
-                i ++ ;
+            final_num ++ ;
         }
+        int step = final_num;
+        loger<<BGIQD::LOG::lstart()<<" print base contig "<<final_num;
+        loger<<" detect delete "<<del_count<<BGIQD::LOG::lend();
 
         for( unsigned int i = 0 ; i < new_graph_ea.contigTotalNum ; i+=2 )
         {
@@ -771,8 +812,11 @@ struct AppConfig
             if ( curr.IsDelete() || curr.length < 1)
                 continue;
             const auto & c = contig_fasta_map.contigs.at(curr.id) ;
+            final_num ++ ;
             (*out)<<c.ToString(NewId(curr.id))<<std::endl;
         }
+        loger<<BGIQD::LOG::lstart()<<" print super contig "<<final_num-step<<BGIQD::LOG::lend();
+        step = final_num;
 
         for( unsigned int i = 0 ; i < linear_graph_ea.contigTotalNum ; i+=2 )
         {
@@ -780,8 +824,12 @@ struct AppConfig
             if ( curr.IsDelete() || curr.length < 1)
                 continue;
             const auto & c = contig_fasta_map.contigs.at(curr.id) ;
+            final_num ++ ;
             (*out)<<c.ToString(NewId(curr.id))<<std::endl;
         }
+        loger<<BGIQD::LOG::lstart()<<" print linear contig "<<final_num-step<<BGIQD::LOG::lend();
+        loger<<BGIQD::LOG::lstart()<<" print final contig "<<final_num<<BGIQD::LOG::lend();
+        loger<<BGIQD::LOG::lstart()<<" final fasta "<<contig_fasta_map.contigs.size()<<BGIQD::LOG::lend();
 
         delete out;
     }
@@ -826,5 +874,6 @@ int main(int argc , char **argv)
     config.ResetId();
     // print
     config.ReGenerate();
+
     return 0 ;
 }

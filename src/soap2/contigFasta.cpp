@@ -113,12 +113,12 @@ namespace BGIQD {
         {
             assert(line.size() > 1);
             unsigned int start = std::stoul(line[0]);
-            auto & first = contigs[start];
+            auto & first = contigs.at(start);
             ContigFastA ret = first;
             first.MarkMerge();
             if(! first.IsBase() )
             {
-                contigs[start-1].MarkMerge();
+                contigs.at(start-1).MarkMerge();
             }
 
             float cov = ret.cov * ret.length + ret.cov * K ;
@@ -126,7 +126,7 @@ namespace BGIQD {
             for( int i = 1 ; i < (int)line.size() ; i++ )
             {
                 unsigned int next_id = std::stoul(line[i]);
-                auto & next = contigs[next_id] ;
+                auto & next = contigs.at(next_id) ;
                 ret.linear += next.linear ;
                 ret.length += next.length ;
                 cov += next.cov * next.length ;
@@ -134,7 +134,7 @@ namespace BGIQD {
 
                 if(! next.IsBase() )
                 {
-                    contigs[next_id-1].MarkMerge();
+                    contigs.at(next_id-1).MarkMerge();
                 }
             }
 
@@ -142,16 +142,17 @@ namespace BGIQD {
             ret.cov = cov / (ret.length + K ) ;
             return ret;
         }
+
         ContigFastA ContigFastAMap::MergeContig(const std::vector<unsigned  int> & line)
         {
             assert(line.size() > 1);
             unsigned int start = line[0];
-            auto & first = contigs[start];
+            auto & first = contigs.at(start);
             ContigFastA ret = first;
             first.MarkMerge();
             if(! first.IsBase() )
             {
-                contigs[start-1].MarkMerge();
+                contigs.at(start-1).MarkMerge();
             }
 
             float cov = ret.cov * ret.length + ret.cov * K ;
@@ -159,7 +160,7 @@ namespace BGIQD {
             for( int i = 1 ; i < (int)line.size() ; i++ )
             {
                 unsigned int next_id = line[i];
-                auto & next = contigs[next_id] ;
+                auto & next = contigs.at(next_id) ;
                 ret.linear += next.linear ;
                 ret.length += next.length ;
                 cov += next.cov * next.length ;
@@ -167,7 +168,7 @@ namespace BGIQD {
 
                 if(! next.IsBase() )
                 {
-                    contigs[next_id-1].MarkMerge();
+                    contigs.at(next_id-1).MarkMerge();
                 }
             }
 
