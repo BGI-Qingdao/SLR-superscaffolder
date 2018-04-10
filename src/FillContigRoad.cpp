@@ -56,7 +56,7 @@ struct DepthSearchResult
     unsigned int true_to ;
 };
 
-DepthSearchResult SearchAllPath(unsigned int from  , unsigned int to){
+DepthSearchResult SearchAllPath(unsigned int from  , unsigned int to, int max){
 
     DepthSearchResult ret;
     ret.head_tail = true ;
@@ -85,7 +85,7 @@ DepthSearchResult SearchAllPath(unsigned int from  , unsigned int to){
     neibs[target_id] = 1.0f;
     // try downstream 
     edge_array[search_id].DepthSearch(edge_array,stack,
-            history, ret.paths , ret.mids ,edge_array[search_id].length , neibs);
+            history, ret.paths , ret.mids ,edge_array[search_id].length , neibs, max);
     /*
     if( ret.paths.empty() )
     {
@@ -197,7 +197,7 @@ bool AppendPath( const  BGIQD::stLFR::P2PGraph & p2pgrapg , const DepthSearchRes
     return true;
 }
 
-void FillContigRoad( BGIQD::stLFR::ContigRoad & road)
+void FillContigRoad( BGIQD::stLFR::ContigRoad & road, int max)
 {
     static std::mutex write_mutex;
     static std::mutex path_num_mutex;
@@ -210,7 +210,7 @@ void FillContigRoad( BGIQD::stLFR::ContigRoad & road)
     for(int i=1  ; i < road.linear_length ; i++ )
     {
         auto start = road.getLinearStep(i);
-        auto ret = SearchAllPath(start.first , start.second);
+        auto ret = SearchAllPath(start.first , start.second,max);
         if( ret.status == DepthSearchResult::NotRearch )
         {
             if( road.status  == BGIQD::stLFR::ContigRoad::FillStatus::None )
@@ -359,6 +359,7 @@ int  main(int argc, char **argv)
                                                     xxx.read2contig");
     DEFINE_ARG_DETAIL(int , kvalue, 'K',false,"K value");
     DEFINE_ARG_DETAIL(int , t_num, 't',true,"thread num . default[8]");
+    DEFINE_ARG_DETAIL(int, searchDepth, 'l',true,"search depth (bp) default 10000");
     END_PARSE_ARGS
 
     config.K = kvalue.to_int();
@@ -393,9 +394,10 @@ int  main(int argc, char **argv)
         BGIQD::MultiThread::MultiThread t_jobs;
         t_jobs.Start(t_num.to_int());
 
+        int max = searchDepth.to_int();
         for(int i= 0 ; i<(int)config.roads.roads.size(); i++)
         {
-            t_jobs.AddJob([i](){ FillContigRoad(std::ref(config.roads.roads[i])); });
+            t_jobs.AddJob([i, max](){ FillContigRoad(std::ref(config.roads.roads[i]),max); });
         }
         t_jobs.End();
         t_jobs.WaitingStop();
