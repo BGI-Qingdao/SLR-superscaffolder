@@ -101,8 +101,8 @@ do
               bwa index -a bwtsw $contig                                                      1>out_bwt       2>&1
     elif [[ $1 -eq  4 ]] ; then 
         # Step 4. bwa align
-        echo "$BWA mem $contig -t $THREADS -k $K                                              >$samread2contig 2>out_bwtmem"
-              $BWA mem $contig -t $THREADS -k $K                                              >$samread2contig 2>out_bwtmen
+        echo "$BWA mem $contig -t $THREADS -k $K $STLFR_READS                                 >$samread2contig 2>out_bwtmem"
+              $BWA mem $contig -t $THREADS -k $K $STLFR_READS                                 >$samread2contig 2>out_bwtmen
     elif [[ $1 -eq  5 ]] ; then 
         # Step 5. sam to txt
         echo "$STLFR_BIN_PATH/Sam2ReadInContig -c 1000000000 -o chr19 <$samread2contig        >$read2contig 2>out_sam2readincontig"
@@ -131,12 +131,16 @@ do
               $STLFR_BIN_PATH/MergeClusterResult <$bin_cluster                                >$contig_cluster 2>out_mergebincluster
     elif [[ $1 -eq  11 ]] ; then 
         # Step 11. SuperContitg
-        echo "$STLFR_BIN_PATH/SuperContig -o $PREFIX -K $K  -t $THREADS -i -s -l 10000        >out_super.txt 2>log_super"
-              $STLFR_BIN_PATH/SuperContig -o $PREFIX -K $K  -t $THREADS -i -s -l 10000        >out_super.txt 2>log_super
+        echo "$STLFR_BIN_PATH/SuperContig -o $PREFIX -K $K  -t $THREADS \
+            -i -s -l $DEPTH_SEARCH_MAX_LENGTH                                                 >out_super.txt 2>log_super"
+              $STLFR_BIN_PATH/SuperContig -o $PREFIX -K $K  -t $THREADS \
+                  -i -s -l $DEPTH_SEARCH_MAX_LENGTH                                           >out_super.txt 2>log_super
     elif [[ $1 -eq 12 ]] ; then
         # Step 12 MergeContig
-        echo "$STLFR_BIN_PATH/FillContigRoad -K $K  -t $THREADS -o $PREFIX -l 10000            >$super_contig_fill  2>log_fillsuper"
-              $STLFR_BIN_PATH/FillContigRoad -K $K  -t $THREADS -o $PREFIX -l 10000            >$super_contig_fill  2>log_fillsuper
+        echo "$STLFR_BIN_PATH/FillContigRoad -K $K  -t $THREADS \
+            -o $PREFIX -l $DEPTH_SEARCH_MAX_LENGTH                                             >$super_contig_fill  2>log_fillsuper"
+              $STLFR_BIN_PATH/FillContigRoad -K $K  -t $THREADS \
+                  -o $PREFIX -l $DEPTH_SEARCH_MAX_LENGTH                                       >$super_contig_fill  2>log_fillsuper
     elif [[ $1 -eq 13 ]] ; then 
         # Step 12 MergeContig
         echo "$STLFR_BIN_PATH/MergeContig -K $K -o $PREFIX -l                                 1>out_mergecontig 2>&1"
