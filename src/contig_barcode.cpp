@@ -287,6 +287,8 @@ logger log1;
         {
             for( const auto & pp : pair.second )
             {
+                if( pp.second.empty() )
+                    continue ;
                 (*out)<<pair.first<<":"<<pp.first;
                 for( auto i : pp.second)
                 {
