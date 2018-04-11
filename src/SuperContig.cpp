@@ -874,7 +874,7 @@ int main(int argc , char **argv)
                     (*deg)<<curr.edge_id<<"\t+\t";
                     for( auto i: curr.to)
                     {
-                        (*deg)<<i.second.to<<":"<<i.second.length<<":"<<(i.second.IsPositive() ? '+' :'-')<<"\t";
+                        (*deg)<<i.second.to<<":"<<i.second.length<<":"<<config.connections.at(curr.edge_id).at(i.second.to)<<(i.second.IsPositive() ? '+' :'-')<<"\t";
                     }
                     *(deg)<<std::endl;
                 }
