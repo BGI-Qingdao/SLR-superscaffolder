@@ -860,21 +860,27 @@ int main(int argc , char **argv)
             {
 
                 auto & curr = config.key_array[config.key_map[m]];
-                if( curr.from.size() > 1 )
+                if( curr.from.size() > 0 )
                 {
                     (*deg)<<curr.edge_id<<"\t-\t";
                     for( auto i: curr.from )
                     {
-                        (*deg)<<i.second.to<<":"<<i.second.length<<":"<<config.connections.at(curr.edge_id).at(i.second.to)<<(i.second.IsPositive() ? '+' :'-')<<"\t";
+                        (*deg)<<i.second.to
+                            <<":"<<i.second.length
+                            <<":"<<config.connections.at(curr.edge_id).at(i.second.to)
+                            <<":"<<(i.second.IsPositive() ? '+' :'-')<<"\t";
                     }
                     *(deg)<<std::endl;
                 }
-                if( curr.to.size() > 1 )
+                if( curr.to.size() > 0 )
                 {
                     (*deg)<<curr.edge_id<<"\t+\t";
                     for( auto i: curr.to)
                     {
-                        (*deg)<<i.second.to<<":"<<i.second.length<<":"<<config.connections.at(curr.edge_id).at(i.second.to)<<(i.second.IsPositive() ? '+' :'-')<<"\t";
+                        (*deg)<<i.second.to
+                            <<":"<<i.second.length
+                            <<":"<<config.connections.at(curr.edge_id).at(i.second.to)
+                            <<":"<<(i.second.IsPositive() ? '+' :'-')<<"\t";
                     }
                     *(deg)<<std::endl;
                 }
