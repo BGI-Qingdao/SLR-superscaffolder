@@ -89,10 +89,18 @@ int main(int argc , char ** argv)
         int j = 0 ;
         for( size_t i = 0 ; i < len_map.size() ; i++ )
         {
-            std::cout<<len_map[i]<<'\t'<<sim_map[i]<<std::endl;
-            if( i > index_map[j] )
+
+            if ( (j == 0 && index_map[j]==1 )|| index_map[j] - index_map[j-1] == 1 ) 
             {
-                std::cout<<"--"<<'\t'<<"--"<<std::endl;
+                std::cerr<<len_map[i]<<'\t'<<sim_map[i]<<std::endl;
+            }
+            else
+            {
+                std::cout<<len_map[i]<<'\t'<<sim_map[i]<<std::endl;
+            }
+            if( i > size_t(index_map[j]) )
+            {
+                //std::cout<<"--"<<'\t'<<"--"<<std::endl;
                 j++;
             }
         }
@@ -119,7 +127,6 @@ int main(int argc , char ** argv)
                 //auto & item  = maps[i.first][i.second[index.to_int()]];
                 if( std::get<3>(i.second[0]) > sim.to_float() && std::get<0>(i.second[0]) * index.to_int() < std::get<0>(i.second[1]) )
                 {
-                    
                     double_check[std::stoi(i.first)].insert(std::stoi(std::get<1>(i.second[0])));
                 }
             }
