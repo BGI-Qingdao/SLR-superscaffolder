@@ -260,39 +260,127 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
         lger<<BGIQD::LOG::lstart()<<"process "<<index<<" ..."<<BGIQD::LOG::lend();
     }
 }
-
-void solveMulti(BGIQD::SOAP2::GlobalConfig &config)
+int countConn( const std::map<unsigned int , BGIQD::SOAP2::KeyConn> & map)
 {
-    auto flush_map = [&config](unsigned int curr , std::map<unsigned int , BGIQD::SOAP2::KeyConn> & map)
+    int count = 0 ;
+    for ( const auto & i : map )
     {
-        std::vector< std::tuple<float, unsigned int> > data;
+        if( i.second.IsValid() )
+            count ++ ;
+    }
+    return count ;
+}
+
+std::map<unsigned int, BGIQD::SOAP2::KeyConn> & get_oppo( BGIQD::SOAP2::GlobalConfig &config,  unsigned int to , bool to_order , bool positive)
+{
+    auto & curr_to = config.key_array[config.key_map[to]];
+    //A1->B1 
+    //A2<-B2
+    if( to_order && positive )
+    {
+        return curr_to.from;
+    }
+    // A1->B2
+    // A2<-B1
+    else if( to_order && ! positive )
+    {
+        return curr_to.to;
+    }
+    // A1<-B1
+    // A2->B2
+    else if( ! to_order &&  positive )
+    {
+        return curr_to.to;
+    }
+    // A1<-B2
+    // A2->B1
+    else //if( ! to_order && !  positive )
+    {
+        return curr_to.from;
+    }
+}
+
+void solveMulti(BGIQD::SOAP2::GlobalConfig &config , float smallest)
+{
+    auto flush_map = [&config, &smallest](unsigned int curr , std::map<unsigned int , BGIQD::SOAP2::KeyConn> & map , bool to_order)
+    {
+        unsigned int the_one = (unsigned int) -1 ;
+        // detect if there is a linear conn
+        for( auto & i : map )
+        {
+            if( i.second.IsJumpConn() )
+                continue ;
+            auto & map = get_oppo( config, i.first , to_order , i.second.IsPositive() ) ;
+            assert( countConn( map ) >=1 );
+            assert(  map.at(curr).IsValid() );
+            if( countConn(map) == 1 )
+            {
+                the_one  = i.first;
+                break;
+            }
+        }
+
+        if( the_one != (unsigned int)-1 )
+        {
+            for( auto &i : map )
+            {
+                if( i.second.IsJumpConn() )
+                    continue ;
+                if ( i.first != the_one )
+                {
+                    if( countConn(get_oppo( config, i.first , to_order , i.second.IsPositive() ) ) > 1 )
+                    {
+                        i.second.SetJump();
+                        get_oppo( config, i.first , to_order , i.second.IsPositive() ).at(curr).SetJump() ;
+                    }
+                }
+            }
+            return ;
+        }
+
+        // find a better one
+        std::vector< std::tuple<float, unsigned int , float> > data;
         for( auto & i: map )
         {
+            if( i.second.IsJumpConn() )
+                continue ;
             float sim = config.connections.at(curr).at(i.first);
             unsigned int to = i.second.to;
             int len = i.second.length;
-            data.push_back( std::make_tuple( float(len) / sim ,to ) );
+            data.push_back( std::make_tuple( float(len) / sim ,to , sim ) );
         }
-
-        std::sort( data.begin() , data.end() );
-        unsigned int only = std::get<1>( data[0] ) ;
-        for( auto & i : map)
+        if( data.size() > 1 )
+            std::sort( data.begin() , data.end() );
+        for( size_t i = 0 ; i < data.size() ; i++ )
         {
-            if( i.second.to != only ) 
-                i.second.SetJump();
+            if( std::get<2>(data[i]) >= smallest )
+                the_one = std::get<1>(data[i]);
+        }
+        if ( the_one != (unsigned int )-1 )
+        {
+            for( auto &i : map )
+            {
+                if( i.second.IsJumpConn() )
+                    continue ;
+                if ( i.first != the_one )
+                {
+                    i.second.SetJump();
+                    get_oppo( config, i.first , to_order , i.second.IsPositive() ).at(curr).SetJump() ;
+                }
+            }
         }
         return ;
     };
     for( auto i: config.keys )
     {
         auto & curr = config.key_array[config.key_map[i]];
-        if( curr.to.size() > 1 )
+        if( countConn(curr.to)  > 1 )
         {
-            flush_map(curr.edge_id ,curr.to);
+            flush_map(curr.edge_id ,curr.to, true );
         }
-        if ( curr.from.size() > 1)
+        if ( countConn(curr.from) > 1)
         {
-            flush_map(curr.edge_id,curr.from );
+            flush_map(curr.edge_id,curr.from ,false);
         }
     }
     return ;
@@ -485,6 +573,50 @@ int deleteConns(BGIQD::SOAP2::GlobalConfig &config)
     return count;
 }
 
+int deleteNotBiSupport_v1(BGIQD::SOAP2::GlobalConfig &config)
+{
+    int count = 0;
+    for(auto & i: config.keys)
+    {
+        auto & curr = config.key_array[config.key_map[i]];
+
+        for( auto & i : curr.to )
+        {
+            if( i.second.IsJumpConn() )
+                continue;
+            const auto & next = config.key_array[config.key_map[i.second.to]];
+            bool f1 , f2 , f3 ;
+            if( i.second.IsPositive() )
+                std::tie(f1,f2,f3) = next.Relationship_nojump( curr.edge_id , false ) ;
+            else 
+                std::tie(f1,f2,f3) = next.Relationship_nojump( curr.edge_id , true) ;
+
+            if( ! f1 )
+            {
+                i.second.SetBiNotSuppert();
+                count ++;
+            }
+        }
+
+        for( auto & i : curr.from )
+        {
+            if( i.second.IsJumpConn() )
+                continue;
+            const auto & next = config.key_array[config.key_map[i.second.to]];
+            bool f1 , f2 , f3 ;
+            if( i.second.IsPositive() )
+                std::tie(f1,f2,f3) = next.Relationship_nojump( curr.edge_id , true) ;
+            else 
+                std::tie(f1,f2,f3) = next.Relationship_nojump( curr.edge_id , false) ;
+            if( ! f1 )
+            {
+                i.second.SetBiNotSuppert();
+                count ++;
+            }
+        }
+    }
+    return count;
+}
 int deleteNotBiSupport(BGIQD::SOAP2::GlobalConfig &config)
 {
     int count = 0;
@@ -801,7 +933,7 @@ int main(int argc , char **argv)
     DEFINE_ARG_DETAIL(int , t_num, 't',true,"thread num . default[8]");
     DEFINE_ARG_DETAIL(bool , super, 's',true,"super contig ? default false");
     DEFINE_ARG_DETAIL(bool , deleteconn , 'd',true,"delete conn ? default false");
-    DEFINE_ARG_DETAIL(bool , multi, 'm',true,"solveMulti ? default false");
+    DEFINE_ARG_DETAIL(float , multi, 'm',true,"solveMulti ? default false");
     DEFINE_ARG_DETAIL(bool , connInfo, 'i',true,"print connInfo ? default false");
     DEFINE_ARG_DETAIL(int, searchDepth, 'l',true,"search depth (bp) default 10000");
     END_PARSE_ARGS
@@ -814,6 +946,11 @@ int main(int argc , char **argv)
         {
             searchDepth.setted = true ;
             searchDepth.d.i = 10000;
+        }
+        if( ! multi.setted )
+        {
+            multi.setted = true ;
+            multi.d.f=0.0f;
         }
     lger<<BGIQD::LOG::lstart()<<"parse args end ... "<<BGIQD::LOG::lend();
 
@@ -861,9 +998,9 @@ int main(int argc , char **argv)
     {
         config.key_array[config.key_map[m]].CheckCircle();
     }
-    if( multi.to_bool() )
+    if( multi.to_float() > 0.01f )
     {
-        solveMulti(config);
+        solveMulti(config, multi.to_float());
         int dd = deleteNotBiSupport(config);
         lger<<BGIQD::LOG::lstart()<<"deleteNotBiSupport "<<dd<<" conn"<<BGIQD::LOG::lend();
     }
@@ -951,13 +1088,13 @@ int main(int argc , char **argv)
                 freq.Touch("Single");
             else if ( config.key_array[config.key_map[m]].IsLinear() )
                 freq.Touch("Linear");
-            else if ( config.key_array[config.key_map[m]].IsTipTo() && config.key_array[config.key_map[m]].from_size ==1 )
+            else if ( config.key_array[config.key_map[m]].IsTipTo() && config.key_array[config.key_map[m]].to_size ==1 )
                 freq.Touch("Tipto 1");
-            else if ( config.key_array[config.key_map[m]].IsTipTo() && config.key_array[config.key_map[m]].from_size > 1 )
+            else if ( config.key_array[config.key_map[m]].IsTipTo() && config.key_array[config.key_map[m]].to_size > 1 )
                 freq.Touch("Tipto >1");
-            else if ( config.key_array[config.key_map[m]].IsTipFrom() && config.key_array[config.key_map[m]].to_size ==1 )
+            else if ( config.key_array[config.key_map[m]].IsTipFrom() && config.key_array[config.key_map[m]].from_size ==1 )
                 freq.Touch("Tipfrom 1");
-            else if ( config.key_array[config.key_map[m]].IsTipFrom() && config.key_array[config.key_map[m]].to_size > 1 )
+            else if ( config.key_array[config.key_map[m]].IsTipFrom() && config.key_array[config.key_map[m]].from_size > 1 )
                 freq.Touch("Tipfrom >1");
             else
                 freq.Touch("Multi");
