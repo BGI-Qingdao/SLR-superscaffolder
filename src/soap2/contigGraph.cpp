@@ -171,12 +171,15 @@ namespace BGIQD{
         {
             for( const auto & f : from )
             {
-                if( to.find(f.first) != to.end() )
+                if( ! f.second.IsValid() )
+                    continue ;
+                if( to.find(f.first) != to.end() && to.at(f.first).IsValid() )
                 {
                     flag |= 0x40;
                     return ;
                 }
             }
+            flag &= 0xffffffbf ;
         }
 
         void KeyEdge::SetType() 
@@ -223,7 +226,7 @@ namespace BGIQD{
                 flag |= 0x10 ;
             else
                 flag |= 0x4;
-            //CheckCircle();
+            CheckCircle();
         }
 
         // -------------------------- struct GraphEA------------------------------

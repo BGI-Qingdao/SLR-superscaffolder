@@ -98,7 +98,7 @@ int main(int argc , char ** argv)
             {
                 std::cout<<len_map[i]<<'\t'<<sim_map[i]<<std::endl;
             }
-            if( i > size_t(index_map[j]) )
+            if( i + 1 >= size_t(index_map[j]) )
             {
                 //std::cout<<"--"<<'\t'<<"--"<<std::endl;
                 j++;

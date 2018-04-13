@@ -261,7 +261,42 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
     }
 }
 
+void solveMulti(BGIQD::SOAP2::GlobalConfig &config)
+{
+    auto flush_map = [&config](unsigned int curr , std::map<unsigned int , BGIQD::SOAP2::KeyConn> & map)
+    {
+        std::vector< std::tuple<float, unsigned int> > data;
+        for( auto & i: map )
+        {
+            float sim = config.connections.at(curr).at(i.first);
+            unsigned int to = i.second.to;
+            int len = i.second.length;
+            data.push_back( std::make_tuple( float(len) / sim ,to ) );
+        }
 
+        std::sort( data.begin() , data.end() );
+        unsigned int only = std::get<1>( data[0] ) ;
+        for( auto & i : map)
+        {
+            if( i.second.to != only ) 
+                i.second.SetJump();
+        }
+        return ;
+    };
+    for( auto i: config.keys )
+    {
+        auto & curr = config.key_array[config.key_map[i]];
+        if( curr.to.size() > 1 )
+        {
+            flush_map(curr.edge_id ,curr.to);
+        }
+        if ( curr.from.size() > 1)
+        {
+            flush_map(curr.edge_id,curr.from );
+        }
+    }
+    return ;
+}
 
 //
 // if 
@@ -456,8 +491,6 @@ int deleteNotBiSupport(BGIQD::SOAP2::GlobalConfig &config)
     for(auto & i: config.keys)
     {
         auto & curr = config.key_array[config.key_map[i]];
-        if( curr.IsCircle() )
-            continue;
 
         for( auto & i : curr.to )
         {
@@ -768,6 +801,7 @@ int main(int argc , char **argv)
     DEFINE_ARG_DETAIL(int , t_num, 't',true,"thread num . default[8]");
     DEFINE_ARG_DETAIL(bool , super, 's',true,"super contig ? default false");
     DEFINE_ARG_DETAIL(bool , deleteconn , 'd',true,"delete conn ? default false");
+    DEFINE_ARG_DETAIL(bool , multi, 'm',true,"solveMulti ? default false");
     DEFINE_ARG_DETAIL(bool , connInfo, 'i',true,"print connInfo ? default false");
     DEFINE_ARG_DETAIL(int, searchDepth, 'l',true,"search depth (bp) default 10000");
     END_PARSE_ARGS
@@ -826,6 +860,12 @@ int main(int argc , char **argv)
     for( const auto & m : config.keys)
     {
         config.key_array[config.key_map[m]].CheckCircle();
+    }
+    if( multi.to_bool() )
+    {
+        solveMulti(config);
+        int dd = deleteNotBiSupport(config);
+        lger<<BGIQD::LOG::lstart()<<"deleteNotBiSupport "<<dd<<" conn"<<BGIQD::LOG::lend();
     }
     if( deleteconn.to_bool() )
     {
@@ -911,13 +951,13 @@ int main(int argc , char **argv)
                 freq.Touch("Single");
             else if ( config.key_array[config.key_map[m]].IsLinear() )
                 freq.Touch("Linear");
-            else if ( config.key_array[config.key_map[m]].IsTipTo() && config.key_array[config.key_map[m]].from.size() ==1 )
+            else if ( config.key_array[config.key_map[m]].IsTipTo() && config.key_array[config.key_map[m]].from_size ==1 )
                 freq.Touch("Tipto 1");
-            else if ( config.key_array[config.key_map[m]].IsTipTo() && config.key_array[config.key_map[m]].from.size() > 1 )
+            else if ( config.key_array[config.key_map[m]].IsTipTo() && config.key_array[config.key_map[m]].from_size > 1 )
                 freq.Touch("Tipto >1");
-            else if ( config.key_array[config.key_map[m]].IsTipFrom() && config.key_array[config.key_map[m]].to.size() ==1 )
+            else if ( config.key_array[config.key_map[m]].IsTipFrom() && config.key_array[config.key_map[m]].to_size ==1 )
                 freq.Touch("Tipfrom 1");
-            else if ( config.key_array[config.key_map[m]].IsTipFrom() && config.key_array[config.key_map[m]].to.size() > 1 )
+            else if ( config.key_array[config.key_map[m]].IsTipFrom() && config.key_array[config.key_map[m]].to_size > 1 )
                 freq.Touch("Tipfrom >1");
             else
                 freq.Touch("Multi");
