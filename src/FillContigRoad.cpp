@@ -122,13 +122,22 @@ DepthSearchResult SearchAllPath(unsigned int from  , unsigned int to, int max){
         return ret;
     }
     //detect relationship
-    unsigned int true_target = (ret.paths.begin()->second)[0].front().id;
+    for( size_t i = 0 ; i < ret.paths.size() ; i++)
+    {
 
-    ret.true_from = search_id ;
-    ret.true_to = true_target ;
-    assert( true_target == target_id );
-    ret.status = DepthSearchResult::A1B1_B2A2 ;
+        unsigned int true_target = (ret.paths.begin()->second)[0].front().id;
 
+        ret.true_from = search_id ;
+        ret.true_to = true_target ;
+        if( true_target != target_id )
+        {
+            // will delete 
+        }
+        else
+        {
+            ret.status = DepthSearchResult::A1B1_B2A2 ;
+        }
+    }
     /*
     if(  ret.head_tail ) 
     {
@@ -166,9 +175,14 @@ void FindCorrectPath(unsigned int from , unsigned int to, const DepthSearchResul
 {
     p2pgrapg.Init(from,to);
     for( const auto & i : result.paths )
-        p2pgrapg.AddPath(to , i.second);
+    {
+        if( i.second[0].begin()->id == to )
+            p2pgrapg.AddPath(to , i.second);
+    }
     for( const auto & i : result.mids )
+    {
         p2pgrapg.AddMid(i.first , i.second);
+    }
     p2pgrapg.GeneratePath();
 }
 

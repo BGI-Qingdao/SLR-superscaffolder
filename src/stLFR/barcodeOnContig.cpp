@@ -83,11 +83,16 @@ namespace BGIQD {
             if ( paths.empty() )
                 return ;
             assert(root== (paths[0].rbegin()->id)) ;
+            // check if to is valid
+            if( sub_graph.find( to ) == sub_graph.end() )
+            {
+                return ;
+            }
 
             for( const auto & l : paths )
             {
                 unsigned int next = to ;
-                for( auto i = l.begin() ; i != l.end() ; i++)
+                for( auto i = l.begin() ; i != l.end() ; i++ )
                 {
                     if( i->id == to )
                         continue;
