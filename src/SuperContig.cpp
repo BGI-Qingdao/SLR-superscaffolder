@@ -302,6 +302,20 @@ std::map<unsigned int, BGIQD::SOAP2::KeyConn> & get_oppo( BGIQD::SOAP2::GlobalCo
 
 void solveMulti(BGIQD::SOAP2::GlobalConfig &config , float smallest)
 {
+    for( auto i: config.keys )
+    {
+        auto & curr = config.key_array[config.key_map[i]];
+        for( auto i : curr.to)
+        {
+            assert( i.second.IsValid() );
+            i.second.IsValid();
+        }
+        for( auto i : curr.from)
+        {
+            assert( i.second.IsValid() );
+            i.second.IsValid();
+        }
+    }
     auto flush_map = [&config, &smallest](unsigned int curr , std::map<unsigned int , BGIQD::SOAP2::KeyConn> & map , bool to_order)
     {
         unsigned int the_one = (unsigned int) -1 ;
@@ -311,9 +325,8 @@ void solveMulti(BGIQD::SOAP2::GlobalConfig &config , float smallest)
             if( i.second.IsJumpConn() )
                 continue ;
             auto & map = get_oppo( config, i.first , to_order , i.second.IsPositive() ) ;
-            assert( countConn( map ) >=1 );
-            assert(  map.at(curr).IsValid() );
-            if( countConn(map) == 1 )
+            //assert( countConn( map ) >=1 );
+            if( countConn(map) == 1 &&  map.at(curr).IsValid())
             {
                 the_one  = i.first;
                 break;
@@ -338,11 +351,23 @@ void solveMulti(BGIQD::SOAP2::GlobalConfig &config , float smallest)
             return ;
         }
 
+        // delete circle thing
+        for( auto & i : map )
+        {
+            if( i.second.IsJumpConn() )
+                continue ;
+            auto & map = get_oppo( config, i.first , to_order , i.second.IsPositive() ) ;
+            //assert( countConn( map ) >=1 );
+            if( ! map.at(curr).IsValid())
+            {
+                i.second.SetJump();
+            }
+        }
         // find a better one
         std::vector< std::tuple<float, unsigned int , float> > data;
         for( auto & i: map )
         {
-            if( i.second.IsJumpConn() )
+            if( i.second.IsJumpConn()  )
                 continue ;
             float sim = config.connections.at(curr).at(i.first);
             unsigned int to = i.second.to;
@@ -353,7 +378,7 @@ void solveMulti(BGIQD::SOAP2::GlobalConfig &config , float smallest)
             std::sort( data.begin() , data.end() );
         for( size_t i = 0 ; i < data.size() ; i++ )
         {
-            if( std::get<2>(data[i]) >= smallest )
+            if( std::get<2>(data[i]) >= smallest  )
                 the_one = std::get<1>(data[i]);
         }
         if ( the_one != (unsigned int )-1 )

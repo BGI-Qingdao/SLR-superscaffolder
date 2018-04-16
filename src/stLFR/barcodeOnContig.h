@@ -98,8 +98,16 @@ namespace BGIQD {
 
                 void CalcCov()
                 {
-                    cov = total_cov / total_length ;
-                    barcode_cov = total_barcode / total_length ;
+                    if( total_length != 0 )
+                    {
+                        cov = total_cov / total_length ;
+                        barcode_cov = total_barcode / total_length ;
+                    }
+                    else
+                    {
+                        cov = 255 ;
+                        barcode_cov = 100000;
+                    }
                 }
 
                 bool operator < ( const Path & a) const

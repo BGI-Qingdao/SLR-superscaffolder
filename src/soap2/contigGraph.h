@@ -104,7 +104,7 @@ namespace BGIQD {
 
             void SetBiNotSuppert() { flag |= 0x4 ; }
             bool IsBiNotSupport() const { return flag & 0x4 ;}
-            
+
 
             bool IsValid() const { return  ! ( IsBiNotSupport() ||  IsJumpConn() ); }
         };
