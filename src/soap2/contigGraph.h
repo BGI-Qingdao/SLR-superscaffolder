@@ -136,6 +136,7 @@ namespace BGIQD {
             bool IsSingle() const { return flag & 0x20 ; }
             bool IsCircle() const { return flag & 0x40 ; }
 
+
             void Mark() { flag |= 0x8 ; }
 
             void CheckCircle();

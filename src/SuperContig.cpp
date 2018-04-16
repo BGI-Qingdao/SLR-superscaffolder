@@ -16,7 +16,7 @@ std::atomic<int> index ;
 
 void findConnection(BGIQD::SOAP2::GlobalConfig & config
         , unsigned int edge_id
-        , bool order
+        , bool is_bal 
         , int max_depth
         , bool detail = false
         )
@@ -105,19 +105,28 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
 
     BGIQD::SOAP2::Edge & root = config.edge_array[edge_id];
     unsigned int path_i = edge_id;
+    unsigned int bal_i = root.bal_id ;
     //unsigned int base_i = order ? config.edge_array[edge_id].bal_id : edge_id ;
     std::list<BGIQD::SOAP2::Edge> stack;
     std::map<unsigned int , BGIQD::SOAP2::Edge > history;
     std::map<unsigned int , std::vector<std::list<BGIQD::SOAP2::Edge> > > paths;
     std::map<unsigned int , std::vector<std::list<BGIQD::SOAP2::Edge> > > mids;
-    if ( order )
-        config.edge_array[path_i].DepthSearch( config.edge_array , stack,
-                history, paths , mids ,config.edge_array[path_i].length ,
-                config.connections.at(root.bal_id),max_depth );
-    else 
-        config.edge_array[path_i].DepthSearch( config.edge_array , stack,
-                history, paths , mids ,config.edge_array[path_i].length ,
-                config.connections.at(root.id) , max_depth);
+    std::map<unsigned int , float> * neibs;
+    if ( is_bal )
+        neibs = & config.connections.at(bal_i);
+    else
+        neibs = & config.connections.at(path_i);
+
+    config.edge_array[path_i].DepthSearch( 
+            config.edge_array 
+            , stack
+            , history
+            , paths 
+            , mids 
+            , config.edge_array[path_i].length 
+            , *neibs 
+            ,max_depth
+            );
     //if( detail )
     //{
     //    for( auto const & i : paths )
@@ -178,79 +187,94 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
           }
           std::cerr<<std::endl;*/
         unsigned int to_id = j.first ;
-        unsigned int to_id_in_path = j.second[0].front().id ;
-        int length  = get_min_length_v2(j.second , mid_map);
-        //
-        //  A1->B1
-        //  A2<-B2
-        //
-        if( !order && to_id == to_id_in_path)
+        for( const auto & a_path : j.second )
         {
+            unsigned int to_id_in_path = a_path.front().id ;
+            //unsigned int to_id_in_path = j.second[0].front().id ;
+            int length  = get_min_length_v2(j.second , mid_map);
+            auto & curr_from = config.key_array[config.key_map.at(is_bal ? bal_i : path_i) ];
+            auto & curr_to = config.key_array[config.key_map[to_id]];
+            if( ! is_bal && curr_from.to.find( to_id_in_path )  != curr_from.to.end () )
             {
-                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[path_i]]);
-                BGIQD::SOAP2::KeyConn conn{j.first ,length,0};
-                conn.SetPostive();
-                //conn.length = 
-                config.key_array[config.key_map[path_i]].to[j.first]= conn;
+                if( curr_from.to.at( to_id_in_path ).length <= length )
+                    continue ;
             }
+            else if ( is_bal && curr_from.from.find( to_id_in_path ) != curr_from.from.end() )
             {
-                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[j.first]]);
-                BGIQD::SOAP2::KeyConn conn{path_i,length,0};
-                conn.SetPostive();
-                config.key_array[config.key_map[j.first]].from[(path_i)] = conn;
+                if( curr_from.from.at( to_id_in_path ).length <= length )
+                    continue ;
             }
-        }
-        //
-        // A1->B2
-        // A2<-B1
-        //
-        else if( !order && to_id != to_id_in_path )
-        {
+            //
+            //  A1->B1
+            //  A2<-B2
+            //
+            if( !is_bal && to_id == to_id_in_path)
             {
-                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[path_i]]);
-                BGIQD::SOAP2::KeyConn conn{j.first,length,0};
-                config.key_array[config.key_map[path_i]].to[j.first]= conn;
+                {
+                    std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[path_i]]);
+                    BGIQD::SOAP2::KeyConn conn{to_id,length,0};
+                    conn.SetPostive();
+                    curr_from.to[to_id]= conn;
+                }
+                {
+                    std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[to_id]]);
+                    BGIQD::SOAP2::KeyConn conn{path_i,length,0};
+                    conn.SetPostive();
+                    curr_to.from[path_i] = conn;
+                }
             }
+            //
+            // A1->B2
+            // A2<-B1
+            //
+            else if( !is_bal && to_id != to_id_in_path )
             {
-                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[j.first]]);
-                BGIQD::SOAP2::KeyConn conn{path_i,length,0};
-                config.key_array[config.key_map[j.first]].to[(path_i)] = conn;
+                {
+                    std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[path_i]]);
+                    BGIQD::SOAP2::KeyConn conn{to_id,length,0};
+                    curr_from.to[to_id_in_path]= conn;
+                }
+                {
+                    std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[to_id]]);
+                    BGIQD::SOAP2::KeyConn conn{path_i,length,0};
+                    curr_to.to[bal_i] = conn;
+                }
             }
-        }
-        //
-        // A2->B1
-        // A1<-B2
-        //
-        else if ( order && to_id == to_id_in_path )
-        {
+            //
+            // A2->B1
+            // A1<-B2
+            //
+            else if ( is_bal && to_id == to_id_in_path )
             {
-                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[root.bal_id]]);
-                BGIQD::SOAP2::KeyConn conn{j.first,length,0};
-                config.key_array[config.key_map[root.bal_id]].from[j.first]= conn;
+                {
+                    std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[bal_i]]);
+                    BGIQD::SOAP2::KeyConn conn{to_id,length,0};
+                    curr_from.from[curr_to.bal_id]= conn;
+                }
+                {
+                    std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[to_id]]);
+                    BGIQD::SOAP2::KeyConn conn{bal_i,length,0};
+                    curr_to.from[path_i] = conn;
+                }
             }
+            //
+            // A2->B2
+            // A1<-B1
+            //
+            else
             {
-                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[j.first]]);
-                BGIQD::SOAP2::KeyConn conn{root.bal_id,length,0};
-                config.key_array[config.key_map[j.first]].from[(root.bal_id)] = conn;
-            }
-        }
-        //
-        // A2->B2
-        // A1<-B1
-        //
-        else
-        {
-            {
-                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[root.bal_id]]);
-                BGIQD::SOAP2::KeyConn conn{j.first,length,0};
-                conn.SetPostive();
-                config.key_array[config.key_map[root.bal_id]].from[j.first]= conn;
-            }
-            {
-                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[j.first]]);
-                BGIQD::SOAP2::KeyConn conn{root.bal_id,length,0};
-                conn.SetPostive();
-                config.key_array[config.key_map[j.first]].to[(root.bal_id)] = conn;
+                {
+                    std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[bal_i]]);
+                    BGIQD::SOAP2::KeyConn conn{to_id,length,0};
+                    conn.SetPostive();
+                    curr_from.from[to_id]= conn;
+                }
+                {
+                    std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[to_id]]);
+                    BGIQD::SOAP2::KeyConn conn{bal_i,length,0};
+                    conn.SetPostive();
+                    curr_to.to[bal_i] = conn;
+                }
             }
         }
     }
@@ -877,13 +901,13 @@ void linearConnection(BGIQD::SOAP2::GlobalConfig &config , unsigned int key_id)/
         {
             if(! next.second.IsValid() )
                 continue;
-            extractPath(next.first,next.second.IsPositive(),true);
+            extractPath(next.second.to,next.second.IsPositive(),true);
         }
         for(auto next : curr.from)
         {
             if( ! next.second.IsValid() )
                 continue;
-            extractPath(next.first,next.second.IsPositive(),false);
+            extractPath(next.second.to,next.second.IsPositive(),false);
         }
         curr.Mark();
     }
@@ -993,6 +1017,11 @@ int main(int argc , char **argv)
     lger<<BGIQD::LOG::lstart()<<"loadCluster start ... "<<BGIQD::LOG::lend();
     BGIQD::SOAP2::loadCluster(config);
     lger<<BGIQD::LOG::lstart()<<"buildConnection start ... "<<BGIQD::LOG::lend();
+    //// alloc all map node first 
+    //for( const auto & m : config.keys)
+    //{
+    //    config.key_array[config.key_map[m]].flag = 0;
+    //}
 
     {
         BGIQD::MultiThread::MultiThread t_jobs;
@@ -1023,6 +1052,7 @@ int main(int argc , char **argv)
     {
         config.key_array[config.key_map[m]].CheckCircle();
     }
+
     if( multi.to_float() > 0.01f )
     {
         solveMulti(config, multi.to_float());
