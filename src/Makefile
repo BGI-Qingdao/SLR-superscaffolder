@@ -56,11 +56,14 @@ source_cpp =	contig_barcode.cpp \
 				soap2/contigType.cpp\
 
 
+
 test_cpp   =	test.cpp\
 				common/time/timetools_test.cpp\
 				common/string/stringtools_test.cpp\
 				biocommon/sam_bam/sam_parser_test.cpp\
 				common/args/argsparser_test.cpp\
+
+source_o					= ${source_cpp:%.cpp=%.o}
 
 BarcodeOnContig_NoRef_cpp =	BarcodeOnContig_NoRef.cpp
 BarcodeOnContig_NoRef_o   =	${BarcodeOnContig_NoRef_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
@@ -128,6 +131,9 @@ MergeContig_o			= ${MergeContig_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 SolveMulti_cpp			= SolveMulti.cpp
 SolveMulti_o			= ${SolveMulti_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
+ClusterLengthSim_cpp 	= ClusterLengthSim.cpp
+ClusterLengthSim_o		= ${ClusterLengthSim_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+
 test_o 	   =	${test_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
 
@@ -138,14 +144,14 @@ jobs 	   =	BarcodeOnContig BarcodeOnContig_NoRef FormatBarcodeOnRef BarcodeOnBin
 				ContigTypeByRef ContigGraphType StaticsticUnique  UnicomGraph \
 				ClusterGap job12 LinearClusterResult Sam2ReadInContig MergeClusterResult \
 				SuperContig LinkCheck LinkCheck_1 FillContigRoad ContigRoadFill2Fasta \
-				MergeContig SolveMulti
+				MergeContig SolveMulti ClusterLengthSim
 jobs_o 	   =	${BarcodeOnContig_o} ${BarcodeOnContig_NoRef_o}  ${BarcodeOnBin_o} ${FormatBarcodeOnRef_o} \
 				${BinCluster_o} ${ContigTypeByRef_o}\
 				${ContigGraphType_o}  ${StaticsticUnique_o}  ${UnicomGraph_o} \
 				${ClusterGap_o} ${job_12_o} ${LinearClusterResult_o} ${Sam2ReadInContig_o} \
 				${MergeClusterResult_o} ${SuperContig_o} ${LinkCheck_o} \
 				${FillContigRoad_o} ${ContigRoadFill2Fasta_o} ${LinkCheck_1_o} \
-				${MergeContig_o} ${SolveMulti_o}
+				${MergeContig_o} ${SolveMulti_o} ${ClusterLengthSim_o}
 
 all : test ${jobs}
 
@@ -214,6 +220,9 @@ MergeContig : clean ${MergeContig_o}
 
 SolveMulti : clean ${SolveMulti_o}
 	${CXX} ${DEUBG_CXX} ${SolveMulti_o} -o SolveMulti
+
+ClusterLengthSim : clean ${ClusterLengthSim_o}
+	${CXX} ${DEUBG_CXX} ${ClusterLengthSim_o} -o ClusterLengthSim
 
 
 test: clean ${test_o} ${source_h}

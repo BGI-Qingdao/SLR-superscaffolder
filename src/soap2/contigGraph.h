@@ -124,6 +124,10 @@ namespace BGIQD {
             std::map<unsigned int , KeyConn> from ;
             std::map<unsigned int , KeyConn> to;
 
+            void Init(int id , unsigned int base) ;
+            void InitFrom( const std::string & string );
+            void InitTo( const std::string & string );
+
             // connect ? up/down ? p/r
             std::tuple<bool,bool,bool> Relationship(unsigned int id) const ;
             std::tuple<bool,bool,bool> Relationship_nojump(unsigned int id, bool to_order) const ;
