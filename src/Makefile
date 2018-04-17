@@ -134,6 +134,9 @@ SolveMulti_o			= ${SolveMulti_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 ClusterLengthSim_cpp 	= ClusterLengthSim.cpp
 ClusterLengthSim_o		= ${ClusterLengthSim_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
+LinearCDG_cpp 			= LinearCDG.cpp
+LinearCDG_o				= ${LinearCDG_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+
 test_o 	   =	${test_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
 
@@ -144,14 +147,15 @@ jobs 	   =	BarcodeOnContig BarcodeOnContig_NoRef FormatBarcodeOnRef BarcodeOnBin
 				ContigTypeByRef ContigGraphType StaticsticUnique  UnicomGraph \
 				ClusterGap job12 LinearClusterResult Sam2ReadInContig MergeClusterResult \
 				SuperContig LinkCheck LinkCheck_1 FillContigRoad ContigRoadFill2Fasta \
-				MergeContig SolveMulti ClusterLengthSim
+				MergeContig SolveMulti ClusterLengthSim LinearCDG
 jobs_o 	   =	${BarcodeOnContig_o} ${BarcodeOnContig_NoRef_o}  ${BarcodeOnBin_o} ${FormatBarcodeOnRef_o} \
 				${BinCluster_o} ${ContigTypeByRef_o}\
 				${ContigGraphType_o}  ${StaticsticUnique_o}  ${UnicomGraph_o} \
 				${ClusterGap_o} ${job_12_o} ${LinearClusterResult_o} ${Sam2ReadInContig_o} \
 				${MergeClusterResult_o} ${SuperContig_o} ${LinkCheck_o} \
 				${FillContigRoad_o} ${ContigRoadFill2Fasta_o} ${LinkCheck_1_o} \
-				${MergeContig_o} ${SolveMulti_o} ${ClusterLengthSim_o}
+				${MergeContig_o} ${SolveMulti_o} ${ClusterLengthSim_o} \
+				${LinearCDG_o}
 
 all : test ${jobs}
 
@@ -224,6 +228,8 @@ SolveMulti : clean ${SolveMulti_o}
 ClusterLengthSim : clean ${ClusterLengthSim_o}
 	${CXX} ${DEUBG_CXX} ${ClusterLengthSim_o} -o ClusterLengthSim
 
+LinearCDG: clean ${LinearCDG_o}
+	${CXX} ${DEUBG_CXX} ${LinearCDG_o} -o LinearCDG 
 
 test: clean ${test_o} ${source_h}
 	${CXX} ${DEUBG_CXX} ${test_o} -o test

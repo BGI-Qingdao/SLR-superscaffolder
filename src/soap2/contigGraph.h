@@ -94,7 +94,7 @@ namespace BGIQD {
             unsigned int to;
             int length;
             int flag ;
-
+            float sim ;
             bool IsPositive() const { return flag & 0x2 ; }
             void SetPostive() { flag |= 0x2 ;}
 
@@ -105,6 +105,7 @@ namespace BGIQD {
             void SetBiNotSuppert() { flag |= 0x4 ; }
             bool IsBiNotSupport() const { return flag & 0x4 ;}
 
+            void InitFromString( const std::string & str ) ;
 
             bool IsValid() const { return  ! ( IsBiNotSupport() ||  IsJumpConn() ); }
         };
@@ -140,6 +141,8 @@ namespace BGIQD {
             bool IsSingle() const { return flag & 0x20 ; }
             bool IsCircle() const { return flag & 0x40 ; }
 
+            KeyConn & GetValidTo() ;
+            KeyConn & GetValidFrom() ;
 
             void Mark() { flag |= 0x8 ; }
 

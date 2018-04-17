@@ -1,5 +1,6 @@
 #include "soap2/contigGraph.h"
-#include <common/files/file_reader.h>
+#include "common/files/file_reader.h"
+#include "common/string/stringtools.h"
 #include <sstream>
 #include <cassert>
 #include <stdio.h>
@@ -130,6 +131,41 @@ namespace BGIQD{
         }
 
         // -------------------------- struct KeyEdge ------------------------------
+
+        KeyConn & KeyEdge::GetValidTo() 
+        {
+            for( auto & i : to)
+            {
+                if( i.second.IsValid() )
+                    return i.second;
+            }
+            assert(0);
+            static KeyConn i ;
+            return i;
+        }
+        KeyConn & KeyEdge::GetValidFrom() 
+        {
+            for( auto & i : from )
+            {
+                if( i.second.IsValid() )
+                    return i.second;
+            }
+            assert(0);
+            static KeyConn i ;
+            return i;
+        }
+        void KeyConn::InitFromString( const std::string & str )
+        {
+            auto items = BGIQD::STRING::split(str,":");
+            assert( items.size() == 2 ) ;
+            to = std::stoul( items[0] );
+            length = std::stoul( items[1] );
+            sim = std::stof( items[2] );
+            flag = 0 ;
+            if( items[3] == "+" )
+                SetPostive() ;
+        }
+
         std::tuple<bool,bool,bool> KeyEdge::Relationship(unsigned int id) const 
         {
             auto itr1 = from.find(id);
@@ -144,6 +180,41 @@ namespace BGIQD{
                 return std::make_tuple(true , true , itr2->second.IsPositive() );
             }
             return std::make_tuple(false ,false ,false);
+        }
+
+        void KeyEdge::Init(int i , unsigned int b)
+        {
+            id = i ;
+            edge_id = b ;
+            bal_id = b + 1;
+        }
+
+        void KeyEdge::InitFrom( const std::string & str )
+        {
+            KeyConn conn ;
+            conn.InitFromString( str );
+            if ( conn.IsPositive() )
+            {
+                from[conn.to] = conn ;
+            }
+            else
+            {
+                from[conn.to + 1 ] = conn ;
+            }
+        }
+
+        void KeyEdge::InitTo( const std::string & str )
+        {
+            KeyConn conn ;
+            conn.InitFromString( str );
+            if ( conn.IsPositive() )
+            {
+                to[conn.to] = conn ;
+            }
+            else
+            {
+                to[conn.to + 1 ] = conn ;
+            }
         }
 
         std::tuple<bool,bool,bool> KeyEdge::Relationship_nojump(unsigned int id,bool to_order) const 
@@ -184,6 +255,7 @@ namespace BGIQD{
 
         void KeyEdge::SetType() 
         {
+            flag = 0 ;
             from_size = 0 ; to_size = 0;
             total_size = 0 ;
             jump_conn = 0 ;
