@@ -12,6 +12,16 @@ namespace BGIQD {
     namespace SOAP2 {
 
 
+        struct ContigRoad
+        {
+            bool headin;
+            bool tailin;
+            int length;
+            bool downstream;
+            std::vector<unsigned int> contig;
+            std::vector<unsigned int> real_contig;
+        };
+
         // --------------------Graph Edge Arc --------------------
         struct Arc
         {

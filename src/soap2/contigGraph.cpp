@@ -157,7 +157,7 @@ namespace BGIQD{
         void KeyConn::InitFromString( const std::string & str )
         {
             auto items = BGIQD::STRING::split(str,":");
-            assert( items.size() == 2 ) ;
+            assert( items.size() == 4 ) ;
             to = std::stoul( items[0] );
             length = std::stoul( items[1] );
             sim = std::stof( items[2] );
