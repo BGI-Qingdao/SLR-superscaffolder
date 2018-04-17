@@ -199,10 +199,21 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
                 if( curr_from.to.at( to_id_in_path ).length <= length )
                     continue ;
             }
-            else if ( is_bal && curr_from.from.find( to_id_in_path ) != curr_from.from.end() )
+            else if ( is_bal )
             {
-                if( curr_from.from.at( to_id_in_path ).length <= length )
-                    continue ;
+                if( to_id != to_id_in_path )
+                {
+                    if( curr_from.from.find( to_id ) != curr_from.from.end() )
+                        if( curr_from.from.at( to_id ).length <= length )
+                            continue ;
+                }
+                else
+                {
+                    if( curr_from.from.find( curr_to.bal_id ) != curr_from.from.end() )
+                        if( curr_from.from.at( curr_to.bal_id ).length <= length )
+                            continue ;
+
+                }
             }
             //
             //  A1->B1

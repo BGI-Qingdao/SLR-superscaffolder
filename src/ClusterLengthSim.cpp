@@ -52,7 +52,7 @@ int main(int argc , char ** argv)
             std::tie( id1 , len1 , start1 , end1 ) = pres.front() ;
             pres.pop();
             if( connections.find( id ) != connections.end() && connections.at(id).find(id1) != connections.at(id).end() )
-                std::cout<<start  - end1 <<"\t"<< connections.at(id).at(id1);
+                std::cout<<start  - end1 <<"\t"<< connections.at(id).at(id1)<<std::endl;
         }
         pres.push( std::make_tuple( id , len ,start ,end ) );
     }
