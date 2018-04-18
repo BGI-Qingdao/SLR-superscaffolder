@@ -22,18 +22,78 @@ struct  AppGlobalData
         BGIQD::LOG::logfilter::singleton().get("LinearCDG",BGIQD::LOG::loglevel::INFO , loger );
     }
 
+
+    void report_freq()
+    {
+        BGIQD::FREQ::Freq<std::string> freq;
+        BGIQD::FREQ::Freq<std::string> basefreq;
+        BGIQD::FREQ::Freq<int> from;
+        BGIQD::FREQ::Freq<int> to;
+        BGIQD::FREQ::Freq<int> total;
+        BGIQD::FREQ::Freq<int> del;
+        BGIQD::FREQ::Freq<int> base_from;
+        BGIQD::FREQ::Freq<int> base_to;
+        BGIQD::FREQ::Freq<int> in_circle;
+
+        for( const auto & m : edges)
+        {
+            auto & curr = m.second;
+            if( curr.from.size() == 0 && curr.to.size() == 0 )
+                basefreq.Touch("Single");
+            else if( curr.from.size() == 0 && curr.to.size() == 1 )
+                basefreq.Touch("Tipto 1");
+            else if( curr.from.size() == 0 && curr.to.size() > 1 )
+                basefreq.Touch("Tipto >1");
+            else if( curr.from.size() == 1 && curr.to.size() ==0 )
+                basefreq.Touch("Tipfrom 1");
+            else if( curr.from.size() > 1 && curr.to.size() ==0 )
+                basefreq.Touch("Tipfrom >1");
+            else if( curr.from.size() == 1 && curr.to.size() == 1 )
+                basefreq.Touch("Linear");
+            else
+                basefreq.Touch("Multi");
+
+
+            if( curr.IsSingle() )
+                freq.Touch("Single");
+            else if ( curr.IsLinear() )
+                freq.Touch("Linear");
+            else if ( curr.IsTipTo() && curr.to_size ==1 )
+                freq.Touch("Tipto 1");
+            else if ( curr.IsTipTo() && curr.to_size > 1 )
+                freq.Touch("Tipto >1");
+            else if ( curr.IsTipFrom() && curr.from_size ==1 )
+                freq.Touch("Tipfrom 1");
+            else if ( curr.IsTipFrom() && curr.from_size > 1 )
+                freq.Touch("Tipfrom >1");
+            else
+                freq.Touch("Multi");
+            from.Touch(curr.from_size);
+            to.Touch(curr.to_size);
+            total.Touch(curr.total_size);
+            del.Touch(curr.jump_conn);
+            base_from.Touch( curr.from.size());
+            base_to.Touch( curr.to.size());
+            in_circle.Touch(curr.IsCircle());
+        }
+
+        loger<<BGIQD::LOG::lstart()<<"base key type freq"<<'\n'<<basefreq.ToString() << BGIQD::LOG::lend();
+        loger<<BGIQD::LOG::lstart()<<"key type freq"<<'\n'<< freq.ToString() << BGIQD::LOG::lend();
+        loger<<BGIQD::LOG::lstart()<<"incircle freq"<< '\n'<<in_circle.ToString() << BGIQD::LOG::lend();
+    }
+
+
 }config;
 
 int main(int argc , char ** argv)
 {
-
     START_PARSE_ARGS
-    DEFINE_ARG_DETAIL(bool, solve, 's',true,"solve multi ? default not");
+        DEFINE_ARG_DETAIL(bool, solve, 's',true,"solve multi ? default not");
     END_PARSE_ARGS
 
-    config.Init();
-        // Load graph
-        std::string line ;
+        config.Init();
+    // Load graph
+    std::string line ;
     int id  = 0 ;
     while( ! std::getline( std::cin , line).eof() )
     {
@@ -63,13 +123,13 @@ int main(int argc , char ** argv)
     }
 
     // report before action
-
-    // anlysis already linear part
-
     for( auto & m : config.edges )
     {
         m.second.SetType();
     }
+    config.report_freq();
+    // anlysis already linear part
+
 
     std::vector<int> linear_len;
 
@@ -90,31 +150,133 @@ int main(int argc , char ** argv)
                 linear_sim.push_back( curr.GetValidFrom().sim);
             }
             /*
-            else if ( curr.IsTipTo()  && curr.to_size == 1 )
-            {
-                index ++ ;
-                linear_len.push_back( curr.GetValidTo().length );
-                linear_sim.push_back( curr.GetValidTo().sim);
-            }*/
+               else if ( curr.IsTipTo()  && curr.to_size == 1 )
+               {
+               index ++ ;
+               linear_len.push_back( curr.GetValidTo().length );
+               linear_sim.push_back( curr.GetValidTo().sim);
+               }*/
         }
     }
     config.loger<<BGIQD::LOG::lstart()<<" total linear node "<<index<<BGIQD::LOG::lend();
     std::sort(linear_len.begin() , linear_len.end());
     std::sort(linear_sim.rbegin() , linear_sim.rend());
-    for(int i = 0 ; i<index ; i++ )
-    {
-        config.loger<<BGIQD::LOG::lstart()<<linear_len[i]<<"\t"<<linear_sim[i]<<BGIQD::LOG::lend(); 
-    }
-    int len_threshold = linear_len[ index * 0.95 ];
-    float sim_threshold = linear_sim[ index * 0.95 ];
+    //for(int i = 0 ; i<index ; i++ )
+    //{
+    //    config.loger<<BGIQD::LOG::lstart()<<linear_len[i]<<"\t"<<linear_sim[i]<<BGIQD::LOG::lend(); 
+    //}
+    int len_threshold = linear_len[ index * 0.8 ];
+    float sim_threshold = linear_sim[ index * 0.9 ];
     config.loger<<BGIQD::LOG::lstart()<<" used linear len threshold "<<len_threshold<<BGIQD::LOG::lend();
     config.loger<<BGIQD::LOG::lstart()<<" used linear sim threshold "<<sim_threshold<<BGIQD::LOG::lend();
-    // solve multi
 
+    // solve multi
+    auto  get_oppo = [] (unsigned int to  , bool to_order , bool positive) {
+        auto & curr_to = config.edges[to];
+        //A1->B1 
+        //A2<-B2
+        if( to_order && positive )
+        {
+            return std::ref(curr_to.from);
+        }
+        // A1->B2
+        // A2<-B1
+        else if( to_order && ! positive )
+        {
+            return std::ref(curr_to.to);
+        }
+        // A1<-B1
+        // A2->B2
+        else if( ! to_order &&  positive )
+        {
+            return std::ref(curr_to.to);
+        }
+        // A1<-B2
+        // A2->B1
+        else //if( ! to_order && !  positive )
+        {
+            return std::ref(curr_to.from);
+        }
+    };
+
+    int del_count = 0 ;
+    // delete unique link -> multi
     for( auto & m : config.edges )
     {
         auto & curr = m.second;
-        if( curr.IsLinear() 
+        if( curr.IsLinear()
+                || (curr.IsTipTo() && curr.to_size == 1 ) 
+                || (curr.IsTipFrom() && curr.from_size == 1 ) )
+        {
+            if( curr.to_size == 1 )
+            {
+                auto & conn = curr.GetValidTo() ;
+                auto i = get_oppo( conn.to , true , conn.IsPositive() );
+                auto & m = i.get();
+                int unique_count = 0 ;
+                for ( auto & p : m )
+                {
+                    auto & oppo_conn = p.second;
+                    if( oppo_conn.to == curr.edge_id && oppo_conn.IsValid())
+                    {
+                        unique_count ++ ;
+                    }
+                }
+                if( unique_count == 1 )
+                {
+                    for( auto & p : m )
+                    {
+                        auto & oppo_conn = p.second;
+                        if( oppo_conn.to != curr.edge_id && oppo_conn.IsValid() )
+                        {
+                            del_count ++ ;
+                            oppo_conn.SetJump();
+                        }
+                    }
+                }
+            }
+
+            if( curr.from_size== 1 )
+            {
+                auto & conn = curr.GetValidFrom() ;
+                auto i = get_oppo( conn.to , true , conn.IsPositive() );
+                auto & m = i.get();
+                int unique_count = 0 ;
+                for( auto & p : m )
+                {
+                    auto & oppo_conn = p.second;
+                    if( oppo_conn.to == curr.edge_id && oppo_conn.IsValid())
+                    {
+                        unique_count ++ ;
+                    }
+                }
+                if( unique_count == 1 )
+                {
+                    for( auto & p : m )
+                    {
+                        auto & oppo_conn = p.second;
+                        if( oppo_conn.to != curr.edge_id && oppo_conn.IsValid() )
+                        {
+                            del_count ++ ;
+                            oppo_conn.SetJump();
+                        }
+                    }
+                }
+            }
+        }
+    }
+    for( auto & m : config.edges )
+    {
+        m.second.SetType();
+    }
+    config.report_freq();
+    config.loger<<BGIQD::LOG::lstart()<<"unque-muti part delete"<<del_count<<BGIQD::LOG::lend();
+    // delete by length & sim
+    del_count = 0 ;
+    for( auto & m : config.edges )
+    {
+        auto & curr = m.second;
+        if( curr.IsLinear()
                 || (curr.IsTipTo() && curr.to_size == 1 ) 
                 || (curr.IsTipFrom() && curr.from_size == 1 ) )
         {
@@ -125,7 +287,11 @@ int main(int argc , char ** argv)
             for( auto & i : curr.from )
             {
                 if( i.second.length > len_threshold || i.second.sim > sim_threshold )
-                    i.second.SetJump();
+                    if( get_oppo( i.second.to , false , i.second.IsPositive() ).get().size() > 1 )
+                    {
+                        i.second.SetJump();
+                        del_count ++ ;
+                    }
             }
         }
         if( curr.to_size > 1 )
@@ -133,85 +299,259 @@ int main(int argc , char ** argv)
             for( auto & i : curr.to)
             {
                 if( i.second.length > len_threshold || i.second.sim > sim_threshold )
-                    i.second.SetJump();
+                    if( get_oppo( i.second.to , true , i.second.IsPositive() ).get().size() > 1 )
+                    {
+                        i.second.SetJump();
+                        del_count ++ ;
+                    }
             }
         }
     }
-    // report after action
-
-    for( auto & m : config.edges)
+    for( auto & m : config.edges )
     {
         m.second.SetType();
     }
-    BGIQD::FREQ::Freq<std::string> freq;
-    BGIQD::FREQ::Freq<std::string> basefreq;
-    BGIQD::FREQ::Freq<int> from;
-    BGIQD::FREQ::Freq<int> to;
-    BGIQD::FREQ::Freq<int> total;
-    BGIQD::FREQ::Freq<int> del;
-    BGIQD::FREQ::Freq<int> base_from;
-    BGIQD::FREQ::Freq<int> base_to;
-    BGIQD::FREQ::Freq<int> in_circle;
-    BGIQD::FREQ::Freq<int> len_freq;
-
-    for( const auto & m : config.edges)
+    config.report_freq();
+    config.loger<<BGIQD::LOG::lstart()<<"length-sim part delete"<<del_count<<BGIQD::LOG::lend();
+    del_count = 0;
+    // rebuild unique link
+    for( auto & m : config.edges )
     {
         auto & curr = m.second;
-        if( curr.from.size() == 0 && curr.to.size() == 0 )
-            basefreq.Touch("Single");
-        else if( curr.from.size() == 0 && curr.to.size() == 1 )
-            basefreq.Touch("Tipto 1");
-        else if( curr.from.size() == 0 && curr.to.size() > 1 )
-            basefreq.Touch("Tipto >1");
-        else if( curr.from.size() == 1 && curr.to.size() ==0 )
-            basefreq.Touch("Tipfrom 1");
-        else if( curr.from.size() > 1 && curr.to.size() ==0 )
-            basefreq.Touch("Tipfrom >1");
-        else if( curr.from.size() == 1 && curr.to.size() == 1 )
-            basefreq.Touch("Linear");
-        else
-            basefreq.Touch("Multi");
+        if( curr.IsLinear()
+                || (curr.IsTipTo() && curr.to_size == 1 ) 
+                || (curr.IsTipFrom() && curr.from_size == 1 ) )
+        {
+            if( curr.to_size == 1 )
+            {
+                auto & conn = curr.GetValidTo() ;
+                auto i = get_oppo( conn.to , true , conn.IsPositive() );
+                auto & m = i.get();
+                bool detected = false ;
+                for( auto & p : m )
+                {
+                    auto & oppo_conn = p.second;
+                    if( oppo_conn.to == curr.edge_id && oppo_conn.IsValid())
+                    {
+                        detected = true ;
+                    }
+                }
+                if( ! detected )
+                {
+                    for( auto & p : m )
+                    {
+                        auto & oppo_conn = p.second;
+                        if( oppo_conn.to == curr.edge_id && ! oppo_conn.IsValid())
+                        {
+                            oppo_conn.UnSetJump();
+                            del_count ++ ;
+                        }
+                    }
+                }
+            }
 
-
-        if( curr.IsSingle() )
-            freq.Touch("Single");
-        else if ( curr.IsLinear() )
-            freq.Touch("Linear");
-        else if ( curr.IsTipTo() && curr.to_size ==1 )
-            freq.Touch("Tipto 1");
-        else if ( curr.IsTipTo() && curr.to_size > 1 )
-            freq.Touch("Tipto >1");
-        else if ( curr.IsTipFrom() && curr.from_size ==1 )
-            freq.Touch("Tipfrom 1");
-        else if ( curr.IsTipFrom() && curr.from_size > 1 )
-            freq.Touch("Tipfrom >1");
-        else
-            freq.Touch("Multi");
-        from.Touch(curr.from_size);
-        to.Touch(curr.to_size);
-        total.Touch(curr.total_size);
-        del.Touch(curr.jump_conn);
-        base_from.Touch( curr.from.size());
-        base_to.Touch( curr.to.size());
-        in_circle.Touch(curr.IsCircle());
+            if( curr.from_size== 1 )
+            {
+                auto & conn = curr.GetValidFrom() ;
+                auto i = get_oppo( conn.to , false , conn.IsPositive() );
+                auto & m = i.get();
+                bool detected = false ;
+                for( auto & p : m )
+                {
+                    auto & oppo_conn = p.second;
+                    if( oppo_conn.to == curr.edge_id && oppo_conn.IsValid())
+                    {
+                        detected = true ;
+                    }
+                }
+                if( ! detected )
+                {
+                    for( auto & p : m )
+                    {
+                        auto & oppo_conn = p.second;
+                        if( oppo_conn.to == curr.edge_id && ! oppo_conn.IsValid())
+                        {
+                            oppo_conn.UnSetJump();
+                            del_count ++ ;
+                        }
+                    }
+                }
+            }
+        }
     }
+    config.loger<<BGIQD::LOG::lstart()<<"rebuild unique part add"<<del_count<<BGIQD::LOG::lend();
+    // report after action
+    for( auto & m : config.edges )
+    {
+        m.second.SetType();
+    }
+    config.report_freq();
 
-    config.loger<<BGIQD::LOG::lstart()<<"base key type freq"<<'\n'<<basefreq.ToString() << BGIQD::LOG::lend();
-    config.loger<<BGIQD::LOG::lstart()<<"key type freq"<<'\n'<< freq.ToString() << BGIQD::LOG::lend();
-    config.loger<<BGIQD::LOG::lstart()<<"from freq"<< '\n'<<from.ToString() << BGIQD::LOG::lend();
-    config.loger<<BGIQD::LOG::lstart()<<"to freq"<< '\n'<<to.ToString() << BGIQD::LOG::lend();
-    config.loger<<BGIQD::LOG::lstart()<<"total freq"<< '\n'<<total.ToString() << BGIQD::LOG::lend();
-    config.loger<<BGIQD::LOG::lstart()<<"delete freq"<< '\n'<<del.ToString() << BGIQD::LOG::lend();
-    config.loger<<BGIQD::LOG::lstart()<<"basefrom freq"<< '\n'<<base_from.ToString() << BGIQD::LOG::lend();
-    config.loger<<BGIQD::LOG::lstart()<<"baseto freq"<< '\n'<<base_to.ToString() << BGIQD::LOG::lend();
-    config.loger<<BGIQD::LOG::lstart()<<"incircle freq"<< '\n'<<in_circle.ToString() << BGIQD::LOG::lend();
 
     // print linear collection
 
+    auto extractPath = []( unsigned int to_s , bool to_order, bool search_order,BGIQD::SOAP2::KeyEdge & curr,BGIQD::SOAP2::ContigRoad & path)
+    {
+        unsigned int to = to_s ;
+        path.contig.clear();
+        path.real_contig.clear();
+        if( search_order )
+        {
+            path.downstream = true ;
+            path.real_contig.push_back(curr.edge_id);
+        }
+        else
+        {
+            path.downstream = false ;
+            path.real_contig.push_back(curr.bal_id);
+        }
+        //detect headin
+        if( search_order && curr.to_size == 1 )
+        {
+            path.headin = true;
+        }
+        else if ( ! search_order && curr.from_size == 1 )
+        {
+            path.headin = true;
+        }
+        else
+        {
+            path.headin = false ;
+        }
+        path.contig.push_back(curr.edge_id) ;
+        path.contig.push_back(to) ;
+
+        if( search_order ^ to_order )
+        {
+            path.real_contig.push_back(config.edges.at(to).bal_id);
+        }
+        else
+        {
+            path.real_contig.push_back(config.edges.at(to).edge_id);
+        }
+        bool order = search_order;//
+        bool torder = to_order; // 
+        if( config.edges.at(to).IsMarked())
+            return ;
+        while( (! config.edges.at(to).IsCircle())&& config.edges.at(to).IsLinear() && !config.edges.at(to).IsMarked() )
+        {
+            auto & curr_to = config.edges.at(to);
+            curr_to.Mark();
+            //downstream
+            if( order )
+            {
+                //
+                //A1->B1
+                if( torder )
+                {
+                    const auto & conn  =  curr_to.GetValidTo() ;
+                    to = conn.to;
+                    torder = conn.IsPositive();
+                    if( torder )
+                    {
+                        path.real_contig.push_back(config.edges.at(to).edge_id );
+                    }
+                    else
+                    {
+                        path.real_contig.push_back(config.edges.at(to).bal_id);
+                    }
+                }
+                //A1->B2
+                else
+                {
+                    const auto & conn  =  curr_to.GetValidFrom() ;
+                    to = conn.to;
+                    torder = conn.IsPositive();
+                    if( torder )
+                    {
+                        path.real_contig.push_back(config.edges.at(to).bal_id);
+                    }
+                    else
+                    {
+                        path.real_contig.push_back(config.edges.at(to).edge_id);
+                    }
+                    order = false;
+                }
+            }
+            //upstream
+            else
+            {
+                //A1<-B1
+                //A2->B2
+                if( torder )
+                {
+
+                    const auto & conn  =  curr_to.GetValidFrom() ;
+                    to = conn.to;
+                    torder = conn.IsPositive();
+                    if( torder )
+                    {
+                        path.real_contig.push_back(config.edges.at(to).bal_id);
+                    }
+                    else
+                    {
+                        path.real_contig.push_back(config.edges.at(to).edge_id);
+                    }
+                    order = false;
+                }
+                //A1<-B2
+                //A2->B1
+                else
+                {
+                    const auto & conn  =  curr_to.GetValidTo() ;
+                    to = conn.to;
+                    torder = conn.IsPositive();
+                    order = true;
+                    if( torder )
+                    {
+                        path.real_contig.push_back(config.edges.at(to).edge_id );
+                    }
+                    else
+                    {
+                        path.real_contig.push_back(config.edges.at(to).bal_id);
+                    }
+                }
+            }
+            path.contig.push_back(to) ;
+        }
+        if( config.edges.at(to).IsMarked() )
+            return ;
+        // line->next_k->
+        // <-next_k<-line
+        path.tailin = false;
+
+        auto & curr_to = config.edges.at(to);
+        if( ! curr_to.IsCircle() )
+        {
+
+            if( ( torder && order ) || ( !torder && !order ) )
+            {
+                if( curr_to.from_size == 1 )
+                {
+                    path.tailin = true;
+                }
+            }
+            else
+            {
+                if( curr_to.to_size == 1 )
+                {
+                    path.tailin = true;
+                }
+            }
+        }
+        path.length = path.contig.size();
+        if(! path.headin )
+            path.length --;
+        if(!path.tailin )
+            path.length -- ;
+        {
+            config.contigs.push_back(path);
+        }
+    };
+    BGIQD::SOAP2::ContigRoad path;
     for(auto & m : config.edges)
     {
         auto & curr = m.second;
-
         if( curr.IsMarked() 
                 ||curr.IsLinear() || curr.IsCircle()
           )
@@ -222,182 +562,26 @@ int main(int argc , char ** argv)
         }
         else
         {
-            BGIQD::SOAP2::ContigRoad path;
-            auto extractPath = [&curr,&path]( unsigned int to_s , bool to_order, bool search_order)
-            {
-                unsigned int to = to_s ;
-                path.contig.clear();
-                path.real_contig.clear();
-                if( search_order )
-                {
-                    path.downstream = true ;
-                    path.real_contig.push_back(curr.edge_id);
-                }
-                else
-                {
-                    path.downstream = false ;
-                    path.real_contig.push_back(curr.bal_id);
-                }
-                //detect headin
-                if( search_order && curr.to_size == 1 )
-                {
-                    path.headin = true;
-                }
-                else if ( ! search_order && curr.from_size == 1 )
-                {
-                    path.headin = true;
-                }
-                else
-                {
-                    path.headin = false ;
-                }
-                path.contig.push_back(curr.edge_id) ;
-                path.contig.push_back(to) ;
-
-                if( search_order ^ to_order )
-                {
-                    path.real_contig.push_back(config.edges.at(to).bal_id);
-                }
-                else
-                {
-                    path.real_contig.push_back(config.edges.at(to).edge_id);
-                }
-                bool order = search_order;//
-                bool torder = to_order; // 
-                if( config.edges.at(to).IsMarked())
-                    return ;
-                while( (! config.edges.at(to).IsCircle())&& config.edges.at(to).IsLinear() && !config.edges.at(to).IsMarked() )
-                {
-                    auto & curr_to = config.edges.at(to);
-                    curr_to.Mark();
-                    //downstream
-                    if( order )
-                    {
-                        //
-                        //A1->B1
-                        if( torder )
-                        {
-                            const auto & conn  =  curr_to.GetValidTo() ;
-                            to = conn.to;
-                            torder = conn.IsPositive();
-                            if( torder )
-                            {
-                                path.real_contig.push_back(config.edges.at(to).edge_id );
-                            }
-                            else
-                            {
-                                path.real_contig.push_back(config.edges.at(to).bal_id);
-                            }
-                        }
-                        //A1->B2
-                        else
-                        {
-                            const auto & conn  =  curr_to.GetValidFrom() ;
-                            to = conn.to;
-                            torder = conn.IsPositive();
-                            if( torder )
-                            {
-                                path.real_contig.push_back(config.edges.at(to).bal_id);
-                            }
-                            else
-                            {
-                                path.real_contig.push_back(config.edges.at(to).edge_id);
-                            }
-                            order = false;
-                        }
-                    }
-                    //upstream
-                    else
-                    {
-                        //A1<-B1
-                        //A2->B2
-                        if( torder )
-                        {
-
-                            const auto & conn  =  curr_to.GetValidFrom() ;
-                            to = conn.to;
-                            torder = conn.IsPositive();
-                            if( torder )
-                            {
-                                path.real_contig.push_back(config.edges.at(to).bal_id);
-                            }
-                            else
-                            {
-                                path.real_contig.push_back(config.edges.at(to).edge_id);
-                            }
-                            order = false;
-                        }
-                        //A1<-B2
-                        //A2->B1
-                        else
-                        {
-                            const auto & conn  =  curr_to.GetValidTo() ;
-                            to = conn.to;
-                            torder = conn.IsPositive();
-                            if( torder )
-                            {
-                                path.real_contig.push_back(config.edges.at(to).edge_id );
-                            }
-                            else
-                            {
-                                path.real_contig.push_back(config.edges.at(to).bal_id);
-                            }
-                        }
-                    }
-                    path.contig.push_back(to) ;
-                }
-                if( config.edges.at(to).IsMarked() )
-                    return ;
-                // line->next_k->
-                // <-next_k<-line
-                path.tailin = false;
-
-                auto & curr_to = config.edges.at(to);
-                if( ! curr_to.IsCircle() )
-                {
-
-                    if( ( torder && order ) || ( !torder && !order ) )
-                    {
-                        if( curr_to.from_size == 1 )
-                        {
-                            path.tailin = true;
-                        }
-                    }
-                    else
-                    {
-                        if( curr_to.to_size == 1 )
-                        {
-                            path.tailin = true;
-                        }
-                    }
-                }
-                path.length = path.contig.size();
-                if(! path.headin )
-                    path.length --;
-                if(!path.tailin )
-                    path.length -- ;
-                {
-                    config.contigs.push_back(path);
-                }
-            };
             for( auto next : curr.to )
             {
                 if(! next.second.IsValid() )
                     continue;
-                extractPath(next.second.to,next.second.IsPositive(),true);
+                extractPath(next.second.to,next.second.IsPositive(),true , curr , path);
             }
             for(auto next : curr.from)
             {
                 if( ! next.second.IsValid() )
                     continue;
-                extractPath(next.second.to,next.second.IsPositive(),false);
+                extractPath(next.second.to,next.second.IsPositive(),false, curr , path);
             }
             curr.Mark();
         }
     }
 
+        BGIQD::FREQ::Freq<int> len_freq;
     for(const auto & i : config.contigs)
     {
+        len_freq.Touch(i.length);
         if( i.length < 2 )
             continue;
         std::cout<<i.length<<'\t';
@@ -406,7 +590,6 @@ int main(int argc , char ** argv)
         {
             start --;
         }
-        len_freq.Touch(i.length);
         for( int j =0 ; j<i.length ; j++ )
         {
             std::cout<<i.real_contig[start+j]<<"\t";

@@ -11,6 +11,7 @@ namespace BGIQD{
     namespace SOAP2{
 
         // -------------------------- struct Edge ---------------------------------
+
         int Edge::ArcNum() const 
         {
             int ret = 0 ;
@@ -143,6 +144,7 @@ namespace BGIQD{
             static KeyConn i ;
             return i;
         }
+
         KeyConn & KeyEdge::GetValidFrom() 
         {
             for( auto & i : from )
@@ -154,6 +156,7 @@ namespace BGIQD{
             static KeyConn i ;
             return i;
         }
+
         void KeyConn::InitFromString( const std::string & str )
         {
             auto items = BGIQD::STRING::split(str,":");

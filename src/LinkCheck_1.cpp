@@ -40,7 +40,7 @@ int main(int argc , char **argv)
         a.start = std::stoi(items[2]);
         a.end= std::stoi(items[3]);
         ref_keys.push_back(a);
-        ref_keys_map[std::stoi(items[0])].push_back(index++);
+        ref_keys_map[std::stoul(items[0])].push_back(index++);
     }
     delete in;
 
@@ -50,14 +50,25 @@ int main(int argc , char **argv)
     BGIQD::FREQ::Freq<int>  del;
     BGIQD::FREQ::Freq<unsigned int>  seeds;
 
-    int total = 0;
     while(!std::getline(std::cin,line_1).eof())
     {
         auto items = BGIQD::STRING::split(line_1,"\t");
+        int length = std::stoi( items[0] ) ;
+        if ( length < 2 ) 
+            continue;
         std::vector<unsigned int> line;
-        for( const auto & i: items)
+        for( int i = 1 ; i <= length ; i++ )
         {
-            line.push_back(std::stoul(i));
+            unsigned int contig = std::stoul(items[i]);
+            if( ref_keys_map.find(contig) == ref_keys_map.end() 
+                    &&  ref_keys_map.find(contig-1) != ref_keys_map.end())
+            {
+                line.push_back(contig-1);
+            }
+            else
+            {
+                line.push_back(contig);
+            }
         }
         /*
         unsigned int head , tail ;

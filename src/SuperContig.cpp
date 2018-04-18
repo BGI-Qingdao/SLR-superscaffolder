@@ -50,13 +50,22 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
             {
                 if( i == list.begin() || std::next(i) == list.end() )
                     continue ;
+                length += i->length ;
+            }
+            int min_length_1 = length ;
+            length = 0 ;
+            for( auto i = list.begin() ; i != list.end() ; i = std::next(i))
+            {
+                if( i == list.begin() || std::next(i) == list.end() )
+                    continue ;
                 if( mid_len.find( i->id ) != mid_len.end() )
                 {
-                    length += mid_len.at(i->id) ;
-                    break;
+                    if( length + mid_len.at(i->id) < min_length_1 )
+                        min_length_1 = length + mid_len.at(i->id) ;
                 }
                 length += i->length ;
             }
+            length = min_length_1;
             if( min_length == 0 || min_length > length )
                 min_length = length ;
         }
@@ -66,29 +75,30 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
     auto get_mid_min = [&get_min_length_v1, &get_min_length_v2] (const std::map<unsigned int ,std::vector<std::list<BGIQD::SOAP2::Edge> > >&mid_list)
     {
         // round 1
-        std::vector<std::tuple<unsigned int , int>> ret_map;
+        //std::vector<std::tuple<unsigned int , int>> ret_map;
+        std::vector<std::tuple<int ,unsigned int>> ret_map;
         for( const auto & i : mid_list )
         {
-            ret_map.push_back(std::make_tuple(i.first,get_min_length_v1(i.second)));
+            ret_map.push_back(std::make_tuple(get_min_length_v1(i.second),i.first));
         }
         std::sort( ret_map.begin() ,ret_map.end());
         // round 2
         for( size_t i = 0 ; i + 1< ret_map.size() ; i ++ )
         {
             unsigned int min_length , min_id ;
-            std::tie(min_id , min_length) = ret_map[i];
+            std::tie(min_length , min_id) = ret_map[i];
             std::map<unsigned int , int > min_map ;
             min_map[min_id] = min_length ;
             for( size_t j = i + 1 ; j < ret_map.size() ; j ++ )
             {
                 int curr_length ;
                 unsigned int curr_id ;
-                std::tie(curr_id, curr_length) = ret_map[j];
+                std::tie(curr_length, curr_id) = ret_map[j];
                 const auto a_list= mid_list.at(curr_id);
                 int final_length = get_min_length_v2(a_list , min_map);
                 if( final_length < curr_length )
                 {
-                    std::get<1>(ret_map[j]) = final_length ;
+                    std::get<0>(ret_map[j]) = final_length ;
                 }
             }
         }
@@ -97,7 +107,7 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
         {
             unsigned int id ;
             int len ;
-            std::tie(id,len) = i ;
+            std::tie(len,id) = i ;
             ret[id] = len ;
         }
         return ret ;
