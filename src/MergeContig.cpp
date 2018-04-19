@@ -347,7 +347,14 @@ struct AppConfig
         ReGenerate_updatedEdge();
         ReGenerate_contig();
     }
+    void PrintSuperOnly()
+    {
 
+    }
+    void PrintSuperUsedOnly()
+    {
+
+    }
     private:
     int linear_del ;
     //BGIQD::FREQ::Freq<int> l_del;
@@ -781,7 +788,7 @@ struct AppConfig
         delete out;
     }
 
-    void ReGenerate_contig()
+    void ReGenerate_contig( )
     {
         auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fnames.contig(round+1));
         int final_num = 0 ;
@@ -842,11 +849,13 @@ int main(int argc , char **argv)
     BGIQD::LOG::timer t(config.loger,"MergeContig");
 
     START_PARSE_ARGS
-        DEFINE_ARG_DETAIL(std::string , prefix, 'o',false,"prefix");
+    DEFINE_ARG_DETAIL(std::string , prefix, 'o',false,"prefix");
     DEFINE_ARG_DETAIL(int , kvalue, 'K',false,"K value");
     DEFINE_ARG_DETAIL(int , t_num, 't',true,"thread num . default[8]");
     DEFINE_ARG_DETAIL(int , round, 'r',true,"round num. default[0]");
     DEFINE_ARG_DETAIL(bool ,linear, 'l',true,"call linear ?. default false");
+    DEFINE_ARG_DETAIL(bool ,super_only, 's' , true , "only print super contig ? default false");
+    DEFINE_ARG_DETAIL(bool ,used_only, 's' , true , "only print super used  contig ? default false");
     END_PARSE_ARGS
 
         if(! t_num.setted )

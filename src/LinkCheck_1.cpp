@@ -23,6 +23,7 @@ int main(int argc , char **argv)
     BGIQD::LOG::timer t(lger,"SuperContig");
     START_PARSE_ARGS
     DEFINE_ARG_DETAIL(std::string , pos, 'p',false,"postion order of contig");
+    DEFINE_ARG_DETAIL(bool , detail, 'd',true,"print error detail");
     END_PARSE_ARGS
 
     auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(pos.to_string());
@@ -225,12 +226,14 @@ int main(int argc , char **argv)
             correct.Touch(line.size());
         else if ( status == 1 && del_total > 0 )
         {
-            del.Touch(del_total);
+            del.Touch(line.size());
+            if( detail.to_bool())
             std::cout<<"D: "<<line_1<<std::endl;
         }
         else
         {
             wrong.Touch(line.size());
+            if( detail.to_bool())
             std::cout<<"E: "<<line_1<<std::endl;
         }
     }
@@ -238,11 +241,18 @@ int main(int argc , char **argv)
     std::cout<<"wrong freq\n"<<wrong.ToString()<<std::endl;
     std::cout<<"del freq\n"<<del.ToString()<<std::endl;
     //std::cout<<"len freq\n"<<len.ToString()<<std::endl;
+    int multi_node = 0 ;
     for( const auto i: seeds.data)
     {
         if( i.second > 1 )
         {
-            std::cout<<"err 2 "<<i.first<<"\t"<<i.second<<std::endl;
+            multi_node ++ ;
+            if( detail.to_bool())
+                std::cout<<"err 2 "<<i.first<<"\t"<<i.second<<std::endl;
         }
     }
+
+    std::cout<<"multi_node  "<<multi_node<<std::endl; 
+
+    return 0;
 }

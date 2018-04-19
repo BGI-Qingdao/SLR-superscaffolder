@@ -88,7 +88,8 @@ struct  AppGlobalData
 int main(int argc , char ** argv)
 {
     START_PARSE_ARGS
-        DEFINE_ARG_DETAIL(bool, solve, 's',true,"solve multi ? default not");
+        DEFINE_ARG_DETAIL(bool, um, 'u',true,"use unique-multi solve ? default not");
+    DEFINE_ARG_DETAIL(bool, ls, 'l',true,"use length-sim solve ? default not");
     END_PARSE_ARGS
 
         config.Init();
@@ -200,119 +201,126 @@ int main(int argc , char ** argv)
     };
 
     int del_count = 0 ;
-    // delete unique link -> multi
-    for( auto & m : config.edges )
+    if ( um.to_bool() )
     {
-        auto & curr = m.second;
-        if( curr.IsLinear()
-                || (curr.IsTipTo() && curr.to_size == 1 ) 
-                || (curr.IsTipFrom() && curr.from_size == 1 ) )
+        // delete unique link -> multi
+        for( auto & m : config.edges )
         {
-            if( curr.to_size == 1 )
+            auto & curr = m.second;
+            if( curr.IsLinear()
+                    || (curr.IsTipTo() && curr.to_size == 1 ) 
+                    || (curr.IsTipFrom() && curr.from_size == 1 ) )
             {
-                auto & conn = curr.GetValidTo() ;
-                auto i = get_oppo( conn.to , true , conn.IsPositive() );
-                auto & m = i.get();
-                int unique_count = 0 ;
-                for ( auto & p : m )
+                if( curr.to_size == 1 )
                 {
-                    auto & oppo_conn = p.second;
-                    if( oppo_conn.to == curr.edge_id && oppo_conn.IsValid())
-                    {
-                        unique_count ++ ;
-                    }
-                }
-                if( unique_count == 1 )
-                {
-                    for( auto & p : m )
+                    auto & conn = curr.GetValidTo() ;
+                    auto i = get_oppo( conn.to , true , conn.IsPositive() );
+                    auto & m = i.get();
+                    int unique_count = 0 ;
+                    for ( auto & p : m )
                     {
                         auto & oppo_conn = p.second;
-                        if( oppo_conn.to != curr.edge_id && oppo_conn.IsValid() )
+                        if( oppo_conn.to == curr.edge_id && oppo_conn.IsValid())
                         {
-                            del_count ++ ;
-                            oppo_conn.SetJump();
+                            unique_count ++ ;
+                        }
+                    }
+                    if( unique_count == 1 )
+                    {
+                        for( auto & p : m )
+                        {
+                            auto & oppo_conn = p.second;
+                            if( oppo_conn.to != curr.edge_id && oppo_conn.IsValid() )
+                            {
+                                del_count ++ ;
+                                oppo_conn.SetJump();
+                            }
                         }
                     }
                 }
-            }
 
-            if( curr.from_size== 1 )
-            {
-                auto & conn = curr.GetValidFrom() ;
-                auto i = get_oppo( conn.to , true , conn.IsPositive() );
-                auto & m = i.get();
-                int unique_count = 0 ;
-                for( auto & p : m )
+                if( curr.from_size== 1 )
                 {
-                    auto & oppo_conn = p.second;
-                    if( oppo_conn.to == curr.edge_id && oppo_conn.IsValid())
-                    {
-                        unique_count ++ ;
-                    }
-                }
-                if( unique_count == 1 )
-                {
+                    auto & conn = curr.GetValidFrom() ;
+                    auto i = get_oppo( conn.to , true , conn.IsPositive() );
+                    auto & m = i.get();
+                    int unique_count = 0 ;
                     for( auto & p : m )
                     {
                         auto & oppo_conn = p.second;
-                        if( oppo_conn.to != curr.edge_id && oppo_conn.IsValid() )
+                        if( oppo_conn.to == curr.edge_id && oppo_conn.IsValid())
                         {
-                            del_count ++ ;
-                            oppo_conn.SetJump();
+                            unique_count ++ ;
+                        }
+                    }
+                    if( unique_count == 1 )
+                    {
+                        for( auto & p : m )
+                        {
+                            auto & oppo_conn = p.second;
+                            if( oppo_conn.to != curr.edge_id && oppo_conn.IsValid() )
+                            {
+                                del_count ++ ;
+                                oppo_conn.SetJump();
+                            }
                         }
                     }
                 }
             }
         }
+        for( auto & m : config.edges )
+        {
+            m.second.SetType();
+        }
+        config.loger<<BGIQD::LOG::lstart()<<"unque-muti part delete"<<del_count<<BGIQD::LOG::lend();
+        config.report_freq();
     }
-    for( auto & m : config.edges )
-    {
-        m.second.SetType();
-    }
-    config.report_freq();
-    config.loger<<BGIQD::LOG::lstart()<<"unque-muti part delete"<<del_count<<BGIQD::LOG::lend();
     // delete by length & sim
+
     del_count = 0 ;
-    for( auto & m : config.edges )
+    if( ls.to_bool() )
     {
-        auto & curr = m.second;
-        if( curr.IsLinear()
-                || (curr.IsTipTo() && curr.to_size == 1 ) 
-                || (curr.IsTipFrom() && curr.from_size == 1 ) )
+        for( auto & m : config.edges )
         {
-            continue ;
-        }
-        if( curr.from_size > 1 )
-        {
-            for( auto & i : curr.from )
+            auto & curr = m.second;
+            if( curr.IsLinear()
+                    || (curr.IsTipTo() && curr.to_size == 1 ) 
+                    || (curr.IsTipFrom() && curr.from_size == 1 ) )
             {
-                if( i.second.length > len_threshold || i.second.sim > sim_threshold )
-                    if( get_oppo( i.second.to , false , i.second.IsPositive() ).get().size() > 1 )
-                    {
-                        i.second.SetJump();
-                        del_count ++ ;
-                    }
+                continue ;
+            }
+            if( curr.from_size > 1 )
+            {
+                for( auto & i : curr.from )
+                {
+                    if( i.second.length > len_threshold || i.second.sim > sim_threshold )
+                        if( get_oppo( i.second.to , false , i.second.IsPositive() ).get().size() > 1 )
+                        {
+                            i.second.SetJump();
+                            del_count ++ ;
+                        }
+                }
+            }
+            if( curr.to_size > 1 )
+            {
+                for( auto & i : curr.to)
+                {
+                    if( i.second.length > len_threshold || i.second.sim > sim_threshold )
+                        if( get_oppo( i.second.to , true , i.second.IsPositive() ).get().size() > 1 )
+                        {
+                            i.second.SetJump();
+                            del_count ++ ;
+                        }
+                }
             }
         }
-        if( curr.to_size > 1 )
+        for( auto & m : config.edges )
         {
-            for( auto & i : curr.to)
-            {
-                if( i.second.length > len_threshold || i.second.sim > sim_threshold )
-                    if( get_oppo( i.second.to , true , i.second.IsPositive() ).get().size() > 1 )
-                    {
-                        i.second.SetJump();
-                        del_count ++ ;
-                    }
-            }
+            m.second.SetType();
         }
+        config.loger<<BGIQD::LOG::lstart()<<"length-sim part delete"<<del_count<<BGIQD::LOG::lend();
+        config.report_freq();
     }
-    for( auto & m : config.edges )
-    {
-        m.second.SetType();
-    }
-    config.report_freq();
-    config.loger<<BGIQD::LOG::lstart()<<"length-sim part delete"<<del_count<<BGIQD::LOG::lend();
     del_count = 0;
     // rebuild unique link
     for( auto & m : config.edges )
@@ -578,7 +586,7 @@ int main(int argc , char ** argv)
         }
     }
 
-        BGIQD::FREQ::Freq<int> len_freq;
+    BGIQD::FREQ::Freq<int> len_freq;
     for(const auto & i : config.contigs)
     {
         len_freq.Touch(i.length);
