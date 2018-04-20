@@ -130,7 +130,7 @@ namespace BGIQD {
             unsigned int curr = id;
             while ( sub_graph[curr].tos.size() == 1 && curr != target )
             {
-                if( !p.AddEdge(curr,sub_graph[curr].length, sub_graph[curr].cov,sub_graph[curr].barcode_cov) )
+                if( ! p.AddEdge(curr,sub_graph[curr].length, sub_graph[curr].cov,sub_graph[curr].barcode_cov) )
                 {
                     path_num = -1 ; //circle
                     break;
@@ -146,7 +146,7 @@ namespace BGIQD {
             else
             {
                 assert( sub_graph[curr].tos.size() >1 );
-                if( p.AddEdge(curr,sub_graph[curr].length, sub_graph[curr].cov,sub_graph[curr].barcode_cov) )
+                if( ! p.AddEdge(curr,sub_graph[curr].length, sub_graph[curr].cov,sub_graph[curr].barcode_cov) )
                 {
                     path_num = -1 ; //circle
                     return ;

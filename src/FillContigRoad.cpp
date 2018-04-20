@@ -8,6 +8,7 @@
 #include "common/multithread/MultiThread.h"
 #include "common/files/file_reader.h"
 #include "common/freq/freq.h"
+
 struct GlobalConfig
 {
     BGIQD::stLFR::GraphEA_withBarcode graph_eab;
