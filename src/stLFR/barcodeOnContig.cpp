@@ -132,8 +132,8 @@ namespace BGIQD {
             {
                 if( ! p.AddEdge(curr,sub_graph[curr].length, sub_graph[curr].cov,sub_graph[curr].barcode_cov) )
                 {
-                    path_num = -1 ; //circle and can't solved  A-B-C-A-B-C-A ....
-                    break;
+                    //path_num = -1 ; //circle and can't solved  A-B-C-A-B-C-A ....
+                    return ;
                 }
                 curr = * sub_graph[curr].tos.begin();
             }
@@ -148,7 +148,8 @@ namespace BGIQD {
                 assert( sub_graph[curr].tos.size() >1 );
                 if( ! p.AddEdge(curr,sub_graph[curr].length, sub_graph[curr].cov,sub_graph[curr].barcode_cov) )
                 {
-                    path_num = -1 ; // circle can solve A-B-C-A-D-E ...
+                    //path_num = -1 ; // circle can solve A-B-C-A-D-E ...
+                    //just delete this path and return so it will try another path
                     return ;
                 }
                 for( const auto & i : sub_graph[curr].tos )

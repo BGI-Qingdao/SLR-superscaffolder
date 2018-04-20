@@ -90,7 +90,23 @@ int main(int argc , char ** argv)
     START_PARSE_ARGS
         DEFINE_ARG_DETAIL(bool, um, 'u',true,"use unique-multi solve ? default not");
     DEFINE_ARG_DETAIL(bool, ls, 'l',true,"use length-sim solve ? default not");
+    DEFINE_ARG_DETAIL(float, len_threshold_factor, 'f',false,"len_threshold_factor ,within [0.9,1.0] is best ");
+    DEFINE_ARG_DETAIL(float, sim_threshold_factor, 's',false,"sim_threshold_factor ,within [0.9,1.0] is best " );
     END_PARSE_ARGS
+
+    if( len_threshold_factor.to_float() < 0.1f )
+        len_threshold_factor.d.f = 0.9f ;
+
+    if( len_threshold_factor.to_float() > 1.0f )
+        len_threshold_factor.d.f = 1.0f ;
+    if( sim_threshold_factor.to_float() < 0.1f )
+        sim_threshold_factor.d.f = 0.9f ;
+
+    if( len_threshold_factor.to_float() > 1.0f )
+        len_threshold_factor.d.f = 1.0f ;
+
+    config.loger<<BGIQD::LOG::lstart()<<" len_threshold_factor used is "<<len_threshold_factor.to_float()<<BGIQD::LOG::lend();
+    config.loger<<BGIQD::LOG::lstart()<<" sim_threshold_factor used is "<<sim_threshold_factor.to_float()<<BGIQD::LOG::lend();
 
         config.Init();
     // Load graph
@@ -166,10 +182,13 @@ int main(int argc , char ** argv)
     //{
     //    config.loger<<BGIQD::LOG::lstart()<<linear_len[i]<<"\t"<<linear_sim[i]<<BGIQD::LOG::lend(); 
     //}
-    int len_threshold = linear_len[ index * 0.8 ];
-    float sim_threshold = linear_sim[ index * 0.9 ];
+    int len_threshold = linear_len[ int(index * len_threshold_factor.to_float()) -1];
+    float sim_threshold = linear_sim[ int(index * sim_threshold_factor.to_float()) -1];
+
     config.loger<<BGIQD::LOG::lstart()<<" used linear len threshold "<<len_threshold<<BGIQD::LOG::lend();
     config.loger<<BGIQD::LOG::lstart()<<" used linear sim threshold "<<sim_threshold<<BGIQD::LOG::lend();
+
+
 
     // solve multi
     auto  get_oppo = [] (unsigned int to  , bool to_order , bool positive) {
