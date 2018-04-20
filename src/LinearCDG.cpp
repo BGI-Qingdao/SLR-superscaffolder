@@ -293,7 +293,7 @@ int main(int argc , char ** argv)
             {
                 for( auto & i : curr.from )
                 {
-                    if( i.second.length > len_threshold || i.second.sim > sim_threshold )
+                    if( i.second.length > len_threshold || i.second.sim < sim_threshold )
                         if( get_oppo( i.second.to , false , i.second.IsPositive() ).get().size() > 1 )
                         {
                             i.second.SetJump();
@@ -305,7 +305,7 @@ int main(int argc , char ** argv)
             {
                 for( auto & i : curr.to)
                 {
-                    if( i.second.length > len_threshold || i.second.sim > sim_threshold )
+                    if( i.second.length > len_threshold || i.second.sim < sim_threshold )
                         if( get_oppo( i.second.to , true , i.second.IsPositive() ).get().size() > 1 )
                         {
                             i.second.SetJump();
