@@ -24,9 +24,10 @@ if [[ $# -lt 1 || $1 == "help" ||  $1 == "-h" || $1 == "--help" ]] ; then
     echo "  8.  chop bin"
     echo "  9.  cluster bin"
     echo "  10. merge bin cluster data into contig cluster data"
-    echo "  11. generate super contig skeleton"
-    echo "  12. fill super contig skeleton into super contig"
-    echo "  13. merge soap contig and super contig"
+    echo "  11. generate contig-Dlink graph"
+    echo "  12. solve multi contig and generate contig skeleton"
+    echo "  13. fill super contig skeleton into super contig"
+    echo "  14. merge soap contig and super contig"
 fi
 
 ########################################################
@@ -75,7 +76,7 @@ bin_cluster=$PREFIX".bin_cluster"
 contig_cluster=$PREFIX".cluster"
 super_contig=$PREFIX".contigroad"
 super_contig_fill=$PREFIX".contigroadfill"
-
+contig_dlink=$PREFIX".connInfo"
 #######################################################
 #
 # RUN STEP ONE BY ONE
@@ -88,61 +89,67 @@ do
     date
 
     if [[ $1 -eq  1 ]] ; then 
-        # Step 1. pregrap
+        echo "Step 1. pregrap"
         echo "$SOAP pregraph -s $LIB_FILE -R -o $PREFIX -K $K  -p $THREADS -d 1                    1>out_pregraph  2>&1"
               $SOAP pregraph -s $LIB_FILE -R -o $PREFIX -K $K  -p $THREADS -d 1                    1>out_pregraph  2>&1
     elif [[ $1 -eq  2 ]] ; then 
-        # Step 2. contig
+        echo "Step 2. contig"
         echo "$SOAP contig -g $PREFIX -R -p $THREADS  -D 1                                    1>out_contig    2>&1"
               $SOAP contig -g $PREFIX -R -p $THREADS  -D 1                                    1>out_contig    2>&1
     elif [[ $1 -eq  3 ]] ; then 
-        # Step 3. bwa index 
+        echo "Step 3. bwa index"
         echo "bwa index -a bwtsw $contig                                                      1>out_bwt       2>&1"
               bwa index -a bwtsw $contig                                                      1>out_bwt       2>&1
     elif [[ $1 -eq  4 ]] ; then 
-        # Step 4. bwa align
+        echo "Step 4. bwa align"
         echo "$BWA mem $contig -t $THREADS -k $K $STLFR_READS                                 >$samread2contig 2>out_bwtmem"
               $BWA mem $contig -t $THREADS -k $K $STLFR_READS                                 >$samread2contig 2>out_bwtmen
     elif [[ $1 -eq  5 ]] ; then 
-        # Step 5. sam to txt
+        echo "Step 5. sam to txt"
         echo "$STLFR_BIN_PATH/Sam2ReadInContig -c 1000000000 -o chr19 <$samread2contig        >$read2contig 2>out_sam2readincontig"
               $STLFR_BIN_PATH/Sam2ReadInContig -c 1000000000 -o chr19 <$samread2contig        >$read2contig 2>out_sam2readincontig
     elif [[ $1 -eq  6 ]] ; then 
-        # Step 6. find seeds
+        echo "Step 6. find seeds"
         echo "$STLFR_BIN_PATH/StaticsticUnique -K $K -m $BIN_SIZE <$contig                    >$seeds  2>out_staticstic"
               $STLFR_BIN_PATH/StaticsticUnique -K $K -m $BIN_SIZE <$contig                    >$seeds  2>out_staticstic
     elif [[ $1 -eq  7 ]] ; then 
-        # Step 7. link barcode and contig information
+        echo "Step 7. link barcode and contig information"
         echo "$STLFR_BIN_PATH/BarcodeOnContig_NoRef -s $seeds <$read2contig                   >$barcode2contig 2>out_barcode_on_contig"
               $STLFR_BIN_PATH/BarcodeOnContig_NoRef -s $seeds <$read2contig                   >$barcode2contig 2>out_barcode_on_contig
     elif [[ $1 -eq  8 ]] ; then 
-        # Step 8. chop bin
+        echo "Step 8. chop bin"
         echo "$STLFR_BIN_PATH/BarcodeOnBin -b $BIN_SIZE -i $barcode2contig -o $barcode2bin    1>out_chopbin 2>&1"
               $STLFR_BIN_PATH/BarcodeOnBin -b $BIN_SIZE -i $barcode2contig -o $barcode2bin    1>out_chopbin 2>&1
     elif [[ $1 -eq  9 ]] ; then 
-        # Step 9. cluster
+        echo "Step 9. cluster"
         echo "$STLFR_BIN_PATH/BinCluster -i $barcode2bin -t $THREADS \
                   -o $bin_cluster -s $SIMULARITY_THRESHOLD                                    >out_cluster 2>&1"
               $STLFR_BIN_PATH/BinCluster -i $barcode2bin -t $THREADS \
                   -o $bin_cluster -s $SIMULARITY_THRESHOLD                                    >out_cluster 2>&1
     elif [[ $1 -eq  10 ]] ; then 
-        # Step 10. merge bin cluster to contig cluster
+        echo "Step 10. merge bin cluster to contig cluster"
         echo "$STLFR_BIN_PATH/MergeClusterResult <$bin_cluster                                >$contig_cluster 2>out_mergebincluster"
               $STLFR_BIN_PATH/MergeClusterResult <$bin_cluster                                >$contig_cluster 2>out_mergebincluster
     elif [[ $1 -eq  11 ]] ; then 
-        # Step 11. SuperContitg
+        echo "Step 11. SuperContitg"
         echo "$STLFR_BIN_PATH/SuperContig -o $PREFIX -K $K  -t $THREADS \
             -i -s -l $DEPTH_SEARCH_MAX_LENGTH                                                 >out_super.txt 2>log_super"
               $STLFR_BIN_PATH/SuperContig -o $PREFIX -K $K  -t $THREADS \
                   -i -s -l $DEPTH_SEARCH_MAX_LENGTH                                           >out_super.txt 2>log_super
     elif [[ $1 -eq 12 ]] ; then
-        # Step 12 MergeContig
+        echo "Step 12. SolveMulti"
+        echo "$STLFR_BIN_PATH/LinearCDG -l -f $SOLVEMULTI_LENGTH -s $SOLVEMULTI_SIMULARITY \
+            <$contig_dlink                                                                    >$super_contig 2>out_solvemulti"
+        $STLFR_BIN_PATH/LinearCDG -l -f $SOLVEMULTI_LENGTH -s $SOLVEMULTI_SIMULARITY \
+            <$contig_dlink                                                                    >$super_contig 2>out_solvemulti
+    elif [[ $1 -eq 13 ]] ; then
+        echo "Step 13 FillContigRoad"
         echo "$STLFR_BIN_PATH/FillContigRoad -K $K  -t $THREADS \
             -o $PREFIX -l $DEPTH_SEARCH_MAX_LENGTH                                             >$super_contig_fill  2>log_fillsuper"
               $STLFR_BIN_PATH/FillContigRoad -K $K  -t $THREADS \
                   -o $PREFIX -l $DEPTH_SEARCH_MAX_LENGTH                                       >$super_contig_fill  2>log_fillsuper
-    elif [[ $1 -eq 13 ]] ; then 
-        # Step 12 MergeContig
+    elif [[ $1 -eq 14 ]] ; then 
+        echo "Step 14 MergeContig"
         echo "$STLFR_BIN_PATH/MergeContig -K $K -o $PREFIX -l                                 1>out_mergecontig 2>&1"
               $STLFR_BIN_PATH/MergeContig -K $K -o $PREFIX -l                                 1>out_mergecontig 2>&1
     else

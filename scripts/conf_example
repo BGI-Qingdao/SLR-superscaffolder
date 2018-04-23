@@ -27,3 +27,6 @@ PREFIX="chr19_standard"
 THREADS=10
 # stLFR reads , used to map int contig
 STLFR_READS="/research/rv-02/home/wangwenchao/stLFR/Lib9/raw_data/chr19_reads1.fq.gz /research/rv-02/home/wangwenchao/stLFR/Lib9/raw_data/chr19_reads2.fq.gz"
+# solve multi - length factor
+SOLVEMULTI_LENGTH=0.90
+SOLVEMULTI_SIMULARITY=0.90
