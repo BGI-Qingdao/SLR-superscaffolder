@@ -29,6 +29,20 @@ namespace BGIQD {
             }
             return ret;
         }
+        // ---------------- Path -------------------------
+        void P2PGraph::Path::MergeCircle()
+        {
+            if( ! circle.Is_set() )
+                return ;
+            unsigned int circle_root = circle.cpath[0] ;
+            size_t i = 0;
+            for( i = 0 ; i < paths.size() ; i++ )
+            {
+                if( paths[i] == circle_root ) 
+                    break;
+            }
+            paths.insert(paths.begin() + i ,circle.cpath.begin() , circle.cpath.end());
+        }
         // ---------------- P2PGraph -------------------------
         void P2PGraph::Init( unsigned int from , unsigned int to)
         {
@@ -111,7 +125,8 @@ namespace BGIQD {
             auto & node = sub_graph[root];
             for( const auto &i : node.tos)
             {
-                findAllPath(i, p);
+                Circle c;
+                findAllPath(i, p, c);
                 if( path_num < 0 )
                     return ;
             }
@@ -125,14 +140,25 @@ namespace BGIQD {
             }
         }
 
-        void P2PGraph::findAllPath(  unsigned int id  ,Path p)
+        void P2PGraph::findAllPath(  unsigned int id  ,Path p , Circle & circle)
         {
+            if( p.IsPathInCircle(circle ) )
+            {
+                p.AddCircle(circle);
+            }
+            else
+            {
+                circle.Clean();
+            }
             unsigned int curr = id;
             while ( sub_graph[curr].tos.size() == 1 && curr != target )
             {
                 if( ! p.AddEdge(curr,sub_graph[curr].length, sub_graph[curr].cov,sub_graph[curr].barcode_cov) )
                 {
-                    //path_num = -1 ; //circle and can't solved  A-B-C-A-B-C-A ....
+                    if( ! circle.Is_set() )
+                    {
+                        circle.SetCircle( p.paths , curr );
+                    }
                     return ;
                 }
                 curr = * sub_graph[curr].tos.begin();
@@ -148,13 +174,15 @@ namespace BGIQD {
                 assert( sub_graph[curr].tos.size() >1 );
                 if( ! p.AddEdge(curr,sub_graph[curr].length, sub_graph[curr].cov,sub_graph[curr].barcode_cov) )
                 {
-                    //path_num = -1 ; // circle can solve A-B-C-A-D-E ...
-                    //just delete this path and return so it will try another path
+                    if( ! circle.Is_set() )
+                    {
+                        circle.SetCircle( p.paths , curr );
+                    }
                     return ;
                 }
                 for( const auto & i : sub_graph[curr].tos )
                 {
-                    findAllPath(i ,p);
+                    findAllPath(i ,p,circle);
                     if( path_num < 0 )
                         return ;
                 }
@@ -167,6 +195,7 @@ namespace BGIQD {
             {
                 for(auto & i : allPaths )
                 {
+                    i.MergeCircle();
                     i.CalcCov();
                 }
                 std::sort( allPaths.rbegin() ,allPaths.rend() );

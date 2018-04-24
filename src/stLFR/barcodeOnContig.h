@@ -7,6 +7,7 @@
 #include "soap2/contigGraph.h"
 #include "stLFR/LineGroup.h"
 #include "stLFR/ContigCluster.h"
+#include "common/flags/flags.h"
 namespace BGIQD {
     namespace stLFR {
 
@@ -64,10 +65,44 @@ namespace BGIQD {
             // AddMid can be called multi-times!!!
             void AddMid( unsigned int to ,const std::vector<std::list<SOAP2::Edge>> & paths );
 
-            struct Path 
+            struct Circle
+            {
+                std::vector<unsigned int> cpath;
+                std::set<unsigned int>  csets;
+                FLAGS_INT ;
+
+                ADD_A_FLAG( 0, set );
+
+                void SetCircle( const std::vector<unsigned int> & path , unsigned int root)
+                {
+                    bool flag = false ;
+                    for( size_t  i = 0 ; i < path.size() ; i++ )
+                    {
+                        if( ! flag && path[i] != root )
+                            continue ;
+                        flag = true ;
+                        cpath.push_back(path[i]);
+                        csets.insert(path[i]);
+                    }
+                    if( ! csets.empty() )
+                        Set_set();
+                }
+
+                void Clean()
+                {
+                    cpath.clear();
+                    csets.clear();
+                    Clean_set();
+                }
+            };
+
+            struct Path
             {
                 std::vector<unsigned int > paths;
                 std::set<unsigned int > nodes;
+
+                Circle circle ;
+
                 int total_length;
                 float cov;
                 float barcode_cov ;
@@ -79,6 +114,22 @@ namespace BGIQD {
                     total_barcode = 0;
                     total_cov = 0;
                     barcode_cov = 0;
+                }
+                void AddCircle( const Circle & c)
+                {
+                    circle  =c ;
+                }
+                void MergeCircle();
+                bool IsPathInCircle(const Circle & c)
+                {
+                    for(auto i: paths )
+                    {
+                        if( c.csets.find( i ) != c.csets.end() )
+                        {
+                            return true ;
+                        }
+                    }
+                    return false;
                 }
 
                 bool AddEdge( int id , int length , float cov , int barcode ) 
@@ -134,8 +185,9 @@ namespace BGIQD {
             void CleanAndSavePath();
             void InitEdge( unsigned int id);
             std::vector<Path> allPaths;
-            void findAllPath(  unsigned int id  , Path  p);
+            void findAllPath(  unsigned int id  , Path  p , Circle & circle_detected);
             void ScoreAllPath();
+
             //struct SubP2PGraphEdge
             //{
             //    unsigned int id;

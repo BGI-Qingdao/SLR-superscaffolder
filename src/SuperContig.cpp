@@ -18,7 +18,6 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
         , unsigned int edge_id
         , bool is_bal 
         , int max_depth
-        , bool detail = false
         )
 {
     auto get_min_length_v1 = [](const std::vector<std::list<BGIQD::SOAP2::Edge>> &vec_list)
