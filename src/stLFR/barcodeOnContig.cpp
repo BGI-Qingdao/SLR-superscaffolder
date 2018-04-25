@@ -148,22 +148,28 @@ namespace BGIQD {
 
         void P2PGraph::findAllPath(  unsigned int id  ,Path p , Circle & circle)
         {
-            if( p.IsPathInCircle(circle ) )
+            if( deal_circle )
             {
-                p.AddCircle(circle);
-            }
-            else
-            {
-                circle.Clean();
+                if(  p.IsPathInCircle(circle ) )
+                {
+                    p.AddCircle(circle);
+                }
+                else
+                {
+                    circle.Clean();
+                }
             }
             unsigned int curr = id;
             while ( sub_graph[curr].tos.size() == 1 && curr != target )
             {
                 if( ! p.AddEdge(sub_graph[curr]) )
                 {
-                    if( ! circle.Is_set() )
+                    if( deal_circle )
                     {
-                        circle.SetCircle( p.paths , curr, ecov );
+                        if( ! circle.Is_set() )
+                        {
+                            circle.SetCircle( p.paths , curr, ecov );
+                        }
                     }
                     return ;
                 }
@@ -180,9 +186,12 @@ namespace BGIQD {
                 assert( sub_graph[curr].tos.size() >1 );
                 if( ! p.AddEdge(sub_graph[curr]) )
                 {
-                    if( ! circle.Is_set() )
+                    if( deal_circle )
                     {
-                        circle.SetCircle( p.paths , curr , ecov );
+                        if( ! circle.Is_set() )
+                        {
+                            circle.SetCircle( p.paths , curr , ecov );
+                        }
                     }
                     return ;
                 }
@@ -206,7 +215,8 @@ namespace BGIQD {
             {
                 for(auto & i : allPaths )
                 {
-                    i.MergeCircle();
+                    if( deal_circle )
+                        i.MergeCircle();
                     i.CalcCov();
                 }
                 std::sort( allPaths.rbegin() ,allPaths.rend() );

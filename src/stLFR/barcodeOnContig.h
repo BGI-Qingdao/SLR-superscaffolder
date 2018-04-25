@@ -48,7 +48,7 @@ namespace BGIQD {
             unsigned int target;
             unsigned int root ;
             int final_circled ;
-
+            bool deal_circle;
             struct Edge
             {
                 unsigned int id;
@@ -143,6 +143,8 @@ namespace BGIQD {
                 void MergeCircle();
                 bool IsPathInCircle(const Circle & c)
                 {
+                    if(! c.Is_set() )
+                        return false ;
                     for(auto i: paths )
                     {
                         if( c.csets.find( i.id ) != c.csets.end() )
