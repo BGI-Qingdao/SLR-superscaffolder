@@ -336,7 +336,7 @@ namespace BGIQD{
                 edge_array[index].bal_id = index+bal;
                 edge_array[index].cov = cov;
                 if( length > K )
-                    edge_array[index].length = length;
+                    edge_array[index].length = length ;
                 else
                     edge_array[index].length = 0 ;
                 if( bal == 0 )

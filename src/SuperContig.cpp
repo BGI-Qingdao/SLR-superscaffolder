@@ -196,6 +196,7 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
           }
           std::cerr<<std::endl;*/
         unsigned int to_id = j.first ;
+        float sim = neibs->at(to_id);
         for( const auto & a_path : j.second )
         {
             unsigned int to_id_in_path = a_path.front().id ;
@@ -232,13 +233,13 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
             {
                 {
                     std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[path_i]]);
-                    BGIQD::SOAP2::KeyConn conn{to_id,length,0};
+                    BGIQD::SOAP2::KeyConn conn{to_id,length,0,sim};
                     conn.SetPostive();
                     curr_from.to[to_id]= conn;
                 }
                 {
                     std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[to_id]]);
-                    BGIQD::SOAP2::KeyConn conn{path_i,length,0};
+                    BGIQD::SOAP2::KeyConn conn{path_i,length,0,sim};
                     conn.SetPostive();
                     curr_to.from[path_i] = conn;
                 }
@@ -251,12 +252,12 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
             {
                 {
                     std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[path_i]]);
-                    BGIQD::SOAP2::KeyConn conn{to_id,length,0};
+                    BGIQD::SOAP2::KeyConn conn{to_id,length,0, sim};
                     curr_from.to[to_id_in_path]= conn;
                 }
                 {
                     std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[to_id]]);
-                    BGIQD::SOAP2::KeyConn conn{path_i,length,0};
+                    BGIQD::SOAP2::KeyConn conn{path_i,length,0, sim};
                     curr_to.to[bal_i] = conn;
                 }
             }
@@ -268,12 +269,12 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
             {
                 {
                     std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[bal_i]]);
-                    BGIQD::SOAP2::KeyConn conn{to_id,length,0};
+                    BGIQD::SOAP2::KeyConn conn{to_id,length,0, sim};
                     curr_from.from[curr_to.bal_id]= conn;
                 }
                 {
                     std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[to_id]]);
-                    BGIQD::SOAP2::KeyConn conn{bal_i,length,0};
+                    BGIQD::SOAP2::KeyConn conn{bal_i,length,0, sim};
                     curr_to.from[path_i] = conn;
                 }
             }
@@ -285,13 +286,13 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
             {
                 {
                     std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[bal_i]]);
-                    BGIQD::SOAP2::KeyConn conn{to_id,length,0};
+                    BGIQD::SOAP2::KeyConn conn{to_id,length,0, sim};
                     conn.SetPostive();
                     curr_from.from[to_id]= conn;
                 }
                 {
                     std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[to_id]]);
-                    BGIQD::SOAP2::KeyConn conn{bal_i,length,0};
+                    BGIQD::SOAP2::KeyConn conn{bal_i,length,0 , sim};
                     conn.SetPostive();
                     curr_to.to[bal_i] = conn;
                 }
@@ -1119,7 +1120,7 @@ int main(int argc , char **argv)
                     {
                         (*deg)<<i.second.to
                             <<":"<<i.second.length
-                            <<":"<<config.connections.at(curr.edge_id).at(i.second.to)
+                            <<":"<<i.second.sim
                             <<":"<<(i.second.IsPositive() ? '+' :'-')<<"\t";
                     }
                     *(deg)<<std::endl;
@@ -1131,7 +1132,7 @@ int main(int argc , char **argv)
                     {
                         (*deg)<<i.second.to
                             <<":"<<i.second.length
-                            <<":"<<config.connections.at(curr.edge_id).at(i.second.to)
+                            <<":"<<i.second.sim
                             <<":"<<(i.second.IsPositive() ? '+' :'-')<<"\t";
                     }
                     *(deg)<<std::endl;

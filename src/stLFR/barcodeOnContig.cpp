@@ -29,7 +29,9 @@ namespace BGIQD {
             }
             return ret;
         }
+
         // ---------------- Path -------------------------
+
         void P2PGraph::Path::MergeCircle()
         {
             if( ! circle.Is_set() )
@@ -44,7 +46,9 @@ namespace BGIQD {
             paths.insert(paths.begin() + i ,circle.cpath.begin() , circle.cpath.end());
 
         }
+
         // ---------------- P2PGraph -------------------------
+
         void P2PGraph::Init( unsigned int from , unsigned int to)
         {
             target = to ;
@@ -60,7 +64,7 @@ namespace BGIQD {
             {
                 auto & node = base_graph->graph_ea.edge_array[id];
                 sub_graph[id].id = id;
-                sub_graph[id].length =  node.id;
+                sub_graph[id].length =  node.length;
                 sub_graph[id].cov = node.cov;
                 if( id != root && id != target )
                 {
@@ -127,6 +131,7 @@ namespace BGIQD {
             for( const auto &i : node.tos)
             {
                 Circle c;
+                c.Clean() ;
                 findAllPath(i, p, c);
                 if( path_num < 0 )
                     return ;
@@ -190,6 +195,11 @@ namespace BGIQD {
             }
         }
 
+        int P2PGraph::ShortestPath()
+        {
+            findAllPath();
+            return 0;
+        }
         void P2PGraph::ScoreAllPath()
         {
             if( path_num > 1 )
@@ -216,6 +226,8 @@ namespace BGIQD {
                 final_circled = correct.circle.circle_run ;
                 allPaths.clear();
             }
+            else
+                allPaths.clear();
         }
 
 
