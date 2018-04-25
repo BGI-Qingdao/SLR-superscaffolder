@@ -35,6 +35,7 @@ namespace BGIQD {
             } status;
 
             int fill_num;
+            int circle_run;
         };
 
         struct ContigRoads

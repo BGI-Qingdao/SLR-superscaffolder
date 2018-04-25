@@ -47,6 +47,8 @@ namespace BGIQD {
 
             unsigned int target;
             unsigned int root ;
+            int final_circled ;
+
             struct Edge
             {
                 unsigned int id;
@@ -56,6 +58,7 @@ namespace BGIQD {
                 std::set<unsigned int> tos;
                 //std::set<unsigned int> froms;
             };
+
             std::map<unsigned int , P2PGraph::Edge> sub_graph;
 
             void Init( unsigned int from , unsigned int to);
@@ -67,23 +70,40 @@ namespace BGIQD {
 
             struct Circle
             {
-                std::vector<unsigned int> cpath;
+                std::vector<Edge> cpath;
                 std::set<unsigned int>  csets;
                 FLAGS_INT ;
-
                 ADD_A_FLAG( 0, set );
-
-                void SetCircle( const std::vector<unsigned int> & path , unsigned int root)
+                int  circle_run ;
+                void SetCircle( const std::vector<Edge> & path , unsigned int root , float ecov)
                 {
                     bool flag = false ;
                     for( size_t  i = 0 ; i < path.size() ; i++ )
                     {
-                        if( ! flag && path[i] != root )
+                        if( ! flag && path[i].id != root )
                             continue ;
                         flag = true ;
                         cpath.push_back(path[i]);
-                        csets.insert(path[i]);
+                        csets.insert(path[i].id);
                     }
+                    int total_len = 0 ;
+                    float total_cov = 0.0f;
+                    for( const auto & i : cpath )
+                    {
+                        total_len += i.length ;
+                        total_cov += i.length * i.cov ; 
+                    }
+                    float me_cov = total_cov / total_len; 
+                    float me_dup = me_cov / ecov ;
+                    int me_more1 = (int)me_dup ;
+                    int me_more = me_more1;
+                    while( me_more > 1  || ( me_more == 1 && me_cov - me_more1 > 0.5f ) )
+                    {
+                        std::vector<Edge> path_base = cpath ;
+                        cpath.insert(cpath.end(), path_base.begin() , path_base.end() );
+                        me_more -- ;
+                    }
+                    circle_run = cpath.size() / csets.size() ;
                     if( ! csets.empty() )
                         Set_set();
                 }
@@ -93,16 +113,17 @@ namespace BGIQD {
                     cpath.clear();
                     csets.clear();
                     Clean_set();
+                    circle_run = 0 ;
                 }
             };
 
             struct Path
             {
-                std::vector<unsigned int > paths;
+                //std::vector<unsigned int > paths;
+                std::vector<Edge> paths;
                 std::set<unsigned int > nodes;
 
                 Circle circle ;
-
                 int total_length;
                 float cov;
                 float barcode_cov ;
@@ -124,7 +145,7 @@ namespace BGIQD {
                 {
                     for(auto i: paths )
                     {
-                        if( c.csets.find( i ) != c.csets.end() )
+                        if( c.csets.find( i.id ) != c.csets.end() )
                         {
                             return true ;
                         }
@@ -132,15 +153,14 @@ namespace BGIQD {
                     return false;
                 }
 
-                bool AddEdge( int id , int length , float cov , int barcode ) 
+                //bool AddEdge( int id , int length , float cov , int barcode ) 
+                bool AddEdge(const Edge & edge ) 
                 {
-                    if( nodes.find( id ) == nodes.end() )
+                    if( nodes.find( edge.id ) == nodes.end() )
                     {
-                        paths.push_back(id);
-                        total_length += length ;
-                        total_cov += length * cov ;
-                        total_barcode += barcode ;
-                        nodes.insert(id);
+                        Edge tmp = edge ;
+                        paths.push_back(tmp);
+                        nodes.insert(edge.id);
                         return true;
                     }
                     else
@@ -149,6 +169,15 @@ namespace BGIQD {
 
                 void CalcCov()
                 {
+                    total_cov = 0 ; 
+                    total_length = 0 ;
+                    total_barcode = 0 ;
+                    for( const auto & edge : paths )
+                    {
+                        total_length += edge.length ;
+                        total_cov += edge.length * cov ;
+                        total_barcode += edge.barcode_cov ;
+                    }
                     if( total_length != 0 )
                     {
                         cov = total_cov / total_length ;
@@ -177,15 +206,15 @@ namespace BGIQD {
 
             int path_num;
             bool IsOK();
-            Path final_path;
-
+            std::vector<unsigned int> final_path;
+            float ecov ;
             void GeneratePath();
             private:
             void findAllPath();
             void CleanAndSavePath();
             void InitEdge( unsigned int id);
             std::vector<Path> allPaths;
-            void findAllPath(  unsigned int id  , Path  p , Circle & circle_detected);
+            void findAllPath(  unsigned int id  , Path  p , Circle & circle_detected );
             void ScoreAllPath();
 
             //struct SubP2PGraphEdge

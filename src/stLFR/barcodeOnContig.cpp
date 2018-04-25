@@ -34,14 +34,15 @@ namespace BGIQD {
         {
             if( ! circle.Is_set() )
                 return ;
-            unsigned int circle_root = circle.cpath[0] ;
+            unsigned int circle_root = circle.cpath[0].id ;
             size_t i = 0;
             for( i = 0 ; i < paths.size() ; i++ )
             {
-                if( paths[i] == circle_root ) 
+                if( paths[i].id == circle_root ) 
                     break;
             }
             paths.insert(paths.begin() + i ,circle.cpath.begin() , circle.cpath.end());
+
         }
         // ---------------- P2PGraph -------------------------
         void P2PGraph::Init( unsigned int from , unsigned int to)
@@ -153,11 +154,11 @@ namespace BGIQD {
             unsigned int curr = id;
             while ( sub_graph[curr].tos.size() == 1 && curr != target )
             {
-                if( ! p.AddEdge(curr,sub_graph[curr].length, sub_graph[curr].cov,sub_graph[curr].barcode_cov) )
+                if( ! p.AddEdge(sub_graph[curr]) )
                 {
                     if( ! circle.Is_set() )
                     {
-                        circle.SetCircle( p.paths , curr );
+                        circle.SetCircle( p.paths , curr, ecov );
                     }
                     return ;
                 }
@@ -172,11 +173,11 @@ namespace BGIQD {
             else
             {
                 assert( sub_graph[curr].tos.size() >1 );
-                if( ! p.AddEdge(curr,sub_graph[curr].length, sub_graph[curr].cov,sub_graph[curr].barcode_cov) )
+                if( ! p.AddEdge(sub_graph[curr]) )
                 {
                     if( ! circle.Is_set() )
                     {
-                        circle.SetCircle( p.paths , curr );
+                        circle.SetCircle( p.paths , curr , ecov );
                     }
                     return ;
                 }
@@ -206,7 +207,13 @@ namespace BGIQD {
         {
             if( path_num > 0 )
             {
-                final_path = * allPaths.begin();
+                final_path.clear();
+                auto & correct = * allPaths.begin();
+                for( const  auto & i : correct.paths )
+                {
+                    final_path.push_back(i.id) ;
+                }
+                final_circled = correct.circle.circle_run ;
                 allPaths.clear();
             }
         }
