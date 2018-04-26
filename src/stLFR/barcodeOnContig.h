@@ -98,7 +98,7 @@ namespace BGIQD {
                     int me_more1 = (int)me_dup ;
                     int me_more = me_more1;
                     std::vector<Edge> path_base = cpath ;
-                    while( me_more > 1  || ( me_more == 1 && me_cov - me_more1 > 0.5f ) )
+                    while( me_more > 1  || ( me_more == 1 && me_dup - me_more1 > 0.5f ) )
                     {
                         cpath.insert(cpath.end(), path_base.begin() , path_base.end() );
                         me_more -- ;

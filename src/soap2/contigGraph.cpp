@@ -11,7 +11,6 @@ namespace BGIQD{
     namespace SOAP2{
 
         // -------------------------- struct Edge ---------------------------------
-
         int Edge::ArcNum() const 
         {
             int ret = 0 ;
@@ -65,6 +64,7 @@ namespace BGIQD{
                 ,const std::map<unsigned int , float> & neibs
                 ,int max_depth )
         {
+            auto test = *(neibs.begin());
             if ( total_length >= max_depth|| length == 0 )
                 return ;
             stack.push_front(*this);
@@ -144,7 +144,6 @@ namespace BGIQD{
             static KeyConn i ;
             return i;
         }
-
         KeyConn & KeyEdge::GetValidFrom() 
         {
             for( auto & i : from )
@@ -156,7 +155,6 @@ namespace BGIQD{
             static KeyConn i ;
             return i;
         }
-
         void KeyConn::InitFromString( const std::string & str )
         {
             auto items = BGIQD::STRING::split(str,":");
@@ -334,7 +332,7 @@ namespace BGIQD{
 #endif
                 edge_array[index].id = index ;
                 edge_array[index].bal_id = index+bal;
-                edge_array[index].cov = cov;
+                edge_array[index].cov = cov / 10;
                 if( length > K )
                     edge_array[index].length = length ;
                 else
