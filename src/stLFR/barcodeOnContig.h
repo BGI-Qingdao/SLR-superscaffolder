@@ -135,6 +135,7 @@ namespace BGIQD {
                     total_barcode = 0;
                     total_cov = 0;
                     barcode_cov = 0;
+                    circle.Clean();
                 }
                 void AddCircle( const Circle & c)
                 {

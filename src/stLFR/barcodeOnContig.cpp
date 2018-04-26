@@ -53,6 +53,7 @@ namespace BGIQD {
         {
             target = to ;
             root= from;
+            final_circled = 0 ;
             InitEdge(to);
             InitEdge(from);
             GraphEA_withBarcode::Union(base_graph->barcode_on_contig[from] ,base_graph->barcode_on_contig[to],root_target_union);
