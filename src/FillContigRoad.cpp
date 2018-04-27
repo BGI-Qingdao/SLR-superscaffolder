@@ -212,7 +212,7 @@ bool AppendPath( const  BGIQD::stLFR::P2PGraph & p2pgrapg , const DepthSearchRes
                 , p2pgrapg.final_path.rbegin()
                 , p2pgrapg.final_path.rend() );
     }
-    road.circle_run = p2pgrapg.final_circled;
+    road.circle_runs.push_back(p2pgrapg.final_circled);
     return true;
 }
 
@@ -357,7 +357,21 @@ void report()
         {
             config.road_fill_freq.Touch("PartSucc");
         }
-        config.circle_run.Touch(road.circle_run);
+        bool has_circle = false ;
+        for( auto i : road.circle_runs )
+        {
+            config.circle_run.Touch(i);
+            if( i > 0 )
+                has_circle = true ;
+        }
+        if( has_circle )
+        {
+            std::cout<<"c\t";
+        }
+        else
+        {
+            std::cout<<"l\t";
+        }
         for( const auto i : road.contig_path )
         {
             std::cout<<i<<'\t';

@@ -35,7 +35,7 @@ namespace BGIQD {
             } status;
 
             int fill_num;
-            int circle_run;
+            std::vector<int> circle_runs;
         };
 
         struct ContigRoads
@@ -50,6 +50,7 @@ namespace BGIQD {
         {
             void LoadContigRoadFills( const std::string & file );
             std::vector<ContigRoadFill>  fills;
+            std::vector<bool> has_circle ; 
         };
     }
 }

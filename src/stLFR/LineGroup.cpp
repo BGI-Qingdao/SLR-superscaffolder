@@ -102,7 +102,12 @@ namespace BGIQD{
                 ContigRoadFill fill;
                 for( const auto & i : items )
                 {
-                    fill.push_back(std::stoul(i));
+                    if( i == "c" )
+                        has_circle.push_back(true) ;
+                    else if ( i == "l" )
+                        has_circle.push_back(false) ;
+                    else
+                        fill.push_back(std::stoul(i));
                 }
                 fills.push_back(ContigRoadFill());
                 (*fills.rbegin()).swap(fill);
