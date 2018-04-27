@@ -172,6 +172,8 @@ namespace BGIQD {
                             circle.SetCircle( p.paths , curr, ecov );
                         }
                     }
+                    else
+                        path_num = -1 ;
                     return ;
                 }
                 curr = * sub_graph[curr].tos.begin();
@@ -194,6 +196,8 @@ namespace BGIQD {
                             circle.SetCircle( p.paths , curr , ecov );
                         }
                     }
+                    else
+                        path_num = -1 ;
                     return ;
                 }
                 for( const auto & i : sub_graph[curr].tos )
