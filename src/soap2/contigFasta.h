@@ -34,7 +34,7 @@ namespace BGIQD {
             void AddSeq ( const std::string & line, int k) ;
 
             std::string ToString() const ;
-            std::string ToString(int new_id, bool marker ) const ;
+            std::string ToString(int new_id, const std::string &marker ) const ;
 
             bool IsSeqComplete(int k) const 
             {

@@ -226,6 +226,11 @@ namespace BGIQD {
                 }
                 std::sort( allPaths.rbegin() ,allPaths.rend() );
             }
+            else if ( path_num == 1 )
+            {
+                if( deal_circle )
+                    allPaths[0].MergeCircle();
+            }
         }
 
         void P2PGraph::CleanAndSavePath()

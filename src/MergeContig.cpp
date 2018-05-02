@@ -806,7 +806,7 @@ struct AppConfig
                 continue;
             }
             const auto & c = contig_fasta_map.contigs.at(curr.id) ;
-            (*out)<<c.ToString(NewId(curr.id),false)<<std::endl;
+            (*out)<<c.ToString(NewId(curr.id),"")<<std::endl;
             final_num ++ ;
         }
         int step = final_num;
@@ -820,11 +820,13 @@ struct AppConfig
                 continue;
             const auto & c = contig_fasta_map.contigs.at(curr.id) ;
             final_num ++ ;
+            std::ostringstream ist ;
             if( fills.has_circle[i/2] )
-                (*out)<<c.ToString(NewId(curr.id),true)<<std::endl;
+                ist<<"\t"<<"has_circle";
             else
-                (*out)<<c.ToString(NewId(curr.id),false)<<std::endl;
-
+                ist<<"\t"<<"no_circle";
+            ist<<"\t"<<i/2;
+            (*out)<<c.ToString(NewId(curr.id),ist.str())<<std::endl;
         }
         loger<<BGIQD::LOG::lstart()<<" print super contig "<<final_num-step<<BGIQD::LOG::lend();
         step = final_num;
@@ -836,7 +838,7 @@ struct AppConfig
                 continue;
             const auto & c = contig_fasta_map.contigs.at(curr.id) ;
             final_num ++ ;
-            (*out)<<c.ToString(NewId(curr.id),false)<<std::endl;
+            (*out)<<c.ToString(NewId(curr.id),"")<<std::endl;
         }
         loger<<BGIQD::LOG::lstart()<<" print linear contig "<<final_num-step<<BGIQD::LOG::lend();
         loger<<BGIQD::LOG::lstart()<<" print final contig "<<final_num<<BGIQD::LOG::lend();
