@@ -62,6 +62,7 @@ test_cpp   =	test.cpp\
 				common/string/stringtools_test.cpp\
 				biocommon/sam_bam/sam_parser_test.cpp\
 				common/args/argsparser_test.cpp\
+				algorithm/graph/GraphTest.cpp\
 
 source_o					= ${source_cpp:%.cpp=%.o}
 
