@@ -48,7 +48,7 @@ namespace BGIQD{
                     finish_search = -1 ;
                 }
             };
-
+/*
         template<class EdgeBase>
             struct DepthSearchEdge
             {
@@ -63,25 +63,26 @@ namespace BGIQD{
 
                 EdgeBase    base ;
             };
-
-        template<class GraphAccess>
+*/
+        // Must be specialized before used .
+        template<class GraphAccess , class traits>
             struct DepthSearchPathEndHelper
             {
                 typedef typename GraphAccess::GraphNodeId NodeId;
                 typedef typename GraphAccess::GraphEdgeId EdgeId;
                 typedef typename GraphAccess::Node        Node;
                 typedef typename GraphAccess::Edge        Edge;
-
+                typedef traits                            traisId;
                 void AddNode(const Node & ) {} 
                 void AddEdge(const Edge & ) {}
 
                 void PopEdge() {}
                 void PopNode() {}
 
-                bool IsEnd() const { return true ; }
+                bool IsEnd() const ;
             };
 
-        template<class GraphAccess ,class EdgeItr>
+        template<class GraphAccess ,class EdgeItr , class PathEnder>
             struct DepthSearch
             {
                 typedef typename GraphAccess::GraphNodeId   NodeId;
@@ -89,15 +90,15 @@ namespace BGIQD{
                 typedef typename GraphAccess::Node          NodeBase;
                 typedef typename GraphAccess::Edge          EdgeBase;
                 typedef DepthSearchNode<NodeBase>           Node;
-                typedef DepthSearchEdge<EdgeBase>           Edge;
+//              typedef DepthSearchEdge<EdgeBase>           Edge;
 
-                NodeId                                    start;
+                NodeId                                      start;
 
-                std::map<NodeId , Node>                   nodes;
+                std::map<NodeId , Node>                     nodes;
                 //std::map<EdgeId , Edge>                   edges;
-                std::stack<EdgeItr>                        path;
-                GraphAccess                               accesser;
-                DepthSearchPathEndHelper<GraphAccess>     ender;
+                std::stack<EdgeItr>                         path;
+                GraphAccess                                 accesser;
+                PathEnder                                   ender;
 
                 //  do depth search.
                 //      1. stop go deeper if ender say yes.
@@ -201,7 +202,7 @@ namespace BGIQD{
                         //path.push(curr_node_id);
                         ender.AddEdge(curr_edge);
                         new_node_in_path = true ;
-                        itr ++ ;
+                        ++ itr ;
                     }
                 }
             };

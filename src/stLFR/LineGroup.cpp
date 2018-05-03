@@ -103,9 +103,16 @@ namespace BGIQD{
                 for( const auto & i : items )
                 {
                     if( i == "c" )
-                        has_circle.push_back(true) ;
+                    {
+                        fill_flag flag ;
+                        flag.Set_circle();
+                        flags.push_back(flag);
+                    }
                     else if ( i == "l" )
-                        has_circle.push_back(false) ;
+                    {
+                        fill_flag flag ;
+                        flags.push_back(flag);
+                    }
                     else
                         fill.push_back(std::stoul(i));
                 }

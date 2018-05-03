@@ -264,6 +264,7 @@ struct AppConfig
                 i ++ ;
             }
         }
+        edge_count = new_id -1 ;
     }
 
     void Linear()
@@ -332,6 +333,32 @@ struct AppConfig
         }
 
         loger<<BGIQD::LOG::lstart()<<"Linear merge "<<linear_fill.fills.size()<<"linear contig and delete "<<linear_del<<" old contig "<<BGIQD::LOG::lend();
+        for( size_t i = 0 ; i < linear_fill.fills.size() ; i ++ )
+        {
+            auto & flag = linear_fill.flags[i];
+            std::cerr<<"LinearFill";
+            for( auto i : linear_fill.fills[i] )
+            {
+                auto ret = GetEdge(i) ;
+                if( ret.first == SUPER )
+                {
+                    flag.Set_fill_by_super();
+                    int super_id = i - graph_ea.contigTotalNum;
+                    if( fills.flags[super_id].Is_circle() )
+                        flag.Set_circle();
+                    for( auto j : fills.fills[super_id] )
+                    {
+                        std::cerr<<'\t'<<j;
+                    }
+                }
+                else
+                {
+                    std::cerr<<'\t'<<i;
+                }
+            }
+            std::cerr<<std::endl;
+        }
+
         //loger<<BGIQD::LOG::lstart()<<"linear del freq"<<"\n"<<l_del.ToString()<< BGIQD::LOG::lend();
         //loger<<BGIQD::LOG::lstart()<<"linear result freq"<<"\n"<<l_now.ToString()<< BGIQD::LOG::lend();
         // alloc graph
@@ -339,7 +366,6 @@ struct AppConfig
         // rebuild graph
         DeleteLinearContig();
     }
-
 
     void ReGenerate()
     {
@@ -357,6 +383,7 @@ struct AppConfig
     }
     private:
     int linear_del ;
+    int edge_count ;
     //BGIQD::FREQ::Freq<int> l_del;
     //BGIQD::FREQ::Freq<int> l_now;
     void LinearANode(unsigned int i)
@@ -732,7 +759,7 @@ struct AppConfig
         };
         auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fnames.updatedEdge(round+1));
         unsigned int line_num = 1 ;
-
+        (*out)<<"EDGEs "<<edge_count<<std::endl;
         for( unsigned int i = 1 ; i <= graph_ea.contigTotalNum ; i++ )
         {
             const auto & curr = graph_ea.edge_array[i] ;
@@ -821,13 +848,14 @@ struct AppConfig
             const auto & c = contig_fasta_map.contigs.at(curr.id) ;
             final_num ++ ;
             std::ostringstream ist ;
-            if( fills.has_circle[i/2] )
+            if( fills.flags[i/2].Is_circle() )
                 ist<<"\t"<<"has_circle";
             else
                 ist<<"\t"<<"no_circle";
             ist<<"\t"<<i/2;
             (*out)<<c.ToString(NewId(curr.id),ist.str())<<std::endl;
         }
+
         loger<<BGIQD::LOG::lstart()<<" print super contig "<<final_num-step<<BGIQD::LOG::lend();
         step = final_num;
 
@@ -837,8 +865,17 @@ struct AppConfig
             if ( curr.IsDelete() || curr.length < 1)
                 continue;
             const auto & c = contig_fasta_map.contigs.at(curr.id) ;
+            std::ostringstream ist ;
+            if( linear_fill.flags[i/2].Is_circle() )
+                ist<<"\t"<<"has_circle";
+            else
+                ist<<"\t"<<"no_circle";
+            if( linear_fill.flags[i/2].Is_fill_by_super() )
+                ist<<"\t"<<"has_super";
+            else
+                ist<<"\t"<<"no_super";
             final_num ++ ;
-            (*out)<<c.ToString(NewId(curr.id),"")<<std::endl;
+            (*out)<<c.ToString(NewId(curr.id),ist.str())<<std::endl;
         }
         loger<<BGIQD::LOG::lstart()<<" print linear contig "<<final_num-step<<BGIQD::LOG::lend();
         loger<<BGIQD::LOG::lstart()<<" print final contig "<<final_num<<BGIQD::LOG::lend();
@@ -869,6 +906,7 @@ int main(int argc , char **argv)
             t_num.setted = true;
             t_num.d.i = 8;
         }
+
     if( !round.setted )
     {
         round.setted = true ;

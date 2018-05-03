@@ -1,7 +1,9 @@
 #ifndef __STLFR_LINEGROUP_H__
 #define __STLFR_LINEGROUP_H__
+
 #include <vector>
 #include <string>
+#include "common/flags/flags.h"
 
 namespace BGIQD {
     namespace stLFR {
@@ -44,13 +46,18 @@ namespace BGIQD {
             std::vector<ContigRoad>  roads;
         };
 
-
+        struct fill_flag
+        {
+            FLAGS_INT ;
+            ADD_A_FLAG(0 , circle);
+            ADD_A_FLAG(1 , fill_by_super);
+        };
         typedef std::vector<unsigned int> ContigRoadFill ;
         struct ContigRoadFills
         {
             void LoadContigRoadFills( const std::string & file );
             std::vector<ContigRoadFill>  fills;
-            std::vector<bool> has_circle ; 
+            std::vector<fill_flag> flags;
         };
     }
 }

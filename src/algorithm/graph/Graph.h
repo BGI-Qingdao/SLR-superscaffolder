@@ -53,6 +53,7 @@ namespace BGIQD {
             struct EdgeIterator : public std::iterator<std::forward_iterator_tag,int>
         {
             public:
+
                 typedef typename GraphAccess::GraphEdgeId Id;
                 typedef typename GraphAccess::Edge        Edge;
 
@@ -61,7 +62,7 @@ namespace BGIQD {
                 EdgeIterator(const Edge & e , GraphAccess & acc )
                 {
                     curr = &e;
-                    accessor = acc ;
+                    accessor = &acc ;
                 }
 
                 EdgeIterator( const EdgeIterator & ei )
@@ -90,9 +91,11 @@ namespace BGIQD {
                     return curr != ei.curr ;
                 }
 
-                Edge & operator*() const  { return *curr ; }
+                const Edge & operator*() const  { return *curr ; }
 
-                EdgeIterator & operator++() {
+                const Edge * operator->() const  { return curr ; }
+
+                EdgeIterator & operator ++() {
                     if( curr != NULL && accessor != NULL )
                     {
                         Id next = curr->next ;
@@ -106,8 +109,11 @@ namespace BGIQD {
                     return *this ;
                 }
 
-                static EdgeIterator end ;
-
+                static EdgeIterator & end() 
+                {
+                    static EdgeIterator end;
+                    return end ;
+                }
             private:
 
                 const Edge * curr ;
