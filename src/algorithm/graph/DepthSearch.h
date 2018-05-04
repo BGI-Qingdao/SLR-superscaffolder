@@ -4,6 +4,10 @@
 #include <map>
 #include <set>
 #include <stack>
+#include <sstream>
+#include <string>
+#include <iostream>
+
 namespace BGIQD{
     namespace GRAPH{
 
@@ -15,17 +19,19 @@ namespace BGIQD{
         //
         //            };
 
+        enum DepthSearchNodeType
+        {
+            Invalid = -1 ,
+            White = 0 ,
+            Gray = 1 ,
+            Black = 2 ,
+            EndPoint  = 3 ,
+        };
         template<class NodeBase>
             struct DepthSearchNode
             {
                 typedef typename NodeBase::NodeNodeId NodeId;
-                enum Type
-                {
-                    White = 0 ,
-                    Gray = 1 ,
-                    Black = 2 ,
-                    EndPoint  = 3 ,
-                };
+                typedef DepthSearchNodeType           Type;
                 Type                                type ;
 
                 NodeId                              id;
@@ -34,7 +40,7 @@ namespace BGIQD{
                 int                                 first_found ;
                 int                                 finish_search ;
 
-                static NodeId                       invalid = -1;
+                static const  NodeId                invalid = -1;
 
                 std::set<NodeId>                    backword_from ;
                 std::set<NodeId>                    forword_from ;
@@ -46,6 +52,25 @@ namespace BGIQD{
                     prev = invalid ;
                     first_found = -1 ;
                     finish_search = -1 ;
+                }
+
+                std::string ToString() const {
+                    std::ostringstream ost;
+                    ost<<"id = "<<id<<" prev= "<<prev;
+                    ost<<" first= "<<first_found<<" last= "<<finish_search;
+                    for( auto x : backword_from)
+                    {
+                        ost<<" Backword= "<<x;
+                    }
+                    for( auto x : forword_from)
+                    {
+                        ost<<" Forword= "<<x;
+                    }
+                    for( auto x : cross_from)
+                    {
+                        ost<<" Cross= "<<x;
+                    }
+                    return ost.str();
                 }
             };
 /*
@@ -72,8 +97,11 @@ namespace BGIQD{
                 typedef typename GraphAccess::GraphEdgeId EdgeId;
                 typedef typename GraphAccess::Node        Node;
                 typedef typename GraphAccess::Edge        Edge;
+
                 typedef traits                            traisId;
-                void AddNode(const Node & ) {} 
+
+                void Start() {}
+                void AddNode(const Node & , DepthSearchNodeType ) {} 
                 void AddEdge(const Edge & ) {}
 
                 void PopEdge() {}
@@ -99,14 +127,27 @@ namespace BGIQD{
                 std::stack<EdgeItr>                         path;
                 GraphAccess                                 accesser;
                 PathEnder                                   ender;
-
+                
+                void PrintNodes() const
+                {
+                    for( auto & i : nodes )
+                    {
+                        std::cerr<<i.second.ToString()<<std::endl;
+                    }
+                }
                 //  do depth search.
                 //      1. stop go deeper if ender say yes.
                 //      2. avoid to use recursion because the depth may very large.
-                void DoDepthSearch()
+                //
+                // @params
+                //          start : id of root node
+                //          step  : index of start step
+                // @return 
+                //          end step index
+                //
+                int DoDepthSearch(NodeId start , int s_step )
                 {
-                    int step = 0 ;
-
+                    int step = s_step;
                     NodeBase root = accesser.AccessNode(start);
                     Node & curr = nodes[start];
                     //curr.base = root ;
@@ -116,13 +157,26 @@ namespace BGIQD{
                     curr.prev = Node::invalid ;
 
                     path.push(EdgeItr(accesser.AccessEdge(root.edge_id) , accesser));
-
+                    //ender.AddEdge(accesser.AccessEdge(root.edge_id));
+                    ender.Start();
                     bool new_node_in_path = true ;
                     while ( ! path.empty() )
                     {
-                        step ++ ;
                         auto & itr = path.top() ;
-                        Node & top = nodes.at( itr->from ) ;
+                        Node & top = nodes.at( itr.node_id) ;
+
+                        if( itr == EdgeItr::end() )
+                        {
+                            step ++ ;
+                            if( top.type == Node::Type::White )
+                                top.type = Node::Type::EndPoint ;
+                            else
+                                top.type = Node::Type::Black ;
+                            top.finish_search = step ;
+                            path.pop() ;
+                            new_node_in_path = false ;
+                            continue ;
+                        }
 
                         if( new_node_in_path )
                         {
@@ -134,12 +188,15 @@ namespace BGIQD{
                                 new_node_in_path = false ;
                                 continue ;
                             }
-                            ender.AddNode(accesser.AccessNode(top.id));
+
+                            ender.AddNode(accesser.AccessNode(top.id),top.type);
                             if( ender.IsEnd() )
                             {
                                 if( top.type == Node::Type::White )
                                 { // end by new node
                                     top.type = Node::Type::EndPoint ;
+                                    step ++ ;
+                                    top.finish_search = step ;
                                 }
                                 else 
                                 { // end by old node
@@ -151,29 +208,19 @@ namespace BGIQD{
                                 new_node_in_path = false ;
                                 continue ;
                             }
+
                             //in path now , force make it Gray !!!
                             top.type = Node::Type::Gray ;
                         }
-                        if( itr == EdgeItr::end )
-                        {
-                            if( top.type == Node::Type::White )
-                                top.type = Node::Type::EndPoint ;
-                            else
-                                top.type = Node::Type::Black ;
-                            top.finish_search = step ;
-                            path.pop() ;
-                            new_node_in_path = false ;
-                            continue ;
-                        }
 
-                        NodeId curr_node_id  = top.base.edge.to ;
-                        EdgeBase curr_edge = accesser.AccessEdge( top.base.edge.id ) ;
-                        auto itr_n = nodes.find( curr_node_id ) ;
-                        if ( itr_n == nodes.end() || itr->type == Node::Type::White )
+                        NodeId next_node_id  = itr->to;
+                        auto itr_n = nodes.find( next_node_id ) ;
+                        if ( itr_n == nodes.end() || itr_n->second.type == Node::Type::White )
                         {
+                            step ++ ;
                             // white node alloc 
-                            auto & next_node = nodes[curr_node_id] ;
-                            next_node.base = accesser.AccessNode(curr_node_id);
+                            auto & next_node = nodes[next_node_id] ;
+                            next_node.id = next_node_id;
                             next_node.type = Node::Type::White ;
                             next_node.first_found = step ;
                             next_node.prev = top.id ;
@@ -181,29 +228,35 @@ namespace BGIQD{
                         }
                         else
                         {
-                            if ( itr->type == Node::Type::Gray )
+                            auto & node = itr_n->second ;
+                            if ( node.type == Node::Type::Gray )
                             { // match a backwoard edge
-                                itr->backword_from.insert( top.id ) ;
+                                node.backword_from.insert( top.id ) ;
                             }
                             else
                             {// black node or endpoint left
 
-                                if( itr->first_found > top.first_found  )
+                                if( node.first_found > top.first_found  )
                                 { // to child ,match a forward edge
-                                    itr->forword_from.insert(top.id);
+                                    node.forword_from.insert(top.id);
                                 }
                                 else
                                 { // to other branch ,match a corss edge
-                                    itr->cross_form.insert(top.id);
+                                    node.cross_from.insert(top.id);
                                 }
                             }
                         }
-                        path.push(EdgeItr(accesser.AccessEdge(curr_node_id) , accesser));
+
+                        auto & next_node = accesser.AccessNode( next_node_id) ;
+                        EdgeId next_edge_id = next_node.edge_id;
+                        path.push(EdgeItr(accesser.AccessEdge(next_edge_id) , accesser));
                         //path.push(curr_node_id);
-                        ender.AddEdge(curr_edge);
+                        EdgeBase next_edge = accesser.AccessEdge( next_edge_id ) ;
+                        ender.AddEdge(next_edge);
                         new_node_in_path = true ;
                         ++ itr ;
                     }
+                    return step ;
                 }
             };
     } // namespace GRAPH

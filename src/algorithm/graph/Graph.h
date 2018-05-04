@@ -61,12 +61,14 @@ namespace BGIQD {
 
                 EdgeIterator(const Edge & e , GraphAccess & acc )
                 {
+                    node_id = e.from;
                     curr = &e;
                     accessor = &acc ;
                 }
 
                 EdgeIterator( const EdgeIterator & ei )
                 {
+                    node_id = ei.node_id;
                     curr = ei.curr ;
                     accessor = ei.accessor ;
                 }
@@ -75,17 +77,22 @@ namespace BGIQD {
                 {
                     if( &ei != this )
                     {
+                        node_id = ei.node_id ;
                         curr = ei.curr ;
                         accessor = ei.accessor ;
                     }
                     return *this;
                 }
 
+                // ONLY detect curr.
+                // ONLY use == with End() .
                 bool operator == ( const EdgeIterator & ei )const
                 {
                     return curr == ei.curr ;
                 }
 
+                // ONLY detect curr.
+                // ONLY use == with End() .
                 bool operator != ( const EdgeIterator & ei )const
                 {
                     return curr != ei.curr ;
@@ -114,8 +121,8 @@ namespace BGIQD {
                     static EdgeIterator end;
                     return end ;
                 }
+                typename Edge::EdgeNodeId node_id ;
             private:
-
                 const Edge * curr ;
                 GraphAccess * accessor ;
         };

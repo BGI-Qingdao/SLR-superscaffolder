@@ -141,6 +141,9 @@ struct traits_2 {} ;
 typedef BGIQD::GRAPH::GraphAccess<TestGraph,char,int> ACCESS;
 typedef BGIQD::GRAPH::EdgeIterator<ACCESS> EdgeItr;
 
+/*
+ * Classic depth search . Only end at NOT WHITE node
+ */
 template<>
 struct BGIQD::GRAPH::DepthSearchPathEndHelper<ACCESS, traits_1>
 {
@@ -150,27 +153,34 @@ struct BGIQD::GRAPH::DepthSearchPathEndHelper<ACCESS, traits_1>
     typedef typename ACCESS::GraphEdgeId     EdgeId;
 
     typedef traits_1                            traisId;
-    void AddNode(const Node & ) {} 
+    void Start() 
+    {
+        clean();
+    }
+    void AddNode(const Node & , BGIQD::GRAPH::DepthSearchNodeType type) {
+        pre_type = type ;
+    }
     void AddEdge(const Edge & ) {
+        clean();
     }
 
-    void PopEdge() {}
-    void PopNode() {}
+    void PopEdge() {clean();}
+    void PopNode() {clean();}
 
     bool IsEnd() const {
-        //
+        return ! ( pre_type == BGIQD::GRAPH::DepthSearchNodeType::Invalid
+            || pre_type == BGIQD::GRAPH::DepthSearchNodeType::White );
     }
-    
-    void Init( ACCESS & acc) { 
-        accesser = & acc ;
-    }
+
     private:
-    ACCESS * accesser;
-    Node curr 
-    //std::stack<Node> nodepath;
-    //std::stack<Edge> edgepath;
+    BGIQD::GRAPH::DepthSearchNodeType pre_type;
+    void clean()
+    {
+        pre_type = BGIQD::GRAPH::DepthSearchNodeType::Invalid;
+    }
 };
 
+typedef BGIQD::GRAPH::DepthSearchPathEndHelper<ACCESS, traits_1> Ender1;
 
 TEST(GraphAccessNode)
 {
@@ -257,8 +267,47 @@ TEST(EdgeItr_test)
     CHECK( true , (EdgeItr::end() == itr2 ));
 }
 
-
+typedef BGIQD::GRAPH::DepthSearch<ACCESS,EdgeItr,Ender1> Searcher1;
 TEST(GraphDepthSearch_test)
 {
+    auto test = TestGraph::GetTestGraph() ;
+    ACCESS acc ;
+    acc.base = & test ;
+    Searcher1 s1;
+    s1.accesser = acc ;
+    Ender1 ender ;
+    s1.ender = ender;
+    int end = s1.DoDepthSearch('u',1);
+    s1.DoDepthSearch('w',end+1);
+    auto & u = s1.nodes.at('u');
+    auto & v = s1.nodes.at('v');
+    auto & w = s1.nodes.at('w');
+    auto & x = s1.nodes.at('x');
+    auto & y = s1.nodes.at('y');
+    auto & z = s1.nodes.at('z');
 
+    CHECK(1,u.first_found);
+    CHECK(8,u.finish_search);
+
+    CHECK(2,v.first_found);
+    CHECK(7,v.finish_search);
+    CHECK(true , (v.backword_from.find('x') != v.backword_from.end()) )
+
+    CHECK(3,y.first_found);
+    CHECK(6,y.finish_search);
+    CHECK(true , (y.cross_from.find('w') != y.cross_from.end()) )
+
+    CHECK(4,x.first_found);
+    CHECK(5,x.finish_search);
+    CHECK(true , (x.forword_from.find('u') != z.forword_from.end()) )
+
+    CHECK(9, w.first_found);
+    CHECK(12,w.finish_search);
+
+    CHECK(10,z.first_found);
+    CHECK(11,z.finish_search);
+    CHECK(true , (z.backword_from.find('z') != z.backword_from.end()) )
+
+
+    s1.PrintNodes();
 }
