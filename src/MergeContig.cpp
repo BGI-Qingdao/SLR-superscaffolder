@@ -333,17 +333,18 @@ struct AppConfig
         }
 
         loger<<BGIQD::LOG::lstart()<<"Linear merge "<<linear_fill.fills.size()<<"linear contig and delete "<<linear_del<<" old contig "<<BGIQD::LOG::lend();
+        linear_fill.flags.resize(linear_fill.fills.size());
         for( size_t i = 0 ; i < linear_fill.fills.size() ; i ++ )
         {
             auto & flag = linear_fill.flags[i];
             std::cerr<<"LinearFill";
-            for( auto i : linear_fill.fills[i] )
+            for( auto m : linear_fill.fills[i] )
             {
-                auto ret = GetEdge(i) ;
+                auto ret = GetEdge(m) ;
                 if( ret.first == SUPER )
                 {
                     flag.Set_fill_by_super();
-                    int super_id = i - graph_ea.contigTotalNum;
+                    int super_id =( m - graph_ea.contigTotalNum ) / 2;
                     if( fills.flags[super_id].Is_circle() )
                         flag.Set_circle();
                     for( auto j : fills.fills[super_id] )
