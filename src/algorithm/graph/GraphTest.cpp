@@ -92,16 +92,15 @@ struct TestGraph
 
 };
 
-template<>
-struct BGIQD::GRAPH::GraphAccess<TestGraph , char , int >
+struct ACCESS : public BGIQD::GRAPH::GraphAccessBase<TestGraph , char , int >
 {
-    typedef char                         GraphNodeId ;
-    typedef int                          GraphEdgeId ;
+    //typedef char                         GraphNodeId ;
+    //typedef int                          GraphEdgeId ;
 
-    typedef GraphNodeBase<char ,int>     Node;
-    typedef GraphEdgeBase<char ,int>     Edge;
+    //typedef GraphNodeBase<char ,int>     Node;
+    //typedef GraphEdgeBase<char ,int>     Edge;
 
-    Node & AccessNode(char i)
+    Node & AccessNode(GraphNodeId i)
     {
         auto itr = nodes.find(i); 
         if( itr == nodes.end() )
@@ -114,7 +113,7 @@ struct BGIQD::GRAPH::GraphAccess<TestGraph , char , int >
         return itr->second ;
     }
 
-    Edge & AccessEdge(int i)
+    Edge & AccessEdge(GraphEdgeId i , GraphNodeId )
     {
         auto itr = edges.find(i); 
         if( itr == edges.end() )
@@ -130,34 +129,27 @@ struct BGIQD::GRAPH::GraphAccess<TestGraph , char , int >
         return itr->second ;
     }
 
-    TestGraph * base ;
-    std::map< char, Node> nodes ;
-    std::map< int , Edge> edges ;
+//    TestGraph * base ;
+//    std::map< char, Node> nodes ;
+//    std::map< int , Edge> edges ;
 };
 
 struct traits_1 {} ;
 struct traits_2 {} ;
 
-typedef BGIQD::GRAPH::GraphAccess<TestGraph,char,int> ACCESS;
+//typedef BGIQD::GRAPH::GraphAccess<TestGraph,char,int> ACCESS;
 typedef BGIQD::GRAPH::EdgeIterator<ACCESS> EdgeItr;
 
 /*
  * Classic depth search . Only end at NOT WHITE node
  */
-template<>
-struct BGIQD::GRAPH::DepthSearchPathEndHelper<ACCESS, traits_1>
+struct Ender1 : public BGIQD::GRAPH::DepthSearchPathEndHelperBase<ACCESS, traits_1>
 {
-    typedef typename ACCESS::Node            Node;
-    typedef typename ACCESS::Edge            Edge;
-    typedef typename ACCESS::GraphNodeId     NodeId;
-    typedef typename ACCESS::GraphEdgeId     EdgeId;
-
-    typedef traits_1                            traisId;
     void Start() 
     {
         clean();
     }
-    void AddNode(const Node & , BGIQD::GRAPH::DepthSearchNodeType type) {
+    void AddNode(const Node & , BGIQD::GRAPH::DepthSearchEdgeType type) {
         pre_type = type ;
     }
     void AddEdge(const Edge & ) {
@@ -168,25 +160,24 @@ struct BGIQD::GRAPH::DepthSearchPathEndHelper<ACCESS, traits_1>
     void PopNode() {clean();}
 
     bool IsEnd() const {
-        return ! ( pre_type == BGIQD::GRAPH::DepthSearchNodeType::Invalid
-            || pre_type == BGIQD::GRAPH::DepthSearchNodeType::White );
+        return ! ( pre_type == BGIQD::GRAPH::DepthSearchEdgeType::Invalid
+            || pre_type == BGIQD::GRAPH::DepthSearchEdgeType::White );
     }
 
     private:
-    BGIQD::GRAPH::DepthSearchNodeType pre_type;
+    BGIQD::GRAPH::DepthSearchEdgeType pre_type;
     void clean()
     {
-        pre_type = BGIQD::GRAPH::DepthSearchNodeType::Invalid;
+        pre_type = BGIQD::GRAPH::DepthSearchEdgeType::Invalid;
     }
 };
 
-typedef BGIQD::GRAPH::DepthSearchPathEndHelper<ACCESS, traits_1> Ender1;
 
 TEST(GraphAccessNode)
 {
     auto test = TestGraph::GetTestGraph() ;
 
-    BGIQD::GRAPH::GraphAccess<TestGraph,char,int> acc ;
+    ACCESS acc ;
     acc.base = &test;
 
     CHECK('u',acc.AccessNode('u').id);
@@ -212,28 +203,28 @@ TEST(GraphAccessEdge)
 {
     auto test = TestGraph::GetTestGraph() ;
 
-    BGIQD::GRAPH::GraphAccess<TestGraph,char,int> acc ;
+    ACCESS acc ;
     acc.base = &test;
 
-    CHECK(1  ,acc.AccessEdge(1).id);
-    CHECK('u',acc.AccessEdge(1).from);
-    CHECK('v',acc.AccessEdge(1).to);
-    CHECK(2  ,acc.AccessEdge(1).next);
+    CHECK(1  ,acc.AccessEdge(1,'u').id);
+    CHECK('u',acc.AccessEdge(1,'u').from);
+    CHECK('v',acc.AccessEdge(1,'u').to);
+    CHECK(2  ,acc.AccessEdge(1,'u').next);
 
-    CHECK(2  ,acc.AccessEdge(2).id);
-    CHECK('u',acc.AccessEdge(2).from);
-    CHECK('x',acc.AccessEdge(2).to);
-    CHECK(-1 ,acc.AccessEdge(2).next);
+    CHECK(2  ,acc.AccessEdge(2,'u').id);
+    CHECK('u',acc.AccessEdge(2,'u').from);
+    CHECK('x',acc.AccessEdge(2,'u').to);
+    CHECK(-1 ,acc.AccessEdge(2,'u').next);
 
-    CHECK(5  ,acc.AccessEdge(5).id);
-    CHECK('y',acc.AccessEdge(5).from);
-    CHECK('x',acc.AccessEdge(5).to);
-    CHECK(-1 ,acc.AccessEdge(5).next);
+    CHECK(5  ,acc.AccessEdge(5,'y').id);
+    CHECK('y',acc.AccessEdge(5,'y').from);
+    CHECK('x',acc.AccessEdge(5,'y').to);
+    CHECK(-1 ,acc.AccessEdge(5,'y').next);
 
-    CHECK(8  ,acc.AccessEdge(8).id);
-    CHECK('z',acc.AccessEdge(8).from);
-    CHECK('z',acc.AccessEdge(8).to);
-    CHECK(-1 ,acc.AccessEdge(8).next);
+    CHECK(8  ,acc.AccessEdge(8,'z').id);
+    CHECK('z',acc.AccessEdge(8,'z').from);
+    CHECK('z',acc.AccessEdge(8,'z').to);
+    CHECK(-1 ,acc.AccessEdge(8,'z').next);
 }
 
 TEST(EdgeItr_test)
@@ -242,7 +233,7 @@ TEST(EdgeItr_test)
     ACCESS acc ;
     acc.base = &test;
 
-    EdgeItr itr1(acc.AccessEdge(1),acc);
+    EdgeItr itr1(acc.AccessEdge(1,'u'),acc);
     CHECK( 1 , itr1->id );
     CHECK('u', itr1->from);
     CHECK('v', itr1->to);
@@ -257,7 +248,7 @@ TEST(EdgeItr_test)
 
     CHECK( true , (EdgeItr::end() == itr1 ));
 
-    EdgeItr itr2(acc.AccessEdge(8),acc);
+    EdgeItr itr2(acc.AccessEdge(8,'z'),acc);
     CHECK( 8 , itr2->id );
     CHECK('z', itr2->from);
     CHECK('z', itr2->to);

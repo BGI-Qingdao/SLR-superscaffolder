@@ -2,7 +2,8 @@
 #define __ALGORITHM_GRAPH_GRAPH_H__ 
 
 #include <iterator>
-
+#include <map>
+#include <cassert>
 namespace BGIQD {
     namespace GRAPH {
 
@@ -34,19 +35,28 @@ namespace BGIQD {
             };
 
 
-        // Must be specialied before use
-        template<class BaseGraph , class NodeId ,  class EdgeId>
-            struct GraphAccess
+        // Must be implement before use
+        template<class BaseGraph 
+            , class NodeId 
+            , class EdgeId 
+            , class Node1 = GraphNodeBase<NodeId,EdgeId> 
+            , class Edge1 = GraphEdgeBase<NodeId,EdgeId> 
+            >
+            struct GraphAccessBase
             {
                 typedef NodeId                       GraphNodeId ;
                 typedef EdgeId                       GraphEdgeId ;
 
-                typedef GraphNodeBase<NodeId,EdgeId> Node;
-                typedef GraphEdgeBase<NodeId,EdgeId> Edge;
+                typedef Node1                        Node;
+                typedef Edge1                        Edge;
 
-                Node & AccessNode(NodeId);
-                Edge & AccessEdge(EdgeId);
+                Node & AccessNode(NodeId) { assert(0) ; }
+                Edge & AccessEdge(EdgeId , GraphNodeId ){ assert(0); }
 
+                BaseGraph * base ;
+
+                std::map<GraphNodeId , Node > nodes ;
+                std::map<GraphEdgeId , Edge > edges ;
             };
 
         template<class GraphAccess>
@@ -107,7 +117,7 @@ namespace BGIQD {
                     {
                         Id next = curr->next ;
                         if( next != Edge::invalid )
-                            curr = &(accessor->AccessEdge(next));
+                            curr = &(accessor->AccessEdge(next, curr->from));
                         else
                             curr = NULL ;
                     }

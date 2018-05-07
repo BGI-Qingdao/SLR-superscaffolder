@@ -8,9 +8,9 @@
 #include <set>
 #include <functional>
 #include "soap2/kmer.h"
+
 namespace BGIQD {
     namespace SOAP2 {
-
 
         struct ContigRoad
         {

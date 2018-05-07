@@ -7,7 +7,7 @@
 #include <sstream>
 #include <string>
 #include <iostream>
-
+#include <cassert>
 namespace BGIQD{
     namespace GRAPH{
 
@@ -19,7 +19,7 @@ namespace BGIQD{
         //
         //            };
 
-        enum DepthSearchNodeType
+        enum DepthSearchEdgeType
         {
             Invalid = -1 ,
             White = 0 ,
@@ -31,7 +31,7 @@ namespace BGIQD{
             struct DepthSearchNode
             {
                 typedef typename NodeBase::NodeNodeId NodeId;
-                typedef DepthSearchNodeType           Type;
+                typedef DepthSearchEdgeType           Type;
                 Type                                type ;
 
                 NodeId                              id;
@@ -73,41 +73,23 @@ namespace BGIQD{
                     return ost.str();
                 }
             };
-/*
-        template<class EdgeBase>
-            struct DepthSearchEdge
-            {
-                enum Type
-                {
-                    TreeEdge = 0 ,
-                    Backward = 1 ,
-                    Forward = 2 ,
-                    Crossward = 3 ,
-                };
-                Type        type ;
 
-                EdgeBase    base ;
-            };
-*/
-        // Must be specialized before used .
         template<class GraphAccess , class traits>
-            struct DepthSearchPathEndHelper
+            struct DepthSearchPathEndHelperBase
             {
                 typedef typename GraphAccess::GraphNodeId NodeId;
                 typedef typename GraphAccess::GraphEdgeId EdgeId;
                 typedef typename GraphAccess::Node        Node;
                 typedef typename GraphAccess::Edge        Edge;
-
+                typedef GraphAccess                       Access;
                 typedef traits                            traisId;
 
-                void Start() {}
-                void AddNode(const Node & , DepthSearchNodeType ) {} 
-                void AddEdge(const Edge & ) {}
-
-                void PopEdge() {}
-                void PopNode() {}
-
-                bool IsEnd() const ;
+                void Start() {assert(0);}
+                void AddNode(const Node & , DepthSearchEdgeType ) {assert(0);}
+                void AddEdge(const Edge & ) {assert(0);}
+                void PopEdge() {assert(0);}
+                void PopNode() {assert(0);}
+                bool IsEnd() const { assert(0) ;} ;
             };
 
         template<class GraphAccess ,class EdgeItr , class PathEnder>
@@ -127,7 +109,7 @@ namespace BGIQD{
                 std::stack<EdgeItr>                         path;
                 GraphAccess                                 accesser;
                 PathEnder                                   ender;
-                
+
                 void PrintNodes() const
                 {
                     for( auto & i : nodes )
@@ -148,7 +130,7 @@ namespace BGIQD{
                 int DoDepthSearch(NodeId start , int s_step )
                 {
                     int step = s_step;
-                    NodeBase root = accesser.AccessNode(start);
+                    NodeBase & root = accesser.AccessNode(start);
                     Node & curr = nodes[start];
                     //curr.base = root ;
                     curr.id = start ;
@@ -156,7 +138,7 @@ namespace BGIQD{
                     curr.type = Node::Type::White;
                     curr.prev = Node::invalid ;
 
-                    path.push(EdgeItr(accesser.AccessEdge(root.edge_id) , accesser));
+                    path.push(EdgeItr(accesser.AccessEdge(root.edge_id , root.id) , accesser));
                     //ender.AddEdge(accesser.AccessEdge(root.edge_id));
                     ender.Start();
                     bool new_node_in_path = true ;
@@ -249,10 +231,11 @@ namespace BGIQD{
 
                         auto & next_node = accesser.AccessNode( next_node_id) ;
                         EdgeId next_edge_id = next_node.edge_id;
-                        path.push(EdgeItr(accesser.AccessEdge(next_edge_id) , accesser));
-                        //path.push(curr_node_id);
-                        EdgeBase next_edge = accesser.AccessEdge( next_edge_id ) ;
+                        EdgeBase & next_edge = accesser.AccessEdge( next_edge_id ,next_node_id) ;
+
+                        path.push(EdgeItr(next_edge, accesser));
                         ender.AddEdge(next_edge);
+
                         new_node_in_path = true ;
                         ++ itr ;
                     }
