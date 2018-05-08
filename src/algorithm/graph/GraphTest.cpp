@@ -149,8 +149,8 @@ struct Ender1 : public BGIQD::GRAPH::DepthSearchPathEndHelperBase<ACCESS, traits
     {
         clean();
     }
-    void AddNode(const Node & , BGIQD::GRAPH::DepthSearchEdgeType type) {
-        pre_type = type ;
+    void AddNode(const Node & , const DNode & dnode) {
+        pre_type =dnode.type ;
     }
     void AddEdge(const Edge & ) {
         clean();
@@ -182,7 +182,7 @@ struct Ender2 : public BGIQD::GRAPH::DepthSearchPathEndHelperBase<ACCESS, traits
     {
         clean();
     }
-    void AddNode(const Node &n , BGIQD::GRAPH::DepthSearchEdgeType ) {
+    void AddNode(const Node &n , const DNode & ) {
         if( now != -1 )
         {
             ids.insert( now ) ;

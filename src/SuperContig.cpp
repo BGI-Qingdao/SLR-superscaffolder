@@ -169,17 +169,18 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
     typedef BGIQD::GRAPH::DepthSearch<
         BGIQD::SOAP2::GraphEA_Access,
         EdgeItr,
-        BGIQD::SOAP2::DepthSearchEAEnder> Searcher;
+        BGIQD::SOAP2::DepthSearchEAEnder,
+        BGIQD::SOAP2::DNode_EA> Searcher;
 
-    Searcher seacher;
-    seacher.accesser.base = &config.graph_ea ;
-    seacher.ender.Init( key , max_length , -1 );
+    Searcher searcher;
+    searcher.accesser.base = &config.graph_ea ;
+    searcher.ender.Init( key , max_length , -1 );
 
-    seacher.DoDepthSearch(path_i , 1 );
+    searcher.DoDepthSearch(path_i , 1 );
     index ++ ;
     //auto mid_map = get_mid_min( mids );
     //for(auto & j : paths)
-    for ( auto & j : seacher.ender.founder )
+    for ( auto & j : searcher.ender.founder )
     {
         /*std::cerr<<j.first<<'\t'<<j.second[0].size()<<'\t';
           while( j.second[0].size() > 0 )
@@ -195,7 +196,6 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
         //unsigned int to_id_in_path = a_path.front().id ;
         //unsigned int to_id_in_path = j.second ;
         //int length  = get_min_length_v2(j.second , mid_map);
-        int length  = 0; 
         auto & curr_from = config.key_array[config.key_map.at(is_bal ? bal_i : path_i) ];
         auto & curr_to = config.key_array[config.key_map[to_id]];
         //if( ! is_bal && curr_from.to.find( to_id_in_path )  != curr_from.to.end () )
@@ -226,6 +226,7 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
         //
         if( ! is_bal && j.second.base )
         {
+            int length  = searcher.nodes.at(to_id).path_length;
             {
                 std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[path_i]]);
                 BGIQD::SOAP2::KeyConn conn{to_id,length,0,sim};
@@ -246,6 +247,7 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
         //else if( !is_bal && to_id != to_id_in_path )
         if( ! is_bal && j.second.bal)
         {
+            int length  = searcher.nodes.at(curr_to.bal_id).path_length;
             {
                 std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[path_i]]);
                 BGIQD::SOAP2::KeyConn conn{to_id,length,0, sim};
@@ -264,6 +266,7 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
         //else if ( is_bal && to_id == to_id_in_path )
         if ( is_bal && j.second.base )
         {
+            int length  = searcher.nodes.at(to_id).path_length;
             {
                 std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[bal_i]]);
                 BGIQD::SOAP2::KeyConn conn{to_id,length,0, sim};
@@ -282,6 +285,7 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
         //else
         if ( is_bal && j.second.bal )
         {
+            int length  = searcher.nodes.at(curr_to.bal_id).path_length;
             {
                 std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[bal_i]]);
                 BGIQD::SOAP2::KeyConn conn{to_id,length,0, sim};

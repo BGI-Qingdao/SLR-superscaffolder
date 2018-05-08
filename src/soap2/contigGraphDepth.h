@@ -4,6 +4,7 @@
 #include "algorithm/graph/DepthSearch.h"
 #include "algorithm/graph/Graph.h"
 #include "soap2/contigGraph.h"
+
 namespace BGIQD{
     namespace SOAP2{
 
@@ -12,9 +13,35 @@ namespace BGIQD{
             int length ;
         };
 
+
         struct DNode_EA : public BGIQD::GRAPH::DepthSearchNode<Node_EA>
         {
             int path_length ;
+            void ReSetParent(const Node & me,const DNode_EA & parenet,int step_start )
+            {
+                BGIQD::GRAPH::DepthSearchNode<Node_EA>::ReSetParent(me,parenet ,step_start);
+                if( parenet.id == invalid )
+                {
+                    path_length = 0 ;
+                }
+                else
+                {
+                    path_length = parenet.path_length + me.length ;
+                }
+            }
+
+            void Init(const Node & me,const DNode_EA & parenet,int step_start )
+            {
+                BGIQD::GRAPH::DepthSearchNode<Node_EA>::Init(me,parenet ,step_start);
+                if( parenet.id == invalid )
+                {
+                    path_length = 0 ;
+                }
+                else
+                {
+                    path_length = parenet.path_length + me.length ;
+                }
+            }
         };
 
         struct GraphEA_Access : public BGIQD::GRAPH::GraphAccessBase<
@@ -48,7 +75,6 @@ namespace BGIQD{
                 static Edge none;
                 if( i == Edge::invalid )
                 {
-                    assert(0);
                     none.id = Edge::invalid ;
                     none.from = from ; 
                     none.to = 0 ;
@@ -81,17 +107,22 @@ namespace BGIQD{
             public BGIQD::GRAPH::DepthSearchPathEndHelperBase<
                             GraphEA_Access 
                             , traits_search_node
+                            , DNode_EA
                             >
         {
             private:
+
                 int curr_length ;
+
                 int curr_depth ;
+
                 bool ender_flag ;
 
                 int max_length ;
+
                 int max_depth ;
 
-                std::stack<Node> nodes;
+                std::stack<DNode> nodes;
 
             public:
 
@@ -131,16 +162,28 @@ namespace BGIQD{
                     ender_flag = false;
                 }
 
-                void AddNode(const Node & node , BGIQD::GRAPH::DepthSearchEdgeType ) 
+                void AddNode(const Node & node , const DNode & dnode ) 
                 {
                     if( nodes.empty() )
                     {
-                        nodes.push(node);
+                        nodes.push(dnode);
                         return ;
                     }
-                    nodes.push(node) ;
+                    if( dnode.type != BGIQD::GRAPH::DepthSearchEdgeType::White )
+                    {
+                        // check if this is a shorter path
+                        if( dnode.path_length - node.length > nodes.top().path_length )
+                        {
+                            ;
+                        }
+                        else
+                        {
+                            ender_flag = true ;
+                        }
+                    }
+                    nodes.push(dnode) ;
                     curr_depth ++ ;
-                    curr_length += node.length ;
+                    curr_length = dnode.path_length;
                     if ( max_depth != -1 && curr_depth > max_depth )
                     {
                         ender_flag = true ;
@@ -195,10 +238,12 @@ namespace BGIQD{
                     }
                     else
                     {
-                        auto & t = nodes.top() ;
                         curr_depth -- ;
-                        curr_length -= t.length ;
                         nodes.pop();
+                        if(! nodes.empty() )
+                            curr_length = nodes.top().path_length ;
+                        else
+                            curr_depth = 0 ;
                     }
                     assert( curr_depth >= 0 );
                     assert( curr_length>= 0 );
