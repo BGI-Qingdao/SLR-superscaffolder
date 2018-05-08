@@ -27,6 +27,25 @@ namespace BGIQD{
             Black = 2 ,
             EndPoint  = 3 ,
         };
+
+        template<class GraphAccess , class traits>
+            struct DepthSearchPathEndHelperBase
+            {
+                typedef typename GraphAccess::GraphNodeId NodeId;
+                typedef typename GraphAccess::GraphEdgeId EdgeId;
+                typedef typename GraphAccess::Node        Node;
+                typedef typename GraphAccess::Edge        Edge;
+                typedef GraphAccess                       Access;
+                typedef traits                            traisId;
+
+                void Start() {assert(0);}
+                void AddNode(const Node & , DepthSearchEdgeType ) {assert(0);}
+                void AddEdge(const Edge & ) {assert(0);}
+                void PopEdge() {assert(0);}
+                void PopNode() {assert(0);}
+                bool IsEnd() const { assert(0) ;} ;
+            };
+
         template<class NodeBase>
             struct DepthSearchNode
             {
@@ -52,7 +71,30 @@ namespace BGIQD{
                     prev = invalid ;
                     first_found = -1 ;
                     finish_search = -1 ;
+
+                    backword_from.clear();
+                    forword_from.clear();
+                    cross_from.clear();
+
                 }
+
+                template <class PathEnder>
+                void ReSetParent(NodeId pre ,int step_start , PathEnder )
+                {
+                    prev = pre ;
+                    first_found = step_start ;
+                    type = White ;
+                    //TODO : reset edges
+                }
+
+                template <class PathEnder>
+                    void Init(NodeId i , NodeId p , int step_start , PathEnder)
+                    {
+                        type = White ;
+                        prev = p;
+                        id = i ;
+                        first_found =  step_start ;
+                    }
 
                 std::string ToString() const {
                     std::ostringstream ost;
@@ -74,33 +116,18 @@ namespace BGIQD{
                 }
             };
 
-        template<class GraphAccess , class traits>
-            struct DepthSearchPathEndHelperBase
-            {
-                typedef typename GraphAccess::GraphNodeId NodeId;
-                typedef typename GraphAccess::GraphEdgeId EdgeId;
-                typedef typename GraphAccess::Node        Node;
-                typedef typename GraphAccess::Edge        Edge;
-                typedef GraphAccess                       Access;
-                typedef traits                            traisId;
-
-                void Start() {assert(0);}
-                void AddNode(const Node & , DepthSearchEdgeType ) {assert(0);}
-                void AddEdge(const Edge & ) {assert(0);}
-                void PopEdge() {assert(0);}
-                void PopNode() {assert(0);}
-                bool IsEnd() const { assert(0) ;} ;
-            };
-
-        template<class GraphAccess ,class EdgeItr , class PathEnder>
+        template<class GraphAccess
+            , class EdgeItr
+            , class PathEnder
+            , class DepthNode = DepthSearchNode<typename GraphAccess::Node > >
             struct DepthSearch
             {
                 typedef typename GraphAccess::GraphNodeId   NodeId;
                 typedef typename GraphAccess::GraphEdgeId   EdgeId;
                 typedef typename GraphAccess::Node          NodeBase;
                 typedef typename GraphAccess::Edge          EdgeBase;
-                typedef DepthSearchNode<NodeBase>           Node;
-//              typedef DepthSearchEdge<EdgeBase>           Edge;
+                typedef DepthNode                           Node;
+                //              typedef DepthSearchEdge<EdgeBase>           Edge;
 
                 NodeId                                      start;
 
@@ -142,6 +169,7 @@ namespace BGIQD{
                     //ender.AddEdge(accesser.AccessEdge(root.edge_id));
                     ender.Start();
                     bool new_node_in_path = true ;
+                    NodeId prev ;
                     while ( ! path.empty() )
                     {
                         auto & itr = path.top() ;
@@ -157,6 +185,8 @@ namespace BGIQD{
                             top.finish_search = step ;
                             path.pop() ;
                             new_node_in_path = false ;
+                            ender.PopEdge();
+                            ender.PopNode();
                             continue ;
                         }
 
@@ -191,6 +221,11 @@ namespace BGIQD{
                                 continue ;
                             }
 
+                            if(  top.type != Node::Type::White )
+                            {
+                                step ++ ;
+                                top.ReSetParent(prev, step , ender);
+                            }
                             //in path now , force make it Gray !!!
                             top.type = Node::Type::Gray ;
                         }
@@ -202,11 +237,12 @@ namespace BGIQD{
                             step ++ ;
                             // white node alloc 
                             auto & next_node = nodes[next_node_id] ;
-                            next_node.id = next_node_id;
-                            next_node.type = Node::Type::White ;
-                            next_node.first_found = step ;
-                            next_node.prev = top.id ;
+                            //next_node.id = next_node_id;
+                            //next_node.type = Node::Type::White ;
+                            //next_node.first_found = step ;
+                            //next_node.prev = top.id ;
 
+                            next_node.Init( next_node_id , top.id , step , ender); 
                         }
                         else
                         {
@@ -228,7 +264,7 @@ namespace BGIQD{
                                 }
                             }
                         }
-
+                        prev = top.id ;
                         auto & next_node = accesser.AccessNode( next_node_id) ;
                         EdgeId next_edge_id = next_node.edge_id;
                         EdgeBase & next_edge = accesser.AccessEdge( next_edge_id ,next_node_id) ;

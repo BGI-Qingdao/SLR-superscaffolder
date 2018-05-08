@@ -140,13 +140,14 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
             ,max_length
             );
     */
+
     auto key = [neibs, &config] (unsigned int id)
     {
         auto & node = config.edge_array[id] ;
         auto & node_bal = config.edge_array[node.bal_id];
         if( ! node.IsKey() && !node_bal.IsKey() )
         {
-            return BGIQD::SOAP2::DepthSearchEAEnder::NodeType::Key_Neibs ;
+            return BGIQD::SOAP2::DepthSearchEAEnder::NodeType::Normal ;
         }
         if ( node.IsKey() )
         {
@@ -178,10 +179,10 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
     index ++ ;
     //auto mid_map = get_mid_min( mids );
     //for(auto & j : paths)
-    for( auto & j : seacher.ender.founder)
+    for ( auto & j : seacher.ender.founder )
     {
         /*std::cerr<<j.first<<'\t'<<j.second[0].size()<<'\t';
-          while(j.second[0].size() > 0 )
+          while( j.second[0].size() > 0 )
           {
           std::cerr<<j.second[0].top().id<<"\t";
           j.second[0].pop();
@@ -223,7 +224,7 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
         //  A1->B1
         //  A2<-B2
         //
-        if( !is_bal && j.second.base )
+        if( ! is_bal && j.second.base )
         {
             {
                 std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[path_i]]);
@@ -243,7 +244,7 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
         // A2<-B1
         //
         //else if( !is_bal && to_id != to_id_in_path )
-        else if( !is_bal && j.second.bal)
+        if( ! is_bal && j.second.bal)
         {
             {
                 std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[path_i]]);

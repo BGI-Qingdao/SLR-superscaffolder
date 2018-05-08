@@ -72,7 +72,10 @@ namespace BGIQD {
                 EdgeIterator(const Edge & e , GraphAccess & acc )
                 {
                     node_id = e.from;
-                    curr = &e;
+                    if( e.id != Edge::invalid )
+                        curr = &e;
+                    else
+                        curr = NULL ;
                     accessor = &acc ;
                 }
 

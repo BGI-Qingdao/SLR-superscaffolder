@@ -12,6 +12,10 @@ namespace BGIQD{
             int length ;
         };
 
+        struct DNode_EA : public BGIQD::GRAPH::DepthSearchNode<Node_EA>
+        {
+            int path_length ;
+        };
 
         struct GraphEA_Access : public BGIQD::GRAPH::GraphAccessBase<
                                 BGIQD::SOAP2::GraphEA
@@ -28,7 +32,11 @@ namespace BGIQD{
                     auto & n = nodes[i] ;
                     auto & e = (*base).edge_array[i] ;
                     n.id = e.id ;
-                    n.edge_id = e.arc - base->arc_array;
+                    assert( e.id >= 0 );
+                    if( e.arc != NULL )
+                        n.edge_id= e.arc- base->arc_array;
+                    else
+                        n.edge_id = Edge::invalid ;
                     n.length = e.length ;
                     return n;
                 }
@@ -37,7 +45,17 @@ namespace BGIQD{
 
             Edge & AccessEdge(GraphEdgeId i , GraphNodeId from)
             {
-                auto itr = edges.find(i); 
+                static Edge none;
+                if( i == Edge::invalid )
+                {
+                    assert(0);
+                    none.id = Edge::invalid ;
+                    none.from = from ; 
+                    none.to = 0 ;
+                    none.next = Edge::invalid ;
+                    return none ;
+                }
+                auto itr = edges.find(i);
                 if( itr == edges.end() )
                 {
                     auto & n = edges[i] ;
@@ -45,7 +63,10 @@ namespace BGIQD{
                     n.id = i ;
                     n.from = from;
                     n.to   = base_edge.to;
-                    n.next = base_edge.next - base->arc_array;
+                    if( base_edge.next != NULL )
+                        n.next = base_edge.next - base->arc_array;
+                    else
+                        n.next = Edge::invalid ;
                     return n;
                 }
                 return itr->second ;
@@ -112,6 +133,12 @@ namespace BGIQD{
 
                 void AddNode(const Node & node , BGIQD::GRAPH::DepthSearchEdgeType ) 
                 {
+                    if( nodes.empty() )
+                    {
+                        nodes.push(node);
+                        return ;
+                    }
+                    nodes.push(node) ;
                     curr_depth ++ ;
                     curr_length += node.length ;
                     if ( max_depth != -1 && curr_depth > max_depth )
@@ -164,13 +191,14 @@ namespace BGIQD{
                     ender_flag  =  false ;
                     if( nodes.empty() )
                     {
-                        assert(0);
+                        //assert(0);
                     }
                     else
                     {
                         auto & t = nodes.top() ;
                         curr_depth -- ;
                         curr_length -= t.length ;
+                        nodes.pop();
                     }
                     assert( curr_depth >= 0 );
                     assert( curr_length>= 0 );

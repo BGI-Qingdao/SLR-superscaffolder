@@ -173,6 +173,56 @@ struct Ender1 : public BGIQD::GRAPH::DepthSearchPathEndHelperBase<ACCESS, traits
 };
 
 
+/*
+ * Full depth search . END ONLY AT CIRCLE
+ */
+struct Ender2 : public BGIQD::GRAPH::DepthSearchPathEndHelperBase<ACCESS, traits_2>
+{
+    void Start() 
+    {
+        clean();
+    }
+    void AddNode(const Node &n , BGIQD::GRAPH::DepthSearchEdgeType ) {
+        if( now != -1 )
+        {
+            ids.insert( now ) ;
+            s.push( now );
+        }
+        now = n.id ;
+    }
+    void AddEdge(const Edge & ) {
+
+    }
+
+    void PopEdge() {
+
+    }
+
+    void PopNode() {
+        if( now != -1 )
+            now = -1 ;
+        else
+        {
+            NodeId prev = s.top() ;
+            s.pop() ;
+            ids.erase(prev);
+        }
+    }
+
+    bool IsEnd() const {
+        return now != -1 && ids.find( now ) != ids.end () ;
+    }
+
+    private:
+    NodeId now ;
+    void clean()
+    {
+        now = -1;
+    }
+    std::set<NodeId> ids;
+    std::stack<NodeId> s;
+};
+
 TEST(GraphAccessNode)
 {
     auto test = TestGraph::GetTestGraph() ;
@@ -259,6 +309,8 @@ TEST(EdgeItr_test)
 }
 
 typedef BGIQD::GRAPH::DepthSearch<ACCESS,EdgeItr,Ender1> Searcher1;
+typedef BGIQD::GRAPH::DepthSearch<ACCESS,EdgeItr,Ender2> Searcher2;
+
 TEST(GraphDepthSearch_test)
 {
     auto test = TestGraph::GetTestGraph() ;
@@ -300,5 +352,49 @@ TEST(GraphDepthSearch_test)
     CHECK(true , (z.backword_from.find('z') != z.backword_from.end()) )
 
 
+    s1.PrintNodes();
+}
+
+TEST(GraphDepthSearch_test_1)
+{
+    auto test = TestGraph::GetTestGraph() ;
+    ACCESS acc ;
+    acc.base = & test ;
+    Searcher2 s1;
+    s1.accesser = acc ;
+    Ender2 ender ;
+    s1.ender = ender;
+    int end = s1.DoDepthSearch('u',1);
+    s1.DoDepthSearch('w',end+1);
+/*    auto & u = s1.nodes.at('u');
+    auto & v = s1.nodes.at('v');
+    auto & w = s1.nodes.at('w');
+    auto & x = s1.nodes.at('x');
+    auto & y = s1.nodes.at('y');
+    auto & z = s1.nodes.at('z');
+
+    CHECK(1,u.first_found);
+    CHECK(8,u.finish_search);
+
+    CHECK(2,v.first_found);
+    CHECK(7,v.finish_search);
+    CHECK(true , (v.backword_from.find('x') != v.backword_from.end()) )
+
+    CHECK(3,y.first_found);
+    CHECK(6,y.finish_search);
+    CHECK(true , (y.cross_from.find('w') != y.cross_from.end()) )
+
+    CHECK(4,x.first_found);
+    CHECK(5,x.finish_search);
+    CHECK(true , (x.forword_from.find('u') != z.forword_from.end()) )
+
+    CHECK(9, w.first_found);
+    CHECK(12,w.finish_search);
+
+    CHECK(10,z.first_found);
+    CHECK(11,z.finish_search);
+    CHECK(true , (z.backword_from.find('z') != z.backword_from.end()) )
+
+*/
     s1.PrintNodes();
 }
