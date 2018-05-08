@@ -30,6 +30,12 @@ namespace BGIQD{
                 }
             }
 
+            void InitRoot(const Node & me,int step_start )
+            {
+                BGIQD::GRAPH::DepthSearchNode<Node_EA>::InitRoot(me,step_start);
+                path_length = 0 ;
+            }
+
             void Init(const Node & me,const DNode_EA & parenet,int step_start )
             {
                 BGIQD::GRAPH::DepthSearchNode<Node_EA>::Init(me,parenet ,step_start);
@@ -72,9 +78,9 @@ namespace BGIQD{
 
             Edge & AccessEdge(GraphEdgeId i , GraphNodeId from)
             {
-                static Edge none;
                 if( i == Edge::invalid )
                 {
+                    auto & none = edges_ends[from]; 
                     none.id = Edge::invalid ;
                     none.from = from ; 
                     none.to = 0 ;

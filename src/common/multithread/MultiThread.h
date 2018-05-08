@@ -18,6 +18,7 @@ struct Thread
                 break;
             else
             {
+                std::cerr<<"run 1  ... "<<std::endl;
                 top.second();
             }
         }

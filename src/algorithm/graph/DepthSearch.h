@@ -70,6 +70,13 @@ namespace BGIQD{
                     //TODO : reset edges
                 }
 
+                void InitRoot(const Node & me,int step_start )
+                {
+                    type = White ;
+                    prev = invalid;
+                    id = me.id;
+                    first_found =  step_start ;
+                }
                 void Init(const Node & me,const DepthSearchNode & parenet,int step_start )
                 {
                     type = White ;
@@ -161,11 +168,8 @@ namespace BGIQD{
                     int step = s_step;
                     NodeBase & root = accesser.AccessNode(start);
                     Node & curr = nodes[start];
-                    //curr.base = root ;
-                    curr.id = start ;
-                    curr.first_found = step ; // 0 as root ;
-                    curr.type = Node::Type::White;
-                    curr.prev = Node::invalid ;
+
+                    curr.InitRoot(root,step);
 
                     path.push(EdgeItr(accesser.AccessEdge(root.edge_id , root.id) , accesser));
                     //ender.AddEdge(accesser.AccessEdge(root.edge_id));
@@ -175,8 +179,16 @@ namespace BGIQD{
                     while ( ! path.empty() )
                     {
                         auto & itr = path.top() ;
-                        Node & top = nodes.at( itr.node_id) ;
-
+                        Node * test ;
+                        try {
+                            Node & top = nodes.at( itr.node_id ) ;
+                            test = &top;
+                        }
+                        catch(...)
+                        {
+                            assert(0);
+                        }
+                        Node & top = *test;
                         if( itr == EdgeItr::end() )
                         {
                             step ++ ;
@@ -226,7 +238,13 @@ namespace BGIQD{
                             if( top.type != Node::Type::White )
                             {
                                 step ++ ;
-                                top.ReSetParent( accesser.AccessNode(top.id) , nodes.at(prev), step );
+                                try {
+                                    top.ReSetParent( accesser.AccessNode(top.id) , nodes.at(prev), step );
+                                }
+                                catch(...)
+                                {
+                                    assert(0);
+                                }
                             }
                             //in path now , force make it Gray !!!
                             top.type = Node::Type::Gray ;
@@ -239,11 +257,6 @@ namespace BGIQD{
                             step ++ ;
                             // white node alloc 
                             auto & next_node = nodes[next_node_id] ;
-                            //next_node.id = next_node_id;
-                            //next_node.type = Node::Type::White ;
-                            //next_node.first_found = step ;
-                            //next_node.prev = top.id ;
-
                             next_node.Init( accesser.AccessNode(next_node_id) , top, step );
                         }
                         else

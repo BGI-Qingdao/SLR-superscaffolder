@@ -57,6 +57,7 @@ namespace BGIQD {
 
                 std::map<GraphNodeId , Node > nodes ;
                 std::map<GraphEdgeId , Edge > edges ;
+                std::map<GraphNodeId , Edge > edges_ends;
             };
 
         template<class GraphAccess>
