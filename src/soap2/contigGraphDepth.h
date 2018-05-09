@@ -11,6 +11,14 @@ namespace BGIQD{
         struct Node_EA : public BGIQD::GRAPH::GraphNodeBase<unsigned int , long>
         {
             int length ;
+            enum EndType 
+            {
+                Unknow = 0 ,
+                KeyEnd = 1 ,
+                MaxLength = 2 ,
+                MaxDepth = 3 ,
+            } ;
+            EndType type ;
         };
 
 

@@ -374,13 +374,34 @@ namespace BGIQD{
             {
                 std::istringstream ist(line);
                 ist>>contigId;
-                while(! ist.eof() )
+                while( ! ist.eof() )
                 {
+                    // make sure are list are sorted by to id .
                     ist>>to>>cov;
                     arc_array[index].to = to;
                     arc_array[index].cov = cov;
-                    arc_array[index].next = edge_array[contigId].arc;
-                    edge_array[contigId].arc = &arc_array[index];
+
+                    auto & node = edge_array[contigId] ;
+
+                    if (node.arc == NULL ||  to <=  node.arc->to )
+                    {
+                        arc_array[index].next = edge_array[contigId].arc;
+                        edge_array[contigId].arc = &arc_array[index];
+                    }
+                    else
+                    {
+                        Arc ** prev = &node.arc ;
+                        Arc * curr = node.arc ;
+                        while( curr != NULL )
+                        {
+                            if( curr->to <= to ) 
+                                break ;
+                            prev = &(curr->next );
+                            curr = curr->next ;
+                        }
+                        arc_array[index].next = curr ;
+                        *prev = &arc_array[index];
+                    }
                     index ++ ;
                 }
             }
