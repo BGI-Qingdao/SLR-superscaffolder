@@ -11,11 +11,11 @@ namespace BGIQD{
             {
                 typedef BiList * BiListPtr ;
                 typedef T *      ContainerPtr;
-                volatile BiListPtr left;
-                volatile BiListPtr right;
-                const T * self;
+                BiListPtr left;
+                BiListPtr right;
+                T * self;
 
-                void Init(const T * s) 
+                void Init(T * s) 
                 {
                     left = this;
                     right = this;

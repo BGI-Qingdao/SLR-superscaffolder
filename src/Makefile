@@ -63,7 +63,8 @@ test_cpp   =	test.cpp\
 				biocommon/sam_bam/sam_parser_test.cpp\
 				common/args/argsparser_test.cpp\
 				algorithm/graph/GraphTest.cpp\
-				algorithm/bi_list/bi_list_test.cpp
+				algorithm/bi_list/bi_list_test.cpp\
+				algorithm/fibheap/fib_heap_test.cpp\
 
 
 source_o					= ${source_cpp:%.cpp=%.o}

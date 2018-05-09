@@ -13,19 +13,23 @@ namespace BGIQD {
             struct Node
             {
                 typedef TKey Key;
+
                 typedef TValue Value ;
+
                 typedef BGIQD::BILIST::BiList<Node> BiList;
 
-                volatile Node * father;
+                Node * father;
 
-                volatile Node * son;
+                Node * son;
 
                 BiList list;
 
                 Key    key;
+
                 Value  value;
 
                 bool   mark;
+
                 int    degree ;
 
                 void Init() 
@@ -45,7 +49,7 @@ namespace BGIQD {
                         son = &child ;
                     else
                     {
-                        son->list.Insert(child.list);
+                        son->list.Insert(&child.list);
                         child.father = this ;
                     }
                 }
@@ -72,13 +76,14 @@ namespace BGIQD {
 
                 Node & Next()
                 {
-                    return *(list.Forward().self);
+                    return *(list.Forward()->self);
                 }
 
                 Node & Last()
                 {
-                    return *(list.Backword().self);
+                    return *(list.Backword()->self);
                 }
+
                 void DeleteMe()
                 {
                     list.DeleteMe();
@@ -86,7 +91,7 @@ namespace BGIQD {
 
                 void Insert( Node & node )
                 {
-                    list.Insert(node.list);
+                    list.Insert(&node.list);
                 }
             };
 
@@ -175,8 +180,8 @@ namespace BGIQD {
                 Node & ExtractMin()
                 {
                     assert( min ) ;
-                    auto & z = min ;
-                    if( z.son != NULL )
+                    auto & z = *min ;
+                    if ( z.son != NULL )
                     {
                         Node * son = z.son ;
                         do
@@ -185,7 +190,7 @@ namespace BGIQD {
                             son = &(son->Next());
                         }
                         while( son != z.son );
-                        min->Insert(z.son);
+                        min->Insert(*z.son);
                     }
                     if( z.IsSingle() )
                         min = NULL ;
@@ -198,6 +203,11 @@ namespace BGIQD {
                     }
                     n -- ;
                     return z;
+                }
+
+                bool Empty()
+                {
+                    return n == 0;
                 }
 
                 protected:
@@ -232,6 +242,7 @@ namespace BGIQD {
                         Node * y;
                         Node * x;
                     };
+
                     void Consolidate() 
                     {
                         assert( min ) ;
@@ -241,7 +252,7 @@ namespace BGIQD {
                         if ( min->IsSingle() )
                             return ;
                         Node * a_son = min ;
-                        Node * last = min->Last();
+                        Node * last = &(min->Last());
 
                         std::vector<DelayHeapLinkInfo> delayinfos;
                         do
@@ -256,7 +267,8 @@ namespace BGIQD {
                                 if ( x->key > y->key )
                                     std::swap(x,y);
                                 //HeapLink(y,x);
-                                delayinfos.emplace_back( y , x );
+                                DelayHeapLinkInfo tmp{ y , x } ;
+                                delayinfos.emplace_back( tmp );
                                 A[d] = NULL ;
                                 d = d + 1 ;
                             }
@@ -276,18 +288,21 @@ namespace BGIQD {
                             if( A[i]->key < min->key )
                                 min = A[i] ;
                         }
+
                     }
 
                     void HeapLink(Node * y , Node * x )
                     {
                         assert( x != NULL && y != NULL );
-                        assert( x->father = NULL && y->father == NULL );
-                        y->RemoveMe();
-                        x->AddChild(y);
+                        assert( x->father== NULL && y->father == NULL );
+                        y->DeleteMe();
+                        x->AddChild(*y);
                         y->mark = false ;
                     }
             };
+
     }
+
 }
 
 #endif //__ALGORITHM_FIBHEAP_H__
