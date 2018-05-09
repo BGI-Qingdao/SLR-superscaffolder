@@ -23,7 +23,7 @@ TEST(BiListInsert)
     list[0].Insert(&list[5]);
     // Left first
     //print 9 8 7 6 5 4 3 2 1 0
-    auto ptr = list[0].right; ;
+    auto ptr = list[0].Backword(); ;
     int i =  9;
     while(true)
     {
@@ -32,12 +32,12 @@ TEST(BiListInsert)
        i -- ;
        if( ptr == &list[0] )
            break;
-       ptr = ptr->right ;
+       ptr = ptr->Backword();
     }
     std::cerr<<std::endl;
     // Right second
     //print 1 2 3 4 5 6 7 8 9 0
-    ptr = list[0].left ;
+    ptr = list[0].Forward() ;
     i =  1;
     while(true)
     {
@@ -48,7 +48,7 @@ TEST(BiListInsert)
            i = 0 ;
        if( ptr == &list[0] )
            break;
-       ptr = ptr->left;
+       ptr = ptr->Forward();
     }
     std::cerr<<std::endl;
 }
@@ -70,7 +70,7 @@ TEST(BiListDel)
     list[7].DeleteMe();
     //Left first
     //print 9 8 6 5 4 3 2 1
-    auto ptr = list[1].right; 
+    auto ptr = list[1].Backword(); 
     int i =  9;
     while( true )
     {
@@ -81,12 +81,12 @@ TEST(BiListDel)
            i -- ;
        if( ptr == &list[1] )
            break;
-       ptr = ptr->right ;
+       ptr = ptr->Backword() ;
     }
     std::cerr<<std::endl;
     //Right second
     //print 2 3 4 5 6 8 9 1
-    ptr = list[1].left; 
+    ptr = list[1].Forward(); 
     i =  2;
     while( true )
     {
@@ -99,7 +99,7 @@ TEST(BiListDel)
            i = 1 ;
        if( ptr == &list[1] )
            break;
-       ptr = ptr->left;
+       ptr = ptr->Forward();
     }
     std::cerr<<std::endl;
 }

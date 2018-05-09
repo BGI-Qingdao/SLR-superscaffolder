@@ -11,8 +11,8 @@ namespace BGIQD{
             {
                 typedef BiList * BiListPtr ;
                 typedef T *      ContainerPtr;
-                BiListPtr left;
-                BiListPtr right;
+                volatile BiListPtr left;
+                volatile BiListPtr right;
                 const T * self;
 
                 void Init(const T * s) 
@@ -22,6 +22,16 @@ namespace BGIQD{
                     self = s ;
                 }
 
+                // first
+                //   * assume this as the root of bi-list ,
+                //   * assume left is the forward order ,
+                //   * so that the right node of this is the end of bi-list ,
+                //
+                // second
+                //
+                //   * always insert node at end of bi-list ,
+                // so
+                //   let node be the left of this's right node !
                 void Insert( BiListPtr node)
                 {
                     assert( node != NULL );
@@ -36,7 +46,6 @@ namespace BGIQD{
                     B->right->left = A ;
                     A->right = br ;
                     B->right= ar ;
-
                 }
 
                 void DeleteMe() 
@@ -53,7 +62,24 @@ namespace BGIQD{
                     }
                     Init(self);
                 }
+
+                bool Single() const 
+                {
+                    return left == this && right == this ;
+                }
+
+                BiListPtr Forward()
+                {
+                    return left;
+                }
+
+                BiListPtr Backword()
+                {
+                    return right;
+                }
+
             };
+
     }
 }
 #endif //__ALGORITHM_BILIST_BILIST_H__
