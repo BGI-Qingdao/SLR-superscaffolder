@@ -120,7 +120,6 @@ namespace BGIQD{
 
                 int curr_length ;
 
-                int curr_depth ;
 
                 bool ender_flag ;
 
@@ -128,9 +127,12 @@ namespace BGIQD{
 
                 int max_depth ;
 
-                std::stack<DNode> nodes;
 
             public:
+
+                std::stack<DNode> nodes;
+
+                int curr_depth ;
 
                 enum NodeType
                 {
@@ -170,15 +172,18 @@ namespace BGIQD{
 
                 void AddNode(const Node & node , const DNode & dnode ) 
                 {
-                    if( nodes.empty() )
+                    nodes.push(dnode) ;
+                    curr_depth ++ ;
+                    if( nodes.size() == 1)
                     {
-                        nodes.push(dnode);
+                        curr_length = 0 ;
                         return ;
                     }
+
                     if( dnode.type != BGIQD::GRAPH::DepthSearchEdgeType::White )
                     {
                         // check if this is a shorter path
-                        if( dnode.path_length - node.length > nodes.top().path_length )
+                        if( dnode.path_length  > nodes.top().path_length - node.length )
                         {
                             ;
                         }
@@ -187,19 +192,8 @@ namespace BGIQD{
                             ender_flag = true ;
                         }
                     }
-                    nodes.push(dnode) ;
-                    curr_depth ++ ;
+
                     curr_length = dnode.path_length;
-                    if ( max_depth != -1 && curr_depth > max_depth )
-                    {
-                        ender_flag = true ;
-                        return ;
-                    }
-                    if ( max_length != -1 && curr_length > max_length )
-                    {
-                        ender_flag = true ;
-                        return ;
-                    }
 
                     auto ret =  keyer(node.id);
                     if( ret == NodeType::Unknow )
@@ -208,6 +202,16 @@ namespace BGIQD{
                     }
                     if( ret == NodeType::Normal ) 
                     {
+                        if ( max_depth != -1 && curr_depth > max_depth )
+                        {
+                            ender_flag = true ;
+                            return ;
+                        }
+                        if ( max_length != -1 && curr_length > max_length )
+                        {
+                            ender_flag = true ;
+                            return ;
+                        }
                         return ;
                     }
                     else if ( ret == NodeType::Key_Neibs)
@@ -224,7 +228,7 @@ namespace BGIQD{
                         ;
                     }
                     else
-                        ;
+                        assert(0);
                     ender_flag = true ;
                 }
 
@@ -249,7 +253,7 @@ namespace BGIQD{
                         if(! nodes.empty() )
                             curr_length = nodes.top().path_length ;
                         else
-                            curr_depth = 0 ;
+                            curr_length = 0 ;
                     }
                     assert( curr_depth >= 0 );
                     assert( curr_length>= 0 );

@@ -226,7 +226,10 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
         //
         if( ! is_bal && j.second.base )
         {
-            int length  = searcher.nodes.at(to_id).path_length;
+
+            int length  = searcher.nodes.at(to_id).path_length
+                - searcher.accesser.AccessNode(to_id).length;
+
             {
                 std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[path_i]]);
                 BGIQD::SOAP2::KeyConn conn{to_id,length,0,sim};
@@ -247,7 +250,8 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
         //else if( !is_bal && to_id != to_id_in_path )
         if( ! is_bal && j.second.bal)
         {
-            int length  = searcher.nodes.at(curr_to.bal_id).path_length;
+            int length  = searcher.nodes.at(curr_to.bal_id).path_length
+                - searcher.accesser.AccessNode(curr_to.bal_id).length;
             {
                 std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[path_i]]);
                 BGIQD::SOAP2::KeyConn conn{to_id,length,0, sim};
@@ -266,7 +270,8 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
         //else if ( is_bal && to_id == to_id_in_path )
         if ( is_bal && j.second.base )
         {
-            int length  = searcher.nodes.at(to_id).path_length;
+            int length  = searcher.nodes.at(to_id).path_length
+                - searcher.accesser.AccessNode(to_id).length;
             {
                 std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[bal_i]]);
                 BGIQD::SOAP2::KeyConn conn{to_id,length,0, sim};
@@ -285,7 +290,8 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
         //else
         if ( is_bal && j.second.bal )
         {
-            int length  = searcher.nodes.at(curr_to.bal_id).path_length;
+            int length  = searcher.nodes.at(curr_to.bal_id).path_length
+                - searcher.accesser.AccessNode(curr_to.bal_id).length;
             {
                 std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[bal_i]]);
                 BGIQD::SOAP2::KeyConn conn{to_id,length,0, sim};

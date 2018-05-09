@@ -153,6 +153,7 @@ namespace BGIQD{
                         std::cerr<<i.second.ToString()<<std::endl;
                     }
                 }
+
                 //  do depth search.
                 //      1. stop go deeper if ender say yes.
                 //      2. avoid to use recursion because the depth may very large.
@@ -198,9 +199,12 @@ namespace BGIQD{
                                 top.type = Node::Type::Black ;
                             top.finish_search = step ;
                             path.pop() ;
-                            new_node_in_path = false ;
                             ender.PopEdge();
-                            ender.PopNode();
+                            if( ! new_node_in_path )
+                                ender.PopNode();
+
+                            new_node_in_path = false ;
+                            //assert(path.size() == ender.nodes.size() );
                             continue ;
                         }
 
@@ -212,6 +216,7 @@ namespace BGIQD{
                                 ender.PopEdge();
                                 path.pop() ;
                                 new_node_in_path = false ;
+                                //assert(path.size() == ender.nodes.size() );
                                 continue ;
                             }
 
@@ -232,6 +237,7 @@ namespace BGIQD{
                                 ender.PopNode();
                                 path.pop() ;
                                 new_node_in_path = false ;
+                                //assert(path.size() == ender.nodes.size() );
                                 continue ;
                             }
 
@@ -250,6 +256,7 @@ namespace BGIQD{
                             top.type = Node::Type::Gray ;
                         }
 
+                        //assert(path.size() == ender.nodes.size() );
                         NodeId next_node_id  = itr->to;
                         auto itr_n = nodes.find( next_node_id ) ;
                         if ( itr_n == nodes.end() || itr_n->second.type == Node::Type::White )
@@ -283,7 +290,7 @@ namespace BGIQD{
                         auto & next_node = accesser.AccessNode( next_node_id) ;
                         EdgeId next_edge_id = next_node.edge_id;
                         EdgeBase & next_edge = accesser.AccessEdge( next_edge_id ,next_node_id) ;
-
+                        //assert(path.size() == ender.nodes.size() );
                         path.push(EdgeItr(next_edge, accesser));
                         ender.AddEdge(next_edge);
 
