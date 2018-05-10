@@ -93,7 +93,8 @@ namespace BGIQD{
                         auto & min = heap.ExtractMin() ;
                         auto & root = accesser.AccessNode( min.value) ;
                         EdgeItr edge_itr(accesser.AccessEdge(root.edge_id , root.id) , accesser);
-                        AddEdge(edge_itr);
+                        if( edge_itr != EdgeItr::end())
+                            AddEdge(edge_itr);
                     }
                 }
 

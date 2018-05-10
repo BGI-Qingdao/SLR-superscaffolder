@@ -77,6 +77,14 @@ namespace BGIQD{
                 }
                 return itr->second ;
             }
+
+            void GetAttr(const Node & node, const Edge & ,
+                    const std::string & name, int &v ) {
+                if(  name == "length" )
+                    v = node.length ;
+                else
+                    assert(0);
+            } 
         };
 
         enum NodeType

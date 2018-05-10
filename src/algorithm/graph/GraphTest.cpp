@@ -14,7 +14,7 @@ TEST_MODULE_INIT(GraphDepthSearch)
 //    }
 //};
 
-struct TestGraph
+struct TestGraph1
 {
     struct Node
     {
@@ -49,10 +49,10 @@ struct TestGraph
      * draw the graph by DOT if you want.
      *************************************************/
 
-    static TestGraph GetTestGraph()
+    static TestGraph1 GetTestGraph()
     {
 
-        TestGraph test;
+        TestGraph1 test;
 
         test.add_edge(1,'u','v',2);
         test.add_edge(2,'u','x',-1);
@@ -92,7 +92,7 @@ struct TestGraph
 
 };
 
-struct ACCESS : public BGIQD::GRAPH::GraphAccessBase<TestGraph , char , int >
+struct ACCESS : public BGIQD::GRAPH::GraphAccessBase<TestGraph1 , char , int >
 {
     //typedef char                         GraphNodeId ;
     //typedef int                          GraphEdgeId ;
@@ -225,7 +225,7 @@ struct Ender2 : public BGIQD::GRAPH::PathEndHelperBase<ACCESS, traits_2, BGIQD::
 
 TEST(GraphAccessNode)
 {
-    auto test = TestGraph::GetTestGraph() ;
+    auto test = TestGraph1::GetTestGraph() ;
 
     ACCESS acc ;
     acc.base = &test;
@@ -251,7 +251,7 @@ TEST(GraphAccessNode)
 
 TEST(GraphAccessEdge)
 {
-    auto test = TestGraph::GetTestGraph() ;
+    auto test = TestGraph1::GetTestGraph() ;
 
     ACCESS acc ;
     acc.base = &test;
@@ -279,7 +279,7 @@ TEST(GraphAccessEdge)
 
 TEST(EdgeItr_test)
 {
-    auto test = TestGraph::GetTestGraph() ;
+    auto test = TestGraph1::GetTestGraph() ;
     ACCESS acc ;
     acc.base = &test;
 
@@ -313,7 +313,7 @@ typedef BGIQD::GRAPH::DepthSearch<ACCESS,EdgeItr,Ender2> Searcher2;
 
 TEST(GraphDepthSearch_test)
 {
-    auto test = TestGraph::GetTestGraph() ;
+    auto test = TestGraph1::GetTestGraph() ;
     ACCESS acc ;
     acc.base = & test ;
     Searcher1 s1;
@@ -357,7 +357,7 @@ TEST(GraphDepthSearch_test)
 
 TEST(GraphDepthSearch_test_1)
 {
-    auto test = TestGraph::GetTestGraph() ;
+    auto test = TestGraph1::GetTestGraph() ;
     ACCESS acc ;
     acc.base = & test ;
     Searcher2 s1;
