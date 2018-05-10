@@ -143,13 +143,13 @@ typedef BGIQD::GRAPH::EdgeIterator<ACCESS> EdgeItr;
 /*
  * Classic depth search . Only end at NOT WHITE node
  */
-struct Ender1 : public BGIQD::GRAPH::DepthSearchPathEndHelperBase<ACCESS, traits_1>
+struct Ender1 : public BGIQD::GRAPH::DepthSearchPathEndHelperBase<ACCESS, traits_1 , BGIQD::GRAPH::DepthSearchNode<ACCESS::Node>>
 {
     void Start() 
     {
         clean();
     }
-    void AddNode(const Node & , const DNode & dnode) {
+    void AddNode(const Node & , const SNode & dnode) {
         pre_type =dnode.type ;
     }
     void AddEdge(const Edge & ) {
@@ -176,13 +176,13 @@ struct Ender1 : public BGIQD::GRAPH::DepthSearchPathEndHelperBase<ACCESS, traits
 /*
  * Full depth search . END ONLY AT CIRCLE
  */
-struct Ender2 : public BGIQD::GRAPH::DepthSearchPathEndHelperBase<ACCESS, traits_2>
+struct Ender2 : public BGIQD::GRAPH::DepthSearchPathEndHelperBase<ACCESS, traits_2, BGIQD::GRAPH::DepthSearchNode<ACCESS::Node>>
 {
     void Start() 
     {
         clean();
     }
-    void AddNode(const Node &n , const DNode & ) {
+    void AddNode(const Node &n , const SNode & ) {
         if( now != -1 )
         {
             ids.insert( now ) ;

@@ -86,15 +86,12 @@ namespace BGIQD {
          * This FibHeap DO NOT care where nodes are stored !!!
          * It is user's duty to make sure all nodes are valid !!!
          * */
-        template< class TKey
-            , class TValue 
-            , class TNode = Node< TKey , TValue>  >
+            template<class TNode> 
             struct FibHeap
             {
-                typedef TKey Key;
-                typedef TValue Value ;
+                typedef typename TNode::Key Key;
+                typedef typename TNode::TValue Value ;
                 typedef TNode Node;
-
                 Node * min ;
 
                 long long n ;

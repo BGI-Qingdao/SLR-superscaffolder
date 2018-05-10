@@ -141,6 +141,25 @@ namespace BGIQD {
                 GraphAccess * accessor ;
         };
 
+
+        template<class GraphAccess , class traits , class SearchNode  >
+            struct DepthSearchPathEndHelperBase
+            {
+                typedef typename GraphAccess::GraphNodeId NodeId;
+                typedef typename GraphAccess::GraphEdgeId EdgeId;
+                typedef typename GraphAccess::Node        Node;
+                typedef typename GraphAccess::Edge        Edge;
+                typedef SearchNode                        SNode;
+                typedef GraphAccess                       Access;
+                typedef traits                            traisId;
+
+                void Start() {assert(0);}
+                void AddNode(const Node & , const SearchNode &) {assert(0);}
+                void AddEdge(const Edge & ) {assert(0);}
+                void PopEdge() {assert(0);}
+                void PopNode() {assert(0);}
+                bool IsEnd() const { assert(0) ;} ;
+            };
     } // namespace GRAPH
 } // namespace BGIQD
 

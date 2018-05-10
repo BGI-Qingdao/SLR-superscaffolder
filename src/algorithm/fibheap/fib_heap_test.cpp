@@ -3,8 +3,9 @@
 
 TEST_MODULE_INIT(FibHeap)
 
-typedef BGIQD::FIBHEAP::FibHeap<int , int > testFibHeap;
+
 typedef BGIQD::FIBHEAP::Node<int , int > testFibHeapNode;
+typedef BGIQD::FIBHEAP::FibHeap<testFibHeapNode> testFibHeap;
 TEST(FibCommon)
 {
     testFibHeapNode array[10];

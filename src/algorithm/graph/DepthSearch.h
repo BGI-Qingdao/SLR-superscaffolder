@@ -58,7 +58,6 @@ namespace BGIQD{
                     backword_from.clear();
                     forword_from.clear();
                     cross_from.clear();
-
                 }
 
                 void ReSetParent(const Node & me,const DepthSearchNode & parenet,int step_start )
@@ -103,26 +102,6 @@ namespace BGIQD{
                     }
                     return ost.str();
                 }
-            };
-
-        template<class GraphAccess , class traits
-            , class DepthNode = DepthSearchNode<typename GraphAccess::Node> >
-            struct DepthSearchPathEndHelperBase
-            {
-                typedef typename GraphAccess::GraphNodeId NodeId;
-                typedef typename GraphAccess::GraphEdgeId EdgeId;
-                typedef typename GraphAccess::Node        Node;
-                typedef typename GraphAccess::Edge        Edge;
-                typedef DepthNode                         DNode;
-                typedef GraphAccess                       Access;
-                typedef traits                            traisId;
-
-                void Start() {assert(0);}
-                void AddNode(const Node & , const DepthNode &) {assert(0);}
-                void AddEdge(const Edge & ) {assert(0);}
-                void PopEdge() {assert(0);}
-                void PopNode() {assert(0);}
-                bool IsEnd() const { assert(0) ;} ;
             };
 
         template<class GraphAccess
