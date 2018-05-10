@@ -48,10 +48,8 @@ namespace BGIQD {
                     if( son == NULL )
                         son = &child ;
                     else
-                    {
                         son->list.Insert(&child.list);
-                        child.father = this ;
-                    }
+                    child.father = this ;
                 }
 
                 void RemoveChild( Node & child)
@@ -64,7 +62,7 @@ namespace BGIQD {
                         if( child.list.Single() ) 
                             son = NULL ;
                         else
-                            son = child.list.left;
+                            son = &child.Next();
                     }
                     child.list.DeleteMe() ;
                 }
@@ -148,10 +146,11 @@ namespace BGIQD {
                     FibHeap H ;
                     H.min = h1.min ;
                     if( H.min != NULL && h2.min != NULL )
-                        H.min->Insert(h2.min) ;
+                        H.min->Insert(*h2.min) ;
                     if( H.min == NULL || ( h2.min != NULL && h2.min->key < H.min->key ) )
                         H.min = h2.min ;
                     H.n = h1.n + h2.n ;
+                    return H;
                 }
 
                 void DecreaseKey( Node & node , Key new_key)
@@ -161,7 +160,7 @@ namespace BGIQD {
                         assert(0);
                         return ;
                     }
-
+        
                     if( node.key == new_key )
                         return ;
                     node.key = new_key ;
@@ -173,19 +172,21 @@ namespace BGIQD {
                     assert( min );
                     if ( node.key < min->key )
                     {
+                        assert( node.father == NULL );
                         min = & node ;
                     }
                 }
 
                 Node & ExtractMin()
                 {
-                    assert( min ) ;
+                    assert( min && min->father == NULL ) ;
                     auto & z = *min ;
                     if ( z.son != NULL )
                     {
                         Node * son = z.son ;
                         do
                         {
+                            assert( son->father ==  min );
                             son->father = NULL ;
                             son = &(son->Next());
                         }
@@ -207,7 +208,15 @@ namespace BGIQD {
 
                 bool Empty()
                 {
-                    return n == 0;
+                    if( min == NULL )
+                    {
+                        assert( n == 0 );
+                    }
+                    if( n == 0 )
+                    {
+                        assert( min == NULL );
+                    }
+                    return n == 0 ;
                 }
 
                 protected:
@@ -245,7 +254,7 @@ namespace BGIQD {
 
                     void Consolidate() 
                     {
-                        assert( min ) ;
+                        assert( min && min->father == NULL) ;
                         Node * A[N] ;
                         for( int i = 0 ; i < N ; i++ )
                             A[i] = NULL ;
@@ -265,10 +274,14 @@ namespace BGIQD {
                             {
                                 Node * y = A[d];
                                 if ( x->key > y->key )
-                                    std::swap(x,y);
+                                {
+                                    Node * tmp = x ;
+                                    x = y ;
+                                    y = tmp ;
+                                }
                                 //HeapLink(y,x);
                                 DelayHeapLinkInfo tmp{ y , x } ;
-                                delayinfos.emplace_back( tmp );
+                                delayinfos.push_back( tmp );
                                 A[d] = NULL ;
                                 d = d + 1 ;
                             }
@@ -280,12 +293,13 @@ namespace BGIQD {
                         {
                             HeapLink(delayinfos[i].y , delayinfos[i].x);
                         }
-
+                        min = NULL ;
                         for( int i = 0 ; i < N ; i ++ )
                         {
                             if( A[i] == NULL ) 
                                 continue ;
-                            if( A[i]->key < min->key )
+                            assert(A[i]->father == NULL );
+                            if( min == NULL ||  A[i]->key < min->key )
                                 min = A[i] ;
                         }
 
@@ -302,7 +316,6 @@ namespace BGIQD {
             };
 
     }
-
 }
 
 #endif //__ALGORITHM_FIBHEAP_H__
