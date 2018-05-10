@@ -58,6 +58,7 @@ source_cpp =	contig_barcode.cpp \
 
 
 test_cpp   =	test.cpp\
+				algorithm/graph/SPFSearch_test.cpp\
 				common/time/timetools_test.cpp\
 				common/string/stringtools_test.cpp\
 				biocommon/sam_bam/sam_parser_test.cpp\

@@ -1,16 +1,21 @@
 #ifndef __ALGORITHM_GRAPH_SPFSEARCH_H__
 #define __ALGORITHM_GRAPH_SPFSEARCH_H__
 #include <map>
+#include <sstream>
+#include <iostream>
+#include <set>
 #include "algorithm/graph/Graph.h"
 #include "algorithm/fibheap/fib_heap.h"
+
 namespace BGIQD{
     namespace GRAPH{
 
+
         template<class BaseNode>
-            struct SPFNode  : public BGIQD::FIBHEAP::Node<int,typename BaseNode::NodeNodeId>
+            struct SPFNode
             {
                 typedef typename BaseNode::NodeNodeId NodeId;
-                typedef BGIQD::FIBHEAP::Node<int,typename BaseNode::NodeNodeId> Base;
+                typedef BGIQD::FIBHEAP::Node<int,typename BaseNode::NodeNodeId> FibBaseNode;
                 enum Type
                 {
                     Unknow = 0 ,
@@ -19,20 +24,43 @@ namespace BGIQD{
                 };
                 Type type;
 
+                FibBaseNode Base;
                 void InitAsRoot(const BaseNode & node )
                 {
-                    Base::value = node.id ;
-                    Base::key = 0;
+                    Base.value = node.id ;
+                    Base.key = 0;
                     type = Type::Finish ;
                 }
-                void Init(const BaseNode & node ,const SPFNode & father , int length)
+                void InitNode(const BaseNode & node ,const SPFNode & father , int length)
                 {
-                    Base::value = node.id ;
-                    Base::key = father.key + length;
+                    Base.value = node.id ;
+                    Base.key = father.Base.key + length;
                     type = Type::InHeap ;
+                    prev = father.Base.value;
+                }
+                void ResetParent(const BaseNode & ,const SPFNode & father , int )
+                {
+                    other_from.insert(prev);
+                    prev = father.Base.value;
                 }
 
+                void TouchParent( const BaseNode & ,const SPFNode & father , int )
+                {
+                    other_from.insert(father.Base.value);
+                }
+                std::set<NodeId>  other_from;
                 NodeId prev ;
+                std::string ToString() const {
+                    std::ostringstream ost;
+                    ost<<"id = "<<Base.value<<" prev= "<<prev;
+                    ost<<" path_length = "<<Base.key;
+                    ost<<" other from = ";
+                    for( auto i:other_from)
+                    {
+                        ost<<i<<'\t';
+                    }
+                    return ost.str();
+                }
             };
 
         template<class GraphAccess
@@ -46,7 +74,8 @@ namespace BGIQD{
                 typedef typename GraphAccess::Node          NodeBase;
                 typedef typename GraphAccess::Edge          EdgeBase;
 
-                typedef SPFNode1                            FibNode;
+                typedef SPFNode1                            SPFNode;
+                typedef typename SPFNode1::FibBaseNode      FibNode;
                 typedef BGIQD::FIBHEAP::FibHeap<FibNode>    FibHeap;
 
                 void DoSPFSearch(NodeId start)
@@ -58,19 +87,13 @@ namespace BGIQD{
                     ender.Start();
                     NodeId prev ;
                     fib_nodes[start].InitAsRoot(root);
-                    heap.Insert(fib_nodes[start]);
+                    heap.Insert(fib_nodes[start].Base);
                     while ( ! heap.Empty() )
                     {
                         auto & min = heap.ExtractMin() ;
+                        auto & root = accesser.AccessNode( min.value) ;
                         EdgeItr edge_itr(accesser.AccessEdge(root.edge_id , root.id) , accesser);
-                        ender.AddEdge(edge_itr);
-                        if( ender.IsEnd() )
-                        {
-                            ender.PopEdge();
-                            continue ;
-                        }
                         AddEdge(edge_itr);
-                        ender.PopEdge();
                     }
                 }
 
@@ -78,14 +101,22 @@ namespace BGIQD{
 
                 GraphAccess accesser;
 
+                void PrintNodes()
+                {
+                    for( auto & i : fib_nodes )
+                    {
+                        std::cerr<<i.second.ToString()<<std::endl;
+                    }
+                };
+
+                    std::map<NodeId ,SPFNode> fib_nodes;
                 protected:
                     FibHeap heap;
-                    std::map<NodeId , FibNode> fib_nodes;
 
                     void AddEdge(EdgeItr & itr)
                     {
                         NodeId from = itr->from;
-                        FibNode * f_node = NULL ;
+                        SPFNode * f_node = NULL ;
                         try{
                             f_node = &fib_nodes.at(from);
                         }
@@ -95,39 +126,51 @@ namespace BGIQD{
                         }
                         assert(f_node);
 
-                        f_node->type = FibNode::Type::Finish ;
+                        f_node->type = SPFNode::Type::Finish ;
 
                         while( itr != EdgeItr::end() )
                         {
+                            ender.AddEdge(*itr);
+                            if( ender.IsEnd() )
+                            {
+                                ender.PopEdge();
+                                ++ itr ;
+                                continue ;
+                            }
+                            ender.PopEdge();
                             NodeId to = itr->to ;
                             auto & base_to_node = accesser.AccessNode(to);
                             int l = -1;
                             accesser.GetAttr(base_to_node,*itr,"length",l);
                             assert( l >= 0 );
-
+                            ++ itr ;
                             auto itr_n = fib_nodes.find( to );
                             if( itr_n == fib_nodes.end() )
                             {
                                 // This is a new node ;
                                 auto & new_node = fib_nodes[to];
-                                new_node.Init(base_to_node,*f_node);
+                                new_node.InitNode(base_to_node,*f_node,l);
                                 ender.AddNode(base_to_node ,new_node);
                                 if( ender.IsEnd() )
                                 {
                                     ender.PopNode() ;
                                     continue ;
                                 }
-                                heap.Insert(new_node);
+                                heap.Insert(new_node.Base);
                                 // pop it because push history is useless .
                                 ender.PopNode();
                             }
                             else
                             {
-                                assert( itr_n -> type == FibNode::Type::InHeap );
-                                if( f_node->key + l < itr_n->key )
+                                auto & node = itr_n->second;
+                                if( f_node->Base.key + l < node.Base.key )
                                 {
-                                    heap.DecreaseKey(*itr , f_node->key+l);
+                                    assert( node.type == SPFNode::Type::InHeap );
+                                    heap.DecreaseKey(node.Base , f_node->Base.key+l);
+                                    node.ResetParent(base_to_node,*f_node,l);
                                 }
+                                else
+                                    node.TouchParent(base_to_node,*f_node,l);
                             }
                         }
                     }

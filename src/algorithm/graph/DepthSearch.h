@@ -8,6 +8,7 @@
 #include <string>
 #include <iostream>
 #include <cassert>
+
 namespace BGIQD{
     namespace GRAPH{
 

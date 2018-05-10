@@ -166,6 +166,7 @@ namespace BGIQD {
                 bool IsEnd() const { assert(0) ;} ;
 
             };
+
     } // namespace GRAPH
 } // namespace BGIQD
 

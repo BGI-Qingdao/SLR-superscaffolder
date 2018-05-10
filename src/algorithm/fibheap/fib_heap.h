@@ -90,7 +90,7 @@ namespace BGIQD {
             struct FibHeap
             {
                 typedef typename TNode::Key Key;
-                typedef typename TNode::TValue Value ;
+                typedef typename TNode::Value Value ;
                 typedef TNode Node;
                 Node * min ;
 
