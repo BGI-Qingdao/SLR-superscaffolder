@@ -10,7 +10,7 @@ namespace BGIQD {
     namespace FIBHEAP {
 
         template< class TKey , class TValue>
-            struct Node
+            struct Node : public BGIQD::BILIST::BiList<Node<TKey,TValue> >
             {
                 typedef TKey Key;
 
@@ -21,8 +21,6 @@ namespace BGIQD {
                 Node * father;
 
                 Node * son;
-
-                BiList list;
 
                 Key    key;
 
@@ -35,7 +33,7 @@ namespace BGIQD {
                 void Init() 
                 {
                     father = NULL ;
-                    list.Init(this);
+                    BiList::Init(this);
                     son = NULL ;
                     mark = false ;
                     degree = 0 ;
@@ -43,12 +41,12 @@ namespace BGIQD {
 
                 void AddChild(Node & child)
                 {
-                    assert( child.list.Single() ) ;
+                    assert( child.Single() ) ;
                     degree ++ ;
                     if( son == NULL )
                         son = &child ;
                     else
-                        son->list.Insert(&child.list);
+                        son->Insert(child);
                     child.father = this ;
                 }
 
@@ -59,37 +57,27 @@ namespace BGIQD {
                     assert( degree >= 0 );
                     if( son == &child )
                     {
-                        if( child.list.Single() ) 
+                        if( child.Single() ) 
                             son = NULL ;
                         else
                             son = &child.Next();
                     }
-                    child.list.DeleteMe() ;
-                }
-
-                bool IsSingle() const 
-                {
-                    return list.Single() ;
+                    child.DeleteMe() ;
                 }
 
                 Node & Next()
                 {
-                    return *(list.Forward()->self);
+                    return *(BiList::Forward()->self);
                 }
 
                 Node & Last()
                 {
-                    return *(list.Backword()->self);
-                }
-
-                void DeleteMe()
-                {
-                    list.DeleteMe();
+                    return *(BiList::Backword()->self);
                 }
 
                 void Insert( Node & node )
                 {
-                    list.Insert(&node.list);
+                    BiList::Insert(&node);
                 }
             };
 
@@ -193,7 +181,7 @@ namespace BGIQD {
                         while( son != z.son );
                         min->Insert(*z.son);
                     }
-                    if( z.IsSingle() )
+                    if( z.Single() )
                         min = NULL ;
                     else 
                     {
@@ -258,7 +246,7 @@ namespace BGIQD {
                         Node * A[N] ;
                         for( int i = 0 ; i < N ; i++ )
                             A[i] = NULL ;
-                        if ( min->IsSingle() )
+                        if ( min->Single() )
                             return ;
                         Node * a_son = min ;
                         Node * last = &(min->Last());
