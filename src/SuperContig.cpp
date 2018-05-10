@@ -10,6 +10,7 @@
 #include <atomic>
 #include <algorithm>
 #include "soap2/contigGraphDepth.h"
+#include "soap2/contigGraphSPF.h"
 
 BGIQD::LOG::logger lger;
 std::atomic<int> index ;
@@ -147,36 +148,36 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
         auto & node_bal = config.edge_array[node.bal_id];
         if( ! node.IsKey() && !node_bal.IsKey() )
         {
-            return BGIQD::SOAP2::DepthSearchEAEnder::NodeType::Normal ;
+            return BGIQD::SOAP2::NodeType::Normal ;
         }
         if ( node.IsKey() )
         {
             if( neibs->find(id) == neibs->end() )
-                return BGIQD::SOAP2::DepthSearchEAEnder::NodeType::Key_Unknow ;
+                return BGIQD::SOAP2::NodeType::Key_Unknow ;
             else
-                return BGIQD::SOAP2::DepthSearchEAEnder::NodeType::Key_Neibs ;
+                return BGIQD::SOAP2::NodeType::Key_Neibs ;
         }
         else
         {
             if( neibs->find(id) == neibs->end() )
-                return BGIQD::SOAP2::DepthSearchEAEnder::NodeType::RC_Key_Unknow ;
+                return BGIQD::SOAP2::NodeType::RC_Key_Unknow ;
             else
-                return BGIQD::SOAP2::DepthSearchEAEnder::NodeType::RC_Key_Neibs ;
+                return BGIQD::SOAP2::NodeType::RC_Key_Neibs ;
         }
     };
 
     typedef BGIQD::GRAPH::EdgeIterator<BGIQD::SOAP2::GraphEA_Access> EdgeItr;
-    typedef BGIQD::GRAPH::DepthSearch<
+
+    typedef BGIQD::GRAPH::SPFSearch<
         BGIQD::SOAP2::GraphEA_Access,
         EdgeItr,
-        BGIQD::SOAP2::DepthSearchEAEnder,
-        BGIQD::SOAP2::DNode_EA> Searcher;
-
+        BGIQD::SOAP2::SFPEnder
+            > Searcher;
     Searcher searcher;
     searcher.accesser.base = &config.graph_ea ;
-    searcher.ender.Init( key , max_length , -1 );
+    searcher.ender.Init( key , max_length );
 
-    searcher.DoDepthSearch(path_i , 1 );
+    searcher.DoSPFSearch(path_i );
     index ++ ;
     //auto mid_map = get_mid_min( mids );
     //for(auto & j : paths)
@@ -227,7 +228,7 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
         if( ! is_bal && j.second.base )
         {
 
-            int length  = searcher.nodes.at(to_id).path_length
+            int length  = searcher.fib_nodes.at(to_id).Base.key
                 - searcher.accesser.AccessNode(to_id).length;
 
             {
@@ -250,7 +251,7 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
         //else if( !is_bal && to_id != to_id_in_path )
         if( ! is_bal && j.second.bal)
         {
-            int length  = searcher.nodes.at(curr_to.bal_id).path_length
+            int length  = searcher.fib_nodes.at(curr_to.bal_id).Base.key // nodes.at(curr_to.bal_id).path_length
                 - searcher.accesser.AccessNode(curr_to.bal_id).length;
             {
                 std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[path_i]]);
@@ -270,7 +271,7 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
         //else if ( is_bal && to_id == to_id_in_path )
         if ( is_bal && j.second.base )
         {
-            int length  = searcher.nodes.at(to_id).path_length
+            int length  = searcher.fib_nodes.at(to_id).Base.key
                 - searcher.accesser.AccessNode(to_id).length;
             {
                 std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[bal_i]]);
@@ -290,7 +291,7 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
         //else
         if ( is_bal && j.second.bal )
         {
-            int length  = searcher.nodes.at(curr_to.bal_id).path_length
+            int length  = searcher.fib_nodes.at(curr_to.bal_id).Base.key
                 - searcher.accesser.AccessNode(curr_to.bal_id).length;
             {
                 std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[bal_i]]);
@@ -741,7 +742,6 @@ int deleteNotBiSupport(BGIQD::SOAP2::GlobalConfig &config)
 }
 void linearConnection(BGIQD::SOAP2::GlobalConfig &config , unsigned int key_id)// , BGIQD::MultiThread::MultiThread & queue)
 {
-
     unsigned int i = key_id;
     BGIQD::SOAP2::KeyEdge & curr =  config.key_array[i];
     if( curr.IsMarked() 

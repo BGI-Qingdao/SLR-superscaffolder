@@ -4,6 +4,7 @@
 #include <iterator>
 #include <map>
 #include <cassert>
+
 namespace BGIQD {
     namespace GRAPH {
 
@@ -148,7 +149,7 @@ namespace BGIQD {
 
 
         template<class GraphAccess , class traits , class SearchNode  >
-            struct DepthSearchPathEndHelperBase
+            struct PathEndHelperBase
             {
                 typedef typename GraphAccess::GraphNodeId NodeId;
                 typedef typename GraphAccess::GraphEdgeId EdgeId;

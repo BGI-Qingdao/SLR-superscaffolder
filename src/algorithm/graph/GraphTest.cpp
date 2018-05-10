@@ -143,7 +143,7 @@ typedef BGIQD::GRAPH::EdgeIterator<ACCESS> EdgeItr;
 /*
  * Classic depth search . Only end at NOT WHITE node
  */
-struct Ender1 : public BGIQD::GRAPH::DepthSearchPathEndHelperBase<ACCESS, traits_1 , BGIQD::GRAPH::DepthSearchNode<ACCESS::Node>>
+struct Ender1 : public BGIQD::GRAPH::PathEndHelperBase<ACCESS, traits_1 , BGIQD::GRAPH::DepthSearchNode<ACCESS::Node>>
 {
     void Start() 
     {
@@ -176,7 +176,7 @@ struct Ender1 : public BGIQD::GRAPH::DepthSearchPathEndHelperBase<ACCESS, traits
 /*
  * Full depth search . END ONLY AT CIRCLE
  */
-struct Ender2 : public BGIQD::GRAPH::DepthSearchPathEndHelperBase<ACCESS, traits_2, BGIQD::GRAPH::DepthSearchNode<ACCESS::Node>>
+struct Ender2 : public BGIQD::GRAPH::PathEndHelperBase<ACCESS, traits_2, BGIQD::GRAPH::DepthSearchNode<ACCESS::Node>>
 {
     void Start() 
     {
