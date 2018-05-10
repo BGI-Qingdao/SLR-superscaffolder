@@ -366,7 +366,8 @@ TEST(GraphDepthSearch_test_1)
     s1.ender = ender;
     int end = s1.DoDepthSearch('u',1);
     s1.DoDepthSearch('w',end+1);
-/*    auto & u = s1.nodes.at('u');
+/*
+ * auto & u = s1.nodes.at('u');
     auto & v = s1.nodes.at('v');
     auto & w = s1.nodes.at('w');
     auto & x = s1.nodes.at('x');
@@ -394,7 +395,6 @@ TEST(GraphDepthSearch_test_1)
     CHECK(10,z.first_found);
     CHECK(11,z.finish_search);
     CHECK(true , (z.backword_from.find('z') != z.backword_from.end()) )
-
 */
     s1.PrintNodes();
 }

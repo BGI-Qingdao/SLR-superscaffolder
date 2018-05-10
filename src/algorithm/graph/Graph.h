@@ -58,6 +58,11 @@ namespace BGIQD {
                 std::map<GraphNodeId , Node > nodes ;
                 std::map<GraphEdgeId , Edge > edges ;
                 std::map<GraphNodeId , Edge > edges_ends;
+
+                template<class Value>
+                void GetAttr(const Node & , const Edge & ,
+                        const std::string & , Value & ) {assert(0);} 
+
             };
 
         template<class GraphAccess>
@@ -159,6 +164,7 @@ namespace BGIQD {
                 void PopEdge() {assert(0);}
                 void PopNode() {assert(0);}
                 bool IsEnd() const { assert(0) ;} ;
+
             };
     } // namespace GRAPH
 } // namespace BGIQD

@@ -145,7 +145,7 @@ namespace BGIQD {
                         assert(0);
                         return ;
                     }
-        
+
                     if( node.key == new_key )
                         return ;
                     node.key = new_key ;
