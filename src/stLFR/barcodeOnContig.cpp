@@ -97,6 +97,13 @@ namespace BGIQD {
             }
         }
 
+        void P2PGraph::AddFromTo( unsigned int from , unsigned int to )
+        {
+            InitEdge( from );
+            InitEdge( to );
+            sub_graph.at(from).tos.insert(to);
+        }
+
         void P2PGraph::AddMid( unsigned int to, const std::vector<std::list<SOAP2::Edge> > & paths )
         {
             //assert(root_graph.target == to) ;

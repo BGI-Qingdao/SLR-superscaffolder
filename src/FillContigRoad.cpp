@@ -8,6 +8,20 @@
 #include "common/multithread/MultiThread.h"
 #include "common/files/file_reader.h"
 #include "common/freq/freq.h"
+#include "soap2/contigGraphSPF.h"
+
+#include <set>
+#include <queue>
+
+typedef BGIQD::GRAPH::EdgeIterator<BGIQD::SOAP2::GraphEA_Access> EdgeItr;
+
+typedef BGIQD::GRAPH::SPFSearch<
+BGIQD::SOAP2::GraphEA_Access,
+    EdgeItr,
+    BGIQD::SOAP2::SFPEnder
+    > Searcher;
+
+typedef Searcher::SPFNode SNode;
 
 struct GlobalConfig
 {
@@ -37,10 +51,10 @@ struct GlobalConfig
 
 } config;
 
-struct DepthSearchResult
+struct SearchResult
 {
-    std::map<unsigned int , std::vector<std::list<BGIQD::SOAP2::Edge> > > paths;
-    std::map<unsigned int , std::vector<std::list<BGIQD::SOAP2::Edge> > > mids;
+    //std::map<unsigned int , std::vector<std::list<BGIQD::SOAP2::Edge> > > paths;
+    //std::map<unsigned int , std::vector<std::list<BGIQD::SOAP2::Edge> > > mids;
     bool rearch;
 
     bool head_tail ; // depth search from head or tail
@@ -57,14 +71,16 @@ struct DepthSearchResult
 
     unsigned int true_from ;
     unsigned int true_to ;
+
+    Searcher searcher;
 };
 
-DepthSearchResult SearchAllPath(unsigned int from  , unsigned int to, int max){
+SearchResult SearchAllPath(unsigned int from  , unsigned int to, int max){
 
-    DepthSearchResult ret;
+    SearchResult ret;
     ret.head_tail = true ;
     ret.downstream = true ;
-    ret.status = DepthSearchResult::NotRearch;
+    ret.status = SearchResult::NotRearch;
     BGIQD::SOAP2::Edge * edge_array = config.graph_eab.graph_ea.edge_array;
 
     unsigned int head_id = from;
@@ -72,130 +88,144 @@ DepthSearchResult SearchAllPath(unsigned int from  , unsigned int to, int max){
     unsigned int search_id = head_id;
     unsigned int target_id = tail_id;
 
-    /*
-    if( edge_array[head_id].bal_id == head_id && edge_array[tail_id].bal_id != tail_id)
-    {
-        ret.head_tail = !ret.head_tail ;
-        unsigned int tmp = search_id ;
-        search_id = tail_id;
-        target_id = tmp;
-    }
-    */
-
-    std::list<BGIQD::SOAP2::Edge> stack;
-    std::map<unsigned int , BGIQD::SOAP2::Edge > history;
     std::map<unsigned int ,float> neibs ;
-    neibs[target_id] = 1.0f;
-    // try downstream 
-    edge_array[search_id].DepthSearch(edge_array,stack,
-            history, ret.paths , ret.mids ,edge_array[search_id].length , neibs, max);
-    /*
-    if( ret.paths.empty() )
+    auto & node = edge_array[target_id];
+    unsigned int to_key_id ;
+    if( node.IsKey() )
+        to_key_id = target_id ;
+    else
+        to_key_id = node.bal_id ;
+
+    neibs[to_key_id] = 0.5f;
+
+    auto key = [neibs, edge_array] (unsigned int id)
     {
-        if( edge_array[search_id].bal_id  == search_id )
+        auto & node = edge_array[id] ;
+        auto & node_bal = edge_array[node.bal_id];
+        if( ! node.IsKey() && !node_bal.IsKey() )
         {
-            // now both contig has no bal_id.
-            // try another downstream
-            ret.head_tail = !ret.head_tail ;
-            unsigned int tmp = search_id ;
-            search_id = tail_id;
-            target_id = tmp;
-            neibs.clear();
-            neibs[target_id] = 1.0f;
+            return BGIQD::SOAP2::NodeType::Normal ;
         }
-        else 
+        if ( node.IsKey() )
         {
-            //try upstream
-            search_id = edge_array[search_id].bal_id;
-            ret.downstream = false ;
-        }
-        stack.clear();
-        history.clear();
-        ret.paths.clear();
-        ret.mids.clear();
-
-        edge_array[search_id].DepthSearch(edge_array,stack,
-                history, ret.paths , ret.mids ,edge_array[search_id].length , neibs);
-    }
-    */
-
-    if( ret.paths.empty() )
-    {
-        ret.status = DepthSearchResult::NotRearch;
-        return ret;
-    }
-    //detect relationship
-    for( size_t i = 0 ; i < ret.paths.size() ; i++)
-    {
-
-        unsigned int true_target = (ret.paths.begin()->second)[0].front().id;
-
-        ret.true_from = search_id ;
-        ret.true_to = true_target ;
-        if( true_target != target_id )
-        {
-            // will delete 
+            if( neibs.find(id) == neibs.end() )
+                return BGIQD::SOAP2::NodeType::Key_Unknow ;
+            else
+                return BGIQD::SOAP2::NodeType::Key_Neibs ;
         }
         else
         {
-            ret.status = DepthSearchResult::A1B1_B2A2 ;
+            if( neibs.find(node.bal_id) == neibs.end() )
+                return BGIQD::SOAP2::NodeType::RC_Key_Unknow ;
+            else
+                return BGIQD::SOAP2::NodeType::RC_Key_Neibs ;
         }
-    }
-    /*
-    if(  ret.head_tail ) 
+    };
+
+    ret.searcher.accesser.base = &config.graph_eab.graph_ea;
+    ret.searcher.ender.Init( key , max);
+
+    ret.searcher.DoSPFSearch(search_id);
+
+    ret.true_from = from ;
+    ret.true_to = to ;
+
+    auto & ender = ret.searcher.ender ;
+    auto itr = ender.founder.find(to_key_id);
+    if( itr == ender.founder.end() )
     {
-        // Start from A contig
-        if( ret.downstream )
-            if( true_target == target_id )
-                ret.status = DepthSearchResult::A1B1_B2A2 ;
-            else 
-                ret.status = DepthSearchResult::A1B2_B1A2 ;
-        else 
-            if( true_target == target_id )
-                ret.status = DepthSearchResult::B2A1_A2B1 ;
-            else 
-                ret.status = DepthSearchResult::B1A1_A2B2 ;
+        assert(0);
+        ret.status = SearchResult::NotRearch;
+        return ret;
+    }
+    auto & tos = itr->second;
+    if( node.IsKey() &&  ! tos.base )
+    {
+        assert(0);
+        ret.status = SearchResult::NotRearch;
+        return ret;
+    }
+    else if ( ! node.IsKey() && ! tos.bal )
+    {
+        assert(0);
+        ret.status = SearchResult::NotRearch;
+        return ret;
+    }
+    else if ( node.IsKey() && tos.base )
+    {
+        ret.status = SearchResult::A1B1_B2A2 ;
+
+    }
+    else if ( ! node.IsKey() && tos.bal ) 
+    {
+        ret.status = SearchResult::A1B2_B1A2 ;
+
     }
     else
     {
-        // Start from B contig
-        if( ret.downstream )
-            if( true_target == target_id )
-                ret.status = DepthSearchResult::B1A1_A2B2 ;
-            else 
-                ret.status = DepthSearchResult::A1B2_B1A2 ;
-        else 
-            if( true_target == target_id )
-                ret.status = DepthSearchResult::B2A1_A2B1 ;
-            else 
-                ret.status = DepthSearchResult::A1B1_B2A2 ;
+        assert(0);
+        ret.status = SearchResult::NotRearch;
+        return ret;
     }
-    */
     return ret ;
 }
 
 void FindCorrectPath(unsigned int from , unsigned int to, 
-        const DepthSearchResult & result , BGIQD::stLFR::P2PGraph & p2pgrapg
+        const SearchResult & result , BGIQD::stLFR::P2PGraph & p2pgrapg
         )
 {
     p2pgrapg.Init(from,to);
-    for( const auto & i : result.paths )
-    {
-        if( i.second[0].begin()->id == to )
-            p2pgrapg.AddPath(to , i.second);
+
+    std::set<unsigned int> history;
+    std::queue<SNode> nexts;
+
+    try{
+        auto & end = result.searcher.fib_nodes.at(to);
+        history.insert(to) ;
+        nexts.push(end);
     }
-    for( const auto & i : result.mids )
+    catch( ... ) 
     {
-        p2pgrapg.AddMid(i.first , i.second);
+        assert(0);
+    }
+
+    try{
+        while(! nexts.empty() )
+        {
+            auto & a_to = nexts.front() ;
+            if( a_to.Base.value != from )
+            {
+                p2pgrapg.AddFromTo( a_to.Base.value , a_to.prev );
+                if( history.find( a_to.prev ) == history.end() )
+                {
+                    history.insert( a_to.prev ) ;
+                    nexts.push( result.searcher.fib_nodes.at(a_to.prev));
+                }
+            }
+            for( auto from : a_to.other_from )
+            {
+                p2pgrapg.AddFromTo(a_to.Base.value ,from );
+                if( history.find( from ) == history.end() )
+                {
+                    history.insert( from ) ;
+                    nexts.push( result.searcher.fib_nodes.at(from));
+                }
+            }
+            nexts.pop();
+        }
+    }
+    catch( ... )
+    {
+        assert(0);
     }
     p2pgrapg.GeneratePath();
 }
 
-bool AppendPath( const  BGIQD::stLFR::P2PGraph & p2pgrapg , const DepthSearchResult & result, BGIQD::stLFR::ContigRoad & road)
+bool AppendPath( const  BGIQD::stLFR::P2PGraph & p2pgrapg , const SearchResult & result, BGIQD::stLFR::ContigRoad & road)
 {
     if( ! road.needMerge() )
         return false;
-    if( result.status== DepthSearchResult::NotRearch )
+    if( result.status== SearchResult::NotRearch )
         return false;
     if( p2pgrapg.path_num < 1 )
         return false;
@@ -212,7 +242,9 @@ bool AppendPath( const  BGIQD::stLFR::P2PGraph & p2pgrapg , const DepthSearchRes
                 , p2pgrapg.final_path.rbegin()
                 , p2pgrapg.final_path.rend() );
     }
+
     road.circle_runs.push_back(p2pgrapg.final_circled);
+
     return true;
 }
 
@@ -230,7 +262,7 @@ void FillContigRoad( BGIQD::stLFR::ContigRoad & road, int max , float ecov , boo
     {
         auto start = road.getLinearStep(i);
         auto ret = SearchAllPath(start.first , start.second,max);
-        if( ret.status == DepthSearchResult::NotRearch )
+        if( ret.status == SearchResult::NotRearch )
         {
             if( road.status  == BGIQD::stLFR::ContigRoad::FillStatus::None )
             {
@@ -244,7 +276,8 @@ void FillContigRoad( BGIQD::stLFR::ContigRoad & road, int max , float ecov , boo
         else
         {
             bool curr_line_down = false ;
-            if ( ret.status == DepthSearchResult::A1B1_B2A2 ||  ret.status == DepthSearchResult::A1B2_B1A2  )
+
+            if ( ret.status == SearchResult::A1B1_B2A2 ||  ret.status == SearchResult::A1B2_B1A2  )
             {
                 curr_line_down = true ;
             }
@@ -258,16 +291,20 @@ void FillContigRoad( BGIQD::stLFR::ContigRoad & road, int max , float ecov , boo
                 road.status = BGIQD::stLFR::ContigRoad::FillStatus::Conflict ;
                 break ;
             }
+
             BGIQD::stLFR::P2PGraph p2pgrapg;
+
             p2pgrapg.base_graph = &config.graph_eab;
             p2pgrapg.deal_circle  = circle_solve ;
             p2pgrapg.ecov = ecov ;
+
             FindCorrectPath(ret.true_from , ret.true_to , ret , p2pgrapg );
             // check if allpath find a correct path ?
             {
                 std::lock_guard<std::mutex> l(path_num_mutex);
                 config.path_num_freq.Touch( p2pgrapg.path_num);
             }
+
             if( p2pgrapg.path_num < 1 )
             {
                 if( road.status  == BGIQD::stLFR::ContigRoad::FillStatus::None )
@@ -279,6 +316,7 @@ void FillContigRoad( BGIQD::stLFR::ContigRoad & road, int max , float ecov , boo
                     break;
                 }
             }
+
             if( road.fill_num== 0 )
             {
                 if( ret.head_tail )
@@ -286,6 +324,7 @@ void FillContigRoad( BGIQD::stLFR::ContigRoad & road, int max , float ecov , boo
                 else 
                     road.contig_path.push_back( ret.true_to );
             }
+
             if( ! AppendPath( p2pgrapg ,ret,road ) )
             {
                 road.status = BGIQD::stLFR::ContigRoad::FillStatus::Conflict ;

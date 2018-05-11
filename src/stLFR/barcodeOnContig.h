@@ -68,6 +68,8 @@ namespace BGIQD {
             // AddMid can be called multi-times!!!
             void AddMid( unsigned int to ,const std::vector<std::list<SOAP2::Edge>> & paths );
 
+            void AddFromTo( unsigned int from , unsigned int to );
+
             struct Circle
             {
                 std::vector<Edge> cpath;
@@ -137,14 +139,17 @@ namespace BGIQD {
                     barcode_cov = 0;
                     circle.Clean();
                 }
+
                 void AddCircle( const Circle & c)
                 {
                     circle  =c ;
                 }
+
                 void MergeCircle();
+
                 bool IsPathInCircle(const Circle & c)
                 {
-                    if(! c.Is_set() )
+                    if( ! c.Is_set() )
                         return false ;
                     for(auto i: paths )
                     {
@@ -155,6 +160,7 @@ namespace BGIQD {
                     }
                     return false;
                 }
+
 
                 //bool AddEdge( int id , int length , float cov , int barcode ) 
                 bool AddEdge(const Edge & edge ) 
