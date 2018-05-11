@@ -159,7 +159,7 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
         }
         else
         {
-            if( neibs->find(id) == neibs->end() )
+            if( neibs->find(node.bal_id) == neibs->end() )
                 return BGIQD::SOAP2::NodeType::RC_Key_Unknow ;
             else
                 return BGIQD::SOAP2::NodeType::RC_Key_Neibs ;
