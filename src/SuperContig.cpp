@@ -179,6 +179,7 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
 
     searcher.DoSPFSearch(path_i );
     index ++ ;
+
     //auto mid_map = get_mid_min( mids );
     //for(auto & j : paths)
     for ( auto & j : searcher.ender.founder )
