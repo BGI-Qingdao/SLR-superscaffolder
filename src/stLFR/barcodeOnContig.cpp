@@ -134,6 +134,7 @@ namespace BGIQD {
         {
             Path p;
             p.Init();
+            p.K = K ;
             path_num = 0 ;
             auto & node = sub_graph[root];
             for( const auto &i : node.tos)

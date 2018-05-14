@@ -49,6 +49,7 @@ namespace BGIQD {
             unsigned int root ;
             int final_circled ;
             bool deal_circle;
+            int K ;
             struct Edge
             {
                 unsigned int id;
@@ -129,7 +130,7 @@ namespace BGIQD {
                 int total_length;
                 float cov;
                 float barcode_cov ;
-
+                int K ;
                 void Init()
                 {
                     total_length = 0 ;
@@ -183,7 +184,7 @@ namespace BGIQD {
                     total_barcode = 0 ;
                     for( const auto & edge : paths )
                     {
-                        total_length += edge.length ;
+                        total_length += edge.length - K  ;
                         total_cov += edge.length * cov ;
                         total_barcode += edge.barcode_cov ;
                     }
