@@ -20,127 +20,18 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
         , unsigned int edge_id
         , bool is_bal 
         , int max_length
+        , int K
         )
 {
-    /*
-    auto get_min_length_v1 = [](const std::vector<std::list<BGIQD::SOAP2::Edge>> &vec_list)
-    {
-        int min_length = 0;
-        for( const auto & list : vec_list)
-        {
-            int length = 0 ;
-            for( auto i = list.begin() ; i != list.end() ; i = std::next(i))
-            {
-                if( i == list.begin() || std::next(i) == list.end() )
-                    continue ;
-                length += i->length ;
-            }
-            if( min_length == 0 || min_length > length )
-                min_length = length ;
-        }
-        return min_length ;
-    };
-
-    auto get_min_length_v2 = [](const std::vector<std::list<BGIQD::SOAP2::Edge>> &vec_list 
-            , const std::map<unsigned int , int >& mid_len)
-    {
-        int min_length = 0;
-        for( const auto & list : vec_list)
-        {
-            int length = 0 ;
-            for( auto i = list.begin() ; i != list.end() ; i = std::next(i))
-            {
-                if( i == list.begin() || std::next(i) == list.end() )
-                    continue ;
-                length += i->length ;
-            }
-            int min_length_1 = length ;
-            length = 0 ;
-            for( auto i = list.begin() ; i != list.end() ; i = std::next(i))
-            {
-                if( i == list.begin() || std::next(i) == list.end() )
-                    continue ;
-                if( mid_len.find( i->id ) != mid_len.end() )
-                {
-                    if( length + mid_len.at(i->id) < min_length_1 )
-                        min_length_1 = length + mid_len.at(i->id) ;
-                }
-                length += i->length ;
-            }
-            length = min_length_1;
-            if( min_length == 0 || min_length > length )
-                min_length = length ;
-        }
-        return min_length ;
-    };
-
-    auto get_mid_min = [&get_min_length_v1, &get_min_length_v2] (const std::map<unsigned int ,std::vector<std::list<BGIQD::SOAP2::Edge> > >&mid_list)
-    {
-        // round 1
-        //std::vector<std::tuple<unsigned int , int>> ret_map;
-        std::vector<std::tuple<int ,unsigned int>> ret_map;
-        for( const auto & i : mid_list )
-        {
-            ret_map.push_back(std::make_tuple(get_min_length_v1(i.second),i.first));
-        }
-        std::sort( ret_map.begin() ,ret_map.end());
-        // round 2
-        for( size_t i = 0 ; i + 1< ret_map.size() ; i ++ )
-        {
-            unsigned int min_length , min_id ;
-            std::tie(min_length , min_id) = ret_map[i];
-            std::map<unsigned int , int > min_map ;
-            min_map[min_id] = min_length ;
-            for( size_t j = i + 1 ; j < ret_map.size() ; j ++ )
-            {
-                int curr_length ;
-                unsigned int curr_id ;
-                std::tie(curr_length, curr_id) = ret_map[j];
-                const auto a_list= mid_list.at(curr_id);
-                int final_length = get_min_length_v2(a_list , min_map);
-                if( final_length < curr_length )
-                {
-                    std::get<0>(ret_map[j]) = final_length ;
-                }
-            }
-        }
-        std::map<unsigned int , int > ret ;
-        for( const auto & i : ret_map )
-        {
-            unsigned int id ;
-            int len ;
-            std::tie(len,id) = i ;
-            ret[id] = len ;
-        }
-        return ret ;
-    };
-    */
     BGIQD::SOAP2::Edge & root = config.edge_array[edge_id];
-    unsigned int path_i = edge_id;
-    unsigned int bal_i = root.bal_id ;
-    //unsigned int base_i = order ? config.edge_array[edge_id].bal_id : edge_id ;
-    //std::list<BGIQD::SOAP2::Edge> stack;
-    //std::map<unsigned int , BGIQD::SOAP2::Edge > history;
-    //std::map<unsigned int , std::vector<std::list<BGIQD::SOAP2::Edge> > > paths;
-    //std::map<unsigned int , std::vector<std::list<BGIQD::SOAP2::Edge> > > mids;
-    std::map<unsigned int , float> * neibs;
-    if ( is_bal )
-        neibs = & config.connections.at(bal_i);
-    else
-        neibs = & config.connections.at(path_i);
 
-    /*
-    config.edge_array[path_i].DepthSearch( 
-            config.edge_array 
-            , stack
-            , history
-            , paths 
-            , mids 
-            , config.edge_array[path_i].length 
-            , *neibs 
-            ,max_length
-            );
-    */
+    unsigned int real_from = edge_id ;
+
+    unsigned int key_from = is_bal ? root.bal_id : edge_id ;
+
+    std::map<unsigned int , float> * neibs;
+
+    neibs = & config.connections.at(key_from);
 
     auto key = [neibs, &config] (unsigned int id)
     {
@@ -175,139 +66,115 @@ void findConnection(BGIQD::SOAP2::GlobalConfig & config
             > Searcher;
     Searcher searcher;
     searcher.accesser.base = &config.graph_ea ;
+    searcher.accesser.K = K ;
     searcher.ender.Init( key , max_length );
 
-    searcher.DoSPFSearch(path_i );
+    searcher.DoSPFSearch(real_from);
     index ++ ;
 
-    //auto mid_map = get_mid_min( mids );
-    //for(auto & j : paths)
     for ( auto & j : searcher.ender.founder )
     {
-        /*std::cerr<<j.first<<'\t'<<j.second[0].size()<<'\t';
-          while( j.second[0].size() > 0 )
-          {
-          std::cerr<<j.second[0].top().id<<"\t";
-          j.second[0].pop();
-          }
-          std::cerr<<std::endl;*/
-        unsigned int to_id = j.first ;
-        float sim = neibs->at(to_id);
-        //for( const auto & a_path : j.second )
-        //{
-        //unsigned int to_id_in_path = a_path.front().id ;
-        //unsigned int to_id_in_path = j.second ;
-        //int length  = get_min_length_v2(j.second , mid_map);
-        auto & curr_from = config.key_array[config.key_map.at(is_bal ? bal_i : path_i) ];
-        auto & curr_to = config.key_array[config.key_map[to_id]];
-        //if( ! is_bal && curr_from.to.find( to_id_in_path )  != curr_from.to.end () )
-        //{
-        //    if( curr_from.to.at( to_id_in_path ).length <= length )
-        //        continue ;
-        //}
-        //else if ( is_bal )
-        //{
-        //    if( to_id != to_id_in_path )
-        //    {
-        //        if( curr_from.from.find( to_id ) != curr_from.from.end() )
-        //            if( curr_from.from.at( to_id ).length <= length )
-        //                continue ;
-        //    }
-        //    else
-        //    {
-        //        if( curr_from.from.find( curr_to.bal_id ) != curr_from.from.end() )
-        //            if( curr_from.from.at( curr_to.bal_id ).length <= length )
-        //                continue ;
+        unsigned int key_to = j.first ;
 
-        //    }
-        //}
+        float sim = neibs->at(key_to);
+
+        auto & curr_from = config.key_array[config.key_map.at(key_from) ];
+
+        auto & curr_to = config.key_array[config.key_map[key_to]];
 
         //
-        //  A1->B1
+        //  A1->B1 * +
         //  A2<-B2
         //
-        if( ! is_bal && j.second.base )
+
+        if ( ! is_bal && j.second.base )
         {
 
-            int length  = searcher.fib_nodes.at(to_id).Base.key
-                - searcher.accesser.AccessNode(to_id).length;
+            unsigned int real_to = key_to ;
+
+            int length  = searcher.fib_nodes.at(real_to).Base.key + K 
+                - searcher.accesser.AccessNode(real_to).length;
 
             {
-                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[path_i]]);
-                BGIQD::SOAP2::KeyConn conn{to_id,length,0,sim};
+                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[key_from]]);
+                BGIQD::SOAP2::KeyConn conn{key_to,length,0,sim};
                 conn.SetPostive();
-                curr_from.to[to_id]= conn;
+                curr_from.to[key_to]= conn;
             }
             {
-                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[to_id]]);
-                BGIQD::SOAP2::KeyConn conn{path_i,length,0,sim};
+                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[key_to]]);
+                BGIQD::SOAP2::KeyConn conn{key_from,length,0,sim};
                 conn.SetPostive();
-                curr_to.from[path_i] = conn;
+                curr_to.from[key_from] = conn;
             }
         }
+
         //
-        // A1->B2
-        // A2<-B1
+        // A1->B2 * +
+        // A2<-B1 +
         //
-        //else if( !is_bal && to_id != to_id_in_path )
+
         if( ! is_bal && j.second.bal)
         {
-            int length  = searcher.fib_nodes.at(curr_to.bal_id).Base.key // nodes.at(curr_to.bal_id).path_length
-                - searcher.accesser.AccessNode(curr_to.bal_id).length;
+            unsigned int real_to =curr_to.bal_id;
+            unsigned int B1_to = curr_from.bal_id ;
+            int length  = searcher.fib_nodes.at(real_to).Base.key + K // nodes.at(curr_to.bal_id).path_length
+                - searcher.accesser.AccessNode(real_to).length;
             {
-                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[path_i]]);
-                BGIQD::SOAP2::KeyConn conn{to_id,length,0, sim};
-                curr_from.to[curr_to.bal_id]= conn;
+                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[key_from]]);
+                BGIQD::SOAP2::KeyConn conn{key_to,length,0, sim};
+                curr_from.to[real_to]= conn;
             }
             {
-                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[to_id]]);
-                BGIQD::SOAP2::KeyConn conn{path_i,length,0, sim};
-                curr_to.to[bal_i] = conn;
+                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[key_to]]);
+                BGIQD::SOAP2::KeyConn conn{key_from,length,0, sim};
+                curr_to.to[B1_to] = conn;
             }
         }
         //
-        // A2->B1
-        // A1<-B2
+        // A2->B1 * +
+        // A1<-B2 +
         //
-        //else if ( is_bal && to_id == to_id_in_path )
         if ( is_bal && j.second.base )
         {
-            int length  = searcher.fib_nodes.at(to_id).Base.key
-                - searcher.accesser.AccessNode(to_id).length;
+            unsigned int real_to = key_to ;
+            unsigned int A1_to = curr_to.bal_id;
+            int length  = searcher.fib_nodes.at(real_to).Base.key + K
+                - searcher.accesser.AccessNode(real_to).length;
             {
-                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[bal_i]]);
-                BGIQD::SOAP2::KeyConn conn{to_id,length,0, sim};
-                curr_from.from[curr_to.bal_id]= conn;
+                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[key_from]]);
+                BGIQD::SOAP2::KeyConn conn{key_to,length,0, sim};
+                curr_from.from[A1_to]= conn;
             }
             {
-                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[to_id]]);
-                BGIQD::SOAP2::KeyConn conn{bal_i,length,0, sim};
-                curr_to.from[path_i] = conn;
+                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[key_to]]);
+                BGIQD::SOAP2::KeyConn conn{key_from,length,0, sim};
+                curr_to.from[real_from] = conn;
             }
         }
         //
-        // A2->B2
-        // A1<-B1
+        // A2->B2 *
+        // A1<-B1 +
         //
-        //else
         if ( is_bal && j.second.bal )
         {
-            int length  = searcher.fib_nodes.at(curr_to.bal_id).Base.key
-                - searcher.accesser.AccessNode(curr_to.bal_id).length;
+            int real_to =curr_to.bal_id;
+
+            int length  = searcher.fib_nodes.at(real_to).Base.key + K 
+                - searcher.accesser.AccessNode(real_to).length;
             {
-                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[bal_i]]);
-                BGIQD::SOAP2::KeyConn conn{to_id,length,0, sim};
+                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[key_from]]);
+                BGIQD::SOAP2::KeyConn conn{key_to,length,0, sim};
                 conn.SetPostive();
-                curr_from.from[to_id]= conn;
+                curr_from.from[key_to]= conn;
             }
             {
-                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[to_id]]);
-                BGIQD::SOAP2::KeyConn conn{bal_i,length,0 , sim};
+                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[key_to]]);
+                BGIQD::SOAP2::KeyConn conn{key_from,length,0 , sim};
                 conn.SetPostive();
-                curr_to.to[bal_i] = conn;
+                curr_to.to[key_from] = conn;
             }
         }
-        //}
     }
     if( index %100 == 0 )
     {
@@ -1061,14 +928,14 @@ int main(int argc , char **argv)
         for( auto j : config.keys )
         {
             t_jobs.AddJob([&config, j, searchDepth_value](){
-                    findConnection(config,j ,false  , searchDepth_value);
+                    findConnection(config,j ,false  , searchDepth_value, config.K);
                     }
                     );
             if( config.edge_array[j].id != config.edge_array[j].bal_id )
             {
                 unsigned int k = config.edge_array[j].bal_id;
                 t_jobs.AddJob([&config, k, searchDepth_value](){
-                        findConnection(config, k ,true , searchDepth_value);
+                        findConnection(config, k ,true , searchDepth_value, config.K);
                         }
                         );
             }

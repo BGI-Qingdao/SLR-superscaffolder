@@ -31,6 +31,7 @@ namespace BGIQD{
                                 , Node_EA
                                 >
         {
+            int K ;
             Node & AccessNode(GraphNodeId i)
             {
                 auto itr = nodes.find(i); 
@@ -81,10 +82,15 @@ namespace BGIQD{
             void GetAttr(const Node & node, const Edge & ,
                     const std::string & name, int &v ) {
                 if(  name == "length" )
-                    v = node.length ;
+                {
+                    if( node.length > K )
+                        v = node.length - K;
+                    else
+                        v = 0 ;
+                }
                 else
                     assert(0);
-            } 
+            }
         };
 
         enum NodeType
