@@ -50,7 +50,7 @@ void loadCluterData(const std::string & file , cluters & data)
     delete in ;
 }
 
-typedef std::map<int , std::vector< std::tuple<int ,int> > > contigRef;
+typedef std::map<int , std::vector< std::tuple<int ,int,bool> > > contigRef;
 void loadContigRef( const std::string & file , contigRef & data )
 {
     auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(file);
@@ -75,7 +75,7 @@ void loadContigRef( const std::string & file , contigRef & data )
             }
             end_pos = info.end_position_on_ref ;
         }
-        data[read].push_back(std::make_tuple(d0.first_match_position,end_pos));
+        data[read].push_back(std::make_tuple(d0.first_match_position,end_pos, d0.IsReverseComplete()));
     }
     delete in ;
 }
@@ -161,23 +161,27 @@ void print_show( int seed, const cluter_show & data , bool s )
 
 void print_contigPos(const contigRef & data)
 {
-    std::vector<std::tuple<int , int , int >> ret ;
+    std::vector<std::tuple<int , int , int , bool >> ret ;
     for( const auto  & a : data )
     {
         for( const auto & b : a.second)
         {
-            ret.push_back(std::make_tuple( std::get<0>(b) , std::get<1>(b) , a.first ));
+            ret.push_back(std::make_tuple( std::get<0>(b) , std::get<1>(b) , a.first, std::get<2>(b)));
         }
     }
+
     std::sort( ret.begin() , ret.end() );
+
     for( const auto & c : ret )
     {
         if ( std::get<1>(c) > std::get<0>(c) )
         std::cout<<std::get<0>(c)<<"\t"
                 << std::get<1>(c)<<"\t"
                 << std::get<1>(c) - std::get<0>(c)<<"\t"
-                << std::get<2>(c)<<std::endl;
+                << std::get<2>(c) <<'\t'
+                << std::get<3>(c) <<std::endl;
     }
+
 }
 
 int main(int argc , char ** argv)

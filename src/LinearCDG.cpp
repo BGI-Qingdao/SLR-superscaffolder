@@ -417,7 +417,7 @@ int main(int argc , char ** argv)
 
     // print linear collection
 
-    auto extractPath = []( unsigned int to_s , bool to_order, bool search_order,BGIQD::SOAP2::KeyEdge & curr,BGIQD::SOAP2::ContigRoad & path)
+    auto extractPath = []( unsigned int to_s , bool to_order, bool search_order,BGIQD::SOAP2::KeyEdge & curr,BGIQD::SOAP2::ContigRoad & path )
     {
         unsigned int to = to_s ;
         path.contig.clear();

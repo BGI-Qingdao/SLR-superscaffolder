@@ -15,6 +15,7 @@ struct A
     unsigned int  contig;
     int start ;
     int end;
+    bool is_reverse_complete;
 };
 
 int main(int argc , char **argv)
@@ -40,6 +41,7 @@ int main(int argc , char **argv)
         a.contig = std::stoi(items[0]);
         a.start = std::stoi(items[2]);
         a.end= std::stoi(items[3]);
+        a.is_reverse_complete = ( items[4] == "1" );
         ref_keys.push_back(a);
         ref_keys_map[std::stoul(items[0])].push_back(index++);
     }
@@ -54,10 +56,15 @@ int main(int argc , char **argv)
     while(!std::getline(std::cin,line_1).eof())
     {
         auto items = BGIQD::STRING::split(line_1,"\t");
+
         int length = std::stoi( items[0] ) ;
+
         if ( length < 2 ) 
             continue;
+
         std::vector<unsigned int> line;
+        std::vector<bool> orders;
+
         for( int i = 1 ; i <= length ; i++ )
         {
             unsigned int contig = std::stoul(items[i]);
@@ -65,178 +72,148 @@ int main(int argc , char **argv)
                     &&  ref_keys_map.find(contig-1) != ref_keys_map.end())
             {
                 line.push_back(contig-1);
+                orders.push_back(false);
             }
             else
             {
                 line.push_back(contig);
+                orders.push_back(true);
             }
         }
-        /*
-        unsigned int head , tail ;
-        char headin, tailin,dot,dir;
-        int length;
-        std::istringstream ist(line_1);
-        ist>>dir>>headin>>head>>dot>>tail>>tailin>>length;
-        if( length < 2 )
-            continue;
 
-        if( headin == '(' )
-            length ++ ;
-        if( tailin == ')')
-            length ++ ;
-
-        total ++ ;
-        std::vector<unsigned int> line;
-        int left = length ;
-        while( left > 0 )
-        {
-            unsigned int next ;
-            ist>>next;
-            left -- ;
-            if(left == length-1 && headin == '(')
-                continue;
-            if( left == 0 && tailin == ')')
-                continue;
-            line.push_back(next);
-        }*/
-
-        /*
-        auto findR = [&ref_keys, &ref_keys_map]( unsigned int from , unsigned int to )
-        {
-            int root = ref_keys_map[from];
-            //forward
-            for( int j = root+1 ; j<(root+4)&& j<(int)ref_keys.size() ; j++)
-            {
-                if( ref_keys[j].contig == to )
-                    return j-root;
-            }
-            //backward
-            for( int j = root-1 ; j>int(root-4)&& j>=0 ; j--)
-            {
-                if( ref_keys[j].contig == to )
-                    return j-root;
-            }
-            return 0;
-        };
-        */
         for( int i =0 ; i< (int)line.size() ; i++ )
         {
             seeds.Touch(line[i]);
         }
 
         int status = 0 ;
+
         int del_total = 0 ;
+
         for( const auto root : ref_keys_map[line[0]])
         {
+            auto & contig = ref_keys[root] ;
+            bool downstream = true ;
+            // real contig upstream on ref
+            if(  (!contig.is_reverse_complete) && (! orders[0] ) )
+            {
+                downstream = false ;
+            }
+            // seed contig upstream on ref
+            if ( contig.is_reverse_complete && orders[0] )
+            {
+                downstream = false ;
+            }
             //downstream
-            int order = 1 ;
+            int order = downstream ? 1 : -1 ;
             int start = root + order ;
             int i = 1 ;
             del_total = 0 ;
-            for( i = 1 ; i< (int)line.size() ; i++ )
+            bool conflict = false ;
+            if ( downstream )
             {
-                int del = 0;
-                while(1)
+                for( i = 1 ; i< (int)line.size() ; i++ )
                 {
-                    if( ref_keys[ start ].contig == line[i] )
+                    int del = 0;
+                    while(1)
                     {
-                        start += order;
-                        break;
+                        if( ref_keys[ start ].contig == line[i] )
+                        {
+                            if ( orders[i] && ( ref_keys[start].is_reverse_complete )) 
+                            {
+                                conflict = true ;
+                            }
+                            if ( (! orders[i]) && ( !ref_keys[start].is_reverse_complete )) 
+                            {
+                                conflict = true ;
+                            }
+                            start += order;
+                            break;
+                        }
+                        else
+                        {
+                            del ++ ;
+                            start += order;
+                        }
+                        if( del > 3 )
+                            break;
                     }
+                    if ( conflict )
+                    {
+                        break ;
+                    }
+                    if( del > 3 ) 
+                        break;
                     else
-                    {
-                        del ++ ;
-                        start += order;
-                    }
-                    if( del > 3 )
-                        break;
+                        del_total += del;
                 }
-                if( del > 3 ) 
-                    break;
-                else
-                    del_total += del;
-            }
-            if( i == (int)line.size() )
-            {
-                status = 1 ; //correct
-                break;
-            }
-            //upstream
-            order = -1 ;
-            start = root + order ;
-            del_total = 0 ;
-            i = 1 ;
-            for( i = 1 ; i< (int)line.size() ; i++ )
-            {
-                int del = 0;
-                while(1)
+                if( ! conflict && i == (int)line.size() )
                 {
-                    if( ref_keys[ start ].contig == line[i] )
-                    {
-                        start += order;
-                        break;
-                    }
-                    else
-                    {
-                        del ++ ;
-                        start += order;
-                    }
-                    if( del > 5 )
-                        break;
-                }
-                if( del > 5 ) 
+                    status = 1 ; //correct
                     break;
-                else
-                    del_total +=del;
+                }
             }
-            if( i == (int)line.size() )
-            {
-                status = 1 ; //correct
-                break;
-            }
-        }
-        //int del 
-        /*
-        for( int i =1 ; i< (int)line.size() ; i++ )
-        {
-            int j = findR(line[i-1],line[i]);
-            if( j == 0 )
-            {
-                wrong.Touch(line.size());
-                correct1 = false;
-                break;
-            }
-
-            if( order == 0)
-                order = j;
             else
             {
-                // error
-                if( order *j <= 0 )
+                //upstream
+                order = -1 ;
+                start = root + order ;
+                del_total = 0 ;
+                i = 1 ;
+                for( i = 1 ; i< (int)line.size() ; i++ )
                 {
-                    wrong.Touch(line.size());
-                    correct1 = false;
+                    int del = 0;
+                    while(1)
+                    {
+                        if( ref_keys[ start ].contig == line[i] )
+                        {
+                            if ( orders[i] && ( !ref_keys[start].is_reverse_complete )) 
+                            {
+                                conflict = true ;
+                            }
+                            if ( (! orders[i]) && ( ref_keys[start].is_reverse_complete )) 
+                            {
+                                conflict = true ;
+                            }
+                            start += order;
+                            break;
+                        }
+                        else
+                        {
+                            del ++ ;
+                            start += order;
+                        }
+                        if( del > 5 )
+                            break;
+                    }
+                    if( del > 5 ) 
+                        break;
+                    else
+                        del_total +=del;
+                }
+                if( ! conflict && i == (int)line.size() )
+                {
+                    status = 1 ; //correct
                     break;
                 }
-                order += j ;
             }
         }
-        */
         if( status == 1 && del_total == 0 )
             correct.Touch(line.size());
         else if ( status == 1 && del_total > 0 )
         {
             del.Touch(line.size());
             if( detail.to_bool())
-            std::cout<<"D: "<<line_1<<std::endl;
+                std::cout<<"D: "<<line_1<<std::endl;
         }
         else
         {
             wrong.Touch(line.size());
             if( detail.to_bool())
-            std::cout<<"E: "<<line_1<<std::endl;
+                std::cout<<"E: "<<line_1<<std::endl;
         }
     }
+
     std::cout<<"correct freq\n"<<correct.ToString()<<std::endl;
     std::cout<<"wrong freq\n"<<wrong.ToString()<<std::endl;
     std::cout<<"del freq\n"<<del.ToString()<<std::endl;
