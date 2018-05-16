@@ -112,6 +112,7 @@ void SearchAllPath(unsigned int from  , unsigned int to , SearchResult & ret){
         }
     };
     ret.searcher.accesser.base = &config.graph_eab.graph_ea;
+    ret.searcher.accesser.K = config.K ;
     ret.searcher.ender.Init( key , config.max_length);
     ret.searcher.DoSPFSearch(ret.true_from);
 
@@ -225,7 +226,7 @@ void FillContigRoad( int i ) //BGIQD::stLFR::ContigRoad & road)
         auto start = road.getLinearStep(i);
         SearchResult ret ;
         SearchAllPath(start.first , start.second, ret);
-        if( ret.succ )
+        if( ! ret.succ )
         {
             if( road.status  == BGIQD::stLFR::ContigRoad::FillStatus::None )
             {
@@ -337,11 +338,6 @@ void FillContigRoad( int i ) //BGIQD::stLFR::ContigRoad & road)
         {
             config.road_fill_freq.Touch("PartSucc");
         }
-        for( const auto i : road.contig_path )
-        {
-            std::cout<<i<<'\t';
-        }
-        std::cout<<std::endl;
     }
 }
 

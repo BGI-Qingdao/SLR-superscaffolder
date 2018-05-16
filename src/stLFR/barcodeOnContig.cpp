@@ -95,7 +95,7 @@ namespace BGIQD {
                 Circle c;
                 c.Clean() ;
                 findAllPath(i, p, c);
-                if( path_num < 0 )
+                if( path_num < 0 || path_num > 100 )
                     return ;
             }
             if( path_num < 0 )
@@ -166,7 +166,7 @@ namespace BGIQD {
                 for( const auto & i : sub_graph[curr].tos )
                 {
                     findAllPath(i ,p,circle);
-                    if( path_num < 0 )
+                    if( path_num < 0 || path_num > 100 )
                         return ;
                 }
             }
@@ -179,7 +179,7 @@ namespace BGIQD {
         }
         void P2PGraph::ScoreAllPath()
         {
-            if( path_num > 1 )
+            if( path_num > 1 && path_num < 100  )
             {
                 for(auto & i : allPaths )
                 {
@@ -198,7 +198,7 @@ namespace BGIQD {
 
         void P2PGraph::CleanAndSavePath()
         {
-            if( path_num > 0 )
+            if( path_num > 0 && path_num < 100)
             {
                 final_path.clear();
                 auto & correct = * allPaths.begin();
@@ -210,7 +210,11 @@ namespace BGIQD {
                 allPaths.clear();
             }
             else
+            {
                 allPaths.clear();
+                if( path_num > 100 )
+                    path_num  = - path_num ;
+            }
         }
 
 

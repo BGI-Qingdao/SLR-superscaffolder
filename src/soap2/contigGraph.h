@@ -164,6 +164,7 @@ namespace BGIQD {
             int to_size ;
             int total_size;
             int jump_conn;
+
         }; // struct KeyEdge
     }//namespace SOAP2
 }//namespace BGIQD

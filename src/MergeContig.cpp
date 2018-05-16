@@ -37,6 +37,17 @@
 
 struct AppConfig
 {
+    enum WorkType
+    {
+        Unknow = 0 ,
+        SuperContigUsed = 1 ,
+        SuperContigOnly = 2 ,
+        SuperContigAndLeft = 3 ,
+        SuperContigAndReLinear = 4 ,
+    };
+
+    WorkType type ;
+
     BGIQD::SOAP2::FileNames fnames;
     BGIQD::LOG::logger loger;
     BGIQD::SOAP2::ContigTypeDetecter detector;
@@ -51,6 +62,7 @@ struct AppConfig
     std::map< unsigned int , unsigned int > id_map;
 
     int K;
+
     int round ;
 
     enum ContigStatus 
@@ -80,7 +92,7 @@ struct AppConfig
         return std::make_pair( UNKNOW , std::ref(error));
     }
 
-    void Init(const std::string & prefix , int rd, int k )
+    void Init(const std::string & prefix , int rd, int k , int )
     {
         K = k ;
         round = rd;
@@ -354,7 +366,7 @@ struct AppConfig
                 }
                 else
                 {
-                    std::cerr<<'\t'<<i;
+                    std::cerr<<'\t'<<m;
                 }
             }
             std::cerr<<std::endl;
