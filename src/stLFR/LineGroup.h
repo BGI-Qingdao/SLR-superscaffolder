@@ -8,25 +8,34 @@
 namespace BGIQD {
     namespace stLFR {
 
+        /**************** For fillcontigroad below *********************/
         struct ContigRoad
         {
-            bool headin;
-            bool tailin;
-            int linear_length;
-            std::vector<unsigned int> group;
-
             std::string  to_string() const ;
 
             void init(const std::string & buff);
+
+            void AddGroup( const std::vector<unsigned int > & a );
 
             bool needMerge() const { return linear_length > 1 ; };
 
             std::pair<unsigned int, unsigned int>  getLinearStep(int index);
 
+            // linear group
+            bool headin;
+
+            bool tailin;
+
+            int linear_length;
+
+            std::vector<unsigned int> group;
+
+            // fill result
             std::vector<unsigned int > contig_path;
 
+            int fill_num;
 
-            void AddGroup( const std::vector<unsigned int > & a );
+            std::vector<int> circle_runs;
 
             enum FillStatus
             {
@@ -35,9 +44,6 @@ namespace BGIQD {
                 PartSucc = 2 ,
                 Complete = 3
             } status;
-
-            int fill_num;
-            std::vector<int> circle_runs;
         };
 
         struct ContigRoads
@@ -46,17 +52,23 @@ namespace BGIQD {
             std::vector<ContigRoad>  roads;
         };
 
+        /**************** For mergecontig below *********************/
+
         struct fill_flag
         {
             FLAGS_INT ;
             ADD_A_FLAG(0 , circle);
             ADD_A_FLAG(1 , fill_by_super);
         };
+
         typedef std::vector<unsigned int> ContigRoadFill ;
+
         struct ContigRoadFills
         {
             void LoadContigRoadFills( const std::string & file );
+
             std::vector<ContigRoadFill>  fills;
+
             std::vector<fill_flag> flags;
         };
     }

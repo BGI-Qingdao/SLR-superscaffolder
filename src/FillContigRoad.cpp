@@ -30,8 +30,18 @@ struct GlobalConfig
     BGIQD::stLFR::ContigRoads roads;
     BGIQD::LOG::logger lger;
 
-
+    enum FillStrategy
+    {
+        Unknow = 0 ,
+        ShortestPath = 1,
+        BarcodeCov = 2 ,
+        BarcodeCov_FillCircle = 3
+    };
+    FillStrategy strategy;
+    float Ecov ;
+    int max_length;
     int K;
+
     std::string updateEdge;
     std::string arc;
     std::string cluster;
@@ -53,21 +63,7 @@ struct GlobalConfig
 
 struct SearchResult
 {
-    //std::map<unsigned int , std::vector<std::list<BGIQD::SOAP2::Edge> > > paths;
-    //std::map<unsigned int , std::vector<std::list<BGIQD::SOAP2::Edge> > > mids;
-    bool rearch;
-
-    bool head_tail ; // depth search from head or tail
-    bool downstream;
-
-    enum Status
-    {
-        NotRearch = 0,
-        A1B1_B2A2 = 1 ,
-        A1B2_B1A2 = 2 ,
-        B1A1_A2B2 = 3 ,
-        B2A1_A2B1 = 4 ,
-    } status;
+    bool succ ;
 
     unsigned int true_from ;
     unsigned int true_to ;
@@ -75,29 +71,23 @@ struct SearchResult
     Searcher searcher;
 };
 
-SearchResult SearchAllPath(unsigned int from  , unsigned int to, int max){
+void SearchAllPath(unsigned int from  , unsigned int to , SearchResult & ret){
 
-    SearchResult ret;
-    ret.head_tail = true ;
-    ret.downstream = true ;
-    ret.status = SearchResult::NotRearch;
+    // fill basic varibales
     BGIQD::SOAP2::Edge * edge_array = config.graph_eab.graph_ea.edge_array;
-
-    unsigned int head_id = from;
-    unsigned int tail_id = to;
-    unsigned int search_id = head_id;
-    unsigned int target_id = tail_id;
+    ret.true_from = from ;
+    ret.true_to = to ;
 
     std::map<unsigned int ,float> neibs ;
-    auto & node = edge_array[target_id];
+    auto & node = edge_array[to];
     unsigned int to_key_id ;
     if( node.IsKey() )
-        to_key_id = target_id ;
+        to_key_id = to ;
     else
         to_key_id = node.bal_id ;
-
     neibs[to_key_id] = 0.5f;
 
+    // Search graph
     auto key = [neibs, edge_array] (unsigned int id)
     {
         auto & node = edge_array[id] ;
@@ -121,53 +111,30 @@ SearchResult SearchAllPath(unsigned int from  , unsigned int to, int max){
                 return BGIQD::SOAP2::NodeType::RC_Key_Neibs ;
         }
     };
-
     ret.searcher.accesser.base = &config.graph_eab.graph_ea;
-    ret.searcher.ender.Init( key , max);
+    ret.searcher.ender.Init( key , config.max_length);
+    ret.searcher.DoSPFSearch(ret.true_from);
 
-    ret.searcher.DoSPFSearch(search_id);
-
-    ret.true_from = from ;
-    ret.true_to = to ;
-
+    // Check result
     auto & ender = ret.searcher.ender ;
     auto itr = ender.founder.find(to_key_id);
     if( itr == ender.founder.end() )
     {
         assert(0);
-        ret.status = SearchResult::NotRearch;
-        return ret;
+        ret.succ = false;
     }
     auto & tos = itr->second;
     if( node.IsKey() &&  ! tos.base )
     {
         assert(0);
-        ret.status = SearchResult::NotRearch;
-        return ret;
+        ret.succ = false;
     }
     else if ( ! node.IsKey() && ! tos.bal )
     {
         assert(0);
-        ret.status = SearchResult::NotRearch;
-        return ret;
+        ret.succ = false;
     }
-    else if ( node.IsKey() && tos.base )
-    {
-        ret.status = SearchResult::A1B1_B2A2 ;
-
-    }
-    else if ( ! node.IsKey() && tos.bal ) 
-    {
-        ret.status = SearchResult::A1B2_B1A2 ;
-
-    }
-    else
-    {
-        assert(0);
-        ret.status = SearchResult::NotRearch;
-        return ret;
-    }
-    return ret ;
+    ret.succ = true ;
 }
 
 void FindCorrectPath(unsigned int from , unsigned int to, 
@@ -195,19 +162,19 @@ void FindCorrectPath(unsigned int from , unsigned int to,
             auto & a_to = nexts.front() ;
             if( a_to.Base.value != from )
             {
-                p2pgrapg.AddFromTo( a_to.prev , a_to.Base.value ) ;//, a_to.prev );
+                p2pgrapg.AddFromTo( a_to.prev , a_to.Base.value );
                 if( history.find( a_to.prev ) == history.end() )
                 {
                     history.insert( a_to.prev ) ;
                     nexts.push( result.searcher.fib_nodes.at(a_to.prev));
                 }
             }
-            for( auto from : a_to.other_from )
+            for( auto a_from : a_to.other_from )
             {
-                p2pgrapg.AddFromTo(from , a_to.Base.value ) ;//,from );
-                if( history.find( from ) == history.end() )
+                p2pgrapg.AddFromTo(a_from , a_to.Base.value ) ;
+                if( history.find( a_from ) == history.end() )
                 {
-                    history.insert( from ) ;
+                    history.insert( a_from ) ;
                     nexts.push( result.searcher.fib_nodes.at(from));
                 }
             }
@@ -225,31 +192,22 @@ bool AppendPath( const  BGIQD::stLFR::P2PGraph & p2pgrapg , const SearchResult &
 {
     if( ! road.needMerge() )
         return false;
-    if( result.status== SearchResult::NotRearch )
+    if( ! result.succ )
         return false;
     if( p2pgrapg.path_num < 1 )
         return false;
 
-    if( result.head_tail )
-    {
-        road.contig_path.insert(road.contig_path.end() 
-                , p2pgrapg.final_path.begin()
-                , p2pgrapg.final_path.end() );
-    }
-    else
-    {
-        road.contig_path.insert(road.contig_path.end() 
-                , p2pgrapg.final_path.rbegin()
-                , p2pgrapg.final_path.rend() );
-    }
+    road.contig_path.insert(road.contig_path.end() 
+            , p2pgrapg.final_path.begin()
+            , p2pgrapg.final_path.end() );
 
     road.circle_runs.push_back(p2pgrapg.final_circled);
-
     return true;
 }
 
-void FillContigRoad( BGIQD::stLFR::ContigRoad & road, int max , float ecov , bool circle_solve)
+void FillContigRoad( int i ) //BGIQD::stLFR::ContigRoad & road)
 {
+    auto & road = config.roads.roads[i];
     static std::mutex write_mutex;
     static std::mutex path_num_mutex;
     if ( ! road.needMerge() )
@@ -258,11 +216,16 @@ void FillContigRoad( BGIQD::stLFR::ContigRoad & road, int max , float ecov , boo
     road.status = BGIQD::stLFR::ContigRoad::FillStatus::None ;
     road.fill_num = 0;
     bool line_down = false;
+    if( config.strategy == GlobalConfig::FillStrategy::Unknow )
+    {
+        assert(0);
+    }
     for(int i=1  ; i < road.linear_length ; i++ )
     {
         auto start = road.getLinearStep(i);
-        auto ret = SearchAllPath(start.first , start.second,max);
-        if( ret.status == SearchResult::NotRearch )
+        SearchResult ret ;
+        SearchAllPath(start.first , start.second, ret);
+        if( ret.succ )
         {
             if( road.status  == BGIQD::stLFR::ContigRoad::FillStatus::None )
             {
@@ -275,94 +238,76 @@ void FillContigRoad( BGIQD::stLFR::ContigRoad & road, int max , float ecov , boo
         }
         else
         {
-            bool curr_line_down = false ;
-
-            if ( ret.status == SearchResult::A1B1_B2A2 ||  ret.status == SearchResult::A1B2_B1A2  )
+            if( road.fill_num == 0)
             {
-                curr_line_down = true ;
+                road.contig_path.clear();
+                road.contig_path.push_back(ret.true_from);
             }
-
-            if( road.status  == BGIQD::stLFR::ContigRoad::FillStatus::None )
+            if( config.strategy != GlobalConfig::FillStrategy::ShortestPath )
             {
-                line_down = curr_line_down ;
-            }
-            else if ( line_down != curr_line_down )
-            {
-                road.status = BGIQD::stLFR::ContigRoad::FillStatus::Conflict ;
-                break ;
-            }
+                BGIQD::stLFR::P2PGraph p2pgrapg;
 
-            /*BGIQD::stLFR::P2PGraph p2pgrapg;
+                p2pgrapg.base_graph = &config.graph_eab;
+                p2pgrapg.deal_circle  = 
+                    (config.strategy == GlobalConfig::FillStrategy::BarcodeCov_FillCircle);
+                p2pgrapg.ecov = config.Ecov ;
+                p2pgrapg.K =config.K ;
 
-            p2pgrapg.base_graph = &config.graph_eab;
-            p2pgrapg.deal_circle  = circle_solve ;
-            p2pgrapg.ecov = ecov ;
-            p2pgrapg.K =config.K ;
-            FindCorrectPath(ret.true_from , ret.true_to , ret , p2pgrapg );
-            // check if allpath find a correct path ?
-            {
-                std::lock_guard<std::mutex> l(path_num_mutex);
-                config.path_num_freq.Touch( p2pgrapg.path_num);
-            }
-
-            if( p2pgrapg.path_num < 1 )
-            {
-                if( road.status  == BGIQD::stLFR::ContigRoad::FillStatus::None )
+                FindCorrectPath(ret.true_from , ret.true_to , ret , p2pgrapg );
+                // check if allpath find a correct path ?
                 {
-                    continue ;
+                    std::lock_guard<std::mutex> l(path_num_mutex);
+                    config.path_num_freq.Touch( p2pgrapg.path_num);
                 }
-                else
+
+                if( p2pgrapg.path_num < 1 )
                 {
+                    if( road.status  == BGIQD::stLFR::ContigRoad::FillStatus::None )
+                    {
+                        continue ;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                if( ! AppendPath( p2pgrapg ,ret,road ) )
+                {
+                    road.status = BGIQD::stLFR::ContigRoad::FillStatus::Conflict ;
                     break;
                 }
             }
-            */
-            auto extractShortestPath = [] (const Searcher & searcher , unsigned int from , unsigned int to)
+            else
             {
-                unsigned int curr = to ;
-                std::stack<unsigned int> path;
-                while(curr != from )
+                auto extractShortestPath = [] (const Searcher & searcher , unsigned int from , unsigned int to)
                 {
-                    path.push(curr);
-                    try {
-                        const auto & node = searcher.fib_nodes.at(curr);
-                        curr = node.prev ;
-                    }
-                    catch ( ... ) 
+                    unsigned int curr = to ;
+                    std::stack<unsigned int> path;
+                    while(curr != from )
                     {
-                        assert(0);
+                        path.push(curr);
+                        try {
+                            const auto & node = searcher.fib_nodes.at(curr);
+                            curr = node.prev ;
+                        }
+                        catch ( ... ) 
+                        {
+                            assert(0);
+                        }
+                    };
+                    std::vector<unsigned int> ret ;
+                    while(!  path.empty() )
+                    {
+                        ret.push_back(path.top());
+                        path.pop() ;
                     }
+                    return ret ;
                 };
-                std::vector<unsigned int> ret ;
-                while(!  path.empty() )
-                {
-                    ret.push_back(path.top());
-                    path.pop() ;
-                }
-                return ret ;
-            };
-
-            if( road.fill_num== 0 )
-            {
-                if( ret.head_tail )
-                    road.contig_path.push_back( ret.true_from );
-                else 
-                    road.contig_path.push_back( ret.true_to );
+                auto retp = extractShortestPath( ret.searcher , ret.true_from , ret.true_to );
+                road.contig_path.insert(road.contig_path.end() 
+                        , retp.begin()
+                        , retp.end() );
             }
-
-            auto retp = extractShortestPath( ret.searcher , ret.true_from , ret.true_to );
-            road.contig_path.insert(road.contig_path.end() 
-                    , retp.begin()
-                    , retp.end() );
-            //if( ! AppendPath( p2pgrapg ,ret,road ) )
-            //{
-            //    road.status = BGIQD::stLFR::ContigRoad::FillStatus::Conflict ;
-            //    break;
-            //}
-            //if( ret.head_tail )
-            //    road.contig_path.push_back( ret.true_to );
-            //else 
-            //    road.contig_path.push_back( ret.true_from );
             road.status = BGIQD::stLFR::ContigRoad::FillStatus::PartSucc ;
             road.fill_num ++ ;
         }
@@ -372,7 +317,7 @@ void FillContigRoad( BGIQD::stLFR::ContigRoad & road, int max , float ecov , boo
     {
         road.status = BGIQD::stLFR::ContigRoad::FillStatus::Complete;
     }
-    /*{
+    {
         std::lock_guard<std::mutex> l(write_mutex);
         if (road.status == BGIQD::stLFR::ContigRoad::FillStatus::Conflict)
         {
@@ -397,7 +342,7 @@ void FillContigRoad( BGIQD::stLFR::ContigRoad & road, int max , float ecov , boo
             std::cout<<i<<'\t';
         }
         std::cout<<std::endl;
-    }*/
+    }
 }
 
 void report()
@@ -454,6 +399,7 @@ int  main(int argc, char **argv)
 {
     BGIQD::LOG::logfilter::singleton().get("SuperContig",BGIQD::LOG::loglevel::INFO , config.lger);
     BGIQD::LOG::timer t(config.lger,"SuperContig");
+    //step0 Parse parmeters...
     START_PARSE_ARGS
     DEFINE_ARG_DETAIL(std::string , prefix, 'o',false,"prefix \n \
                                             need    xxx.Arc\n\
@@ -464,7 +410,10 @@ int  main(int argc, char **argv)
     DEFINE_ARG_DETAIL(int , kvalue, 'K',false,"K value");
     DEFINE_ARG_DETAIL(int , t_num, 't',true,"thread num . default[8]");
     DEFINE_ARG_DETAIL(float , Ecov, 'e',false,"Ecov of contigs");
-    DEFINE_ARG_DETAIL(bool, circle, 'c',true,"solve circle by cov ? default not");
+    DEFINE_ARG_DETAIL(int, fill_strategy, 's',false,"fill strategy \n\
+                                                     1 for shortest path fill\n\
+                                                     2 for barcode cov path fill without circle solve\n\
+                                                     3 for barcode cov path fill and read cov solve circle. ( may cause mismatch )");
     DEFINE_ARG_DETAIL(int, searchDepth, 'l',true,"search depth (bp) default 10000");
     END_PARSE_ARGS
 
@@ -474,6 +423,9 @@ int  main(int argc, char **argv)
     config.cluster= prefix.to_string() +".cluster";
     config.road = prefix.to_string() +".contigroad";
     config.read2contig = prefix.to_string() +".read2contig";
+    config.max_length = searchDepth.to_int();
+    config.Ecov = Ecov.to_float();
+    config.strategy = static_cast<GlobalConfig::FillStrategy>(fill_strategy.to_int());
 
     if( ! t_num.setted )
     {
@@ -481,7 +433,7 @@ int  main(int argc, char **argv)
         t_num.d.i = 8 ;
     }
     config.lger<<BGIQD::LOG::lstart()<<"parse args end ... "<<BGIQD::LOG::lend();
-    //step1 .loading ...
+    //step1 .Loading files...
     config.graph_eab.graph_ea.LoadEdge(config.updateEdge,config.K);
     config.lger<<BGIQD::LOG::lstart()<<"load updateEdg end ... "<<BGIQD::LOG::lend();
     config.graph_eab.graph_ea.LoadArc(config.arc);
@@ -495,43 +447,24 @@ int  main(int argc, char **argv)
     config.LoadKeyInfo();
     config.lger<<BGIQD::LOG::lstart()<<"load key end ... "<<BGIQD::LOG::lend();
 
-    //step2 fill road ... 
+    //step2 Fill roads ...
     {
         BGIQD::MultiThread::MultiThread t_jobs;
         t_jobs.Start(t_num.to_int());
 
-        int max = searchDepth.to_int();
-        float ecov = Ecov.to_float() ;
-        bool circle_solve = circle.to_bool() ;
-        for(int i= 0 ; i<(int)config.roads.roads.size(); i++)
+        for( int i= 0 ; i<(int)config.roads.roads.size(); i++ )
         {
-            t_jobs.AddJob([i, max ,ecov ,circle_solve](){ FillContigRoad(std::ref(config.roads.roads[i]),max,ecov,circle_solve); });
+            t_jobs.AddJob([i](){ FillContigRoad(i);});
         }
         t_jobs.End();
         t_jobs.WaitingStop();
     }
 
     config.lger<<BGIQD::LOG::lstart()<<"fill contig road end ... "<<BGIQD::LOG::lend();
-
+    //step3 Print ...
     report();
-
     config.lger<<BGIQD::LOG::lstart()<<"report end ... "<<BGIQD::LOG::lend();
     config.lger<<BGIQD::LOG::lstart()<<"all path freq \n"<<config.path_num_freq.ToString()<<BGIQD::LOG::lend();
     config.lger<<BGIQD::LOG::lstart()<<"road fill freq \n"<<config.road_fill_freq.ToString()<<BGIQD::LOG::lend();
     config.lger<<BGIQD::LOG::lstart()<<"circled  freq \n"<<config.circle_run.ToString()<<BGIQD::LOG::lend();
-
-    /*for( const auto & road :  config.roads.roads )
-    {
-        if(road.needMerge()
-                && ( road.status != BGIQD::stLFR::ContigRoad::FillStatus::Conflict 
-                    || road.status != BGIQD::stLFR::ContigRoad::FillStatus::None )) 
-        {
-            for( const auto i : road.contig_path )
-            {
-                std::cout<<i<<'\t';
-            }
-            std::cout<<std::endl;
-        }
-    }*/
-    //step2 print road ... 
 }

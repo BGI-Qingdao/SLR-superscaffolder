@@ -76,58 +76,11 @@ namespace BGIQD {
             }
         }
 
-        void P2PGraph::AddPath( unsigned int to, const std::vector<std::list<SOAP2::Edge> > & paths )
-        {
-            assert( target == to ) ;
-            if ( paths.empty() )
-                return ;
-            assert ( root== (paths[0].rbegin()->id) ) ;
-
-            for( const auto & l : paths )
-            {
-                unsigned int next = target ;
-                for( auto i = l.begin() ; i != l.end() ; i++)
-                {
-                    if( i->id == to )
-                        continue;
-                    InitEdge( i->id );
-                    sub_graph[i->id].tos.insert(next);
-                    next  = i->id ;
-                }
-            }
-        }
-
         void P2PGraph::AddFromTo( unsigned int from , unsigned int to )
         {
             InitEdge( from );
             InitEdge( to );
             sub_graph.at(from).tos.insert(to);
-        }
-
-        void P2PGraph::AddMid( unsigned int to, const std::vector<std::list<SOAP2::Edge> > & paths )
-        {
-            //assert(root_graph.target == to) ;
-            if ( paths.empty() )
-                return ;
-            assert(root== (paths[0].rbegin()->id)) ;
-            // check if to is valid
-            if( sub_graph.find( to ) == sub_graph.end() )
-            {
-                return ;
-            }
-
-            for( const auto & l : paths )
-            {
-                unsigned int next = to ;
-                for( auto i = l.begin() ; i != l.end() ; i++ )
-                {
-                    if( i->id == to )
-                        continue;
-                    InitEdge( i->id );
-                    sub_graph[i->id].tos.insert(next);
-                    next  = i->id ;
-                }
-            }
         }
 
         void P2PGraph::findAllPath()
@@ -155,11 +108,11 @@ namespace BGIQD {
             }
         }
 
-        void P2PGraph::findAllPath(  unsigned int id  ,Path p , Circle & circle)
+        void P2PGraph::findAllPath( unsigned int id  ,Path p , Circle & circle)
         {
             if( deal_circle )
             {
-                if(  p.IsPathInCircle(circle ) )
+                if( p.IsPathInCircle(circle ) )
                 {
                     p.AddCircle(circle);
                 }
@@ -203,6 +156,8 @@ namespace BGIQD {
                         {
                             circle.SetCircle( p.paths , curr , ecov );
                         }
+                        else 
+                            path_num = -2 ;
                     }
                     else
                         path_num = -1 ;
