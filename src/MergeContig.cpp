@@ -44,6 +44,7 @@ struct AppConfig
         SuperContigOnly = 2 ,
         SuperContigAndLeft = 3 ,
         SuperContigAndReLinear = 4 ,
+        All = 5 ,
     };
 
     WorkType type ;
@@ -92,16 +93,20 @@ struct AppConfig
         return std::make_pair( UNKNOW , std::ref(error));
     }
 
-    void Init(const std::string & prefix , int rd, int k , int )
+    void Init(const std::string & prefix , int rd, int k , WorkType t)
     {
         K = k ;
         round = rd;
+        type = t ;
+        super_gen = false ;
         // init logger
         BGIQD::LOG::logfilter::singleton().get("MergeContig",BGIQD::LOG::loglevel::INFO , loger);
         // init files name
         fnames.Init(prefix);
         // load original data 
         graph_ea.LoadEdge(fnames.updatedEdge(round),K);
+
+        // other work type need merge graph, above 2 type only print contig . 
         graph_ea.LoadArc(fnames.Arc(round));
         // prepare for detect contig type
         detector.Init(K);
@@ -142,9 +147,13 @@ struct AppConfig
 
             //delete old head & tail
             head.SetDelete();
+            head.SetUsedInSuper();
             head_bal.SetDelete();
+            head_bal.SetUsedInSuper();
             tail.SetDelete();
+            tail.SetUsedInSuper();
             tail_bal.SetDelete();
+            tail_bal.SetUsedInSuper();
             del_count += 2 ;
 
             //make new contig
@@ -199,13 +208,16 @@ struct AppConfig
             for ( size_t i = 1 ; i < fill.size() -1 ; i++ )
             {
                 auto & curr = graph_ea.edge_array[fill[i]];
+                auto & bal = graph_ea.edge_array[curr.bal_id];
+                curr.SetUsedInSuper();
+                bal.SetUsedInSuper();
                 if( detector.ContigType(curr.length , curr.cov ) == BGIQD::SOAP2::ContigTypeDetecter::Type::Unique )
                 {
                     curr.SetDelete();
                     del_count ++ ;
                     if( curr.bal_id != curr.id )
                     {
-                        graph_ea.edge_array[curr.bal_id].SetDelete() ;
+                        bal.SetDelete() ;
                     }
                 }
             }
@@ -216,6 +228,8 @@ struct AppConfig
         new_graph_ea.arcNum= new_arc_id -1 ;
         loger<<BGIQD::LOG::lstart()<<"DeleteUniqueContigInSuperContig merge "<<fills.fills.size()<<" super contig and delete "<<del_count<<" old contig "<<BGIQD::LOG::lend();
     }
+
+    bool super_gen ;
 
     void GenerateNewContigSeq()
     {
@@ -386,13 +400,87 @@ struct AppConfig
         ReGenerate_updatedEdge();
         ReGenerate_contig();
     }
+
     void PrintSuperOnly()
     {
+        GenerateNewContigSeq_super();
 
+        auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fnames.super_only(round));
+        int super_count = 0 ;
+        for( unsigned int i = 0 ; i < new_graph_ea.contigTotalNum ; i+=2 )
+        {
+            const auto & curr = new_graph_ea.edge_array[i] ;
+            if ( curr.IsDelete() || curr.length < 1)
+                continue;
+            const auto & c = contig_fasta_map.contigs.at(curr.id) ;
+            super_count ++ ;
+            std::ostringstream ist ;
+            if( fills.flags[i/2].Is_circle() )
+                ist<<"\t"<<"has_circle";
+            else
+                ist<<"\t"<<"no_circle";
+            ist<<"\t"<<i/2;
+            (*out)<<c.ToString(curr.id,ist.str())<<std::endl;
+        }
+        loger<<BGIQD::LOG::lstart()<<" print super contig "<<super_count<<BGIQD::LOG::lend();
     }
+
     void PrintSuperUsedOnly()
     {
-
+        auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fnames.super_used(round));
+        int use_count = 0 ;
+        for( unsigned int i = 1 ; i <= graph_ea.contigTotalNum ; i++ )
+        {
+            const auto & curr = graph_ea.edge_array[i] ;
+            // check base
+            if( curr.id > curr.bal_id )
+                continue ;
+            // check valid
+            if ( !curr.IsUsedInSuper() )
+            {
+                continue;
+            }
+            use_count++ ;
+            const auto & c = contig_fasta_map.contigs.at(curr.id) ;
+            (*out)<<c.ToString(curr.id,"")<<std::endl;
+        }
+        loger<<BGIQD::LOG::lstart()<<" print super used contig "<<use_count<<BGIQD::LOG::lend();
+    }
+    void PrintSuperAndLeft()
+    {
+        auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fnames.super_and_left(round));
+        int both_count = 0 ;
+        for( unsigned int i = 1 ; i <= graph_ea.contigTotalNum ; i++ )
+        {
+            const auto & curr = graph_ea.edge_array[i] ;
+            // check base
+            if( curr.id > curr.bal_id )
+                continue ;
+            // check valid
+            if ( curr.IsDelete() || curr.length < 1)
+            {
+                continue;
+            }
+            both_count++ ;
+            const auto & c = contig_fasta_map.contigs.at(curr.id) ;
+            (*out)<<c.ToString(curr.id,"")<<std::endl;
+        }
+        for( unsigned int i = 0 ; i < new_graph_ea.contigTotalNum ; i+=2 )
+        {
+            const auto & curr = new_graph_ea.edge_array[i] ;
+            if ( curr.IsDelete() || curr.length < 1)
+                continue;
+            const auto & c = contig_fasta_map.contigs.at(curr.id) ;
+            both_count ++ ;
+            std::ostringstream ist ;
+            if( fills.flags[i/2].Is_circle() )
+                ist<<"\t"<<"has_circle";
+            else
+                ist<<"\t"<<"no_circle";
+            ist<<"\t"<<i/2;
+            (*out)<<c.ToString(curr.id,ist.str())<<std::endl;
+        }
+        loger<<BGIQD::LOG::lstart()<<" print bothcontig "<<both_count<<BGIQD::LOG::lend();
     }
     private:
     int linear_del ;
@@ -413,7 +501,6 @@ struct AppConfig
         GetLinearFromNode( curr , path_to ) ;
         GetLinearFromNode( bal , path_from );
         // mark used node
-        int total_len = 0;
         if( path_to.size() ==  0 || path_from.size() == 0 )
         {
             return ;
@@ -582,6 +669,9 @@ struct AppConfig
 
     void GenerateNewContigSeq_super()
     {
+        if( super_gen )
+            return ;
+        super_gen = true ;
         for( unsigned int i = 0 ; i < new_graph_ea.contigTotalNum ; i=i+2 )
         {
             auto & curr = new_graph_ea.edge_array[i] ;
@@ -905,13 +995,17 @@ int main(int argc , char **argv)
     BGIQD::LOG::timer t(config.loger,"MergeContig");
 
     START_PARSE_ARGS
+
     DEFINE_ARG_DETAIL(std::string , prefix, 'o',false,"prefix");
     DEFINE_ARG_DETAIL(int , kvalue, 'K',false,"K value");
     DEFINE_ARG_DETAIL(int , t_num, 't',true,"thread num . default[8]");
     DEFINE_ARG_DETAIL(int , round, 'r',true,"round num. default[0]");
-    DEFINE_ARG_DETAIL(bool ,linear, 'l',true,"call linear ?. default false");
-    DEFINE_ARG_DETAIL(bool ,super_only, 's' , true , "only print super contig ? default false");
-    DEFINE_ARG_DETAIL(bool ,used_only, 's' , true , "only print super used  contig ? default false");
+    DEFINE_ARG_DETAIL(int , strategy, 's',false,"merge strategy. \n\
+                                                    SuperContigUsed = 1\n\
+                                                    SuperContigOnly = 2\n\
+                                                    SuperContigAndLeft = 3 \n\
+                                                    SuperContigAndReLinear = 4\n\
+                                                    All = 5 ");
     END_PARSE_ARGS
 
         if(! t_num.setted )
@@ -926,14 +1020,40 @@ int main(int argc , char **argv)
         round.d.i = 0;
     }
     // init
-    config.Init(prefix.to_string() , round.to_int() , kvalue.to_int());
+    config.Init(prefix.to_string() , round.to_int() 
+            , kvalue.to_int()
+            ,static_cast<AppConfig::WorkType>(strategy.to_int()));
+
     // graph simplify step 1
     config.DeleteUniqueContigInSuperContig();
-    // graph simplify step 2
-    if( linear.to_bool() )
+
+    if(config.type == AppConfig::WorkType::SuperContigUsed 
+            || config.type == AppConfig::WorkType::All)
     {
-        config.Linear();
+        config.PrintSuperUsedOnly();
+        if( config.type != AppConfig::WorkType::All )
+            return 0;
     }
+
+    if( config.type == AppConfig::WorkType::All 
+            || config.type == AppConfig::WorkType::SuperContigOnly )
+    {
+        config.PrintSuperOnly();
+        if( config.type != AppConfig::WorkType::All )
+            return 0;
+    }
+
+    if( config.type == AppConfig::WorkType::All 
+            || config.type == AppConfig::WorkType::SuperContigAndLeft )
+    {
+        config.PrintSuperAndLeft();
+        if( config.type != AppConfig::WorkType::All )
+            return 0;
+    }
+
+    // All or SuperAndReLinear below 
+    // graph simplify step 2
+    config.Linear();
     // management  date
     config.GenerateNewContigSeq();
     // management  date order

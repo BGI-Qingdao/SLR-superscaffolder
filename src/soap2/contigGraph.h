@@ -51,6 +51,7 @@ namespace BGIQD {
             void SetPalindrome()    { flag |= 0x100 ; }
             void SetBase()          { flag |= 0x200 ; }
             void SetMarked()        { flag |= 0x400 ; }
+            void SetUsedInSuper()   { flag |= 0x800 ; }
 
             bool IsDelete() const   { return flag & 0x1 ; }
             bool IsRepeat() const   { return flag & 0x2 ; }
@@ -63,15 +64,22 @@ namespace BGIQD {
             bool IsPalindrome()const{ return flag & 0x100 ; }
             bool IsBase() const     { return flag & 0x200 ; }
             bool IsMarked() const   { return flag & 0x400 ; }
+            bool IsUsedInSuper()const{return flag & 0x800 ; }
+
             int ArcNum() const ;
+
             bool LinearDetect() const ;
+
             /*
+
             static void CheckLinear( Edge & a , Edge & b_a );
 
             static void CheckTip( Edge &a , Edge &b_a );
 
             static void CheckRepeat(Edge &a , Edge &b_a );
+
             */
+
             // Depth seach with neibs
             void DepthSearch(Edge * array 
                     ,std::list<Edge> & stack

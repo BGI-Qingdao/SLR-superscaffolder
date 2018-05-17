@@ -40,52 +40,12 @@ namespace BGIQD {
 
             DEFINE_SUFFIX(contigroad , ".contigroad");
 
-            //DEFINE_SUFFIX(
+            DEFINE_SUFFIX(super_used, ".super_used");
 
-            /*
-            std::string Arc() const { return m_prefix+".Arc" ;}
-            std::string Arc(int round) const 
-            {
-                if(round == 0 )
-                    return Arc() ;
-                else 
-                    return m_prefix+".Arc"+"_round_"+BGIQD::STRING::itos(round) ;
-            }
-            std::string updatedEdge() const { return m_prefix + ".updated.edge"; }
-            std::string updatedEdge(int round) const 
-            {
-                if(round == 0 )
-                    return updatedEdge() ;
-                else 
-                    return m_prefix+".updated.edge"+"_round_"+BGIQD::STRING::itos(round) ;
-            }
-            std::string contig()const { return m_prefix + ".contig" ; }
-            std::string contig(int round) const 
-            {
-                if(round == 0 )
-                    return contig() ;
-                else 
-                    return m_prefix+".contig"+"_round_"+BGIQD::STRING::itos(round) ;
-            }
-            std::string ContigIndex() const { return m_prefix + ".ContigIndex" ; }
-            std::string ContigIndex(int round) const 
-            {
-                if(round == 0 )
-                    return ContigIndex() ;
-                else 
-                    return m_prefix+".ContigIndex"+"_round_"+BGIQD::STRING::itos(round) ;
-            }
+            DEFINE_SUFFIX(super_only, ".super_only");
 
-            std::string contigroadfill() const { return m_prefix + ".contigroadfill" ; }
-            std::string ContigIndex(int round) const 
-            {
-                if(round == 0 )
-                    return ContigIndex() ;
-                else 
-                    return m_prefix+".ContigIndex"+"_round_"+BGIQD::STRING::itos(round) ;
-            }
-            std::string contigroad() const { return m_prefix + ".contigroad" ; }
-            */
+            DEFINE_SUFFIX(super_and_left, ".super_and_left");
+
             private:
                 std::string m_prefix;
         };
