@@ -56,7 +56,11 @@ namespace BGIQD {
             final_circled = 0 ; 
             InitEdge(to);
             InitEdge(from);
-            GraphEA_withBarcode::Union(base_graph->barcode_on_contig[from] ,base_graph->barcode_on_contig[to],root_target_union);
+            auto & from_n = base_graph->graph_ea.edge_array[from];
+            auto & to_n = base_graph->graph_ea.edge_array[to];
+            unsigned int key_from = from_n.IsKey() ? from_n.id : from_n.bal_id ;
+            unsigned int key_to = to_n.IsKey() ? to_n.id : to_n.bal_id ;
+            GraphEA_withBarcode::Union(base_graph->barcode_on_contig[key_from] ,base_graph->barcode_on_contig[key_to],root_target_union);
         }
 
         void P2PGraph::InitEdge( unsigned int id)
@@ -71,7 +75,11 @@ namespace BGIQD {
                 {
                     BarcodeOnContig tmp;
                     if( base_graph->barcode_on_contig.find(id)  != base_graph->barcode_on_contig.end() )
-                        sub_graph[id].barcode_cov = GraphEA_withBarcode::Union(base_graph->barcode_on_contig[id],root_target_union,tmp);
+                    {
+                        auto & id_n = base_graph->graph_ea.edge_array[id];
+                        unsigned int key_id = id_n.IsKey() ? id_n.id : id_n.bal_id ;
+                        sub_graph[id].barcode_cov = GraphEA_withBarcode::Union(base_graph->barcode_on_contig[key_id],root_target_union,tmp);
+                    }
                 }
             }
         }
@@ -81,6 +89,19 @@ namespace BGIQD {
             InitEdge( from );
             InitEdge( to );
             sub_graph.at(from).tos.insert(to);
+        }
+
+        bool P2PGraph::CheckPalindrome() const
+        {
+            for( const auto & i : sub_graph )
+            {
+                const auto & node = base_graph->graph_ea.edge_array[i.second.id];
+                if( node.IsPalindrome() )
+                {
+                    return true ;
+                }
+            }
+            return false ;
         }
 
         void P2PGraph::findAllPath()
@@ -132,6 +153,8 @@ namespace BGIQD {
                         {
                             circle.SetCircle( p.paths , curr, ecov );
                         }
+                        else
+                            path_num = -2 ;
                     }
                     else
                         path_num = -1 ;

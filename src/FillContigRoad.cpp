@@ -178,7 +178,7 @@ void FindCorrectPath(unsigned int from , unsigned int to,
                 if( history.find( a_from ) == history.end() )
                 {
                     history.insert( a_from ) ;
-                    nexts.push( result.searcher.fib_nodes.at(from));
+                    nexts.push( result.searcher.fib_nodes.at(a_from));
                 }
             }
             nexts.pop();
@@ -188,7 +188,11 @@ void FindCorrectPath(unsigned int from , unsigned int to,
     {
         assert(0);
     }
-    p2pgrapg.GeneratePath();
+    bool p = p2pgrapg.CheckPalindrome();
+    if( !p )
+        p2pgrapg.GeneratePath();
+    else
+        p2pgrapg.path_num = -3 ; 
 }
 
 bool AppendPath( const  BGIQD::stLFR::P2PGraph & p2pgrapg , const SearchResult & result, BGIQD::stLFR::ContigRoad & road)

@@ -72,6 +72,8 @@ namespace BGIQD {
 
             void AddFromTo( unsigned int from , unsigned int to );
 
+            bool CheckPalindrome() const ;
+
             struct Circle
             {
                 std::vector<Edge> cpath;
