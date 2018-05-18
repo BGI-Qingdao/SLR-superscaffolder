@@ -35,7 +35,9 @@ struct GlobalConfig
         Unknow = 0 ,
         ShortestPath = 1,
         BarcodeCov = 2 ,
-        BarcodeCov_FillCircle = 3
+        BarcodeCov_BreakPalindrome = 3 ,
+        BarcodeCov_FillCircle = 4,
+        BarcodeCov_BreakPalindromeAndFillCircle = 5
     };
     FillStrategy strategy;
     float Ecov ;
@@ -188,11 +190,21 @@ void FindCorrectPath(unsigned int from , unsigned int to,
     {
         assert(0);
     }
-    bool p = p2pgrapg.CheckPalindrome();
-    if( !p )
+    if( config.strategy == GlobalConfig::FillStrategy::BarcodeCov )
+    {
+        bool p = p2pgrapg.CheckPalindrome();
+        if( !p )
+            p2pgrapg.GeneratePath();
+        else
+            p2pgrapg.path_num = -3 ; 
+    }
+    else if( config.strategy != GlobalConfig::FillStrategy::BarcodeCov_FillCircle )
+    {
+        p2pgrapg.RemovePalindromeLink();
         p2pgrapg.GeneratePath();
+    }
     else
-        p2pgrapg.path_num = -3 ; 
+        p2pgrapg.GeneratePath();
 }
 
 bool AppendPath( const  BGIQD::stLFR::P2PGraph & p2pgrapg , const SearchResult & result, BGIQD::stLFR::ContigRoad & road)
@@ -223,7 +235,6 @@ void FillContigRoad( int i ) //BGIQD::stLFR::ContigRoad & road)
 
     road.status = BGIQD::stLFR::ContigRoad::FillStatus::None ;
     road.fill_num = 0;
-    bool line_down = false;
     if( config.strategy == GlobalConfig::FillStrategy::Unknow )
     {
         assert(0);
@@ -257,7 +268,8 @@ void FillContigRoad( int i ) //BGIQD::stLFR::ContigRoad & road)
 
                 p2pgrapg.base_graph = &config.graph_eab;
                 p2pgrapg.deal_circle  = 
-                    (config.strategy == GlobalConfig::FillStrategy::BarcodeCov_FillCircle);
+                    (config.strategy == GlobalConfig::FillStrategy::BarcodeCov_BreakPalindromeAndFillCircle
+                     || config.strategy == GlobalConfig::FillStrategy::BarcodeCov_FillCircle);
                 p2pgrapg.ecov = config.Ecov ;
                 p2pgrapg.K =config.K ;
 
@@ -415,8 +427,11 @@ int  main(int argc, char **argv)
     DEFINE_ARG_DETAIL(float , Ecov, 'e',false,"Ecov of contigs");
     DEFINE_ARG_DETAIL(int, fill_strategy, 's',false,"fill strategy \n\
                                                      1 for shortest path fill\n\
-                                                     2 for barcode cov path fill without circle solve\n\
-                                                     3 for barcode cov path fill and read cov solve circle. ( may cause mismatch )");
+                                                        BarcodeCov = 2 ,\n\
+                                                        BarcodeCov_BreakPalindrome = 3 ,\n\
+                                                        BarcodeCov_FillCircle = 4,\n\
+                                                        BarcodeCov_BreakPalindromeAndFillCircle = 5\n\
+    ");
     DEFINE_ARG_DETAIL(int, searchDepth, 'l',true,"search depth (bp) default 10000");
     END_PARSE_ARGS
 

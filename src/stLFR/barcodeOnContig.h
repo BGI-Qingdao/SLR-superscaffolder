@@ -8,6 +8,7 @@
 #include "stLFR/LineGroup.h"
 #include "stLFR/ContigCluster.h"
 #include "common/flags/flags.h"
+
 namespace BGIQD {
     namespace stLFR {
 
@@ -63,6 +64,9 @@ namespace BGIQD {
                 float cov;
                 int length ;
                 std::set<unsigned int> tos;
+                FLAGS_INT;
+                ADD_A_FLAG(1, palindrome);
+                ADD_A_FLAG(2, circle_join);
                 //std::set<unsigned int> froms;
             };
 
@@ -73,6 +77,8 @@ namespace BGIQD {
             void AddFromTo( unsigned int from , unsigned int to );
 
             bool CheckPalindrome() const ;
+
+            void RemovePalindromeLink() ;
 
             struct Circle
             {

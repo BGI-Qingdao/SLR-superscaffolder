@@ -91,6 +91,30 @@ namespace BGIQD {
             sub_graph.at(from).tos.insert(to);
         }
 
+        void P2PGraph::RemovePalindromeLink()
+        {
+            for( auto & i : sub_graph )
+            {
+                auto & node = base_graph->graph_ea.edge_array[i.second.id];
+                if( node.IsPalindrome() )
+                {
+                    std::set<unsigned int> to_del ;
+                    for( auto to : i.second.tos)
+                    {
+                        auto & a_to = sub_graph.at(to) ;
+                        if( a_to.tos.find( i.second.id ) != a_to.tos.end() )
+                        {
+                            to_del.insert(to);
+                        }
+                    }
+                    for( auto to : to_del )
+                    {
+                        i.second.tos.erase(to);
+                    }
+                }
+            }
+        }
+
         bool P2PGraph::CheckPalindrome() const
         {
             for( const auto & i : sub_graph )
@@ -167,9 +191,13 @@ namespace BGIQD {
             if ( curr == target )
             {
                 allPaths.push_back(p);
+                path_num ++ ;
             }
-            else
+            else if( sub_graph[curr].tos.empty() )
             {
+                return ;
+            }
+            else {
                 assert( sub_graph[curr].tos.size() >1 );
                 if( ! p.AddEdge(sub_graph[curr]) )
                 {
