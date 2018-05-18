@@ -88,12 +88,12 @@ namespace BGIQD {
             std::ostringstream ost;
             //">%d length %d cvg_%f_tip_%d"
             ost<<'>'<<id<<" length "<<length+K.size()<<" cov_"<<cov<<"_tip_"<<tip<<'\n';
-            int index = 0 ;
+            size_t index = 0 ;
             for( size_t i = 0 ; i< K.size(); i++)
             {
                 ost<<K[i];
                 index ++ ;
-                if( index % 100  == 0 )
+                if( index % 100  == 0 && (index != K.size() -1 ))
                 {
                     ost<<'\n';
                 }
@@ -103,7 +103,7 @@ namespace BGIQD {
             {
                 ost<<linear[i];
                 index ++ ;
-                if( index % 100  == 0 )
+                if( index % 100  == 0 && (index != K.size() -1 ))
                 {
                     ost<<'\n';
                 }

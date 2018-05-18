@@ -43,13 +43,19 @@ namespace BGIQD {
         {
 
             GraphEA_withBarcode * base_graph;
+
             BarcodeOnContig root_target_union;
 
             unsigned int target;
+
             unsigned int root ;
+
             int final_circled ;
+
             bool deal_circle;
+
             int K ;
+
             struct Edge
             {
                 unsigned int id;
@@ -63,11 +69,6 @@ namespace BGIQD {
             std::map<unsigned int , P2PGraph::Edge> sub_graph;
 
             void Init( unsigned int from , unsigned int to);
-            // used below 2 intareface to construct sub_p2p_graph.
-            // AddPath must be called only once !!
-            void AddPath( unsigned int to ,const std::vector<std::list<SOAP2::Edge>> & paths );
-            // AddMid can be called multi-times!!!
-            void AddMid( unsigned int to ,const std::vector<std::list<SOAP2::Edge>> & paths );
 
             void AddFromTo( unsigned int from , unsigned int to );
 

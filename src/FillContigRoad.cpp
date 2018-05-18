@@ -111,6 +111,7 @@ void SearchAllPath(unsigned int from  , unsigned int to , SearchResult & ret){
                 return BGIQD::SOAP2::NodeType::RC_Key_Neibs ;
         }
     };
+
     ret.searcher.accesser.base = &config.graph_eab.graph_ea;
     ret.searcher.accesser.K = config.K ;
     ret.searcher.ender.Init( key , config.max_length);
@@ -145,6 +146,7 @@ void FindCorrectPath(unsigned int from , unsigned int to,
     p2pgrapg.Init(from,to);
 
     std::set<unsigned int> history;
+
     std::queue<SNode> nexts;
 
     try{
@@ -201,6 +203,7 @@ bool AppendPath( const  BGIQD::stLFR::P2PGraph & p2pgrapg , const SearchResult &
     road.contig_path.insert(road.contig_path.end() 
             , p2pgrapg.final_path.begin()
             , p2pgrapg.final_path.end() );
+    road.contig_path.push_back(result.true_to);
 
     road.circle_runs.push_back(p2pgrapg.final_circled);
     return true;
