@@ -63,6 +63,7 @@ test_cpp   =	test.cpp\
 				algorithm/bi_list/bi_list_test.cpp\
 				algorithm/fibheap/fib_heap_test.cpp\
 				algorithm/collection/collection_test.cpp\
+				algorithm/incr_array/incr_array_test.cpp\
 				common/time/timetools_test.cpp\
 				common/string/stringtools_test.cpp\
 				common/args/argsparser_test.cpp\
