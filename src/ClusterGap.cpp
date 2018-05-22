@@ -28,6 +28,7 @@ void incrMap1(std::map<int,int> & map , int key  )
     else
         itr->second ++ ;
 }
+
 void print_show(const std::string & line , std::map<int , int > & data )
 {
     std::istringstream ism(line);
@@ -51,6 +52,7 @@ void print_show(const std::string & line , std::map<int , int > & data )
         pstart = start;
     }
 }
+
 int main()
 {
     std::map< int , int > gaps;
