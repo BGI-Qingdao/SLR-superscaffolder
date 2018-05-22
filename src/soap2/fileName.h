@@ -46,6 +46,8 @@ namespace BGIQD {
 
             DEFINE_SUFFIX(super_and_left, ".super_and_left");
 
+            DEFINE_SUFFIX(barcodeList, ".barcodeList");
+
             private:
                 std::string m_prefix;
         };
