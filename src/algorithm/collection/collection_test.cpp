@@ -61,3 +61,19 @@ TEST(Jaccard)
     CharCollect t2 = InitC2();
     CHECK( 0.25 , CharCollect::Jaccard(t1,t2) );
 }
+
+TEST(CollectIterator)
+{
+    std::map<char , int > t;
+    t['H'] = 1 ;
+    t['e']= 1;
+    t['l']=2;
+    t['o']=1;
+    auto t1 = InitC1();
+    for( auto i : t1 )
+    {
+        std::cerr<<i.first<<'\t'<<i.second<<std::endl;
+        CHECK(t[i.first] , i.second);
+    }
+    std::cerr<<std::endl;
+}
