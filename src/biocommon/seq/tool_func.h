@@ -1,6 +1,8 @@
 #ifndef __BIOCOMMON_SEQ_TOOL_FUNC_H__
 #define __BIOCOMMON_SEQ_TOOL_FUNC_H__
+
 #include <string>
+
 namespace BGIQD{
     namespace SEQ{
 
