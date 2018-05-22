@@ -996,11 +996,11 @@ int main(int argc , char **argv)
 
     START_PARSE_ARGS
 
-    DEFINE_ARG_DETAIL(std::string , prefix, 'o',false,"prefix");
-    DEFINE_ARG_DETAIL(int , kvalue, 'K',false,"K value");
-    DEFINE_ARG_DETAIL(int , t_num, 't',true,"thread num . default[8]");
-    DEFINE_ARG_DETAIL(int , round, 'r',true,"round num. default[0]");
-    DEFINE_ARG_DETAIL(int , strategy, 's',false,"merge strategy. \n\
+    DEFINE_ARG_REQUIRED(std::string , prefix, "prefix");
+    DEFINE_ARG_REQUIRED(int , kvalue, "K value");
+    DEFINE_ARG_OPTIONAL(int , t_num, "thread num . default[8]", "8");
+    DEFINE_ARG_OPTIONAL(int , round, "round num. default[0]", "0");
+    DEFINE_ARG_REQUIRED(int , strategy, "merge strategy. \n\
                                                     SuperContigUsed = 1\n\
                                                     SuperContigOnly = 2\n\
                                                     SuperContigAndLeft = 3 \n\

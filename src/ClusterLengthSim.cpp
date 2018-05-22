@@ -10,8 +10,8 @@ int main(int argc , char ** argv)
 {
 
     START_PARSE_ARGS
-        DEFINE_ARG_DETAIL(std::string , cluster, 'c',false,"seed contig linear info");
-        DEFINE_ARG_DETAIL(int  , step, 'd',false,"step length ");
+        DEFINE_ARG_REQUIRED(std::string , cluster, "seed contig linear info");
+        DEFINE_ARG_REQUIRED(int  , step,"step length ");
     END_PARSE_ARGS
 
     // Load cluster first

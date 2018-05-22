@@ -37,13 +37,13 @@ int main(int argc , char ** argv)
 {
 
     START_PARSE_ARGS
-        DEFINE_ARG_DETAIL(int , type, 'o',false,"1 for len , 2 for simularity \
+        DEFINE_ARG_REQUIRED(int , type, "1 for len , 2 for simularity \
                                 ,3 for split multi and base \
                                 ,4 for solve multi");
-        DEFINE_ARG_DETAIL(int , len_max, 'a',false,"max_len for first close");
-        DEFINE_ARG_DETAIL(int , len_min, 'i',false,"min len for second close");
-        DEFINE_ARG_DETAIL(float, sim, 's',false,"min simularity");
-        DEFINE_ARG_DETAIL(int, index, 'd',false,"index");
+        DEFINE_ARG_REQUIRED(int , len_max, "max_len for first close");
+        DEFINE_ARG_REQUIRED(int , len_min, "min len for second close");
+        DEFINE_ARG_REQUIRED(float, sim, "min simularity");
+        DEFINE_ARG_REQUIRED(int, index, "index");
     END_PARSE_ARGS
 
     std::string line;

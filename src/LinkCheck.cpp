@@ -22,7 +22,7 @@ int main(int argc , char **argv)
     BGIQD::LOG::logfilter::singleton().get("SuperContig",BGIQD::LOG::loglevel::INFO , lger);
     BGIQD::LOG::timer t(lger,"SuperContig");
     START_PARSE_ARGS
-    DEFINE_ARG_DETAIL(std::string , pos, 'p',false,"postion order of contig");
+    DEFINE_ARG_REQUIRED(std::string , pos, "postion order of contig");
     END_PARSE_ARGS
 
     auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(pos.to_string());

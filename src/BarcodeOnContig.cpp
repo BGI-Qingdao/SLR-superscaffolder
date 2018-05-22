@@ -9,9 +9,9 @@ int main(int argc , char ** argv)
     initLog("BarcodeOnContig");
 
     START_PARSE_ARGS
-    DEFINE_ARG_DETAIL(std::string , refBarcode , 'i',false,"barcodeOnRef");
-    DEFINE_ARG_DETAIL(std::string , refContig, 'c',false, "contigOnRef ");
-    DEFINE_ARG_DETAIL(std::string , output, 'o',false,"output prefix");
+    DEFINE_ARG_REQUIRED(std::string , refBarcode , "barcodeOnRef");
+    DEFINE_ARG_REQUIRED(std::string , refContig, "contigOnRef ");
+    DEFINE_ARG_REQUIRED(std::string , output, "output prefix");
     END_PARSE_ARGS
 
     refBarcodeInfo ebi;

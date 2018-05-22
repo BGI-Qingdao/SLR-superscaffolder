@@ -189,13 +189,13 @@ int main(int argc , char ** argv)
     initLog("LinearClusterResult");
 
     START_PARSE_ARGS
-    DEFINE_ARG_DETAIL(std::string , refBarcode , 'i', false , "the clusters result");
-    DEFINE_ARG_DETAIL(std::string , refContig, 'c', false , "sam file . map contig to ref");
-    DEFINE_ARG_DETAIL(bool , ponly, 'p', true , "If this flag setted , it will only print the postion of each contig.");
-    DEFINE_ARG_DETAIL(bool , repeat, 'r', true , "If this flag setted , it will not delete repeat contig from cluster.");
-    DEFINE_ARG_DETAIL(int , from , 'f', true, "from . default[0]");
-    DEFINE_ARG_DETAIL(int , to , 't', true, "to. default [0] , means all position is valid");
-    DEFINE_ARG_DETAIL(bool, show, 's', true, "If this flag setted , it will print total length region in column 3 , 4 .");
+    DEFINE_ARG_REQUIRED(std::string , refBarcode , "the clusters result");
+    DEFINE_ARG_REQUIRED(std::string , refContig,"sam file . map contig to ref");
+    DEFINE_ARG_OPTIONAL(bool , ponly,  "If this flag setted , it will only print the postion of each contig.","false");
+    DEFINE_ARG_OPTIONAL(bool , repeat,  "If this flag setted , it will not delete repeat contig from cluster.", "false");
+    DEFINE_ARG_OPTIONAL(int , from , "from . default[0]","0");
+    DEFINE_ARG_OPTIONAL(int , to , " to. default [0] , means all position is valid", "0");
+    DEFINE_ARG_OPTIONAL(bool, show,"If this flag setted , it will print total length region in column 3 , 4 .","false");
     END_PARSE_ARGS
 
     cluters c;

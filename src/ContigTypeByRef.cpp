@@ -150,8 +150,8 @@ int main(int argc ,char **argv)
     initLog("ContigTypeByRef");
 
     START_PARSE_ARGS
-    DEFINE_ARG(std::string , input , 'i');
-    DEFINE_ARG(std::string , output, 'o');
+    DEFINE_ARG_REQUIRED(std::string , input , "in");
+    DEFINE_ARG_REQUIRED(std::string , output, "out");
     END_PARSE_ARGS
 
     contigTypes types;

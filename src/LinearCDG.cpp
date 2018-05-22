@@ -88,10 +88,10 @@ struct  AppGlobalData
 int main(int argc , char ** argv)
 {
     START_PARSE_ARGS
-        DEFINE_ARG_DETAIL(bool, um, 'u',true,"use unique-multi solve ? default not");
-    DEFINE_ARG_DETAIL(bool, ls, 'l',true,"use length-sim solve ? default not");
-    DEFINE_ARG_DETAIL(float, len_threshold_factor, 'f',false,"len_threshold_factor ,within [0.9,1.0] is best ");
-    DEFINE_ARG_DETAIL(float, sim_threshold_factor, 's',false,"sim_threshold_factor ,within [0.9,1.0] is best " );
+        DEFINE_ARG_OPTIONAL(bool, um, "use unique-multi solve ? default not","0");
+    DEFINE_ARG_OPTIONAL(bool, ls, "use length-sim solve ? default not","0");
+    DEFINE_ARG_REQUIRED(float, len_threshold_factor, "len_threshold_factor ,within [0.1,1.0]  ");
+    DEFINE_ARG_REQUIRED(float, sim_threshold_factor, "sim_threshold_factor ,within [0.1,1.0]  " );
     END_PARSE_ARGS
 
     if( len_threshold_factor.to_float() < 0.1f )

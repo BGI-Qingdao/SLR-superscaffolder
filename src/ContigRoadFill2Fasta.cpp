@@ -268,12 +268,12 @@ struct GlobalContig
 int main(int argc , char ** argv)
 {
     START_PARSE_ARGS
-    DEFINE_ARG_DETAIL(int , kvalue, 'K',false,"K value");
-    DEFINE_ARG_DETAIL(std::string, prefix, 'o',false,"prefix\n\
+    DEFINE_ARG_REQUIRED(int , kvalue, "K value");
+    DEFINE_ARG_REQUIRED(std::string, prefix, "prefix\n\
                                                need   xxx.contig\n\
                                                 xxx.contigroadfill");
-    DEFINE_ARG_DETAIL(bool , left, 'l',true,"print left contig ? default no");
-    DEFINE_ARG_DETAIL(bool , use, 'u',true,"only print used contig ? default no");
+    DEFINE_ARG_REQUIRED(bool , left,"print left contig ? default no");
+    DEFINE_ARG_REQUIRED(bool , use, "only print used contig ? default no");
     END_PARSE_ARGS
 
     config.Init( kvalue.to_int() ,prefix.to_string() + ".contig");

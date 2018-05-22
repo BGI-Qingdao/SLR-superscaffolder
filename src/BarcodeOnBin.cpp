@@ -10,9 +10,9 @@ int main(int argc ,char **argv)
     initLog("BarcodeOnBin");
 
     START_PARSE_ARGS
-    DEFINE_ARG_DETAIL(std::string , input , 'i',false,"barcodeOnContig");
-    DEFINE_ARG_DETAIL(std::string , output, 'o',false,"output file");
-    DEFINE_ARG_DETAIL(int , binsize, 'b',false, "bin size");
+    DEFINE_ARG_REQUIRED(std::string , input ,"barcodeOnContig file");
+    DEFINE_ARG_REQUIRED(std::string , output, "output file");
+    DEFINE_ARG_REQUIRED(int , binsize, "bin size");
     END_PARSE_ARGS
 
     contigBarcodeInfo cbi;

@@ -412,27 +412,27 @@ void report()
 
 int  main(int argc, char **argv)
 {
-    BGIQD::LOG::logfilter::singleton().get("SuperContig",BGIQD::LOG::loglevel::INFO , config.lger);
-    BGIQD::LOG::timer t(config.lger,"SuperContig");
+    BGIQD::LOG::logfilter::singleton().get("FillContigRoad",BGIQD::LOG::loglevel::INFO , config.lger);
+    BGIQD::LOG::timer t(config.lger,"FillContigRoad");
     //step0 Parse parmeters...
     START_PARSE_ARGS
-    DEFINE_ARG_DETAIL(std::string , prefix, 'o',false,"prefix \n \
+    DEFINE_ARG_REQUIRED(std::string , prefix, "prefix \n \
                                             need    xxx.Arc\n\
                                                     xxx.updated.edge\n\
                                                     xxx.cluster\n\
                                                     xxx.contigroad\n\
                                                     xxx.read2contig");
-    DEFINE_ARG_DETAIL(int , kvalue, 'K',false,"K value");
-    DEFINE_ARG_DETAIL(int , t_num, 't',true,"thread num . default[8]");
-    DEFINE_ARG_DETAIL(float , Ecov, 'e',false,"Ecov of contigs");
-    DEFINE_ARG_DETAIL(int, fill_strategy, 's',false,"fill strategy \n\
+    DEFINE_ARG_REQUIRED(int , kvalue, "K value");
+    DEFINE_ARG_REQUIRED(int , t_num,"thread num . default[8]");
+    DEFINE_ARG_REQUIRED(float , Ecov, "Ecov of contigs");
+    DEFINE_ARG_REQUIRED(int, fill_strategy, "fill strategy \n\
                                                      1 for shortest path fill\n\
                                                         BarcodeCov = 2 ,\n\
                                                         BarcodeCov_BreakPalindrome = 3 ,\n\
                                                         BarcodeCov_FillCircle = 4,\n\
                                                         BarcodeCov_BreakPalindromeAndFillCircle = 5\n\
     ");
-    DEFINE_ARG_DETAIL(int, searchDepth, 'l',true,"search depth (bp) default 10000");
+    DEFINE_ARG_REQUIRED(int, searchDepth, "search depth (bp) default 10000");
     END_PARSE_ARGS
 
     config.K = kvalue.to_int();

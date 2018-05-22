@@ -17,10 +17,10 @@ int main(int argc , char ** argv)
 
     // parse args
     START_PARSE_ARGS
-    DEFINE_ARG_DETAIL(bool ,no_stLFR , 'n',true,"no barcode in read name");
-    DEFINE_ARG_DETAIL(std::string,barcodeList, 'b',true,"barcodeList file file");
-    DEFINE_ARG_DETAIL(std::string,prefix, 'o',false,"output prefix");
-    DEFINE_ARG_DETAIL(long,file_cache, 'c',true,"cache size of file buffer");
+    DEFINE_ARG_OPTIONAL(bool ,no_stLFR , "no barcode in read name","");
+    DEFINE_ARG_OPTIONAL(std::string,barcodeList, "barcodeList file file","");
+    DEFINE_ARG_OPTIONAL(long,file_cache, "cache size of file buffer","1000000");
+    DEFINE_ARG_REQUIRED(std::string,prefix, "output prefix");
     //DEFINE_ARG_DETAIL(int,thread_num, 't',true,"thread number");
     END_PARSE_ARGS
 

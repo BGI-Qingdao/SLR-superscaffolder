@@ -874,14 +874,14 @@ int main(int argc , char **argv)
     BGIQD::LOG::logfilter::singleton().get("SuperContig",BGIQD::LOG::loglevel::INFO , lger);
     BGIQD::LOG::timer t(lger,"SuperContig");
     START_PARSE_ARGS
-        DEFINE_ARG_DETAIL(std::string , prefix, 'o',false,"prefix");
-    DEFINE_ARG_DETAIL(int , kvalue, 'K',false,"K value");
-    DEFINE_ARG_DETAIL(int , t_num, 't',true,"thread num . default[8]");
-    DEFINE_ARG_DETAIL(bool , super, 's',true,"super contig ? default false");
-    DEFINE_ARG_DETAIL(bool , deleteconn , 'd',true,"delete conn ? default false");
-    DEFINE_ARG_DETAIL(float , multi, 'm',true,"solveMulti ? default false");
-    DEFINE_ARG_DETAIL(bool , connInfo, 'i',true,"print connInfo ? default false");
-    DEFINE_ARG_DETAIL(int, searchDepth, 'l',true,"search depth (bp) default 10000");
+        DEFINE_ARG_REQUIRED(std::string , prefix, "prefix");
+    DEFINE_ARG_REQUIRED(int , kvalue,"K value");
+    DEFINE_ARG_OPTIONAL(int , t_num, "thread num . default[8]","8");
+    DEFINE_ARG_OPTIONAL(bool , super,"super contig ? default false","");
+    DEFINE_ARG_OPTIONAL(bool , deleteconn , "delete conn ? default false","");
+    DEFINE_ARG_OPTIONAL(float , multi, "solveMulti ? default false","0.0");
+    DEFINE_ARG_OPTIONAL(bool , connInfo,"print connInfo ? default false","");
+    DEFINE_ARG_OPTIONAL(int, searchDepth,"search depth (bp) default 10000","10000");
     END_PARSE_ARGS
         if(! t_num.setted )
         {

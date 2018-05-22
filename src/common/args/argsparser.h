@@ -116,11 +116,11 @@ namespace BGIQD{
                     d.vs = new std::vector<std::string>();
             }
 
-            void set_value( const  char * value )
+            void set_value( const  char * value , bool df )
             {
-                if( t == BGIQD::ARGS::args_union::is_bool )
+                if( t == BGIQD::ARGS::args_union::is_bool  )
                 {
-                    d.b = true;
+                    d.b = ! df ;
                 }
                 if( t == BGIQD::ARGS::args_union::is_string)
                 {
@@ -256,34 +256,34 @@ namespace BGIQD{
 {\
     int id = i.first;\
     auto & item = *(i.second);\
-    long_options[id].name = item.name.c_str();\
+    BGIQD::ARGS::long_options[id].name = item.name.c_str();\
     if(item.t == BGIQD::ARGS::args_union::is_bool )\
     {\
-        long_options[id].has_arg = 0;\
+        BGIQD::ARGS::long_options[id].has_arg = 0;\
     }else{\
-        long_options[id].has_arg = 1;\
+        BGIQD::ARGS::long_options[id].has_arg = 1;\
     }\
-    long_options[id].flag = 0 ;\
-    long_options[id].val = id ;\
+    BGIQD::ARGS::long_options[id].flag = 0 ;\
+    BGIQD::ARGS::long_options[id].val = id ;\
     max = id ;\
 }\
-    for(int i = max + 1 ; i < arg_max ; i++ )\
+    for(int i = max + 1 ; i < BGIQD::ARGS::arg_max ; i++ )\
 {\
-    long_options[i].name = 0;\
-    long_options[i].has_arg = 0;\
-    long_options[i].flag = 0;\
-    long_options[i].val = 0;\
+    BGIQD::ARGS::long_options[i].name = 0;\
+    BGIQD::ARGS::long_options[i].has_arg = 0;\
+    BGIQD::ARGS::long_options[i].flag = 0;\
+    BGIQD::ARGS::long_options[i].val = 0;\
 }
 
 #define __PARSE_ARGS \
     int curr_flag , out = 0;\
-    while( ( curr_flag = getopt_long_only( argc , argv,"",long_options, &out  ) ) != EOF )\
+    while( ( curr_flag = getopt_long_only( argc , argv,"",BGIQD::ARGS::long_options, &out  ) ) != EOF )\
 {\
     auto itr = BGIQD::ARGS::infos.find( curr_flag ) ;\
     if ( itr == BGIQD::ARGS::infos.end() )\
     {    continue; }\
     itr->second->setted = true ;\
-    itr->second->set_value(optarg);\
+    itr->second->set_value(optarg, false);\
 }\
 
 #define __PRINT_ARGS \
@@ -304,7 +304,7 @@ namespace BGIQD{
         pass =false ;\
     }\
     if( i.second->optional && (! i.second->setted) ){\
-        i.second->set_value(i.second->default_value.c_str()); \
+        i.second->set_value(i.second->default_value.c_str(),true); \
     }\
 }\
 if( ! pass ){\
@@ -316,12 +316,12 @@ if( ! pass ){\
 
 #define __DEFINE_ARG_DETAIL( typen , name , optional , d ,exp ) \
     BGIQD::ARGS::args_union name(BGIQD::ARGS::args_traits<typen>().type(),#name, optional,d,exp);\
-    BGIQD::ARGS::infos[arg_index]=&name;\
-    arg_index ++ \
+    BGIQD::ARGS::infos[BGIQD::ARGS::arg_index]=&name;\
+    BGIQD::ARGS::arg_index ++ \
 
 #define START_PARSE_ARGS \
     BGIQD::ARGS::infos.clear();\
-    arg_index = 0 ;\
+    BGIQD::ARGS::arg_index = 0 ;\
 
 
 #define DEFINE_ARG_REQUIRED( typen , name , exp ) \
