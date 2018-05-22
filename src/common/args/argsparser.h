@@ -4,284 +4,293 @@
 #include <string>
 #include <tuple>
 #include <vector>
-#include <stdarg.h>
-#include <unistd.h>
 #include <map>
 #include <cassert>
 #include <iostream>
+#include <getopt.h>
 
 namespace BGIQD{
-namespace ARGS{
+    namespace ARGS{
 
-struct args_union
-{
-    bool optional;
-    bool setted ;
-    std::string explain;
-    enum type 
-    {
-        is_bool = 0,
-        is_string = 1,
-        is_int = 2,
-        is_long = 3,
-        is_float = 4,
-        is_vector_string = 5,
-    };
-
-    static std::string get_type( type t)
-    {
-        if( t == is_bool )
-            return "no args";
-        if( t == is_int)
-            return "int";
-        if( t == is_long)
-            return "long";
-        if( t == is_float)
-            return "float";
-        if( t == is_string)
-            return "string";
-        if( t == is_vector_string)
-            return "vector_string";
-        return "";
-    }
-
-    std::string args_to_string() 
-    {
-        if( t == is_bool )
-            return d.b ? "true" : "false";
-        if( t == is_int)
-            return std::to_string(d.i);
-        if( t == is_long)
-            return std::to_string(d.l);
-        if( t == is_float)
-            return std::to_string(d.f);
-        if( t == is_string)
-            return to_string();
-        if( t == is_vector_string)
+        struct args_union
         {
-            std::string ret ;
-            for(const auto & i : to_vector_string())
+            enum type 
             {
-                ret += "\t";
-                ret += i;
+                is_bool = 0,
+                is_string = 1,
+                is_int = 2,
+                is_long = 3,
+                is_float = 4,
+                is_vector_string = 5,
+            };
+
+            union data {
+                std::string *s;
+                std::vector<std::string> *vs;
+                bool b;
+                int i;
+                long l;
+                float f;
+            };
+
+            bool optional;
+
+            bool setted ;
+
+            std::string explain;
+
+            std::string name ;
+
+            std::string default_value ;
+
+            type t;
+
+            data d;
+
+            static std::string get_type( type t)
+            {
+                if( t == is_bool )
+                    return "no args";
+                if( t == is_int)
+                    return "int";
+                if( t == is_long)
+                    return "long";
+                if( t == is_float)
+                    return "float";
+                if( t == is_string)
+                    return "string";
+                if( t == is_vector_string)
+                    return "vector_string";
+                return "";
             }
-            return ret ;
-        }
-        return "";
-    }
 
-    union data {
-        std::string *s;
-        std::vector<std::string> *vs;
-        bool b;
-        int i;
-        long l;
-        float f;
-    };
+            std::string args_to_string() 
+            {
+                if( t == is_bool )
+                    return d.b ? "true" : "false";
+                if( t == is_int)
+                    return std::to_string(d.i);
+                if( t == is_long)
+                    return std::to_string(d.l);
+                if( t == is_float)
+                    return std::to_string(d.f);
+                if( t == is_string)
+                    return to_string();
+                if( t == is_vector_string)
+                {
+                    std::string ret ;
+                    for(const auto & i : to_vector_string())
+                    {
+                        ret += "\t";
+                        ret += i;
+                    }
+                    return ret ;
+                }
+                return "";
+            }
 
-    type t;
-    data d;
+            args_union(type ty
+                    ,const  std::string & n
+                    ,bool o
+                    ,const std::string & df
+                    ,const std::string & exp) 
+                : optional(o)
+                , setted(false)
+                , explain(exp)
+                , name(n)
+                , default_value(df)
+                , t(ty) 
 
-    args_union(type t , bool o = true ) : optional(o),setted(false), t(t) {
-        if(! optional )
-        {
-            d.s = NULL;
-        }
-        if ( t != is_string && t != is_vector_string )
-            d.l = 0 ;
-        if ( t == is_float )
-            d.f = 0.0f ;
-        if ( t == is_string )
-            d.s = new std::string("");
-        if ( t == is_vector_string )
-            d.vs = new std::vector<std::string>();
-    }
+            {
+                if(! optional )
+                {
+                    d.s = NULL;
+                }
+                if ( t != is_string && t != is_vector_string )
+                    d.l = 0 ;
+                if ( t == is_float )
+                    d.f = 0.0f ;
+                if ( t == is_string )
+                    d.s = new std::string("");
+                if ( t == is_vector_string )
+                    d.vs = new std::vector<std::string>();
+            }
 
-    std::string to_string() const 
-    {
-        assert( t == is_string && d.s );
-        return *d.s;
-    }
-    std::vector<std::string> to_vector_string() const 
-    {
-        assert( t == is_vector_string && d.vs );
-        return *d.vs;
-    }
+            void set_value( const  char * value )
+            {
+                if( t == BGIQD::ARGS::args_union::is_bool )
+                {
+                    d.b = true;
+                }
+                if( t == BGIQD::ARGS::args_union::is_string)
+                {
+                    d.s = new std::string(value);
+                }
+                if( t == BGIQD::ARGS::args_union::is_int)
+                {
+                    d.i = std::stoi(std::string(value));
+                }
+                if( t == BGIQD::ARGS::args_union::is_long)
+                {
+                    d.l = std::stol(std::string(value));
+                }
+                if( t == BGIQD::ARGS::args_union::is_float)
+                {
+                    d.f = std::stod(std::string(value));
+                }
+                if( t == BGIQD::ARGS::args_union::is_vector_string)
+                {
+                    if( d.vs == NULL )
+                    {
+                        d.vs = new std::vector<std::string>() ;
+                    }
+                    (*(d.vs)).push_back(std::string(value));
+                }
+            }
 
-    bool to_bool() const { assert(t == is_bool); return d.b ; }
-    int to_int() const { assert( t == is_int) ; return d.i ; }
-    long to_long() const { assert(t == is_long) ;return d.l ; }
-    float to_float() const { assert( t== is_float) ; return d.f ; }
+            std::string to_string() const 
+            {
+                assert( t == is_string && d.s );
+                return *d.s;
+            }
 
-    template<class T> 
-    T value(T &)
-    {
-        assert(0);
-    }
+            std::vector<std::string> to_vector_string() const 
+            {
+                assert( t == is_vector_string && d.vs );
+                return *d.vs;
+            }
 
-    template<class T=int>
-    int value(int &a)
-    {
-        a= to_int();
-        return a;
-    }
+            bool to_bool() const { assert(t == is_bool); return d.b ; }
 
-    template<class T=long>
-    long value(long &a)
-    {
-        a= to_long();
-        return a;
-    }
-    template<class T=float>
-    float value(float &a)
-    {
-        a= to_float();
-        return a;
-    }
+            int to_int() const { assert( t == is_int) ; return d.i ; }
 
-    template<class T=bool>
-    bool value(bool &a)
-    {
-        a= to_bool();
-        return a;
-    }
+            long to_long() const { assert(t == is_long) ;return d.l ; }
 
-    template<class T=std::string>
-    std::string value(std::string &a)
-    {
-        a= to_string();
-        return a;
-    }
-    template<class T=std::vector<std::string>>
-    std::vector<std::string> value(std::vector<std::string> &a)
-    {
-        a= to_vector_string();
-        return a;
-    }
+            float to_float() const { assert( t== is_float) ; return d.f ; }
 
-    ~args_union()
-    {
-        if( t == is_string && d.s )
-            delete d.s ;
-        if ( t== is_vector_string && d.vs )
-            delete d.vs ;
-    }
-};
-
-static std::map<int,args_union*>  infos;
-
-template<class T>
-struct args_traits
-{
-    args_union::type type() ;
-};
-
-template<>
-struct args_traits<int>
-{
-    args_union::type type() { return args_union::type::is_int ; }
-};
-
-template<>
-struct args_traits<std::string>
-{
-    args_union::type type() { return args_union::type::is_string; }
-};
-
-template<>
-struct args_traits<long>
-{
-    args_union::type type() { return args_union::type::is_int ; }
-};
+            ~args_union()
+            {
+                if( t == is_string && d.s )
+                    delete d.s ;
+                if ( t== is_vector_string && d.vs )
+                    delete d.vs ;
+            }
+        };
 
 
-template<>
-struct args_traits<float>
-{
-    args_union::type type() { return args_union::type::is_float; }
-};
+        template<class T>
+            struct args_traits
+            {
+                args_union::type type() ;
+            };
 
-template<>
-struct args_traits<std::vector<std::string> >
-{
-    args_union::type type() { return args_union::type::is_vector_string; }
-};
+        template<>
+            struct args_traits<int>
+            {
+                args_union::type type() { return args_union::type::is_int ; }
+            };
 
-template<>
-struct args_traits< bool >
-{
-    args_union::type type() { return args_union::type::is_bool; }
-};
+        template<>
+            struct args_traits<std::string>
+            {
+                args_union::type type() { return args_union::type::is_string; }
+            };
+
+        template<>
+            struct args_traits<long>
+            {
+                args_union::type type() { return args_union::type::is_int ; }
+            };
 
 
-}//ARGS
+        template<>
+            struct args_traits<float>
+            {
+                args_union::type type() { return args_union::type::is_float; }
+            };
+
+        template<>
+            struct args_traits<std::vector<std::string> >
+            {
+                args_union::type type() { return args_union::type::is_vector_string; }
+            };
+
+        template<>
+            struct args_traits< bool >
+            {
+                args_union::type type() { return args_union::type::is_bool; }
+            };
+
+
+        static std::map<int,args_union*>  infos;
+
+        static int arg_index = 0 ;
+
+        const int arg_max = 10 ;
+
+        static struct option long_options[arg_max];
+
+    }//ARGS
 }//BGIQD
+
 
 #define __PRINT_USAGE \
     std::cerr<<"Usage : "<<argv[0]<< " args "<<std::endl;\
     for( const auto &i : BGIQD::ARGS::infos )\
-    {\
-        std::cerr<<"\t\t"<<"-"<<(char)i.first;\
-        if( i.second->optional){\
-            std::cerr<<"\t"<<"[optional]";}\
-        else{std::cerr<<"\t"<<"[required]";}\
-        std::cerr<<"\t"<<BGIQD::ARGS::args_union::get_type(i.second->t)\
-                 <<"\t"<<i.second->explain<<std::endl;\
-    }
-#define __CONSTRUCT_FORMAT \
-    std::string format;\
-    for( const auto &i : BGIQD::ARGS::infos )\
-    {\
-        format += i.first;\
-        if(i.second->t != BGIQD::ARGS::args_union::is_bool )\
-        {\
-            format += ":";\
-        }\
+{\
+    std::cerr<<"\t\t"<<"--"<<i.second->name;\
+    if( i.second->optional){\
+        std::cerr<<"\t"<<"[optional]";}\
+    else{std::cerr<<"\t"<<"[required]";}\
+    std::cerr<<"\t"<<BGIQD::ARGS::args_union::get_type(i.second->t);\
+    std::cerr<<"\t"<<i.second->explain;\
+    if( i.second->optional ){\
+        std::cerr<<"\t default= [ "<<i.second->default_value<<" ]";\
     }\
+    std::cerr<<std::endl;\
+}
+
+#define __CONSTRUCT_LONG_OPTIONS\
+    int max = 0 ;\
+    for( const auto &i : BGIQD::ARGS::infos )\
+{\
+    int id = i.first;\
+    auto & item = *(i.second);\
+    long_options[id].name = item.name.c_str();\
+    if(item.t == BGIQD::ARGS::args_union::is_bool )\
+    {\
+        long_options[id].has_arg = 0;\
+    }else{\
+        long_options[id].has_arg = 1;\
+    }\
+    long_options[id].flag = 0 ;\
+    long_options[id].val = id ;\
+    max = id ;\
+}\
+    for(int i = max + 1 ; i < arg_max ; i++ )\
+{\
+    long_options[i].name = 0;\
+    long_options[i].has_arg = 0;\
+    long_options[i].flag = 0;\
+    long_options[i].val = 0;\
+}
 
 #define __PARSE_ARGS \
-    int curr_flag ;\
-    while( ( curr_flag = getopt( argc , argv, format.c_str() ) ) != EOF )\
-    {\
-        auto itr = BGIQD::ARGS::infos.find( curr_flag ) ;\
-        if ( itr == BGIQD::ARGS::infos.end() )\
-        {    continue; }\
-        itr->second->setted = true ;\
-        if( itr->second->t == BGIQD::ARGS::args_union::is_bool )\
-        {\
-            itr->second->d.b = true;\
-        }\
-        if( itr->second->t == BGIQD::ARGS::args_union::is_string)\
-        {\
-            itr->second->d.s = new std::string(optarg);\
-        }\
-        if( itr->second->t == BGIQD::ARGS::args_union::is_int)\
-        {\
-            itr->second->d.i = std::stoi(std::string(optarg));\
-        }\
-        if( itr->second->t == BGIQD::ARGS::args_union::is_long)\
-        {\
-            itr->second->d.l = std::stol(std::string(optarg));\
-        }\
-        if( itr->second->t == BGIQD::ARGS::args_union::is_float)\
-        {\
-            itr->second->d.f = std::stod(std::string(optarg));\
-        }\
-        if( itr->second->t == BGIQD::ARGS::args_union::is_vector_string)\
-        {\
-            if( itr->second->d.vs == NULL )\
-            {\
-                itr->second->d.vs = new std::vector<std::string>() ;\
-            }\
-            (*(itr->second->d.vs)).push_back(std::string(optarg));\
-        }\
-    }\
+    int curr_flag , out = 0;\
+    while( ( curr_flag = getopt_long_only( argc , argv,"",long_options, &out  ) ) != EOF )\
+{\
+    auto itr = BGIQD::ARGS::infos.find( curr_flag ) ;\
+    if ( itr == BGIQD::ARGS::infos.end() )\
+    {    continue; }\
+    itr->second->setted = true ;\
+    itr->second->set_value(optarg);\
+}\
 
 #define __PRINT_ARGS \
     std::cerr<<argv[0];\
     for( const auto &i : BGIQD::ARGS::infos ){\
         if( i.second->setted) {\
-        std::cerr<<"\t-"<<(char)i.first<<"\t"<<i.second->args_to_string();\
+            std::cerr<<" --"<<i.second->name<<" "<<i.second->args_to_string();\
         }\
     }\
     std::cerr<<std::endl;
@@ -289,37 +298,51 @@ struct args_traits< bool >
 #define __CHECK_ARGS \
     bool pass = true ;\
     for( const auto &i : BGIQD::ARGS::infos )\
-    {\
-        if( ! i.second->optional &&  ! i.second->setted ){\
-            std::cerr<<"ERROR:  unset nacessary args - "<<(char)i.first<<std::endl;\
-            pass =false ;\
-        }\
+{\
+    if( ! i.second->optional &&  ! i.second->setted ){\
+        std::cerr<<"ERROR:  unset nacessary args -- "<<i.second->name<<std::endl;\
+        pass =false ;\
     }\
-    if( ! pass ){\
+    if( i.second->optional && (! i.second->setted) ){\
+        i.second->set_value(i.second->default_value.c_str()); \
+    }\
+}\
+if( ! pass ){\
+    __PRINT_USAGE\
+    return 0;\
+} else {\
+    __PRINT_ARGS \
+}
+
+#define __DEFINE_ARG_DETAIL( typen , name , optional , d ,exp ) \
+    BGIQD::ARGS::args_union name(BGIQD::ARGS::args_traits<typen>().type(),#name, optional,d,exp);\
+    BGIQD::ARGS::infos[arg_index]=&name;\
+    arg_index ++ \
+
+#define START_PARSE_ARGS \
+    BGIQD::ARGS::infos.clear();\
+    arg_index = 0 ;\
+
+
+#define DEFINE_ARG_REQUIRED( typen , name , exp ) \
+    __DEFINE_ARG_DETAIL( typen , name , false,"", exp)
+
+#define DEFINE_ARG_OPTIONAL(typen , name ,  exp , df)\
+    __DEFINE_ARG_DETAIL( typen , name , true , df , exp);\
+
+#define __CHECK_HELP \
+    if( argc < 2\
+            || std::string(argv[1]) == "-h" \
+            || std::string(argv[1]) == "--help"\
+            || std::string(argv[1]) == "help"\
+            ){\
         __PRINT_USAGE\
-        return 0;\
-    } else {\
-        __PRINT_ARGS \
+        return 0 ;\
     }
 
-#define __DEFINE_ARG_DETAIL( typen , name , flag , optional ) \
-    BGIQD::ARGS::args_union name(BGIQD::ARGS::args_traits<typen>().type(), optional);\
-    BGIQD::ARGS::infos[flag]=&name;
-
-#define START_PARSE_ARGS  
-
-#define DEFINE_ARG_REQUIRED( typen , name , flag ) \
-    __DEFINE_ARG_DETAIL( typen , name , flag , false)
-
-#define DEFINE_ARG( typen , name , flag ) \
-    __DEFINE_ARG_DETAIL( typen , name , flag , true )
-
-#define DEFINE_ARG_DETAIL(typen , name , flag ,o,  e)\
-    __DEFINE_ARG_DETAIL( typen , name , flag , o);\
-    name.explain = e ;
-
 #define END_PARSE_ARGS \
-    __CONSTRUCT_FORMAT\
+    __CHECK_HELP\
+    __CONSTRUCT_LONG_OPTIONS\
     __PARSE_ARGS\
     __CHECK_ARGS
 

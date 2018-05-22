@@ -12,21 +12,26 @@ TEST(simulator_args)
     {
         START_PARSE_ARGS
 
-        DEFINE_ARG(bool , open , 'o' )
-        DEFINE_ARG(int, k , 'k' )
-        DEFINE_ARG(std::string, p , 'p' )
+        DEFINE_ARG_REQUIRED(bool , open , "require open" );
+        DEFINE_ARG_REQUIRED(int, k , "require k" );
+        DEFINE_ARG_OPTIONAL(std::string, p , "optional p", "default p" );
+        DEFINE_ARG_OPTIONAL(std::string, oo , "optional oo", "ooo" );
 
         END_PARSE_ARGS
 
         CHECK(open.d.b,true);
         CHECK(k.d.i,10);
         CHECK(*(p.d.s) , "/ab/c");
+        CHECK(*(oo.d.s) , "ooo");
+
+
+        return 1;
     };
     char a1[] = "main";
-    char a2[] = "-o";
-    char a3[] = "-k";
+    char a2[] = "-open";
+    char a3[] = "--k";
     char a4[] = "10";
-    char a5[] = "-p";
+    char a5[] = "--p";
     char a6[] = "/ab/c";
 
     char *aa1[100];
@@ -37,4 +42,8 @@ TEST(simulator_args)
     aa1[4]=a5;
     aa1[5]=a6;
     fake_main(6,aa1);
+    fake_main(1,aa1);
 }
+
+
+
