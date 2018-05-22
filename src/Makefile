@@ -49,6 +49,7 @@ source_cpp =	contig_barcode.cpp \
 				stLFR/barcodeOnContig.cpp\
 				stLFR/ContigCluster.cpp\
 				stLFR/LineGroup.cpp\
+				stLFR/CBB.cpp\
 				common/args/argsparser.cpp\
 				soap2/loadGraph.cpp\
 				soap2/contigGraph.cpp\

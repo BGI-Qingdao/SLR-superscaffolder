@@ -48,6 +48,12 @@ namespace BGIQD {
 
             DEFINE_SUFFIX(barcodeList, ".barcodeList");
 
+            DEFINE_SUFFIX(BarcodeOnContig, ".barcodeOnContig");
+
+            DEFINE_SUFFIX(BarcodeOnBin, ".barcodeOnBin");
+
+            DEFINE_SUFFIX(seeds, ".seeds");
+
             private:
                 std::string m_prefix;
         };

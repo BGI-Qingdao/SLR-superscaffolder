@@ -28,11 +28,15 @@ namespace BGIQD {
             struct iterator ;
 
         template<class T>
+            struct const_iterator ;
+
+        template<class T>
             struct  IncrArray
             {
                 typedef T Element;
 
                 typedef struct iterator<IncrArray> iterator;
+                typedef struct const_iterator<IncrArray> const_iterator;
 
                 virtual ~IncrArray()
                 {
@@ -46,12 +50,25 @@ namespace BGIQD {
                     }
                 }
 
-                IncrArray(size_t block_size)
+                IncrArray() 
                 {
+                    m_block_size = 0 ;
+                    m_curr  = 0 ;
+                    m_capacity = 0 ;
+                }
+
+                void Init( size_t block_size) 
+                {
+                    assert(m_capacity == 0);
                     m_block_size = block_size ;
                     m_curr = 0 ;
                     m_headers.push_back(new Element[m_block_size]);
                     m_capacity = m_block_size;
+                }
+
+                IncrArray(size_t block_size)
+                {
+                    Init(block_size);
                 }
 
                 IncrArray( const IncrArray & );
@@ -70,6 +87,30 @@ namespace BGIQD {
                     operator[](m_curr++) = e ;
                 }
 
+                Element & at(size_t i ) 
+                {
+                    assert( i < m_curr );
+                    size_t block_num = i / m_block_size ;
+                    size_t block_i= i % m_block_size ;
+                    if( block_num >= m_headers.size() )
+                    {
+                        assert(0);
+                    }
+                    return m_headers[block_num][block_i];
+                }
+
+                const Element & at(size_t i ) const 
+                {
+                    assert( i < m_curr );
+                    size_t block_num = i / m_block_size ;
+                    size_t block_i= i % m_block_size ;
+                    if( block_num >= m_headers.size() )
+                    {
+                        assert(0);
+                    }
+                    return m_headers[block_num][block_i];
+                }
+
                 Element & operator[](size_t i )
                 {
                     assert( i < m_curr );
@@ -82,18 +123,29 @@ namespace BGIQD {
                     return m_headers[block_num][block_i];
                 }
 
-                iterator begin()
+                iterator begin() 
                 {
                     iterator ret(*this,0);
                     return ret ;
                 }
 
-                iterator end()
+                iterator end() 
                 {
                     iterator ret(*this,m_curr);
                     return ret ;
                 }
 
+                const_iterator begin()  const 
+                {
+                    const_iterator ret(*this,0);
+                    return ret ;
+                }
+
+                const_iterator end() const
+                {
+                    const_iterator ret(*this,m_curr);
+                    return ret ;
+                }
                 bool empty() const { return m_curr == 0 ;}
 
                 void clear() { m_curr = 0 ; }
@@ -119,123 +171,172 @@ namespace BGIQD {
                 std::vector<Element * > m_headers;
             };
 
+
         template<class T>
-            struct iterator : public std::iterator<typename T::Element
+            struct non_const_traits
+            {
+                typedef T Base ;
+                typedef T * BasePointer;
+                typedef typename T::Element Element;
+                typedef typename T::Element & reference;
+                typedef typename T::Element * pointer;
+            };
+
+        template<class T>
+            struct const_traits
+            {
+                typedef const T Base ;
+                typedef T const * BasePointer;
+                typedef typename T::Element const Element;
+                typedef typename T::Element const & reference;
+                typedef typename T::Element const * pointer;
+            };
+
+        template<class T>
+            struct iterator_base : public std::iterator<typename T::Element
                               , size_t 
-                              , typename T::Element * 
-                              , typename T::Element &
+                              , typename T::pointer
+                              , typename T::reference
                               , std::random_access_iterator_tag>
         {
-            typedef T Base;
+            typedef typename T::Base Base;
+            typedef typename T::BasePointer  BasePointer;
 
-            typedef typename T::Element * pointer;
+            typedef typename T::pointer pointer;
 
-            typedef typename T::Element & reference;
+            typedef typename T::reference reference;
 
-            iterator( Base & b , size_t i ) : base(&b) , curr(i) {}
+            iterator_base( Base & b , size_t i ) : base(&b) , curr(i) {}
 
-            iterator( const iterator & o ) : base(o.base) , curr(o.curr) {}
+            iterator_base( const iterator_base & o ) : base(o.base) , curr(o.curr) {}
 
-            iterator & operator = ( const iterator & o )
+            iterator_base & operator = ( const iterator_base & o )
             {
                 base = o.base ;
                 curr = o.curr ;
                 return *this ;
             }
 
-            virtual ~iterator() {} ;
+            virtual ~iterator_base() {} ;
 
-            bool operator <= ( const iterator & o )const { 
+            bool operator <= ( const iterator_base & o )const { 
                 assert ( base == o.base );
                 return curr <= o.curr ; 
             }
 
-            bool operator >= ( const iterator & o ) const { 
+            bool operator >= ( const iterator_base & o ) const { 
                 assert ( base == o.base );
                 return curr >= o.curr ; 
             }
 
-            bool operator != ( const iterator & o ) const {
+            bool operator != ( const iterator_base & o ) const {
                 assert ( base == o.base );
                 return curr == o.curr ; 
             }
-            bool operator < ( const iterator & o )const { 
+            bool operator < ( const iterator_base & o )const { 
                 assert ( base == o.base );
                 return curr < o.curr ; 
             }
 
-            bool operator > ( const iterator & o ) const { 
+            bool operator > ( const iterator_base & o ) const { 
                 assert ( base == o.base );
                 return curr > o.curr ; 
             }
 
-            bool operator == ( const iterator & o ) const {
+            bool operator == ( const iterator_base & o ) const {
                 assert ( base == o.base );
                 return curr == o.curr ; 
             }
 
             reference operator*() 
             {
-                return (*base)[curr];
+                return base->at(curr);
             }
 
             pointer operator->()
             {
-                return &((*base)[curr]);
+                return &(base->at(curr));
             }
 
-            iterator & operator++ (int i)
+            iterator_base & operator++ (int i)
             {
                 curr += i ;
                 return *this;
             }
 
-            iterator & operator-- (int i)
+            iterator_base & operator-- (int i)
             {
                 curr -= i ;
                 return *this;
             }
-            iterator & operator++ ()
+            iterator_base & operator++ ()
             {
                 curr ++ ;
                 return *this;
             }
 
-            iterator & operator-- ()
+            iterator_base & operator-- ()
             {
                 curr -- ;
                 return *this;
             }
 
-            iterator & operator += ( size_t i)
+            iterator_base & operator += ( size_t i)
             {
                 curr += i ;
                 return *this ;
             }
 
-            iterator & operator -= ( size_t i)
+            iterator_base & operator -= ( size_t i)
             {
                 curr += i ;
                 return *this ;
             }
 
-            iterator  operator + ( size_t i) const 
+            iterator_base  operator + ( size_t i) const 
             {
-                iterator ret(*this);
+                iterator_base ret(*this);
                 ret.curr += i ;
                 return ret;
             }
 
-            iterator  operator - ( size_t i) const 
+            iterator_base  operator - ( size_t i) const 
             {
-                iterator ret(*this);
+                iterator_base ret(*this);
                 ret.curr -= i ;
                 return ret;
             }
 
             protected:
-            Base * base;
+            BasePointer base;
             size_t curr ;
+        };
+
+        template<class T>
+        struct iterator: public iterator_base<non_const_traits<T> >{
+            typedef iterator_base<non_const_traits<T> > F;
+            iterator(T & b , size_t i ) : F(b,i) {}
+
+            iterator( const iterator& o ) : F(o) {}
+
+            iterator& operator = ( const iterator& o )
+            {
+                *this = F(o);
+            }
+        };
+
+        template<class T>
+        struct const_iterator: public iterator_base<const_traits<T> >{
+            typedef iterator_base<const_traits<T> > F;
+
+            const_iterator(const T & b , size_t i ) : F(b,i) {}
+
+            const_iterator( const const_iterator& o ) : F(o) {}
+
+            const_iterator& operator = ( const const_iterator& o )
+            {
+                *this = F(o);
+            }
         };
 
     } // INCRARRAY

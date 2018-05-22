@@ -35,5 +35,18 @@ namespace FILES {
         }
         (ist.rdbuf())->pubsetbuf(buffer,size);
     }
+
+
+    void FileReaderFactory::EachLine(std::istream & ost , ParseLine parse)
+    {
+        while( ! ost.eof() )
+        {
+            std::string line;
+            std::getline(ost,line);
+            parse(line);
+        }
+    }
+
+
 }
 }
