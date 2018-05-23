@@ -19,7 +19,10 @@ struct AppConfig
     typedef std::map< int , std::set<int> > BinIndexOnBarcode;
 
     BGIQD::stLFR::BarcodeOnBinArray barcodeOnBin ;
-    BGIQD::INCRARRAY::IncrArray<BGIQD::stLFR::BinRelation>  relations;
+
+    BGIQD::stLFR::BinRelationArray  relations;
+
+    BGIQD::stLFR::ContigRelationArray contig_relations;
 
     BinIndexOnBarcode binOnBarcode ;
 
@@ -31,6 +34,9 @@ struct AppConfig
     {
         fName.Init(p);
         thresold = t;
+        barcodeOnBin.Init(1024);
+        relations.Init(1024);
+        contig_relations.Init(1024);
     }
 
     void LoadB2BArray( )
@@ -125,35 +131,17 @@ struct AppConfig
 
     void PrintBinRalation()
     {
-        auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.bin_cluster());
-        for( size_t i = 0 ; i < relations.size() ; i++ )
-        {
-            auto &result = relations.at(i);
-            //TODO : new format
-            (*out)<<result.contigId<<':'<<result.binId;
-            for( auto pair : result.sims )
-            {
-                auto & sinfo = pair.second ;
-                (*out)<<'\t'<<sinfo.contigId<<':'<<sinfo.simularity;
-            }
-            (*out)<<'\t'<<std::endl;
-        }
-        delete out;
+        BGIQD::stLFR::PrintBinRelationArray(fName.bin_cluster() , relations);
     }
-    /*
-    void PrintContigRalation()
-    {
-        for( size_t i = 0 ; i < relations.size() ; i++ )
-        {
-            auto &result = relations.at(i);
-            //TODO : new format
-            (*out)<<result.contigId<<':'<<result.binId;
-            for( auto pair : result.sims )
-            {
 
-            }
-        }
-    }*/
+    void BuildContigRelation()
+    {
+    }
+
+    void PrintContigRelation()
+    {
+        BGIQD::stLFR::PrintContigRelationArray(fName.cluster() , contig_relations);
+    }
 
 } config;
 
@@ -178,6 +166,10 @@ int main(int argc ,char **argv)
     config.BuildABBAResult();
 
     config.PrintBinRalation();
+
+    config.BuildContigRelation();
+
+    config.PrintContigRelation();
 
     return 0;
 }
