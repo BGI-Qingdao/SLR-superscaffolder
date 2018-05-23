@@ -68,6 +68,7 @@ struct AppConfig
         bin_size = bin;
         BGIQD::LOG::logfilter::singleton().get("ChopBin",BGIQD::LOG::loglevel::INFO,log);
         fName.Init(prefix);
+        b2b_array.Init(1024);
     }
 
     void LoadBarcodeOnContig(std::istream & in)

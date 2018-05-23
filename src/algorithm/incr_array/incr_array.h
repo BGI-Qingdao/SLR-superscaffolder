@@ -152,7 +152,7 @@ namespace BGIQD {
 
                 size_t size() const { return m_curr ; }
 
-                size_t capacity() const { return m_curr ; }
+                size_t capacity() const { return m_capacity; }
 
                 void resize( size_t i ) 
                 {
@@ -231,7 +231,7 @@ namespace BGIQD {
 
             bool operator != ( const iterator_base & o ) const {
                 assert ( base == o.base );
-                return curr == o.curr ; 
+                return curr != o.curr ; 
             }
             bool operator < ( const iterator_base & o )const { 
                 assert ( base == o.base );
@@ -260,13 +260,13 @@ namespace BGIQD {
 
             iterator_base & operator++ (int i)
             {
-                curr += i ;
+                curr ++ ;
                 return *this;
             }
 
             iterator_base & operator-- (int i)
             {
-                curr -= i ;
+                curr -- ;
                 return *this;
             }
             iterator_base & operator++ ()
