@@ -54,6 +54,10 @@ namespace BGIQD {
 
             DEFINE_SUFFIX(seeds, ".seeds");
 
+            DEFINE_SUFFIX(cluster, ".cluster");
+
+            DEFINE_SUFFIX(bin_cluster, ".bin_cluster");
+
             private:
                 std::string m_prefix;
         };

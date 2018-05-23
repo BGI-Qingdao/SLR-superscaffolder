@@ -1,193 +1,183 @@
-#include "contig_barcode.h"
-#include "file_writer.h"
-#include "argsparser.h"
+#include "algorithm/incr_array/incr_array.h"
+#include "algorithm/collection/collection.h"
+
+#include "common/files/file_writer.h"
+#include "common/args/argsparser.h"
+#include "common/multithread/MultiThread.h"
+
+#include "soap2/soap2.h"
+#include "soap2/fileName.h"
+
+#include "stLFR/CBB.h"
+
 #include <algorithm>
 #include <iostream>
-#include <common/multithread/MultiThread.h>
-using namespace BGIQD;
-using namespace BGIQD::JOB01;
-using namespace BGIQD::ARGS;
-using namespace BGIQD::LOG;
-using namespace BGIQD::FILES;
+#include <string>
 
-//                length  contig  sd      bin
-//typedef std::tuple<size_t,size_t,size_t, size_t> binIndex;
-
-struct binIndex
+struct AppConfig
 {
-    unsigned int contig;
-    int bin;
+    typedef std::map< int , std::set<int> > BinIndexOnBarcode;
 
-    bool operator < ( const binIndex & a ) const 
+    BGIQD::stLFR::BarcodeOnBinArray barcodeOnBin ;
+    BGIQD::INCRARRAY::IncrArray<BGIQD::stLFR::BinRelation>  relations;
+
+    BinIndexOnBarcode binOnBarcode ;
+
+    float thresold;
+
+    BGIQD::SOAP2::FileNames fName;
+
+    void Init(const std::string & p , float t)
     {
-        return contig < a.contig ? true : ( contig>a.contig ?  false : bin<a.bin );
+        fName.Init(p);
+        thresold = t;
     }
-};
 
-typedef std::vector<binIndex> binIndexs;
-
-typedef std::vector<binIndex> binIndexs;
-
-inline size_t min(size_t i , size_t j) 
-{
-    return i < j ? i : j ;
-}
-
-//
-// not thread safe . do not edit sum_cache in multi-thread
-//
-static std::map<binIndex, size_t> sum_cache;
-inline size_t sum(const  binIndex & index ,   const std::map<size_t , size_t> & hash)
-{
-    auto itr =  sum_cache.find( index ) ;
-    if ( itr == sum_cache.end() )
+    void LoadB2BArray( )
     {
-        size_t ret = 0 ;
-        for( auto pair : hash )
-        {
-            ret += pair.second;
-        }
-        sum_cache.emplace( index , ret );
-        //std::cerr<<"bin size "<<ret<<std::endl;
-        return ret;
+        BGIQD::stLFR::LoadBarcodeOnBinArray( fName.BarcodeOnBin() , barcodeOnBin);
     }
-    //std::cerr<<"bin size "<<itr->second<<std::endl;
-    return itr->second;
-}
 
-
-inline std::tuple<int,int,double> simularity(
-    const  binIndex & index1 ,
-    const  binIndex & index2 ,
-    const std::map<size_t , size_t> & hash1
-  , const std::map<size_t , size_t> & hash2)
-{
-        size_t both=0;
-        for( auto pair : hash1 )
+    void AllocRelationArray()
+    {
+        relations.init_n_element(barcodeOnBin.size());
+    }
+    void BuildBinIndexOnBarcode()
+    {
+        for(size_t i = 0 ; i <barcodeOnBin.size() ; i++)
         {
-            auto itr2 = hash2.find(pair.first);
-            if( itr2 != hash2.end() )
+            auto & b2b = barcodeOnBin.at(i);
+            for( auto j : b2b.collections )
             {
-                both += min( pair.second , itr2->second);
+                int barcode = j.first ;
+                binOnBarcode[barcode].insert( i);
             }
         }
-        //std::cerr<<" -- both"<<both<<std::endl;
-        size_t all = sum(index1,hash1) + sum(index2,hash2) - both;
-        //std::cerr<<" -- all "<<all<<std::endl;
-        double frac= double( both ) / double(all);
-        return std::make_tuple(all,both,frac);
-}
+    }
 
-void buildBinIndexs( const binBarcodeInfo & bbi , binIndexs & indexs)
-{
-    timer t(log1,"buildBinIndexs");
-    for( const  auto & c : bbi )
+    void Calc1Bin2All(int i )
     {
-        for( const auto & b : c.second )
+        auto & bin = barcodeOnBin.at(i);
+        auto & result = relations.at(i);
+        result.binId = bin.binId ;
+        result.contigId = bin.contigId ;
+        result.binIndex = i ;
+        std::set<int> relates ;
+        for(auto pair : bin.collections)
         {
-            binIndex tmp ;
-            tmp.contig = c.first;
-            tmp.bin = b.first ;
-            sum(tmp, b.second);
-            indexs.push_back(tmp);//( c.first , b.first );
+            int barcode = pair.first ;
+            for( auto index : binOnBarcode[barcode] )
+            {
+                if ( index > i )
+                    relates.insert(index);
+            }
+        }
+
+        for(auto index : relates)
+        {
+            auto & other = barcodeOnBin.at(index);
+            float sim = BGIQD::stLFR::BarcodeCollection::Jaccard(bin.collections,other.collections);
+            if( sim >= thresold )
+            {
+                auto & sinfo = result.sims[index];
+                sinfo.binIndex = index ;
+                sinfo.contigId = other.contigId;
+                sinfo.binId = other.binId;
+                sinfo.simularity= sim;
+            }
         }
     }
-}
 
-void updateMap( std::map<size_t,float> & data , size_t key ,float i )
-{
-    auto itr = data.find(key);
-    if( itr == data.end() ) data[key] = i ;
-    else if ( itr->second < i ) data[key] = i;
-}
-
-std::map<size_t,float>  cluster(const binIndex &seed , const binIndexs & allIndexs ,const binBarcodeInfo & bbi, float thresold )
-{
-    timer t(log1,"cluster");
-    std::map<size_t,float>  rets;
-    updateMap(rets, seed.contig , 1.0f);
-    auto const & seedmap = bbi.at(seed.contig).at( seed.bin) ;// std::get<1>(seed)).at(std::get<3>(seed));
-
-    for ( const auto & index : allIndexs )
+    void RunAllJob( int thread)
     {
-        auto const & curr = bbi.at(index.contig).at(index.bin);
-        auto ret = simularity( index , seed , curr , seedmap );
-        if( std::get<2>(ret) >= thresold )
+        BGIQD::MultiThread::MultiThread t_jobs;
+        t_jobs.Start(thread);
+
+        for(size_t i = 0 ; i <barcodeOnBin.size() ; i++)
         {
-            updateMap(rets,index.contig,std::get<2>(ret));
+            t_jobs.AddJob([i,this](){ Calc1Bin2All(i);});
+        }
+
+        t_jobs.End();
+        t_jobs.WaitingStop();
+    }
+
+    void BuildABBAResult()
+    {
+        for( size_t i = 0 ; i < relations.size() ; i++ )
+        {
+            auto & binInfo = barcodeOnBin.at(i);
+            auto & result = relations.at(i);
+            for(auto pair : result.sims )
+            {
+                if( pair.first <=(int) i )
+                    continue ;
+                auto & sinfo = pair.second ;
+                auto & another = relations.at(sinfo.binIndex);
+                auto & new_sinfo = another.sims[i];
+                new_sinfo.binIndex = i ;
+                new_sinfo.contigId = binInfo.contigId;
+                new_sinfo.binId = binInfo.binId ;
+                new_sinfo.simularity = sinfo.simularity ;
+            }
         }
     }
-    return rets;
-}
 
-void printClusterData(const std::string & file ,const  std::vector< std::map< size_t ,float > > &results)
-{
-    timer t(log1,"printClusterData");
-    auto out = FileWriterFactory::GenerateWriterFromFileName(file);
-    for( const auto r : results )
+    void PrintBinRalation()
     {
-        for( const auto p : r )
+        auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.bin_cluster());
+        for( size_t i = 0 ; i < relations.size() ; i++ )
         {
-            (*out)<<p.first<<":"<<p.second<<"\t";
+            auto &result = relations.at(i);
+            //TODO : new format
+            (*out)<<result.contigId<<':'<<result.binId;
+            for( auto pair : result.sims )
+            {
+                auto & sinfo = pair.second ;
+                (*out)<<'\t'<<sinfo.contigId<<':'<<sinfo.simularity;
+            }
+            (*out)<<'\t'<<std::endl;
         }
-        (*out)<<std::endl;
+        delete out;
     }
-    delete out;
-}
+    /*
+    void PrintContigRalation()
+    {
+        for( size_t i = 0 ; i < relations.size() ; i++ )
+        {
+            auto &result = relations.at(i);
+            //TODO : new format
+            (*out)<<result.contigId<<':'<<result.binId;
+            for( auto pair : result.sims )
+            {
+
+            }
+        }
+    }*/
+
+} config;
 
 int main(int argc ,char **argv)
 {
-    initLog("BinCluster");
-    timer t(log1,"binCluster");
-    int t_num = 8;
-    float thresold_f;
     START_PARSE_ARGS
-    DEFINE_ARG_DETAIL(std::string , input , 'i',false,"barcodeOnBin");
-    DEFINE_ARG_DETAIL(std::string , output, 'o',false,"output");
-    DEFINE_ARG_DETAIL(int , thread, 't',true,"thread num [ default 8] ");
-    DEFINE_ARG_DETAIL(float , thresold, 's',false,"simularity thresold");
+    DEFINE_ARG_REQUIRED(std::string , prefix, "prefix");
+    DEFINE_ARG_REQUIRED(float , thresold, "simularity thresold");
+    DEFINE_ARG_OPTIONAL(int , thread, "thread num" ,"8");
     END_PARSE_ARGS
-    if( thread.setted )
-    {
-       t_num = thread.to_int(); 
-    }
-    thresold_f = thresold.to_float();
 
-    binBarcodeInfo bbi;
-    loadBinBarcodeInfo(input.to_string() , bbi);
-    binIndexs allIndexs;
-    buildBinIndexs(bbi,allIndexs);
+    config.Init(prefix.to_string() , thresold.to_float());
 
+    config.LoadB2BArray() ;
 
-    std::mutex ret_mut;
-    std::vector< std::map< size_t ,float > > results;
-    int   index = 0;
+    config.BuildBinIndexOnBarcode();
 
-    auto cluster_job = [&results , &allIndexs ,&bbi ,
-         thresold_f,&ret_mut,&index ]
-             ( const binIndex & seed )
-    {
-        auto ret = cluster(seed,allIndexs,bbi,thresold_f);
-        {
-            std::lock_guard<std::mutex> l(ret_mut);
-            results.push_back(ret);
-            index ++ ;
-            if( index % 1000 == 0 )
-            {
-                log1<<BGIQD::LOG::lstart()<<"cluster "<<index<<" ... "<<BGIQD::LOG::lend();
-            }
-        }
-    };
-    BGIQD::MultiThread::MultiThread t_jobs;
-    //TODO : make it thread safe
-    t_jobs.Start(t_num);
-    for( const auto & seed : allIndexs)
-    {
-        t_jobs.AddJob(std::bind(cluster_job,seed));
-    }
-    t_jobs.End();
-    t_jobs.WaitingStop();
+    config.AllocRelationArray();
 
-    printClusterData(output.to_string(),results);
+    config.RunAllJob(thread.to_int());
+
+    config.BuildABBAResult();
+
+    config.PrintBinRalation();
+
     return 0;
 }

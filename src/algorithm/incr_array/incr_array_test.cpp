@@ -35,12 +35,15 @@ TEST(IncrArrayAcess)
         CHECK( j , *i);
         j++ ;
     }
+    CHECK( 88 , j );
     j = 0 ;
+
     for( auto i = test.begin() ; i < test.end() ; i+= 2 )
     {
         CHECK( j , *i);
         j+= 2 ;
     }
+    CHECK( 88 , j );
 
     j = 0; 
     for( auto & i : test )
@@ -48,5 +51,6 @@ TEST(IncrArrayAcess)
         CHECK( j , i);
         j ++ ;
     }
+    CHECK( 88 , j );
 }
 

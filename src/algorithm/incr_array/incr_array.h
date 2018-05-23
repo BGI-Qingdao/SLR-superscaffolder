@@ -154,14 +154,21 @@ namespace BGIQD {
 
                 size_t capacity() const { return m_capacity; }
 
-                void resize( size_t i ) 
+                void resize( size_t i )
                 {
-                    if( i <= m_capacity ) 
+                    if( i <= m_capacity )
                         return ;
                     do {
                         m_headers.push_back(new Element[m_block_size]);
                         m_capacity += m_block_size ;
                     }while( m_capacity < i );
+                }
+
+                void init_n_element(size_t i )
+                {
+                    assert( m_curr == 0 );
+                    resize( i) ;
+                    m_curr = i ;
                 }
 
                 protected:
