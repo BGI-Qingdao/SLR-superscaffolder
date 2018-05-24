@@ -1,4 +1,4 @@
-.PHONY: main clean dev_tools
+.PHONY: main clean dev_tools test
 
 main:
 	cd main && make
