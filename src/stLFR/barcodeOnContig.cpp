@@ -1,8 +1,11 @@
-#include "stLFR/barcodeOnContig.h"
 #include <cassert>
 #include <algorithm>
-#include "common/files/file_reader.h"
 #include <sstream>
+
+#include "common/files/file_reader.h"
+#include "common/error/Error.h"
+
+#include "stLFR/barcodeOnContig.h"
 namespace BGIQD {
     namespace stLFR {
 
@@ -284,6 +287,8 @@ namespace BGIQD {
         void GraphEA_withBarcode::LoadBarcodeOnConfig(const std::string & file)
         {
             auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(file);
+            if( in == NULL )
+                FATAL(" open xxx.barcodeOnContig to read failed !!! ");
             std::string line;
             while(!std::getline(*in,line).eof())
             {

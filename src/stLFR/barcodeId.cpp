@@ -2,6 +2,7 @@
 #include "common/files/file_reader.h"
 #include "common/files/file_writer.h"
 #include "common/string/stringtools.h"
+#include "common/error/Error.h"
 
 namespace BGIQD{
 namespace stLFR{
@@ -70,6 +71,8 @@ namespace stLFR{
         if( ! preload )
             return ;
         auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(file);
+        if( in == NULL )
+            FATAL( " open (barcodeList) file for read failed !!! " );
         std::string line ;
         while(in &&!std::getline(*in,line).eof())
         {
@@ -82,6 +85,8 @@ namespace stLFR{
     void BarcodeIdHelper::Print(const std::string & file)
     {
         auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(file);
+        if( out == NULL )
+            FATAL( " open (barcodeList) file for write failed !!!");
         BarcodeId::Singleton().Print(*out);
         delete out;
     }

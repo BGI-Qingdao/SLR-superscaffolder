@@ -1,6 +1,7 @@
 #include "soap2/loadGraph.h"
 #include <cassert>
-#include <common/files/file_reader.h>
+#include "common/files/file_reader.h"
+#include "common/error/Error.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -91,6 +92,8 @@ void loadCluster(GlobalConfig & config)
     float cov;
     config.connectionNum= 0;
     auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(config.cluster);
+    if( in == NULL )
+        FATAL( " open prefix.cluser for read failed !!! " );
     // load connection 
     while(!std::getline(*in,line).eof())
     {

@@ -1,5 +1,7 @@
 #include "stLFR/ContigCluster.h"
 #include "common/files/file_reader.h"
+#include "common/error/Error.h"
+
 #include <sstream>
 
 namespace BGIQD{
@@ -13,6 +15,8 @@ namespace BGIQD{
             float cov;
             clusterNum = 0;
             auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(file);
+            if( in == NULL )
+                FATAL(" open prefix.cluster for read failed !!! ");
             // load connection 
             while(!std::getline(*in,line).eof())
             {

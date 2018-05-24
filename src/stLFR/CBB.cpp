@@ -3,6 +3,7 @@
 #include "common/string/stringtools.h"
 #include "common/files/file_writer.h"
 #include "common/files/file_reader.h"
+#include "common/error/Error.h"
 
 namespace BGIQD{
     namespace stLFR {
@@ -42,6 +43,8 @@ namespace BGIQD{
         void LoadBarcodeOnBinArray( const std::string & file , BarcodeOnBinArray & data )
         {
             auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(file);
+            if( in == NULL )
+                FATAL( " open prefix.barcodeOnBin to read failed !!!" );
             auto add_data = [&] ( const std::string & line)
             {
                 BarcodeOnBin b2b ;
@@ -56,6 +59,8 @@ namespace BGIQD{
         void PrintBarcodeOnBinArray( const std::string & file , const BarcodeOnBinArray & data)
         {
             auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(file);
+            if( out == NULL )
+                FATAL( " open prefix.barcodeOnBin to write failed !!!" );
             for( const auto & i : data )
             {
                 if( i.empty()) 
@@ -105,6 +110,8 @@ namespace BGIQD{
             };
 
             auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(file);
+            if( in == NULL )
+                FATAL( " open prefix.bin_cluster to read failed !!!" );
             BGIQD::FILES::FileReaderFactory::EachLine(*in ,parseline);
             delete in ;
         }
@@ -112,6 +119,8 @@ namespace BGIQD{
         void PrintBinRelationArray(const std::string & file ,const BinRelationArray & data)
         {
             auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(file);
+            if( out == NULL )
+                FATAL( " open prefix.bin_cluster to write failed !!!" );
             for( size_t i = 0 ; i < data.size() ; i++ )
             {
                 (*out)<<data.at(i).ToString()<<std::endl;
@@ -153,6 +162,8 @@ namespace BGIQD{
             };
 
             auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(file);
+            if( in == NULL )
+                FATAL( " open prefix.cluster to read failed !!!" );
             BGIQD::FILES::FileReaderFactory::EachLine(*in ,parseline);
             delete in ;
         }
@@ -160,6 +171,8 @@ namespace BGIQD{
         void PrintContigRelationArray(const std::string & file ,const ContigRelationArray & data)
         {
             auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(file) ;
+            if( out  == NULL )
+                FATAL( " open prefix.cluster to write failed !!!" );
             for( size_t i = 0 ; i <data.size() ; i++)
             {
                 (*out)<<data.at(i).ToString()<<std::endl;

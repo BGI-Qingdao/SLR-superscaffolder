@@ -1,6 +1,8 @@
 #include "soap2/contigGraph.h"
 #include "common/files/file_reader.h"
 #include "common/string/stringtools.h"
+#include "common/error/Error.h"
+
 #include <sstream>
 #include <cassert>
 #include <stdio.h>
@@ -64,7 +66,6 @@ namespace BGIQD{
                 ,const std::map<unsigned int , float> & neibs
                 ,int max_depth )
         {
-            auto test = *(neibs.begin());
             if ( total_length >= max_depth|| length == 0 )
                 return ;
             stack.push_front(*this);
@@ -307,6 +308,8 @@ namespace BGIQD{
         void GraphEA::LoadEdge( const std::string & file, int K)
         {
             auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(file);
+            if( in == NULL )
+                FATAL( "open prefix.update_edge for read failed !!! " );
             std::string line;
             std::getline(*in,line);
             sscanf(line.c_str(),"EDGEs %u",&contigTotalNum);
@@ -356,6 +359,8 @@ namespace BGIQD{
             arcNum = 0;
             // Counting arcs
             auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(file);
+            if( in == NULL )
+                FATAL( "open prefix.Arc for read failed !!! " );
             while(!std::getline(*in,line).eof())
             {
                 std::istringstream ist(line);
@@ -370,6 +375,8 @@ namespace BGIQD{
             arc_array =static_cast<Arc*>( calloc(sizeof(Arc),arcNum + 1));
             long long index = 1 ;
             auto in1 = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(file);
+            if( in == NULL )
+                FATAL( "open prefix.Arc for read failed !!! " );
             while(!std::getline(*in1,line).eof())
             {
                 std::istringstream ist(line);

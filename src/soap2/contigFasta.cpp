@@ -1,5 +1,6 @@
 #include "contigFasta.h"
 #include "common/files/file_reader.h"
+#include "common/error/Error.h"
 #include "biocommon/seq/tool_func.h"
 #include <sstream>
 #include <cassert>
@@ -182,6 +183,8 @@ namespace BGIQD {
         void ContigFastAMap::LoadContig(const std::string & file)
         {
             auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(file);
+            if( in != NULL )
+                FATAL( " open prefix.contig for read failed !!! ");
             std::string line ;
             ContigFastA tmp ;
             tmp.length = 0; 

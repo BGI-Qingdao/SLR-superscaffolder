@@ -73,7 +73,7 @@ jobs 	   =	ChopBin\
 jobs_o 	   =	${ChopBin_o} \
 				${BinCluster_o} \
 				${StaticsticUnique_o}\
-				${Sam2ReadOnContig}\
+				${Sam2ReadOnContig_o}\
 				${ContigDlink_o}\
 				${FillContigRoad_o}\
 				${MergeContig_o}\

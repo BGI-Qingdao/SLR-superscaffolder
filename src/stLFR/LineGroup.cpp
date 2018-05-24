@@ -1,6 +1,7 @@
 #include "stLFR/LineGroup.h"
 #include "common/files/file_reader.h"
 #include "common/string/stringtools.h"
+#include "common/error/Error.h"
 #include <sstream>
 #include <cassert>
 
@@ -81,6 +82,8 @@ namespace BGIQD{
         {
 
             auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(file);
+            if( in == NULL )
+                FATAL(" open xxx.contigraod to read failed !!! ");
             std::string line;
             while(!std::getline(*in,line).eof())
             {
@@ -95,6 +98,8 @@ namespace BGIQD{
         void ContigRoadFills::LoadContigRoadFills( const std::string &file )
         {
             auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(file);
+            if( in == NULL )
+                FATAL(" open xxx.contigraodfill to read failed !!! ");
             std::string line;
             while(!std::getline(*in,line).eof())
             {

@@ -7,6 +7,8 @@
 #include "common/multithread/MultiThread.h"
 #include "common/files/file_writer.h"
 #include "common/freq/freq.h"
+#include "common/error/Error.h"
+
 #include <atomic>
 #include <algorithm>
 #include "soap2/contigGraphDepth.h"
@@ -846,6 +848,8 @@ void report(const  BGIQD::SOAP2::GlobalConfig & config)
     }
 
     auto fout= BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(config.contigroad);
+    if( fout == NULL )
+        FATAL(" open prefix.contigroad fir write failed !!!");
     for(const auto & i : config.contigs)
     {
         if( i.length < 2 )
@@ -985,6 +989,8 @@ int main(int argc , char **argv)
         if( connInfo.to_bool() )
         {
             auto deg= BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(prefix.to_string()+".connInfo");
+            if( deg == NULL )
+                FATAL( "open prefix.connInfo for write failed !!! ");
             for( const auto & m : config.keys )
             {
 

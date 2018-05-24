@@ -4,6 +4,7 @@
 #include "common/multithread/MultiThread.h"
 #include "common/files/file_writer.h"
 #include "common/freq/freq.h"
+#include "common/error/Error.h"
 
 #include "biocommon/seq/tool_func.h"
 
@@ -406,6 +407,8 @@ struct AppConfig
         GenerateNewContigSeq_super();
 
         auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fnames.super_only(round));
+        if( out == NULL )
+            FATAL( "open prefix.super_only for write failed !!! " );
         int super_count = 0 ;
         for( unsigned int i = 0 ; i < new_graph_ea.contigTotalNum ; i+=2 )
         {
@@ -428,6 +431,8 @@ struct AppConfig
     void PrintSuperUsedOnly()
     {
         auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fnames.super_used(round));
+        if( out == NULL )
+            FATAL( "open prefix.super_used for write failed !!! " );
         int use_count = 0 ;
         for( unsigned int i = 1 ; i <= graph_ea.contigTotalNum ; i++ )
         {
@@ -449,6 +454,8 @@ struct AppConfig
     void PrintSuperAndLeft()
     {
         auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fnames.super_and_left(round));
+        if( out ==NULL)
+            FATAL( "open prefix.super_and_left for write failed !!! " );
         int both_count = 0 ;
         for( unsigned int i = 1 ; i <= graph_ea.contigTotalNum ; i++ )
         {
@@ -796,6 +803,8 @@ struct AppConfig
             ost<<std::endl;
         };
         auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fnames.Arc(round+1));
+        if( out ==NULL )
+            FATAL( "open prefix.Arc_round_n for write failed !!! " );
         for( unsigned int i = 1 ; i <= graph_ea.contigTotalNum ; i++ )
         {
             const auto & curr = graph_ea.edge_array[i] ;
@@ -861,6 +870,8 @@ struct AppConfig
                 <<std::dec<<std::endl;
         };
         auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fnames.updatedEdge(round+1));
+        if( out==NULL )
+            FATAL( "open prefix.updateEdge_round_n for write failed !!! " );
         unsigned int line_num = 1 ;
         (*out)<<"EDGEs "<<edge_count<<std::endl;
         for( unsigned int i = 1 ; i <= graph_ea.contigTotalNum ; i++ )
@@ -921,6 +932,8 @@ struct AppConfig
     void ReGenerate_contig( )
     {
         auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fnames.contig(round+1));
+        if( out==NULL )
+            FATAL( "open prefix.contig_round_n for write failed !!! " );
         int final_num = 0 ;
         int del_count = 0 ;
         for( unsigned int i = 1 ; i <= graph_ea.contigTotalNum ; i++ )

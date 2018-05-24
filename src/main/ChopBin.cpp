@@ -4,6 +4,7 @@
 #include "common/log/log.h"
 #include "common/log/logfilter.h"
 #include "common/string/stringtools.h"
+#include "common/error/Error.h"
 
 #include "soap2/fileName.h"
 #include "soap2/soap2.h"
@@ -54,6 +55,9 @@ struct AppConfig
     {
         BGIQD::LOG::timer t(log,"LoadSeeds");
         auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.seeds()) ;
+        if( in == NULL )
+            FATAL( "open .seeds file to read failed !!! " );
+
         std::string line ;
         while( in && !std::getline(*in, line).eof() )
         {
@@ -95,6 +99,9 @@ struct AppConfig
         if( need && ! prefix.empty() )
         {
             auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.BarcodeOnContig());
+            if( out == NULL )
+                FATAL( "open .barcodeOnContig file to write failed" );
+
             for( const auto & i : boc )
             {
                 (*out)<<i.second.format(i.first)<<std::endl;

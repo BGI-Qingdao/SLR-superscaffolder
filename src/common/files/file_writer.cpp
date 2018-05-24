@@ -16,7 +16,7 @@ namespace FILES{
         { // treat as txt file now //TODO
             ret = (new std::ofstream(file_name.c_str()));
         }
-        if (ret && ret->bad() )
+        if (ret && ! ret->good() )
         {
             delete ret ;
             ret = NULL;

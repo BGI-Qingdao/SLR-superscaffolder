@@ -42,6 +42,7 @@ test_cpp   =	test.cpp\
 				../common/time/timetools_test.cpp\
 				../common/string/stringtools_test.cpp\
 				../common/args/argsparser_test.cpp\
+				../common/files/file_test.cpp\
 				../biocommon/sam_bam/sam_parser_test.cpp\
 
 
