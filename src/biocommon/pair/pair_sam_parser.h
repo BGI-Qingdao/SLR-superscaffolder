@@ -1,7 +1,7 @@
 #ifndef __BIOCOMMON_PAIR_PAIR_SAM_PARSER_H__
 #define __BIOCOMMON_PAIR_PAIR_SAM_PARSER_H__
 
-#include "sam_parser.h"
+#include "biocommon/sam_bam/sam_parser.h"
 #include <istream>
 #include <vector>
 #include <map>

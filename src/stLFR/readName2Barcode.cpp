@@ -1,5 +1,5 @@
-#include "readName2Barcode.h"
-#include "stringtools.h"
+#include "stLFR/readName2Barcode.h"
+#include "common/string/stringtools.h"
 
 namespace BGIQD{
 namespace stLFR{

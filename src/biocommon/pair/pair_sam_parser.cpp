@@ -1,5 +1,5 @@
-#include "pair_sam_parser.h"
-#include "sam_parser.h"
+#include "biocommon/pair/pair_sam_parser.h"
+#include "biocommon/sam_bam/sam_parser.h"
 namespace BGIQD{
 namespace SAM{
 

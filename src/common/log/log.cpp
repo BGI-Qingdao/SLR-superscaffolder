@@ -1,5 +1,5 @@
-#include "log.h"
-#include "timetools.h"
+#include "common/log/log.h"
+#include "common/time/timetools.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>

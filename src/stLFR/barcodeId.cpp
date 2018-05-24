@@ -1,7 +1,7 @@
-#include "barcodeId.h"
-#include "file_reader.h"
-#include "file_writer.h"
-#include "stringtools.h"
+#include "stLFR/barcodeId.h"
+#include "common/files/file_reader.h"
+#include "common/files/file_writer.h"
+#include "common/string/stringtools.h"
 
 namespace BGIQD{
 namespace stLFR{

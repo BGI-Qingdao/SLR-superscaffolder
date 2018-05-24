@@ -1,6 +1,6 @@
-#include "sam_parser.h"
+#include "biocommon/sam_bam/sam_parser.h"
 #include <sstream>
-#include "stringtools.h"
+#include "common/string/stringtools.h"
 namespace BGIQD{
 namespace SAM{
 

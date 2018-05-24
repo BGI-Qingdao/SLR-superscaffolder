@@ -32,7 +32,7 @@
 // Standard C++ Library".
 // ============================================================================
 
-#include <gzstream.h>
+#include "common/files/gzstream.h"
 #include <iostream>
 #include <string.h>  // for memcpy
 
