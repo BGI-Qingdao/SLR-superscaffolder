@@ -4,6 +4,7 @@
 #include "common/files/file_writer.h"
 #include "common/args/argsparser.h"
 #include "common/multithread/MultiThread.h"
+#include "common/stl/mapHelper.h"
 
 #include "soap2/soap2.h"
 #include "soap2/fileName.h"
@@ -17,10 +18,13 @@
 struct AppConfig
 {
     typedef std::map< int , std::set<int> > BinIndexOnBarcode;
+    typedef std::map<BGIQD::SOAP2::ContigId ,std::map< BGIQD::SOAP2::ContigId ,float> > ContigSims;
 
     BGIQD::stLFR::BarcodeOnBinArray barcodeOnBin ;
 
     BGIQD::stLFR::BinRelationArray  relations;
+
+    ContigSims contigSims;
 
     BGIQD::stLFR::ContigRelationArray contig_relations;
 
@@ -108,11 +112,15 @@ struct AppConfig
         t_jobs.WaitingStop();
     }
 
+    void CleanCollectionAndIndexMap()
+    {
+        barcodeOnBin.deep_clean();
+        binOnBarcode.clear();
+    }
     void BuildABBAResult()
     {
         for( size_t i = 0 ; i < relations.size() ; i++ )
         {
-            auto & binInfo = barcodeOnBin.at(i);
             auto & result = relations.at(i);
             for(auto pair : result.sims )
             {
@@ -122,8 +130,8 @@ struct AppConfig
                 auto & another = relations.at(sinfo.binIndex);
                 auto & new_sinfo = another.sims[i];
                 new_sinfo.binIndex = i ;
-                new_sinfo.contigId = binInfo.contigId;
-                new_sinfo.binId = binInfo.binId ;
+                new_sinfo.contigId = result.contigId;
+                new_sinfo.binId = result.binId ;
                 new_sinfo.simularity = sinfo.simularity ;
             }
         }
@@ -136,6 +144,33 @@ struct AppConfig
 
     void BuildContigRelation()
     {
+        for( size_t i = 0 ; i < relations.size() ; i++ )
+        {
+            auto & result = relations.at(i);
+            for(auto pair : result.sims )
+            {
+                auto & sinfo = pair.second ;
+                BGIQD::STL::MapHelper<ContigSims::mapped_type>::UpdateAsBiggest(
+                        contigSims[result.contigId]
+                    ,   sinfo.contigId
+                    ,   sinfo.simularity );
+            }
+        }
+        for( auto pair : contigSims )
+        {
+            BGIQD::stLFR::ContigRelation data;
+            data.contigId = pair.first ;
+            for( auto & pair_2 : pair.second )
+            {
+                if( pair_2.first == pair.first )
+                    continue ;
+                BGIQD::stLFR::ContigSimularity sinfo;
+                sinfo.contigId = pair_2.first ;
+                sinfo.simularity = pair_2.second ;
+                data.sims[pair_2.first] = sinfo;
+            }
+            contig_relations.push_back(data);
+        }
     }
 
     void PrintContigRelation()
@@ -162,6 +197,8 @@ int main(int argc ,char **argv)
     config.AllocRelationArray();
 
     config.RunAllJob(thread.to_int());
+
+    config.CleanCollectionAndIndexMap() ;
 
     config.BuildABBAResult();
 

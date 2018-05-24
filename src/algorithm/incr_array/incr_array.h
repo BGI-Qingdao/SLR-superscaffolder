@@ -40,14 +40,7 @@ namespace BGIQD {
 
                 virtual ~IncrArray()
                 {
-                    for( auto  & i : m_headers )
-                    {
-                        if( i != NULL )
-                        {
-                            delete [] i ;
-                            i = NULL ;
-                        }
-                    }
+                    deep_clean();
                 }
 
                 IncrArray() 
@@ -149,6 +142,22 @@ namespace BGIQD {
                 bool empty() const { return m_curr == 0 ;}
 
                 void clear() { m_curr = 0 ; }
+
+                void deep_clean()
+                {
+                    for( auto  & i : m_headers )
+                    {
+                        if( i != NULL )
+                        {
+                            delete [] i ;
+                            i = NULL ;
+                        }
+                    }
+                    m_headers.clear();
+                    m_curr = 0 ;
+                    m_capacity = 0 ;
+                    m_block_size = 0 ;
+                }
 
                 size_t size() const { return m_curr ; }
 
