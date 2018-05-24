@@ -1,8 +1,8 @@
 #include "contig_barcode.h"
-#include "argsparser.h"
-#include "file_reader.h"
-#include "file_writer.h"
-#include "sam_parser.h"
+#include "common/args/argsparser.h"
+#include "common/files/file_reader.h"
+#include "common/files/file_writer.h"
+#include "biocommon/sam_bam/sam_parser.h"
 #include <cassert>
 
 using namespace BGIQD;

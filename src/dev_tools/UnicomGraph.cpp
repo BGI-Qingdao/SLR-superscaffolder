@@ -1,5 +1,5 @@
 #include "contig_barcode.h"
-#include "argsparser.h"
+#include "common/args/argsparser.h"
 #include <iostream>
 #include "algorithm/disjoin_set/disjoin_set.h"
 using namespace BGIQD::JOB01;

@@ -1,8 +1,8 @@
 #include "contig_barcode.h"
-#include "argsparser.h"
-#include "file_reader.h"
-#include "stringtools.h"
-#include "sam_parser.h"
+#include "common/args/argsparser.h"
+#include "common/files/file_reader.h"
+#include "common/string/stringtools.h"
+#include "biocommon/sam_bam/sam_parser.h"
 #include <algorithm>
 #include <iostream>
 using namespace BGIQD::ARGS;

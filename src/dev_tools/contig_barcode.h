@@ -5,7 +5,7 @@
 #include <map>
 #include <set>
 
-#include "log.h"
+#include "common/log/log.h"
 
 namespace BGIQD {
 

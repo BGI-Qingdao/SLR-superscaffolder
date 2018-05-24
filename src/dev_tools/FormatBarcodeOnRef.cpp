@@ -1,5 +1,5 @@
 #include "contig_barcode.h"
-#include "argsparser.h"
+#include "common/args/argsparser.h"
 
 
 using namespace BGIQD::JOB01;

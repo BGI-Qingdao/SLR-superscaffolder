@@ -1,10 +1,10 @@
 #include "contig_barcode.h"
-#include "log.h"
-#include "logfilter.h"
-#include "file_reader.h"
-#include "file_writer.h"
-#include "sam_parser.h"
-#include "stringtools.h"
+#include "common/log/log.h"
+#include "common/log/logfilter.h"
+#include "common/files/file_reader.h"
+#include "common/files/file_writer.h"
+#include "biocommon/sam_bam/sam_parser.h"
+#include "common/string/stringtools.h"
 #include <cassert>
 #include <algorithm>
 #include <iostream>
