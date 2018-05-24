@@ -1,7 +1,5 @@
 #ifndef __LFR_UTILS_CHECK_H__
 #define __LFR_UTILS_CHECK_H__
-#include "log.h"
-
 
 #define CHECK_STRUCT( expect , value )\
     if( expect != value ) \

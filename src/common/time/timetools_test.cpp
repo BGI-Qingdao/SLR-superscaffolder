@@ -1,6 +1,6 @@
-#include "Test.h"
-#include "timetools.h"
-#include "Check.h"
+#include "common/test/Test.h"
+#include "common/time/timetools.h"
+#include "common/test/Check.h"
 #include <unistd.h>
 
 TEST_MODULE_INIT(timetools)

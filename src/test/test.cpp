@@ -1,4 +1,4 @@
-#include  "Test.h"
+#include  "common/test/Test.h"
 
 BGIQD::LOG::logger Test::log ;
 

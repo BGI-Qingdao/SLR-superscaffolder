@@ -1,5 +1,5 @@
-#include "Test.h"
-#include "stringtools.h"
+#include "common/test/Test.h"
+#include "common/string/stringtools.h"
 
 using namespace BGIQD::STRING;
 using namespace BGIQD::LOG;

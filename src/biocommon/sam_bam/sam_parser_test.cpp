@@ -1,5 +1,5 @@
-#include "Test.h"
-#include "sam_parser.h"
+#include "common/test/Test.h"
+#include "biocommon/sam_bam/sam_parser.h"
 
 TEST_MODULE_INIT(SAMParser)
 

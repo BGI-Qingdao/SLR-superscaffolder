@@ -1,14 +1,14 @@
 #ifndef __LFR_TEST_TEST_H__
 #define __LFR_TEST_TEST_H__
 
-#include "Check.h"
+#include "common/test/Check.h"
 #include <vector>
 #include <iostream>
 #include <string>
 #include <map>
 #include <functional>
-#include "log.h"
-#include "logfilter.h"
+#include "common/log/log.h"
+#include "common/log/logfilter.h"
 struct Test
 {
     typedef std::function<void()> testFunc ;
