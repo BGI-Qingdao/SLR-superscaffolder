@@ -62,7 +62,7 @@ namespace TIME{
     std::string timeperoid::to_string() const 
     {
         return std::string("wall clock : ") + std::to_string(wall.tv_sec)
-               + " seconds " ;//, cpu time : "+std::to_string( cpu ) + " seconds";
+               + " seconds, cpu time : "+std::to_string( cpu * 1.0f / CLOCKS_PER_SEC ) + " seconds";
     }
 }
 }

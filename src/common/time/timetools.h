@@ -14,7 +14,7 @@ struct timepoint
     public:
 
         timeval wall;
-        double cpu;
+        clock_t cpu;
 
     public:
 
@@ -44,7 +44,7 @@ struct timeperoid
 {
     public:
         timeval wall;
-        double cpu;
+        clock_t cpu;
     public:
         timeperoid operator-( const timeperoid & other ) const ;
         timeperoid operator+( const timeperoid & other ) const ;
