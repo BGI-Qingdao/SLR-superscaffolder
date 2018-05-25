@@ -27,7 +27,6 @@ source_cpp =	../common/files/file_reader.cpp \
 				../stLFR/LineGroup.cpp\
 				../stLFR/CBB.cpp\
 				../common/args/argsparser.cpp\
-				../soap2/loadGraph.cpp\
 				../soap2/contigGraph.cpp\
 				../soap2/contigFasta.cpp\
 				../soap2/contigType.cpp\

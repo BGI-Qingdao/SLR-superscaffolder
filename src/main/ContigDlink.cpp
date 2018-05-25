@@ -1,6 +1,3 @@
-#include "soap2/contigGraph.h"
-#include "soap2/loadGraph.h"
-#include <iostream>
 #include "common/args/argsparser.h"
 #include "common/log/log.h"
 #include "common/log/logfilter.h"
@@ -10,971 +7,291 @@
 #include "common/error/Error.h"
 
 #include <atomic>
+#include <iostream>
 #include <algorithm>
+#include <set>
+#include <mutex>
+#include <string>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sstream>
+
 #include "soap2/contigGraphDepth.h"
 #include "soap2/contigGraphSPF.h"
+#include "soap2/contigGraph.h"
+#include "soap2/fileName.h"
+#include "soap2/contigGraph.h"
 
-BGIQD::LOG::logger lger;
-std::atomic<int> index ;
+#include "common/files/file_reader.h"
+#include "common/error/Error.h"
 
-
-void findConnection(BGIQD::SOAP2::GlobalConfig & config
-        , unsigned int edge_id
-        , bool is_bal 
-        , int max_length
-        , int K
-        )
+struct AppConfig
 {
-    BGIQD::SOAP2::Edge & root = config.edge_array[edge_id];
+    BGIQD::SOAP2::GraphEA  graph_ea;
+    BGIQD::SOAP2::Edge * edge_array;
 
-    unsigned int real_from = edge_id ;
+    // cluster(key) data
+    unsigned int clusterNum;
+    std::set<unsigned int> keys;
+    std::map<unsigned int , std::map<unsigned int,float > > connections;
+    long long connectionNum;
 
-    unsigned int key_from = is_bal ? root.bal_id : edge_id ;
+    // edge id --> key id
+    std::map<unsigned int , unsigned int> key_map;
+    BGIQD::SOAP2::KeyEdge * key_array;
+    std::mutex * key_mutex;
 
-    std::map<unsigned int , float> * neibs;
+    // super conitgs
+    std::mutex contig_mutex;
+    std::vector<BGIQD::SOAP2::ContigRoad> contigs ;//std::vector<unsigned int> > contigs;
 
-    neibs = & config.connections.at(key_from);
-
-    auto key = [neibs, &config] (unsigned int id)
+    void loadUpdateEdge( )
     {
-        auto & node = config.edge_array[id] ;
-        auto & node_bal = config.edge_array[node.bal_id];
-        if( ! node.IsKey() && !node_bal.IsKey() )
-        {
-            return BGIQD::SOAP2::NodeType::Normal ;
-        }
-        if ( node.IsKey() )
-        {
-            if( neibs->find(id) == neibs->end() )
-                return BGIQD::SOAP2::NodeType::Key_Unknow ;
-            else
-                return BGIQD::SOAP2::NodeType::Key_Neibs ;
-        }
-        else
-        {
-            if( neibs->find(node.bal_id) == neibs->end() )
-                return BGIQD::SOAP2::NodeType::RC_Key_Unknow ;
-            else
-                return BGIQD::SOAP2::NodeType::RC_Key_Neibs ;
-        }
-    };
-
-    typedef BGIQD::GRAPH::EdgeIterator<BGIQD::SOAP2::GraphEA_Access> EdgeItr;
-
-    typedef BGIQD::GRAPH::SPFSearch<
-        BGIQD::SOAP2::GraphEA_Access,
-        EdgeItr,
-        BGIQD::SOAP2::SFPEnder
-            > Searcher;
-    Searcher searcher;
-    searcher.accesser.base = &config.graph_ea ;
-    searcher.accesser.K = K ;
-    searcher.ender.Init( key , max_length );
-
-    searcher.DoSPFSearch(real_from);
-    index ++ ;
-
-    for ( auto & j : searcher.ender.founder )
+        graph_ea.LoadEdge(fName.updatedEdge(),K);
+        edge_array = graph_ea.edge_array;
+    }
+    void loadArc()
     {
-        unsigned int key_to = j.first ;
+        graph_ea.LoadArc(fName.Arc());
+    }
 
-        float sim = neibs->at(key_to);
-
-        auto & curr_from = config.key_array[config.key_map.at(key_from) ];
-
-        auto & curr_to = config.key_array[config.key_map[key_to]];
-
-        //
-        //  A1->B1 * +
-        //  A2<-B2
-        //
-
-        if ( ! is_bal && j.second.base )
+    void loadCluster()
+    {
+        std::string line;
+        unsigned int contigId;
+        unsigned int to;
+        float cov;
+        connectionNum= 0;
+        auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.cluster());
+        if( in == NULL )
+            FATAL( " open prefix.cluser for read failed !!! " );
+        // load connection 
+        while(!std::getline(*in,line).eof())
         {
+            std::istringstream ist(line);
+            ist>>contigId;
+            //config.connections[contigId][contigId] = 1.0f;
 
-            unsigned int real_to = key_to ;
-
-            int length  = searcher.fib_nodes.at(real_to).Base.key + K 
-                - searcher.accesser.AccessNode(real_to).length;
-
+            keys.insert(contigId);
+            while(! ist.eof() )
             {
-                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[key_from]]);
-                BGIQD::SOAP2::KeyConn conn{key_to,length,0,sim};
-                conn.SetPostive();
-                curr_from.to[key_to]= conn;
-            }
-            {
-                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[key_to]]);
-                BGIQD::SOAP2::KeyConn conn{key_from,length,0,sim};
-                conn.SetPostive();
-                curr_to.from[key_from] = conn;
+                ist>>to>>cov;
+                connections[contigId][to] = cov;
+                connections[to][contigId] = cov ;
+                //config.keys.insert(to);
             }
         }
+        delete in ;
 
-        //
-        // A1->B2 * +
-        // A2<-B1 +
-        //
-
-        if( ! is_bal && j.second.bal)
+        // init keys
+        clusterNum = keys.size();
+        key_array =static_cast<BGIQD::SOAP2::KeyEdge*>( calloc( sizeof(BGIQD::SOAP2::KeyEdge) , clusterNum +1));
+        key_mutex = new std::mutex[clusterNum+1];
+        unsigned int index = 1;
+        for( const auto & i : keys)
         {
-            unsigned int real_to =curr_to.bal_id;
-            unsigned int B1_to = curr_from.bal_id ;
-            int length  = searcher.fib_nodes.at(real_to).Base.key + K // nodes.at(curr_to.bal_id).path_length
-                - searcher.accesser.AccessNode(real_to).length;
-            {
-                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[key_from]]);
-                BGIQD::SOAP2::KeyConn conn{key_to,length,0, sim};
-                curr_from.to[real_to]= conn;
-            }
-            {
-                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[key_to]]);
-                BGIQD::SOAP2::KeyConn conn{key_from,length,0, sim};
-                curr_to.to[B1_to] = conn;
-            }
-        }
-        //
-        // A2->B1 * +
-        // A1<-B2 +
-        //
-        if ( is_bal && j.second.base )
-        {
-            unsigned int real_to = key_to ;
-            unsigned int A1_to = curr_to.bal_id;
-            int length  = searcher.fib_nodes.at(real_to).Base.key + K
-                - searcher.accesser.AccessNode(real_to).length;
-            {
-                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[key_from]]);
-                BGIQD::SOAP2::KeyConn conn{key_to,length,0, sim};
-                curr_from.from[A1_to]= conn;
-            }
-            {
-                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[key_to]]);
-                BGIQD::SOAP2::KeyConn conn{key_from,length,0, sim};
-                curr_to.from[real_from] = conn;
-            }
-        }
-        //
-        // A2->B2 *
-        // A1<-B1 +
-        //
-        if ( is_bal && j.second.bal )
-        {
-            int real_to =curr_to.bal_id;
-
-            int length  = searcher.fib_nodes.at(real_to).Base.key + K 
-                - searcher.accesser.AccessNode(real_to).length;
-            {
-                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[key_from]]);
-                BGIQD::SOAP2::KeyConn conn{key_to,length,0, sim};
-                conn.SetPostive();
-                curr_from.from[key_to]= conn;
-            }
-            {
-                std::lock_guard<std::mutex> lm(config.key_mutex[config.key_map[key_to]]);
-                BGIQD::SOAP2::KeyConn conn{key_from,length,0 , sim};
-                conn.SetPostive();
-                curr_to.to[key_from] = conn;
-            }
+            edge_array[i].SetKey();
+            key_array[index] = BGIQD::SOAP2::KeyEdge();
+            key_array[index].edge_id = i;
+            key_array[index].bal_id = edge_array[i].bal_id;
+            key_array[index].id = index;
+            key_map[i] = index ;
+            index++;
         }
     }
-    if( index %100 == 0 )
+    //void buildConnection(GlobalConfig&);
+    //void LinearConnection(GlobalConfig &);
+    BGIQD::LOG::logger lger;
+    std::atomic<int> index ;
+    BGIQD::SOAP2::FileNames fName;
+    int K;
+    void Init(const std::string & prefix , int k )
     {
-        std::lock_guard<std::mutex> lm(config.contig_mutex);
-        lger<<BGIQD::LOG::lstart()<<"process "<<index<<" ..."<<BGIQD::LOG::lend();
+        fName.Init(prefix);
+        K = k ;
+        BGIQD::LOG::logfilter::singleton().get("ContigDlink",BGIQD::LOG::loglevel::INFO , lger);
+        index = 0;
+        lger<<BGIQD::LOG::lstart()<<"loadUpdateEdge start ... "<<BGIQD::LOG::lend();
+        loadUpdateEdge();
+        lger<<BGIQD::LOG::lstart()<<"loadArc start ... "<<BGIQD::LOG::lend();
+        loadArc();
+        lger<<BGIQD::LOG::lstart()<<"loadCluster start ... "<<BGIQD::LOG::lend();
+        loadCluster();
     }
-}
-int countConn( const std::map<unsigned int , BGIQD::SOAP2::KeyConn> & map)
-{
-    int count = 0 ;
-    for ( const auto & i : map )
-    {
-        if( i.second.IsValid() )
-            count ++ ;
-    }
-    return count ;
-}
 
-std::map<unsigned int, BGIQD::SOAP2::KeyConn> & get_oppo( BGIQD::SOAP2::GlobalConfig &config,  unsigned int to , bool to_order , bool positive)
-{
-    auto & curr_to = config.key_array[config.key_map[to]];
-    //A1->B1 
-    //A2<-B2
-    if( to_order && positive )
+    void findConnection(unsigned int edge_id
+            , bool is_bal 
+            , int max_length
+            , int K
+            )
     {
-        return curr_to.from;
-    }
-    // A1->B2
-    // A2<-B1
-    else if( to_order && ! positive )
-    {
-        return curr_to.to;
-    }
-    // A1<-B1
-    // A2->B2
-    else if( ! to_order &&  positive )
-    {
-        return curr_to.to;
-    }
-    // A1<-B2
-    // A2->B1
-    else //if( ! to_order && !  positive )
-    {
-        return curr_to.from;
-    }
-}
+        BGIQD::SOAP2::Edge & root = edge_array[edge_id];
 
-void solveMulti(BGIQD::SOAP2::GlobalConfig &config , float smallest)
-{
-    for( auto i: config.keys )
-    {
-        auto & curr = config.key_array[config.key_map[i]];
-        for( auto i : curr.to)
+        unsigned int real_from = edge_id ;
+
+        unsigned int key_from = is_bal ? root.bal_id : edge_id ;
+
+        std::map<unsigned int , float> * neibs;
+
+        neibs = & connections.at(key_from);
+
+        auto key = [neibs,this] (unsigned int id)
         {
-            assert( i.second.IsValid() );
-            i.second.IsValid();
-        }
-        for( auto i : curr.from)
-        {
-            assert( i.second.IsValid() );
-            i.second.IsValid();
-        }
-    }
-    auto flush_map = [&config, &smallest](unsigned int curr , std::map<unsigned int , BGIQD::SOAP2::KeyConn> & map , bool to_order)
-    {
-        unsigned int the_one = (unsigned int) -1 ;
-        // detect if there is a linear conn
-        for( auto & i : map )
-        {
-            if( i.second.IsJumpConn() )
-                continue ;
-            auto & map = get_oppo( config, i.first , to_order , i.second.IsPositive() ) ;
-            //assert( countConn( map ) >=1 );
-            if( countConn(map) == 1 &&  map.at(curr).IsValid())
+            auto & node = edge_array[id] ;
+            auto & node_bal = edge_array[node.bal_id];
+            if( ! node.IsKey() && !node_bal.IsKey() )
             {
-                the_one  = i.first;
-                break;
+                return BGIQD::SOAP2::NodeType::Normal ;
             }
-        }
-
-        if( the_one != (unsigned int)-1 )
-        {
-            for( auto &i : map )
+            if ( node.IsKey() )
             {
-                if( i.second.IsJumpConn() )
-                    continue ;
-                if ( i.first != the_one )
-                {
-                    if( countConn(get_oppo( config, i.first , to_order , i.second.IsPositive() ) ) > 1 )
-                    {
-                        i.second.SetJump();
-                        get_oppo( config, i.first , to_order , i.second.IsPositive() ).at(curr).SetJump() ;
-                    }
-                }
-            }
-            return ;
-        }
-
-        // delete circle thing
-        for( auto & i : map )
-        {
-            if( i.second.IsJumpConn() )
-                continue ;
-            auto & map = get_oppo( config, i.first , to_order , i.second.IsPositive() ) ;
-            //assert( countConn( map ) >=1 );
-            if( ! map.at(curr).IsValid())
-            {
-                i.second.SetJump();
-            }
-        }
-        // find a better one
-        std::vector< std::tuple<float, unsigned int , float> > data;
-        for( auto & i: map )
-        {
-            if( i.second.IsJumpConn()  )
-                continue ;
-            float sim = config.connections.at(curr).at(i.first);
-            unsigned int to = i.second.to;
-            int len = i.second.length;
-            data.push_back( std::make_tuple( float(len) / sim ,to , sim ) );
-        }
-        if( data.size() > 1 )
-            std::sort( data.begin() , data.end() );
-        for( size_t i = 0 ; i < data.size() ; i++ )
-        {
-            if( std::get<2>(data[i]) >= smallest  )
-                the_one = std::get<1>(data[i]);
-        }
-        if ( the_one != (unsigned int )-1 )
-        {
-            for( auto &i : map )
-            {
-                if( i.second.IsJumpConn() )
-                    continue ;
-                if ( i.first != the_one )
-                {
-                    i.second.SetJump();
-                    get_oppo( config, i.first , to_order , i.second.IsPositive() ).at(curr).SetJump() ;
-                }
-            }
-        }
-        return ;
-    };
-    for( auto i: config.keys )
-    {
-        auto & curr = config.key_array[config.key_map[i]];
-        if( countConn(curr.to)  > 1 )
-        {
-            flush_map(curr.edge_id ,curr.to, true );
-        }
-        if ( countConn(curr.from) > 1)
-        {
-            flush_map(curr.edge_id,curr.from ,false);
-        }
-    }
-    return ;
-}
-
-//
-// if 
-//  O->A->B && O->B
-// delete 
-//   O->C
-// return the number of deleted conns.
-// 
-int deleteConns(BGIQD::SOAP2::GlobalConfig &config)
-{
-    int count = 0;
-
-    auto flush_map = [&config,&count]( std::map<unsigned int , BGIQD::SOAP2::KeyConn> & map , bool order)
-    {
-        std::vector<BGIQD::SOAP2::KeyConn*> vecs;
-        for( auto & i: map )
-        {
-            vecs.emplace_back(&i.second);
-        }
-        for( size_t b = 0 ;b< vecs.size() ; b++ )
-        {
-            for( size_t a = b+1; a< vecs.size() ; a++ )
-            {
-                if( a == b )
-                    continue;
-                if( vecs[a]->IsJumpConn() &&  vecs[b]->IsJumpConn() )
-                    continue;
-                auto & B = config.key_array[config.key_map[vecs[b]->to]];
-                auto & A = config.key_array[config.key_map[vecs[a]->to]];
-                if( A.IsCircle() || B.IsCircle() )
-                    continue;
-                bool f11 ,f21 ,f31 ;
-                bool f12 ,f22 ,f32 ;
-                std::tie(f11,f21,f31) = B.Relationship(vecs[a]->to) ;
-                std::tie(f12,f22,f32) = A.Relationship(vecs[b]->to) ;
-                if( !f11 || !f12 )
-                    continue;
-                bool useA1 = false;
-                if( vecs[a]->IsPositive() )
-                {
-                    useA1 = true ;
-                }
-
-                if( order )
-                {
-                    if( useA1 )
-                    {
-                        //O1->A1 O1->B1 A1->B2
-                        //O1->A1 O1->B2 A1->B1
-                        //O1->A1 O1->B1 A1<-B2
-                        //O1->A1 O1->B2 A1<-B1
-                        if ( f32 != vecs[b]->IsPositive() )
-                            continue ;
-                        if( f22 ) 
-                            // O1->A1 O1->B1 A1->B1 --> O1->A1->B1 ;
-                            // O1->A1 O1->B2 A1->B2 --> O1->A1->B2 ;
-                            // delete O->B
-                        {    if ( ! vecs[b]->IsJumpConn() )
-                            {
-                                vecs[b]->SetJump();
-                                count ++;
-                            }
-                            else {}
-                        }
-                        else 
-                            //O1->A1 O1->B1 A1<-B1 --> O1->B1->A1 ;
-                            //O1->A1 O1->B2 A1<-B2 --> O1->B2->A1 ; 
-                            //delete O->A
-                        {
-                            if ( ! vecs[a]->IsJumpConn() )
-                            {
-                                vecs[a]->SetJump();
-                                count ++;
-                            }
-                            else {}
-                        }
-                    }
-                    else
-                    {
-                        //O1->A2 O1->B2 A1->B2
-                        //O1->A2 O1->B2 A1<-B2
-                        //O1->A2 O1->B1 A1->B1
-                        //O1->A2 O1->B1 A1<-B1
-                        if( f32 == vecs[b]->IsPositive() )
-                            continue ;
-                        if( f22 ) 
-                            // O1->A2 O1->B1 A1->B2 --> O1->B1->A2 ;
-                            // O1->A2 O1->B2 A1->B1 --> O1->B2->A2;
-                            // delete O->A
-                        {
-                            if ( ! vecs[a]->IsJumpConn() )
-                            {   vecs[a]->SetJump(); count ++; }
-                            else {}
-                        }
-                        else  
-                            // O1->A2 O1->B1 A1<-B2 --> O1->A2->B1
-                            // O1->A2 O1->B2 A1<-B1 --> O1->A2->B2
-                            // delete O->B
-                        {
-                            if ( ! vecs[b]->IsJumpConn() )
-                            {   vecs[b]->SetJump(); count ++; }
-                            else {}
-                        }
-                    }
-                }
+                if( neibs->find(id) == neibs->end() )
+                    return BGIQD::SOAP2::NodeType::Key_Unknow ;
                 else
-                {
-                    if( useA1)
-                    {
-                        //O1<-A1 O1<-B1 A1->B2
-                        //O1<-A1 O1<-B1 A1<-B2
-                        //O1<-A1 O1<-B2 A1->B1
-                        //O1<-A1 O1<-B2 A1<-B1
-                        if ( f32 != vecs[b]->IsPositive() )
-                            continue;
-                        if ( f22 )
-                        //O1<-A1 O1<-B1 A1->B1 --> A1->B1->O1
-                        //O1<-A1 O1<-B2 A1->B2 --> A1->B2->O1
-                        //delete O-A
-                        {
-                            if ( ! vecs[a]->IsJumpConn() )
-                            {   vecs[a]->SetJump(); count ++; }
-                            else {}
-                        }
-                        //O1<-A1 O1<-B1 A1<-B1 --> O1<-A1<-B1
-                        //O1<-A1 O1<-B2 A1<-B2 --> O1<-A1<-B2
-                        //delete O-B
-                        else
-                        {
-                            if ( ! vecs[b]->IsJumpConn() )
-                            {   vecs[b]->SetJump(); count ++; }
-                            else {}
-                        }
-                    }
-                    else
-                    {
-                        // O1<-A2 O1<-B1 A1->B1
-                        // O1<-A2 O1<-B2 A1->B2
-                        // O1<-A2 O1<-B1 A1<-B1
-                        // O1<-A2 O1<-B2 A1<-B2
-                        if ( f32 == vecs[b]->IsPositive() )
-                            continue ;
-                        if (! f22 )
-                        // O1<-A2 O1<-B1 A1<-B2  --> A2->B1->O1
-                        // O1<-A2 O1<-B2 A1<-B1  --> A2->B2->O1
-                        // delete O-A
-                        {
-                            if ( ! vecs[a]->IsJumpConn() )
-                            {   vecs[a]->SetJump(); count ++; }
-                            else {}
-                        }
-                        else
-                        // O1<-A2 O1<-B1 A1->B2 --> B1->A2->O1
-                        // O1<-A2 O2<-B2 A1->B1 --> B2->A2->O1
-                        // delete O-B
-                        {
-                            if ( ! vecs[b]->IsJumpConn() )
-                            {   vecs[b]->SetJump(); count ++; }
-                            else {}
-                        }
-                    }
-                }
-            }
-        }
-    };
-
-    for( auto i: config.keys )
-    {
-        auto & curr = config.key_array[config.key_map[i]];
-        if( curr.IsCircle() )
-            continue;
-        if( curr.to.size() > 1 )
-        {
-            flush_map(curr.to,true);
-        }
-        if ( curr.from.size() > 1)
-        {
-            flush_map(curr.from,false);
-        }
-        index ++ ;
-        if( index % 1000 == 0 )
-        {
-            lger<<BGIQD::LOG::lstart()<<"process "<<index<<" ..."<<BGIQD::LOG::lend();
-        }
-    }
-    return count;
-}
-
-int deleteNotBiSupport_v1(BGIQD::SOAP2::GlobalConfig &config)
-{
-    int count = 0;
-    for(auto & i: config.keys)
-    {
-        auto & curr = config.key_array[config.key_map[i]];
-
-        for( auto & i : curr.to )
-        {
-            if( i.second.IsJumpConn() )
-                continue;
-            const auto & next = config.key_array[config.key_map[i.second.to]];
-            bool f1 , f2 , f3 ;
-            if( i.second.IsPositive() )
-                std::tie(f1,f2,f3) = next.Relationship_nojump( curr.edge_id , false ) ;
-            else 
-                std::tie(f1,f2,f3) = next.Relationship_nojump( curr.edge_id , true) ;
-
-            if( ! f1 )
-            {
-                i.second.SetBiNotSuppert();
-                count ++;
-            }
-        }
-
-        for( auto & i : curr.from )
-        {
-            if( i.second.IsJumpConn() )
-                continue;
-            const auto & next = config.key_array[config.key_map[i.second.to]];
-            bool f1 , f2 , f3 ;
-            if( i.second.IsPositive() )
-                std::tie(f1,f2,f3) = next.Relationship_nojump( curr.edge_id , true) ;
-            else 
-                std::tie(f1,f2,f3) = next.Relationship_nojump( curr.edge_id , false) ;
-            if( ! f1 )
-            {
-                i.second.SetBiNotSuppert();
-                count ++;
-            }
-        }
-    }
-    return count;
-}
-int deleteNotBiSupport(BGIQD::SOAP2::GlobalConfig &config)
-{
-    int count = 0;
-    for(auto & i: config.keys)
-    {
-        auto & curr = config.key_array[config.key_map[i]];
-
-        for( auto & i : curr.to )
-        {
-            if( i.second.IsJumpConn() )
-                continue;
-            const auto & next = config.key_array[config.key_map[i.second.to]];
-            bool f1 , f2 , f3 ;
-            if( i.second.IsPositive() )
-                std::tie(f1,f2,f3) = next.Relationship_nojump( curr.edge_id , false ) ;
-            else 
-                std::tie(f1,f2,f3) = next.Relationship_nojump( curr.edge_id , true) ;
-
-            if( ! f1 )
-            {
-                i.second.SetBiNotSuppert();
-                count ++;
-            }
-        }
-
-        for( auto & i : curr.from )
-        {
-            if( i.second.IsJumpConn() )
-                continue;
-            const auto & next = config.key_array[config.key_map[i.second.to]];
-            bool f1 , f2 , f3 ;
-            if( i.second.IsPositive() )
-                std::tie(f1,f2,f3) = next.Relationship_nojump( curr.edge_id , true) ;
-            else 
-                std::tie(f1,f2,f3) = next.Relationship_nojump( curr.edge_id , false) ;
-            if( ! f1 )
-            {
-                i.second.SetBiNotSuppert();
-                count ++;
-            }
-        }
-    }
-    return count;
-}
-void linearConnection(BGIQD::SOAP2::GlobalConfig &config , unsigned int key_id)// , BGIQD::MultiThread::MultiThread & queue)
-{
-    unsigned int i = key_id;
-    BGIQD::SOAP2::KeyEdge & curr =  config.key_array[i];
-    if( curr.IsMarked() 
-            ||curr.IsLinear() || curr.IsCircle()
-      )
-        return ;
-    index ++ ;
-    if( curr.IsSingle() )
-    {
-        curr.Mark();
-    }
-    else
-    {
-        BGIQD::SOAP2::ContigRoad path;
-        auto extractPath = [&config,&curr,&path]( unsigned int to , bool to_order, bool search_order)
-        {
-            path.contig.clear();
-            path.real_contig.clear();
-            if( search_order )
-            {
-                path.downstream = true ;
-                path.real_contig.push_back(curr.edge_id);
+                    return BGIQD::SOAP2::NodeType::Key_Neibs ;
             }
             else
             {
-                path.downstream = false ;
-                path.real_contig.push_back(curr.bal_id);
-            }
-            //detect headin
-            if( search_order && curr.to_size == 1 )
-            {
-                path.headin = true;
-            }
-            else if ( ! search_order && curr.from_size == 1 )
-            {
-                path.headin = true;
-            }
-            else
-            {
-                path.headin = false ;
-            }
-            path.contig.push_back(curr.edge_id) ;
-            path.contig.push_back(to) ;
-            unsigned int next_k = config.key_map[to];
-            if( search_order ^ to_order )
-            {
-                path.real_contig.push_back(config.key_array[next_k].bal_id);
-            }
-            else
-            {
-                path.real_contig.push_back(config.key_array[next_k].edge_id);
-            }
-            bool order = search_order;//
-            bool torder = to_order; // 
-            if( config.key_array[next_k].IsMarked())
-                return ;
-            auto  get_nonjump = [] ( const std::map<unsigned int , BGIQD::SOAP2::KeyConn> & map)
-            {
-                for(const auto & i : map)
-                {
-                    if( i.second.IsValid() )
-                        return std::ref(i.second);
-                }
-                assert(0);
-                return std::ref(map.begin()->second);
-            };
-            while( (! config.key_array[next_k].IsCircle())&& config.key_array[next_k].IsLinear() && !config.key_array[next_k].IsMarked() )
-            {
-                config.key_array[next_k].Mark();
-                unsigned int next_i;
-                //downstream
-                if( order )
-                {
-                    //
-                    //A1->B1
-                    if( torder )
-                    {
-                        const auto & conn  = get_nonjump(config.key_array[next_k].to ) ;
-                        next_i = conn.get().to;
-                        torder = conn.get().IsPositive();;
-                        if( torder )
-                        {
-                            path.real_contig.push_back(config.key_array[config.key_map[next_i]].edge_id );
-                        }
-                        else
-                        {
-                            path.real_contig.push_back(config.key_array[config.key_map[next_i]].bal_id);
-                        }
-                    }
-                    //A1->B2
-                    else
-                    {
-                        const auto & conn  = get_nonjump(config.key_array[next_k].from) ;
-                        next_i = conn.get().to;
-                        torder = conn.get().IsPositive();;
-                        if( torder )
-                        {
-                            path.real_contig.push_back(config.key_array[config.key_map[next_i]].bal_id);
-                        }
-                        else
-                        {
-                            path.real_contig.push_back(config.key_array[config.key_map[next_i]].edge_id);
-                        }
-
-                        order = false;
-                    }
-                }
-                //upstream
+                if( neibs->find(node.bal_id) == neibs->end() )
+                    return BGIQD::SOAP2::NodeType::RC_Key_Unknow ;
                 else
-                {
-                    //A1<-B1
-                    //A2->B2
-                    if( torder )
-                    {
-                        const auto & conn  = get_nonjump(config.key_array[next_k].from) ;
-                        next_i = conn.get().to;
-                        torder = conn.get().IsPositive();;
-
-                        if( torder )
-                        {
-                            path.real_contig.push_back(config.key_array[config.key_map[next_i]].bal_id);
-                        }
-                        else
-                        {
-                            path.real_contig.push_back(config.key_array[config.key_map[next_i]].edge_id);
-                        }
-
-                        order = false;
-                    }
-                    //A1<-B2
-                    //A2->B1
-                    else
-                    {
-                        const auto & conn  = get_nonjump(config.key_array[next_k].to ) ;
-                        next_i = conn.get().to;
-                        torder = conn.get().IsPositive();;
-                        order = true;
-
-                        if( torder )
-                        {
-                            path.real_contig.push_back(config.key_array[config.key_map[next_i]].edge_id);
-                        }
-                        else
-                        {
-                            path.real_contig.push_back(config.key_array[config.key_map[next_i]].bal_id);
-                        }
-                    }
-                }
-                next_k = config.key_map[next_i];
-                path.contig.push_back(next_i) ;
-            }
-            if( config.key_array[next_k].IsMarked() )
-                return ;
-            // line->next_k->
-            // <-next_k<-line
-            path.tailin = false;
-            if(! config.key_array[next_k].IsCircle() )
-            {
-
-                if( ( torder && order ) || ( !torder && !order ))
-                {
-                    if( config.key_array[next_k].from_size == 1 )
-                    {
-                        path.tailin = true;
-                    }
-                }
-                else
-                {
-                    if( config.key_array[next_k].to_size == 1 )
-                    {
-                        path.tailin = true;
-                    }
-                }
-            }
-            path.length = path.contig.size();
-            if(! path.headin )
-                path.length --;
-            if(!path.tailin )
-                path.length -- ;
-            {
-                std::lock_guard<std::mutex> lm(config.contig_mutex);
-                config.contigs.push_back(path);
+                    return BGIQD::SOAP2::NodeType::RC_Key_Neibs ;
             }
         };
-        for( auto next : curr.to )
+
+        typedef BGIQD::GRAPH::EdgeIterator<BGIQD::SOAP2::GraphEA_Access> EdgeItr;
+
+        typedef BGIQD::GRAPH::SPFSearch<
+            BGIQD::SOAP2::GraphEA_Access,
+            EdgeItr,
+            BGIQD::SOAP2::SFPEnder
+                > Searcher;
+        Searcher searcher;
+        searcher.accesser.base = &graph_ea ;
+        searcher.accesser.K = K ;
+        searcher.ender.Init( key , max_length );
+
+        searcher.DoSPFSearch(real_from);
+        index ++ ;
+
+        for ( auto & j : searcher.ender.founder )
         {
-            if(! next.second.IsValid() )
-                continue;
-            extractPath(next.second.to,next.second.IsPositive(),true);
-        }
-        for(auto next : curr.from)
-        {
-            if( ! next.second.IsValid() )
-                continue;
-            extractPath(next.second.to,next.second.IsPositive(),false);
-        }
-        curr.Mark();
-    }
-    if( index %100 == 0 )
-    {
-        std::lock_guard<std::mutex> lm(config.contig_mutex);
-        lger<<BGIQD::LOG::lstart()<<"process "<<index<<" ..."<<BGIQD::LOG::lend();
-    }
-}
+            unsigned int key_to = j.first ;
 
-void report(const  BGIQD::SOAP2::GlobalConfig & config)
-{
-    BGIQD::FREQ::Freq<unsigned int > freq;
+            float sim = neibs->at(key_to);
 
+            auto & curr_from = key_array[key_map.at(key_from) ];
 
-    //std::cout<<"--- Paths start  ----"<<std::endl;
-    for(const auto & i : config.contigs)
-    {
-        freq.Touch(i.length);
-        if( i.downstream )
-            std::cout<<'>';
-        else
-            std::cout<<'<';
+            auto & curr_to = key_array[key_map[key_to]];
 
-        if( i.headin )
-            std::cout<<'[';
-        else
-            std::cout<<'(';
-        std::cout<<*i.contig.begin()<<'\t'<<*i.contig.rbegin();
-        if( i.tailin )
-            std::cout<<']';
-        else
-            std::cout<<')';
-        std::cout<<'\t'<<i.length<<'\t';
+            //
+            //  A1->B1 * +
+            //  A2<-B2
+            //
 
-        for( auto j : i.contig)
-            std::cout<<j<<'\t';
-        std::cout<<std::endl;
-    }
-
-    auto fout= BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(config.contigroad);
-    if( fout == NULL )
-        FATAL(" open prefix.contigroad fir write failed !!!");
-    for(const auto & i : config.contigs)
-    {
-        if( i.length < 2 )
-            continue;
-        (*fout)<<i.length<<'\t';
-        int start = 1 ;
-        if( i.headin )
-        {
-            start --;
-        }
-        for( int j =0 ; j<i.length ; j++ )
-        {
-            (*fout)<<i.real_contig[start+j]<<"\t";
-        }
-        (*fout)<<std::endl;
-    }
-    delete fout;
-
-    lger<<BGIQD::LOG::lstart()<<"clusterNum "<<config.clusterNum<<BGIQD::LOG::lend();
-    lger<<BGIQD::LOG::lstart()<<"pathNum "<<config.contigs.size()<<BGIQD::LOG::lend();
-    lger<<BGIQD::LOG::lstart()<<"linear length freq\n"<<freq.ToString()<<BGIQD::LOG::lend();
-}
-
-int main(int argc , char **argv)
-{
-    BGIQD::LOG::logfilter::singleton().get("SuperContig",BGIQD::LOG::loglevel::INFO , lger);
-    BGIQD::LOG::timer t(lger,"SuperContig");
-    START_PARSE_ARGS
-        DEFINE_ARG_REQUIRED(std::string , prefix, "prefix");
-    DEFINE_ARG_REQUIRED(int , kvalue,"K value");
-    DEFINE_ARG_OPTIONAL(int , t_num, "thread num . default[8]","8");
-    DEFINE_ARG_OPTIONAL(bool , super,"super contig ? default false","");
-    DEFINE_ARG_OPTIONAL(bool , deleteconn , "delete conn ? default false","");
-    DEFINE_ARG_OPTIONAL(float , multi, "solveMulti ? default false","0.0");
-    DEFINE_ARG_OPTIONAL(bool , connInfo,"print connInfo ? default false","");
-    DEFINE_ARG_OPTIONAL(int, searchDepth,"search depth (bp) default 10000","10000");
-    END_PARSE_ARGS
-        if(! t_num.setted )
-        {
-            t_num.setted = true ;
-            t_num.d.i = 8 ;
-        }
-        if(! searchDepth.setted )
-        {
-            searchDepth.setted = true ;
-            searchDepth.d.i = 10000;
-        }
-        if( ! multi.setted )
-        {
-            multi.setted = true ;
-            multi.d.f=0.0f;
-        }
-    lger<<BGIQD::LOG::lstart()<<"parse args end ... "<<BGIQD::LOG::lend();
-
-    BGIQD::SOAP2::GlobalConfig config;
-    config.K = kvalue.to_int();
-    config.arc = prefix.to_string() +".Arc";
-    config.updateEdge = prefix.to_string() +".updated.edge";
-    config.cluster= prefix.to_string() +".cluster";
-    config.contigroad =  prefix.to_string() +".contigroad";
-
-    lger<<BGIQD::LOG::lstart()<<"loadUpdateEdge start ... "<<BGIQD::LOG::lend();
-    BGIQD::SOAP2::loadUpdateEdge(config);
-    lger<<BGIQD::LOG::lstart()<<"loadArc start ... "<<BGIQD::LOG::lend();
-    BGIQD::SOAP2::loadArc(config);
-    lger<<BGIQD::LOG::lstart()<<"loadCluster start ... "<<BGIQD::LOG::lend();
-    BGIQD::SOAP2::loadCluster(config);
-    lger<<BGIQD::LOG::lstart()<<"buildConnection start ... "<<BGIQD::LOG::lend();
-    //// alloc all map node first 
-    //for( const auto & m : config.keys)
-    //{
-    //    config.key_array[config.key_map[m]].flag = 0;
-    //}
-
-    {
-        BGIQD::MultiThread::MultiThread t_jobs;
-        t_jobs.Start(t_num.to_int());
-        index  = 0;
-        int searchDepth_value = searchDepth.to_int();
-        for( auto j : config.keys )
-        {
-            t_jobs.AddJob([&config, j, searchDepth_value](){
-                    findConnection(config,j ,false  , searchDepth_value, config.K);
-                    }
-                    );
-            if( config.edge_array[j].id != config.edge_array[j].bal_id )
+            if ( ! is_bal && j.second.base )
             {
-                unsigned int k = config.edge_array[j].bal_id;
-                t_jobs.AddJob([&config, k, searchDepth_value](){
-                        findConnection(config, k ,true , searchDepth_value, config.K);
-                        }
-                        );
+
+                unsigned int real_to = key_to ;
+
+                int length  = searcher.fib_nodes.at(real_to).Base.key + K 
+                    - searcher.accesser.AccessNode(real_to).length;
+
+                {
+                    std::lock_guard<std::mutex> lm(key_mutex[key_map[key_from]]);
+                    BGIQD::SOAP2::KeyConn conn{key_to,length,0,sim};
+                    conn.SetPostive();
+                    curr_from.to[key_to]= conn;
+                }
+                {
+                    std::lock_guard<std::mutex> lm(key_mutex[key_map[key_to]]);
+                    BGIQD::SOAP2::KeyConn conn{key_from,length,0,sim};
+                    conn.SetPostive();
+                    curr_to.from[key_from] = conn;
+                }
+            }
+
+            //
+            // A1->B2 * +
+            // A2<-B1 +
+            //
+
+            if( ! is_bal && j.second.bal)
+            {
+                unsigned int real_to =curr_to.bal_id;
+                unsigned int B1_to = curr_from.bal_id ;
+                int length  = searcher.fib_nodes.at(real_to).Base.key + K // nodes.at(curr_to.bal_id).path_length
+                    - searcher.accesser.AccessNode(real_to).length;
+                {
+                    std::lock_guard<std::mutex> lm(key_mutex[key_map[key_from]]);
+                    BGIQD::SOAP2::KeyConn conn{key_to,length,0, sim};
+                    curr_from.to[real_to]= conn;
+                }
+                {
+                    std::lock_guard<std::mutex> lm(key_mutex[key_map[key_to]]);
+                    BGIQD::SOAP2::KeyConn conn{key_from,length,0, sim};
+                    curr_to.to[B1_to] = conn;
+                }
+            }
+            //
+            // A2->B1 * +
+            // A1<-B2 +
+            //
+            if ( is_bal && j.second.base )
+            {
+                unsigned int real_to = key_to ;
+                unsigned int A1_to = curr_to.bal_id;
+                int length  = searcher.fib_nodes.at(real_to).Base.key + K
+                    - searcher.accesser.AccessNode(real_to).length;
+                {
+                    std::lock_guard<std::mutex> lm(key_mutex[key_map[key_from]]);
+                    BGIQD::SOAP2::KeyConn conn{key_to,length,0, sim};
+                    curr_from.from[A1_to]= conn;
+                }
+                {
+                    std::lock_guard<std::mutex> lm(key_mutex[key_map[key_to]]);
+                    BGIQD::SOAP2::KeyConn conn{key_from,length,0, sim};
+                    curr_to.from[real_from] = conn;
+                }
+            }
+            //
+            // A2->B2 *
+            // A1<-B1 +
+            //
+            if ( is_bal && j.second.bal )
+            {
+                int real_to =curr_to.bal_id;
+
+                int length  = searcher.fib_nodes.at(real_to).Base.key + K 
+                    - searcher.accesser.AccessNode(real_to).length;
+                {
+                    std::lock_guard<std::mutex> lm(key_mutex[key_map[key_from]]);
+                    BGIQD::SOAP2::KeyConn conn{key_to,length,0, sim};
+                    conn.SetPostive();
+                    curr_from.from[key_to]= conn;
+                }
+                {
+                    std::lock_guard<std::mutex> lm(key_mutex[key_map[key_to]]);
+                    BGIQD::SOAP2::KeyConn conn{key_from,length,0 , sim};
+                    conn.SetPostive();
+                    curr_to.to[key_from] = conn;
+                }
             }
         }
-        t_jobs.End();
-        t_jobs.WaitingStop();
-    }
-    //lger<<BGIQD::LOG::lstart()<<"buildConnection start ... "<<BGIQD::LOG::lend();
-    //BGIQD::SOAP2::buildConnection(config);
-    for( const auto & m : config.keys)
-    {
-        config.key_array[config.key_map[m]].CheckCircle();
     }
 
-    if( multi.to_float() > 0.01f )
+    void LogFreq()
     {
-        solveMulti(config, multi.to_float());
-        int dd = deleteNotBiSupport(config);
-        lger<<BGIQD::LOG::lstart()<<"deleteNotBiSupport "<<dd<<" conn"<<BGIQD::LOG::lend();
-    }
-    if( deleteconn.to_bool() )
-    {
-        lger<<BGIQD::LOG::lstart()<<"deleteConn start ... "<<BGIQD::LOG::lend();
-        index = 0 ;
-        int d = deleteConns(config);
-        lger<<BGIQD::LOG::lstart()<<"deleteConn delete  "<<d<<" conn"<<BGIQD::LOG::lend();
-        int dd = deleteNotBiSupport(config);
-        lger<<BGIQD::LOG::lstart()<<"deleteNotBiSupport "<<dd<<" conn"<<BGIQD::LOG::lend();
-    }
 
-    lger<<BGIQD::LOG::lstart()<<"freq report... "<<BGIQD::LOG::lend();
-    {
-        for( const auto & m : config.keys)
+        for( const auto & m : keys)
         {
-            config.key_array[config.key_map[m]].SetType();
+            key_array[key_map[m]].CheckCircle();
+        }
+
+        for( const auto & m : keys)
+        {
+            key_array[key_map[m]].SetType();
         }
         BGIQD::FREQ::Freq<std::string> freq;
         BGIQD::FREQ::Freq<std::string> basefreq;
@@ -986,46 +303,10 @@ int main(int argc , char **argv)
         BGIQD::FREQ::Freq<int> base_to;
         BGIQD::FREQ::Freq<int> in_circle;
 
-        if( connInfo.to_bool() )
-        {
-            auto deg= BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(prefix.to_string()+".connInfo");
-            if( deg == NULL )
-                FATAL( "open prefix.connInfo for write failed !!! ");
-            for( const auto & m : config.keys )
-            {
-
-                auto & curr = config.key_array[config.key_map[m]];
-                if( curr.from.size() > 0 )
-                {
-                    (*deg)<<curr.edge_id<<"\t-\t";
-                    for( auto i: curr.from )
-                    {
-                        (*deg)<<i.second.to
-                            <<":"<<i.second.length
-                            <<":"<<i.second.sim
-                            <<":"<<(i.second.IsPositive() ? '+' :'-')<<"\t";
-                    }
-                    *(deg)<<std::endl;
-                }
-                if( curr.to.size() > 0 )
-                {
-                    (*deg)<<curr.edge_id<<"\t+\t";
-                    for( auto i: curr.to)
-                    {
-                        (*deg)<<i.second.to
-                            <<":"<<i.second.length
-                            <<":"<<i.second.sim
-                            <<":"<<(i.second.IsPositive() ? '+' :'-')<<"\t";
-                    }
-                    *(deg)<<std::endl;
-                }
-            }
-            delete deg;
-        }
-        for( const auto & m : config.keys )
+        for( const auto & m : keys )
         {
 
-            auto & curr = config.key_array[config.key_map[m]];
+            auto & curr = key_array[key_map[m]];
             if( curr.from.size() == 0 && curr.to.size() == 0 )
                 basefreq.Touch("Single");
             else if( curr.from.size() == 0 && curr.to.size() == 1 )
@@ -1042,27 +323,27 @@ int main(int argc , char **argv)
                 basefreq.Touch("Multi");
 
 
-            if( config.key_array[config.key_map[m]].IsSingle() )
+            if( key_array[key_map[m]].IsSingle() )
                 freq.Touch("Single");
-            else if ( config.key_array[config.key_map[m]].IsLinear() )
+            else if ( key_array[key_map[m]].IsLinear() )
                 freq.Touch("Linear");
-            else if ( config.key_array[config.key_map[m]].IsTipTo() && config.key_array[config.key_map[m]].to_size ==1 )
+            else if ( key_array[key_map[m]].IsTipTo() && key_array[key_map[m]].to_size ==1 )
                 freq.Touch("Tipto 1");
-            else if ( config.key_array[config.key_map[m]].IsTipTo() && config.key_array[config.key_map[m]].to_size > 1 )
+            else if ( key_array[key_map[m]].IsTipTo() && key_array[key_map[m]].to_size > 1 )
                 freq.Touch("Tipto >1");
-            else if ( config.key_array[config.key_map[m]].IsTipFrom() && config.key_array[config.key_map[m]].from_size ==1 )
+            else if ( key_array[key_map[m]].IsTipFrom() && key_array[key_map[m]].from_size ==1 )
                 freq.Touch("Tipfrom 1");
-            else if ( config.key_array[config.key_map[m]].IsTipFrom() && config.key_array[config.key_map[m]].from_size > 1 )
+            else if ( key_array[key_map[m]].IsTipFrom() && key_array[key_map[m]].from_size > 1 )
                 freq.Touch("Tipfrom >1");
             else
                 freq.Touch("Multi");
-            from.Touch(config.key_array[config.key_map[m]].from_size);
-            to.Touch(config.key_array[config.key_map[m]].to_size);
-            total.Touch(config.key_array[config.key_map[m]].total_size);
-            del.Touch(config.key_array[config.key_map[m]].jump_conn);
-            base_from.Touch( config.key_array[config.key_map[m]].from.size());
-            base_to.Touch( config.key_array[config.key_map[m]].to.size());
-            in_circle.Touch(config.key_array[config.key_map[m]].IsCircle());
+            from.Touch(key_array[key_map[m]].from_size);
+            to.Touch(key_array[key_map[m]].to_size);
+            total.Touch(key_array[key_map[m]].total_size);
+            del.Touch(key_array[key_map[m]].jump_conn);
+            base_from.Touch( key_array[key_map[m]].from.size());
+            base_to.Touch( key_array[key_map[m]].to.size());
+            in_circle.Touch(key_array[key_map[m]].IsCircle());
         }
 
         lger<<BGIQD::LOG::lstart()<<"base key type freq"<<'\n'<<basefreq.ToString() << BGIQD::LOG::lend();
@@ -1075,24 +356,90 @@ int main(int argc , char **argv)
         lger<<BGIQD::LOG::lstart()<<"baseto freq"<< '\n'<<base_to.ToString() << BGIQD::LOG::lend();
         lger<<BGIQD::LOG::lstart()<<"incircle freq"<< '\n'<<in_circle.ToString() << BGIQD::LOG::lend();
     }
-    if ( ! super.to_bool() )
-        return 0;
-    lger<<BGIQD::LOG::lstart()<<"linear start ... "<<BGIQD::LOG::lend();
-    //BGIQD::SOAP2::LinearConnection(config);
+
+    void PrintContigDlinkGraph()
+    {
+        auto deg= BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.connInfo());
+        if( deg == NULL )
+            FATAL( "open prefix.connInfo for write failed !!! ");
+        for( const auto & m : keys )
+        {
+
+            auto & curr = key_array[key_map[m]];
+            if( curr.from.size() > 0 )
+            {
+                (*deg)<<curr.edge_id<<"\t-\t";
+                for( auto i: curr.from )
+                {
+                    (*deg)<<i.second.to
+                        <<":"<<i.second.length
+                        <<":"<<i.second.sim
+                        <<":"<<(i.second.IsPositive() ? '+' :'-')<<"\t";
+                }
+                *(deg)<<std::endl;
+            }
+            if( curr.to.size() > 0 )
+            {
+                (*deg)<<curr.edge_id<<"\t+\t";
+                for( auto i: curr.to)
+                {
+                    (*deg)<<i.second.to
+                        <<":"<<i.second.length
+                        <<":"<<i.second.sim
+                        <<":"<<(i.second.IsPositive() ? '+' :'-')<<"\t";
+                }
+                *(deg)<<std::endl;
+            }
+        }
+        delete deg;
+    }
+
+} config;
+
+
+
+int main(int argc , char **argv)
+{
+    BGIQD::LOG::timer t(config.lger,"ContigDlink");
+    START_PARSE_ARGS;
+    DEFINE_ARG_REQUIRED(std::string , prefix, "prefix");
+    DEFINE_ARG_REQUIRED(int , kvalue,"K value");
+    DEFINE_ARG_OPTIONAL(int , thread, "thread num .","8");
+    DEFINE_ARG_OPTIONAL(int, searchDepth,"search depth (bp) ","10000");
+    END_PARSE_ARGS;
+
+    config.lger<<BGIQD::LOG::lstart()<<"parse args end ... "<<BGIQD::LOG::lend();
+
+    config.Init(prefix.to_string() , kvalue.to_int());
+
+
+    config.lger<<BGIQD::LOG::lstart()<<"buildConnection start ... "<<BGIQD::LOG::lend();
     {
         BGIQD::MultiThread::MultiThread t_jobs;
-        index = 0;
-        //TODO : make it thread safe
-        t_jobs.Start(1);
-        for(size_t i = 1 ; i<= config.keys.size() ; i++)
+        t_jobs.Start(thread.to_int());
+        int searchDepth_value = searchDepth.to_int();
+        for( auto j : config.keys )
         {
-            t_jobs.AddJob([&config,i](){ linearConnection(config,i); });
+            t_jobs.AddJob([j, searchDepth_value](){
+                    config.findConnection(j ,false  , searchDepth_value, config.K);
+                    }
+                    );
+            if( config.edge_array[j].id != config.edge_array[j].bal_id )
+            {
+                unsigned int k = config.edge_array[j].bal_id;
+                t_jobs.AddJob([ k, searchDepth_value](){
+                        config.findConnection(k ,true , searchDepth_value, config.K);
+                        }
+                        );
+            }
         }
         t_jobs.End();
         t_jobs.WaitingStop();
     }
 
-    lger<<BGIQD::LOG::lstart()<<"report start ... "<<BGIQD::LOG::lend();
-    report(config);
+    config.PrintContigDlinkGraph();
+
+    config.LogFreq();
+
     return 0;
 }

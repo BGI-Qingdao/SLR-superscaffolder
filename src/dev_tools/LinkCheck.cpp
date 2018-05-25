@@ -1,5 +1,4 @@
 #include "soap2/contigGraph.h"
-#include "soap2/loadGraph.h"
 #include <iostream>
 #include "common/args/argsparser.h"
 #include "common/files/file_reader.h"

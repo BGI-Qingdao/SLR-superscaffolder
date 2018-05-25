@@ -40,6 +40,8 @@ namespace BGIQD {
 
             DEFINE_SUFFIX(contigroad , ".contigroad");
 
+            DEFINE_SUFFIX(connInfo, ".connInfo");
+
             DEFINE_SUFFIX(super_used, ".super_used");
 
             DEFINE_SUFFIX(super_only, ".super_only");
