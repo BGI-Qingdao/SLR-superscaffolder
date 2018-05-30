@@ -73,6 +73,7 @@ struct AppConfig
         BGIQD::LOG::logfilter::singleton().get("ChopBin",BGIQD::LOG::loglevel::INFO,log);
         fName.Init(prefix);
         b2b_array.Init(1024);
+        log<<BGIQD::LOG::lstart()<<"Init finsish ..."<<BGIQD::LOG::lend();
     }
 
     void LoadBarcodeOnContig(std::istream & in)
@@ -154,7 +155,7 @@ int main(int argc , char ** argv)
 
     config.Init( prefix.to_string() , bin_size.to_int() );
 
-    BGIQD::LOG::timer t(config.log,"BarcodeOnContig_NoRef");
+    BGIQD::LOG::timer t(config.log,"ChopBin");
 
     config.LoadSeeds();
 

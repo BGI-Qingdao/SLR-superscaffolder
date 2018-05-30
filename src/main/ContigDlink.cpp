@@ -400,7 +400,6 @@ struct AppConfig
 
 int main(int argc , char **argv)
 {
-    BGIQD::LOG::timer t(config.lger,"ContigDlink");
     START_PARSE_ARGS;
     DEFINE_ARG_REQUIRED(std::string , prefix, "prefix");
     DEFINE_ARG_REQUIRED(int , kvalue,"K value");
@@ -408,10 +407,12 @@ int main(int argc , char **argv)
     DEFINE_ARG_OPTIONAL(int, searchDepth,"search depth (bp) ","10000");
     END_PARSE_ARGS;
 
-    config.lger<<BGIQD::LOG::lstart()<<"parse args end ... "<<BGIQD::LOG::lend();
 
     config.Init(prefix.to_string() , kvalue.to_int());
 
+    config.lger<<BGIQD::LOG::lstart()<<"parse args end ... "<<BGIQD::LOG::lend();
+
+    BGIQD::LOG::timer t(config.lger,"ContigDlink");
 
     config.lger<<BGIQD::LOG::lstart()<<"buildConnection start ... "<<BGIQD::LOG::lend();
     {

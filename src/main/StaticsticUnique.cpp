@@ -89,6 +89,7 @@ int main(int argc , char ** argv)
     END_PARSE_ARGS
 
     config.Init(kvalue.to_int(),min.to_int());
+    BGIQD::LOG::timer t(config.log,"StaticsticUnique");
     config.LoadContigInfio(std::cin);
     config.CalcCov();
     config.PrintUniqueInfo(std::cout);

@@ -5,6 +5,8 @@
 #include "common/args/argsparser.h"
 #include "common/multithread/MultiThread.h"
 #include "common/stl/mapHelper.h"
+#include "common/log/log.h"
+#include "common/log/logfilter.h"
 
 #include "soap2/soap2.h"
 #include "soap2/fileName.h"
@@ -18,6 +20,7 @@
 struct AppConfig
 {
     typedef std::map< int , std::set<int> > BinIndexOnBarcode;
+
     typedef std::map<BGIQD::SOAP2::ContigId ,std::map< BGIQD::SOAP2::ContigId ,float> > ContigSims;
 
     BGIQD::stLFR::BarcodeOnBinArray barcodeOnBin ;
@@ -34,6 +37,8 @@ struct AppConfig
 
     BGIQD::SOAP2::FileNames fName;
 
+    BGIQD::LOG::logger lger;
+
     void Init(const std::string & p , float t)
     {
         fName.Init(p);
@@ -41,6 +46,8 @@ struct AppConfig
         barcodeOnBin.Init(1024);
         relations.Init(1024);
         contig_relations.Init(1024);
+        BGIQD::LOG::logfilter::singleton().get("BinCluster",BGIQD::LOG::INFO,lger);
+        lger<<BGIQD::LOG::lstart()<<"Init finsish ..."<<BGIQD::LOG::lend();
     }
 
     void LoadB2BArray( )
@@ -67,8 +74,8 @@ struct AppConfig
 
     void Calc1Bin2All(int i )
     {
-        auto & bin = barcodeOnBin.at(i);
-        auto & result = relations.at(i);
+        auto & bin = barcodeOnBin[i];
+        auto & result = relations[i];
         result.binId = bin.binId ;
         result.contigId = bin.contigId ;
         result.binIndex = i ;
@@ -85,7 +92,7 @@ struct AppConfig
 
         for(auto index : relates)
         {
-            auto & other = barcodeOnBin.at(index);
+            auto & other = barcodeOnBin[index];
             float sim = BGIQD::stLFR::BarcodeCollection::Jaccard(bin.collections,other.collections);
             if( sim >= thresold )
             {
@@ -189,6 +196,8 @@ int main(int argc ,char **argv)
     END_PARSE_ARGS
 
     config.Init(prefix.to_string() , thresold.to_float());
+
+    BGIQD::LOG::timer t(config.lger,"BinCluster");
 
     config.LoadB2BArray() ;
 

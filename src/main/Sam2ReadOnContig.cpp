@@ -115,6 +115,8 @@ int main(int argc , char ** argv)
     }
 
     config.Init(prefix.to_string() , barcodeList.to_string() , no_stLFR.to_bool());
+
+    BGIQD::LOG::timer t(config.loger,"Same2ReadOnContig");
     config.TryLoadBarcode2Num() ;
     config.ParseSam2ReadOnContig(std::cin,std::cout);
     config.PrintBarcodeList();

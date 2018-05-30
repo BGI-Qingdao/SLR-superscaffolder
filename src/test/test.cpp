@@ -1,5 +1,5 @@
 #include  "common/test/Test.h"
-
+                          
 BGIQD::LOG::logger Test::log ;
 
 static void print_usage()
