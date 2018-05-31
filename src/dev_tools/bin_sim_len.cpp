@@ -212,12 +212,11 @@ int main(int argc , char ** argv)
     // Parse commands ...
     std::string input_file;
     std::string output_file;
-    size_t step_max = 0;
-    size_t limit= 0;
-    bool detail_1000_2000 = false;
-    bool simulator_random = false;
+    int step_max = 0;
+    int limit= 0;
+    int calc_step;
     int opt = 0;
-    while( ( opt =getopt(argc,argv,"i:o:a:l:dr") ) !=EOF )
+    while( ( opt =getopt(argc,argv,"i:s:b:a:") ) !=EOF )
     {
         char data[1024];
         switch(opt)
@@ -226,27 +225,22 @@ int main(int argc , char ** argv)
                 sscanf(optarg,"%s",data);
                 input_file= std::string(data);
                 break;
-            case 'o':
-                sscanf(optarg,"%s",data);
-                output_file= std::string(data);
+            case 'b':
+                sscanf(optarg,"%d",&step_max);
                 break;
             case 'a':
-                sscanf(optarg,"%llu",&step_max);
+                sscanf(optarg,"%d",&limit);
                 break;
-            case 'l':
-                sscanf(optarg,"%llu",&limit);
+            case 's':
+                sscanf(optarg,"%d",&calc_step);
                 break;
-            case 'd':
-                detail_1000_2000 = true;
-                break;
-            case 'r':
-                simulator_random= true;
+            default:
                 break;
         }
     }
-    const std::string Usage("Usage: bin_simularity -i ifile -o ofile -a step [ -l limit ][-d]");
-    if ( input_file == "" || output_file == "" || step_max < 1 
-        || (detail_1000_2000 && (0 <limit && limit<2000 ) ))
+
+    const std::string Usage("Usage: bin_simularity -i ifile  -b bin_size -s calc_step  [ -a row_max ][-d]");
+    if ( input_file == "" || step_max < 1 || calc_step < 1)
     {
         std::cerr<<Usage<<std::endl;
         exit(-1);
@@ -264,11 +258,11 @@ int main(int argc , char ** argv)
     {
         std::cerr<<"Succ to open "<<input_file<<" for read"<<std::endl;
     }
-    size_t bin_max = 0;
+    int bin_max = 0;
     std::map<size_t, std::map<size_t,size_t> > bin_data;
     while( ! ifs.eof() )
     {
-        size_t bin,num;
+        int bin,num;
         char dot;
         ifs>>bin>>dot>>num;
         //std::cerr<<"DEBUG : "<<barcode<<":"<<num<<std::endl;
@@ -290,13 +284,6 @@ int main(int argc , char ** argv)
     }
     ifs.close();
 
-    if( simulator_random )
-    {
-        std::cerr<<"Start shuffle barcodes..."<<std::endl;
-        shuffle_map( bin_data );
-        std::cerr<<"End shuffle barcodes..."<<std::endl;
-    }
-
     std::map<size_t , size_t> total_index;
     std::map<size_t , std::map<size_t , double> > total_total;
     std::map<size_t , std::map<size_t , size_t> > detail_U;
@@ -307,7 +294,7 @@ int main(int argc , char ** argv)
         limit = bin_max-step_max;
     }
     // Calc now .,..
-    for( size_t i = 0 ; i <= limit; i++ )
+    for( int i = 0 ; i <= limit; i++ )
     {
         if( i % 1000 == 0 )
         {
@@ -316,46 +303,21 @@ int main(int argc , char ** argv)
         auto itr1 = bin_data.find(i);
         if( itr1 == bin_data.end() )
         {
+            std::cout<<0<<std::endl;
             continue;
         }
-        for(size_t j = 1 ; j<=step_max ; j++ )
+        int j = i + calc_step ;
+        //for(int j = 1 ; j<=step_max ; j++ )
         {
-            auto itr2 = bin_data.find(i+j) ;
+            auto itr2 = bin_data.find(j) ;
             if( itr2 == bin_data.end() )
             {
+                std::cout<<0<<std::endl;
                 continue;
             }
             auto ret = simularity( itr1->second , itr2->second );
-            incr( total_index , j , 1 );
-            incr( total_total[1], j , std::get<0>(ret) );
-            incr( total_total[2], j , std::get<1>(ret) );
-            incr( total_total[3], j , std::get<2>(ret) );
-            //if( j == 2  )
-            //{
-            //    std::cout<<std::get<0>(ret) <<","<<std::get<1>(ret)<<std::endl;
-            //}
-            if ( detail_1000_2000 && 1000< i && i <= 2000)
-            {
-                incr( detail_U[i-1000] , j , std::get<0>(ret));
-                incr( detail_N[i-1000] , j , std::get<1>(ret));
-                incr( detail_S[i-1000] , j , std::get<2>(ret));
-            }
+            std::cout<<std::get<2>(ret)<<std::endl;
         }
-    }
-    median(total_total[1], total_index);
-    median(total_total[2], total_index);
-    median(total_total[3], total_index);
-    // Write result;
-    std::map<size_t , std::string> heads;
-    heads[1] = "Union size";
-    heads[2] = "Intersection size";
-    heads[3] = "Simularity fraction";
-    map2csv( heads ,total_total, step_max , 3 , output_file+".csv"  );
-    if( detail_1000_2000 )
-    {
-        map2csv( heads ,detail_U, 1000 , step_max , output_file+"_Union.csv" ,false );
-        map2csv( heads ,detail_N, 1000 , step_max , output_file+"_Intersection.csv" ,false );
-        map2csv( heads ,detail_S, 1000 , step_max , output_file+"_Intersection.csv" ,false );
     }
     return 0;
 }
