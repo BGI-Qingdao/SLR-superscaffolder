@@ -175,6 +175,8 @@ namespace BGIQD{
                 FATAL( " open prefix.cluster to write failed !!!" );
             for( size_t i = 0 ; i <data.size() ; i++)
             {
+                if( data.at(i).empty() )
+                    continue ;
                 (*out)<<data.at(i).ToString()<<std::endl;
             }
             delete out;

@@ -110,7 +110,12 @@ namespace BGIQD{
 
                 static float Jaccard(const Collection & c1 , const Collection & c2 )
                 {
-                    return ((float)Intersection(c1,c2).size()) / (float)(Union(c1,c2).size()) ;
+                    auto it = Intersection(c1,c2) ;
+                    Collection ret ;
+                    ret += c1 ;
+                    ret += c2 ;
+                    ret -= it ;
+                    return ((float)it.size()) / (float)((ret).size()) ;
                 }
 
                 Collection & operator +=( const Collection & other)

@@ -608,9 +608,9 @@ int main(int argc , char ** argv)
     BGIQD::FREQ::Freq<int> len_freq;
     for(const auto & i : config.contigs)
     {
-        len_freq.Touch(i.length);
         if( i.length < 2 )
             continue;
+        len_freq.Touch(i.length);
         std::cout<<i.length<<'\t';
         int start = 1 ;
         if( i.headin )

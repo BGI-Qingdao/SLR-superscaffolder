@@ -183,7 +183,7 @@ namespace BGIQD {
         void ContigFastAMap::LoadContig(const std::string & file)
         {
             auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(file);
-            if( in != NULL )
+            if( in == NULL )
                 FATAL( " open prefix.contig for read failed !!! ");
             std::string line ;
             ContigFastA tmp ;

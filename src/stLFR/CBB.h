@@ -69,7 +69,7 @@ namespace BGIQD{
 
             std::string ToString() const ;
 
-            bool empty() const ;
+            bool empty() const  { return sims.empty() ; }
 
             void InitFromString( const std::string & line ) ;
         };
