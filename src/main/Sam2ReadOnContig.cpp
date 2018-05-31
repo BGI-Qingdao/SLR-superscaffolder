@@ -65,22 +65,24 @@ struct AppConfig
         };
 
         // parse sam and print
-        BGIQD::SAM::PairedSAMParser parser(sam_in);
-
+        //BGIQD::SAM::PairedSAMParser parser(sam_in);
         long long count = 0 ;
-        while(1)
+        auto parseline = [&](const std::string & line)
         {
-            auto p = parser.CurrentPair();
-            if( ! p.first.Valid() || !p.second.Valid() )
-                break;
-            if( p.first.UnMap() || p.second.UnMap() )
-                continue;
+            BGIQD::SAM::LineParser l(line);
+            if( ! l.IsVaid() || l.IsHead() )
+            {
+                return ;
+            }
+            auto mdata = l.ParseAsMatchData();
+            if( mdata.UnMap()) 
+                return ;
             count ++ ;
-            print1read(p.first);
-            print1read(p.second);
-            if( count % 1000 == 0 )
+            print1read(mdata);
+            if( count % 10000 == 0 )
                 loger<<BGIQD::LOG::lstart()<<count<<"   pair maped reads processed ..."<<BGIQD::LOG::lend();
-        }
+        };
+        BGIQD::FILES::FileReaderFactory::EachLine(sam_in , parseline);
     }
 
     void PrintBarcodeList()
