@@ -5,23 +5,31 @@
 #include <algorithm>
 #include <vector>
 #include <set>
+
 #include "common/string/stringtools.h"
 #include "common/args/argsparser.h"
 #include "common/freq/freq.h"
-#include "soap2/contigGraph.h"
 #include "common/log/log.h"
 #include "common/log/logfilter.h"
+#include "common/files/file_reader.h"
+#include "common/files/file_writer.h"
 
-struct  AppGlobalData
+#include "soap2/contigGraph.h"
+#include "soap2/fileName.h"
+
+struct  AppConfig
 {
+
     std::map<unsigned int , BGIQD::SOAP2::KeyEdge> edges;
     BGIQD::LOG::logger loger;
     std::vector<BGIQD::SOAP2::ContigRoad> contigs ; 
-    void Init()
+    BGIQD::SOAP2::FileNames fName;
+
+    void Init(const std::string & prefix)
     {
         BGIQD::LOG::logfilter::singleton().get("LinearCDG",BGIQD::LOG::loglevel::INFO , loger );
+        fName.Init(prefix);
     }
-
 
     void report_freq()
     {
@@ -88,12 +96,12 @@ struct  AppGlobalData
 int main(int argc , char ** argv)
 {
     START_PARSE_ARGS
-        DEFINE_ARG_OPTIONAL(bool, um, "use unique-multi solve ? default not","0");
-    DEFINE_ARG_OPTIONAL(bool, ls, "use length-sim solve ? default not","0");
+    DEFINE_ARG_REQUIRED(std::string , prefix, "prefix. Input xxx.connInfo ; Ouput xxx.contigroad");
     DEFINE_ARG_REQUIRED(float, len_threshold_factor, "len_threshold_factor ,within [0.1,1.0]  ");
     DEFINE_ARG_REQUIRED(float, sim_threshold_factor, "sim_threshold_factor ,within [0.1,1.0]  " );
     END_PARSE_ARGS
 
+    
     if( len_threshold_factor.to_float() < 0.1f )
         len_threshold_factor.d.f = 0.9f ;
 
@@ -108,11 +116,12 @@ int main(int argc , char ** argv)
     config.loger<<BGIQD::LOG::lstart()<<" len_threshold_factor used is "<<len_threshold_factor.to_float()<<BGIQD::LOG::lend();
     config.loger<<BGIQD::LOG::lstart()<<" sim_threshold_factor used is "<<sim_threshold_factor.to_float()<<BGIQD::LOG::lend();
 
-        config.Init();
+    config.Init(prefix.to_string());
     // Load graph
     std::string line ;
     int id  = 0 ;
-    while( ! std::getline( std::cin , line).eof() )
+    auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(config.fName.connInfo());
+    while( ! std::getline( *in , line).eof() )
     {
         auto items1 = BGIQD::STRING::split( line , "\t") ;
         assert( items1.size() >= 3 );
@@ -138,7 +147,7 @@ int main(int argc , char ** argv)
             }
         }
     }
-
+    delete in ;
     // report before action
     for( auto & m : config.edges )
     {
@@ -166,29 +175,15 @@ int main(int argc , char ** argv)
                 linear_len.push_back( curr.GetValidFrom().length );
                 linear_sim.push_back( curr.GetValidFrom().sim);
             }
-            /*
-               else if ( curr.IsTipTo()  && curr.to_size == 1 )
-               {
-               index ++ ;
-               linear_len.push_back( curr.GetValidTo().length );
-               linear_sim.push_back( curr.GetValidTo().sim);
-               }*/
         }
     }
     config.loger<<BGIQD::LOG::lstart()<<" total linear node "<<index<<BGIQD::LOG::lend();
     std::sort(linear_len.begin() , linear_len.end());
     std::sort(linear_sim.rbegin() , linear_sim.rend());
-    //for(int i = 0 ; i<index ; i++ )
-    //{
-    //    config.loger<<BGIQD::LOG::lstart()<<linear_len[i]<<"\t"<<linear_sim[i]<<BGIQD::LOG::lend(); 
-    //}
     int len_threshold = linear_len[ int(index * len_threshold_factor.to_float()) -1];
     float sim_threshold = linear_sim[ int(index * sim_threshold_factor.to_float()) -1];
-
     config.loger<<BGIQD::LOG::lstart()<<" used linear len threshold "<<len_threshold<<BGIQD::LOG::lend();
     config.loger<<BGIQD::LOG::lstart()<<" used linear sim threshold "<<sim_threshold<<BGIQD::LOG::lend();
-
-
 
     // solve multi
     auto  get_oppo = [] (unsigned int to  , bool to_order , bool positive) {
@@ -220,128 +215,6 @@ int main(int argc , char ** argv)
     };
 
     int del_count = 0 ;
-    if ( um.to_bool() )
-    {
-        // delete unique link -> multi
-        for( auto & m : config.edges )
-        {
-            auto & curr = m.second;
-            if( curr.IsLinear()
-                    || (curr.IsTipTo() && curr.to_size == 1 ) 
-                    || (curr.IsTipFrom() && curr.from_size == 1 ) )
-            {
-                if( curr.to_size == 1 )
-                {
-                    auto & conn = curr.GetValidTo() ;
-                    auto i = get_oppo( conn.to , true , conn.IsPositive() );
-                    auto & m = i.get();
-                    int unique_count = 0 ;
-                    for ( auto & p : m )
-                    {
-                        auto & oppo_conn = p.second;
-                        if( oppo_conn.to == curr.edge_id && oppo_conn.IsValid())
-                        {
-                            unique_count ++ ;
-                        }
-                    }
-                    if( unique_count == 1 )
-                    {
-                        for( auto & p : m )
-                        {
-                            auto & oppo_conn = p.second;
-                            if( oppo_conn.to != curr.edge_id && oppo_conn.IsValid() )
-                            {
-                                del_count ++ ;
-                                oppo_conn.SetJump();
-                            }
-                        }
-                    }
-                }
-
-                if( curr.from_size== 1 )
-                {
-                    auto & conn = curr.GetValidFrom() ;
-                    auto i = get_oppo( conn.to , true , conn.IsPositive() );
-                    auto & m = i.get();
-                    int unique_count = 0 ;
-                    for( auto & p : m )
-                    {
-                        auto & oppo_conn = p.second;
-                        if( oppo_conn.to == curr.edge_id && oppo_conn.IsValid())
-                        {
-                            unique_count ++ ;
-                        }
-                    }
-                    if( unique_count == 1 )
-                    {
-                        for( auto & p : m )
-                        {
-                            auto & oppo_conn = p.second;
-                            if( oppo_conn.to != curr.edge_id && oppo_conn.IsValid() )
-                            {
-                                del_count ++ ;
-                                oppo_conn.SetJump();
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        for( auto & m : config.edges )
-        {
-            m.second.SetType();
-        }
-        config.loger<<BGIQD::LOG::lstart()<<"unque-muti part delete"<<del_count<<BGIQD::LOG::lend();
-        config.report_freq();
-    }
-    // delete by length & sim
-
-    del_count = 0 ;
-    if( ls.to_bool() )
-    {
-        for( auto & m : config.edges )
-        {
-            auto & curr = m.second;
-            if( curr.IsLinear()
-                    || (curr.IsTipTo() && curr.to_size == 1 ) 
-                    || (curr.IsTipFrom() && curr.from_size == 1 ) )
-            {
-                continue ;
-            }
-            if( curr.from_size > 1 )
-            {
-                for( auto & i : curr.from )
-                {
-                    if( i.second.length > len_threshold || i.second.sim < sim_threshold )
-                        if( get_oppo( i.second.to , false , i.second.IsPositive() ).get().size() > 1 )
-                        {
-                            i.second.SetJump();
-                            del_count ++ ;
-                        }
-                }
-            }
-            if( curr.to_size > 1 )
-            {
-                for( auto & i : curr.to)
-                {
-                    if( i.second.length > len_threshold || i.second.sim < sim_threshold )
-                        if( get_oppo( i.second.to , true , i.second.IsPositive() ).get().size() > 1 )
-                        {
-                            i.second.SetJump();
-                            del_count ++ ;
-                        }
-                }
-            }
-        }
-        for( auto & m : config.edges )
-        {
-            m.second.SetType();
-        }
-        config.loger<<BGIQD::LOG::lstart()<<"length-sim part delete"<<del_count<<BGIQD::LOG::lend();
-        config.report_freq();
-    }
-    del_count = 0;
-    // rebuild unique link
     for( auto & m : config.edges )
     {
         auto & curr = m.second;
@@ -349,71 +222,39 @@ int main(int argc , char ** argv)
                 || (curr.IsTipTo() && curr.to_size == 1 ) 
                 || (curr.IsTipFrom() && curr.from_size == 1 ) )
         {
-            if( curr.to_size == 1 )
+            continue ;
+        }
+        if( curr.from_size > 1 )
+        {
+            for( auto & i : curr.from )
             {
-                auto & conn = curr.GetValidTo() ;
-                auto i = get_oppo( conn.to , true , conn.IsPositive() );
-                auto & m = i.get();
-                bool detected = false ;
-                for( auto & p : m )
-                {
-                    auto & oppo_conn = p.second;
-                    if( oppo_conn.to == curr.edge_id && oppo_conn.IsValid())
+                if( i.second.length > len_threshold || i.second.sim < sim_threshold )
+                    if( get_oppo( i.second.to , false , i.second.IsPositive() ).get().size() > 1 )
                     {
-                        detected = true ;
+                        i.second.SetJump();
+                        del_count ++ ;
                     }
-                }
-                if( ! detected )
-                {
-                    for( auto & p : m )
-                    {
-                        auto & oppo_conn = p.second;
-                        if( oppo_conn.to == curr.edge_id && ! oppo_conn.IsValid())
-                        {
-                            oppo_conn.UnSetJump();
-                            del_count ++ ;
-                        }
-                    }
-                }
             }
-
-            if( curr.from_size== 1 )
+        }
+        if( curr.to_size > 1 )
+        {
+            for( auto & i : curr.to)
             {
-                auto & conn = curr.GetValidFrom() ;
-                auto i = get_oppo( conn.to , false , conn.IsPositive() );
-                auto & m = i.get();
-                bool detected = false ;
-                for( auto & p : m )
-                {
-                    auto & oppo_conn = p.second;
-                    if( oppo_conn.to == curr.edge_id && oppo_conn.IsValid())
+                if( i.second.length > len_threshold || i.second.sim < sim_threshold )
+                    if( get_oppo( i.second.to , true , i.second.IsPositive() ).get().size() > 1 )
                     {
-                        detected = true ;
+                        i.second.SetJump();
+                        del_count ++ ;
                     }
-                }
-                if( ! detected )
-                {
-                    for( auto & p : m )
-                    {
-                        auto & oppo_conn = p.second;
-                        if( oppo_conn.to == curr.edge_id && ! oppo_conn.IsValid())
-                        {
-                            oppo_conn.UnSetJump();
-                            del_count ++ ;
-                        }
-                    }
-                }
             }
         }
     }
-    config.loger<<BGIQD::LOG::lstart()<<"rebuild unique part add"<<del_count<<BGIQD::LOG::lend();
-    // report after action
     for( auto & m : config.edges )
     {
         m.second.SetType();
     }
+    config.loger<<BGIQD::LOG::lstart()<<"length-sim delete"<<del_count<<BGIQD::LOG::lend();
     config.report_freq();
-
 
     // print linear collection
 
@@ -604,14 +445,14 @@ int main(int argc , char ** argv)
             curr.Mark();
         }
     }
-
+    auto outf = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(config.fName.contigroad());
     BGIQD::FREQ::Freq<int> len_freq;
     for(const auto & i : config.contigs)
     {
         if( i.length < 2 )
             continue;
         len_freq.Touch(i.length);
-        std::cout<<i.length<<'\t';
+        (*outf)<<i.length<<'\t';
         int start = 1 ;
         if( i.headin )
         {
@@ -619,9 +460,9 @@ int main(int argc , char ** argv)
         }
         for( int j =0 ; j<i.length ; j++ )
         {
-            std::cout<<i.real_contig[start+j]<<"\t";
+            (*outf)<<i.real_contig[start+j]<<"\t";
         }
-        std::cout<<std::endl;
+        (*outf)<<std::endl;
     }
     config.loger<<BGIQD::LOG::lstart()<<"len freq"<< '\n'<<len_freq.ToString() << BGIQD::LOG::lend();
     return 0 ;

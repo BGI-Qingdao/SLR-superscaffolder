@@ -47,21 +47,23 @@ struct AppConfig
         }
     }
 
-    void ParseSam2ReadOnContig(std::istream & sam_in , std::ostream & b2r_out)
+    void ParseSam2ReadOnContig()
     {
+        auto sam_in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.read2contig_sam());
+        auto b2r_out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.read2contig());
         // basic function
         long long readId = 1 ;
         auto print1read= [&](const BGIQD::SAM::MatchData &d )
         {
             //readId\tcontigId\treadInContigPos\torigin\tbarcodeId\n
-            b2r_out<<readId++<<'\t'
+            (*b2r_out)<<readId++<<'\t'
                 <<d.ref_name<<'\t'
                 <<d.first_match_position<<'\t'
                 <<(d.IsReverseComplete() ? '-':'+')<<'\t';
             if( has_barcode_in_read_name )
-                b2r_out<<BGIQD::stLFR::BarcodeIdHelper::Id( 
+                (*b2r_out)<<BGIQD::stLFR::BarcodeIdHelper::Id( 
                         BGIQD::stLFR::readName2Barcode(d.read_name));
-            b2r_out<<std::endl;
+            (*b2r_out)<<std::endl;
         };
 
         // parse sam and print
@@ -82,7 +84,7 @@ struct AppConfig
             if( count % 10000 == 0 )
                 loger<<BGIQD::LOG::lstart()<<count<<"   pair maped reads processed ..."<<BGIQD::LOG::lend();
         };
-        BGIQD::FILES::FileReaderFactory::EachLine(sam_in , parseline);
+        BGIQD::FILES::FileReaderFactory::EachLine(*sam_in , parseline);
     }
 
     void PrintBarcodeList()
@@ -103,24 +105,17 @@ int main(int argc , char ** argv)
 
     // parse args
     START_PARSE_ARGS
-    DEFINE_ARG_REQUIRED(std::string,prefix, "output prefix");
-
-    DEFINE_ARG_OPTIONAL(bool ,no_stLFR , "no barcode in read name -- if the sam file was no barcode info , open this.","");
+    //DEFINE_ARG_OPTIONAL(bool ,no_stLFR , "no barcode in read name -- if the sam file was no barcode info , open this.","");
+    DEFINE_ARG_REQUIRED(std::string,prefix, "prefix. Input xxx.read2contig.sam ; Output xxx.read2contig && xxx.barcodeList");
     DEFINE_ARG_OPTIONAL(std::string,barcodeList, "barcodeList file file","");
-    DEFINE_ARG_OPTIONAL(long,file_cache, "cache size of file buffer","1000000");
+    //DEFINE_ARG_OPTIONAL(long,file_cache, "cache size of file buffer","1000000");
     END_PARSE_ARGS
 
-    if( file_cache.setted && file_cache.to_int() > 1024)
-    {
-        BGIQD::FILES::FileReaderFactory::ResizeBuff(std::cin , file_cache.to_int());
-        BGIQD::FILES::FileWriterFactory::ResizeBuff(std::cout , file_cache.to_int());
-    }
-
-    config.Init(prefix.to_string() , barcodeList.to_string() , no_stLFR.to_bool());
+    config.Init(prefix.to_string() , barcodeList.to_string() ,false );// no_stLFR.to_bool());
 
     BGIQD::LOG::timer t(config.loger,"Same2ReadOnContig");
     config.TryLoadBarcode2Num() ;
-    config.ParseSam2ReadOnContig(std::cin,std::cout);
+    config.ParseSam2ReadOnContig();
     config.PrintBarcodeList();
     return 0;
 }

@@ -417,16 +417,17 @@ int  main(int argc, char **argv)
     //step0 Parse parmeters...
     START_PARSE_ARGS
     DEFINE_ARG_REQUIRED(std::string , prefix, "prefix \n \
-                                            need    xxx.Arc\n\
+                                            Input xxx.Arc\n\
                                                     xxx.updated.edge\n\
                                                     xxx.cluster\n\
                                                     xxx.contigroad\n\
-                                                    xxx.read2contig");
+                                                    xxx.read2contig;\n\
+                                            Output xxx.contigroadfill");
     DEFINE_ARG_REQUIRED(int , kvalue, "K value");
-    DEFINE_ARG_REQUIRED(int , t_num,"thread num . default[8]");
-    DEFINE_ARG_REQUIRED(float , Ecov, "Ecov of contigs");
+    DEFINE_ARG_OPTIONAL(int , thread,"thread num ","8");
+    DEFINE_ARG_OPTIONAL(float , Ecov, "Ecov of contigs. must set this if fill circle.","10.0");
     DEFINE_ARG_REQUIRED(int, fill_strategy, "fill strategy \n\
-                                                     1 for shortest path fill\n\
+                                                        ShortestPath=1\n\
                                                         BarcodeCov = 2 ,\n\
                                                         BarcodeCov_BreakPalindrome = 3 ,\n\
                                                         BarcodeCov_FillCircle = 4,\n\
@@ -444,12 +445,6 @@ int  main(int argc, char **argv)
     config.max_length = searchDepth.to_int();
     config.Ecov = Ecov.to_float();
     config.strategy = static_cast<GlobalConfig::FillStrategy>(fill_strategy.to_int());
-
-    if( ! t_num.setted )
-    {
-        t_num.setted = true ;
-        t_num.d.i = 8 ;
-    }
     config.lger<<BGIQD::LOG::lstart()<<"parse args end ... "<<BGIQD::LOG::lend();
     //step1 .Loading files...
     config.graph_eab.graph_ea.LoadEdge(config.updateEdge,config.K);
@@ -468,7 +463,7 @@ int  main(int argc, char **argv)
     //step2 Fill roads ...
     {
         BGIQD::MultiThread::MultiThread t_jobs;
-        t_jobs.Start(t_num.to_int());
+        t_jobs.Start(thread.to_int());
 
         for( int i= 0 ; i<(int)config.roads.roads.size(); i++ )
         {

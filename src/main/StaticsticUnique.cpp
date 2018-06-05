@@ -1,7 +1,12 @@
 #include "common/args/argsparser.h"
 #include "common/log/log.h"
 #include "common/log/logfilter.h"
+#include "common/files/file_reader.h"
+#include "common/files/file_writer.h"
+
+#include "soap2/fileName.h"
 #include "soap2/soap2.h"
+
 #include <iostream>
 #include <set>
 #include <map>
@@ -16,6 +21,8 @@ struct AppConfig
         int  tip ;
     };
 
+    BGIQD::SOAP2::FileNames fName ;
+
     int K;
     int min;
     long total ;
@@ -27,7 +34,7 @@ struct AppConfig
     float UniqueLow ;
     float UniqueHigh  ;
 
-    void Init(int k, int m)
+    void Init(int k, int m ,const std::string & prefix )
     {
         K = k ;
         min = m;
@@ -37,14 +44,16 @@ struct AppConfig
         UniqueLow = 0 ;
         UniqueHigh = 0 ;
         contigInfo.clear();
+        fName.Init(prefix);
         BGIQD::LOG::logfilter::singleton().get("StatictisUnique",BGIQD::LOG::loglevel::INFO,log);
     }
 
-    void LoadContigInfio(std::istream & ist)
+    void LoadContigInfo()
     {
+        auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.contig());
         std::string line ;
         unsigned int prev = -1 ;
-        while(!std::getline(ist,line).eof())
+        while(!std::getline(*in,line).eof())
         {
             ContigInfo data;
             sscanf(line.c_str() ,">%u length %d cvg_%f_tip_%d",&data.id , &data.length , &data.cov , &data.tip);
@@ -58,6 +67,7 @@ struct AppConfig
             }
             contigInfo[data.id] = data;
         }
+        delete in;
     }
 
     void CalcCov()
@@ -68,8 +78,9 @@ struct AppConfig
         log<<BGIQD::LOG::lstart()<<"E(cov) = "<< Ecov<< " range ( "<<UniqueLow<<" , "<<UniqueHigh<<")"<< BGIQD::LOG::lend();
     }
 
-    void PrintUniqueInfo(std::ostream & ost)
+    void PrintUniqueInfo()
     {
+        auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.seeds());
         long index = 0 ;
         long index1 = 0 ;
         for( const auto &i : contigInfo)
@@ -79,26 +90,28 @@ struct AppConfig
             if( pass.find(contig.id) == pass.end() && contig.cov > UniqueLow && contig.cov < UniqueHigh && contig.length >=min )
             {
                 index ++ ;
-                ost<<contig.id<<'\t'<<contig.length<<std::endl;
+                (*out)<<contig.id<<'\t'<<contig.length<<std::endl;
             }
         }
         log<<BGIQD::LOG::lstart()<<index << " seed in "<<index1<<" contigs"<< BGIQD::LOG::lend();
+        delete out;
     }
 
-}config;
+} config;
 
 int main(int argc , char ** argv)
 {
     START_PARSE_ARGS
     DEFINE_ARG_REQUIRED(int ,kvalue,"K value");
-    DEFINE_ARG_REQUIRED(int ,min ," bin size ");
+    DEFINE_ARG_REQUIRED(int ,min ,"min length of seed contigs");
+    DEFINE_ARG_REQUIRED(std::string ,prefix,"prefix . Input xxx.contig ; Output xxx.seeds");
     END_PARSE_ARGS
 
-    config.Init(kvalue.to_int(),min.to_int());
+    config.Init(kvalue.to_int(),min.to_int(),prefix.to_string());
     BGIQD::LOG::timer t(config.log,"StaticsticUnique");
-    config.LoadContigInfio(std::cin);
+    config.LoadContigInfo();
     config.CalcCov();
-    config.PrintUniqueInfo(std::cout);
+    config.PrintUniqueInfo();
 
     return 0;
 }

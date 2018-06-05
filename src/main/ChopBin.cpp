@@ -76,11 +76,12 @@ struct AppConfig
         log<<BGIQD::LOG::lstart()<<"Init finsish ..."<<BGIQD::LOG::lend();
     }
 
-    void LoadBarcodeOnContig(std::istream & in)
+    void LoadBarcodeOnContig()
     {
+        auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.read2contig());
         BGIQD::LOG::timer t(log,"parse all input");
         std::string line;
-        while(!std::getline(in,line).eof())
+        while(!std::getline(*in,line).eof())
         {
             long readId ;
             unsigned int contigId, pos , barcode;
@@ -93,22 +94,20 @@ struct AppConfig
             }
             boc[contigId].barcodesOnPos[pos].push_back(barcode);
         }
+        delete in;
     }
 
-    void PrintBarcodeOnContig( bool need , const std::string &prefix)
+    void PrintBarcodeOnContig()
     {
-        if( need && ! prefix.empty() )
-        {
-            auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.BarcodeOnContig());
-            if( out == NULL )
-                FATAL( "open .barcodeOnContig file to write failed" );
+        auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.BarcodeOnContig());
+        if( out == NULL )
+            FATAL( "open .barcodeOnContig file to write failed" );
 
-            for( const auto & i : boc )
-            {
-                (*out)<<i.second.format(i.first)<<std::endl;
-            }
-            delete out;
+        for( const auto & i : boc )
+        {
+            (*out)<<i.second.format(i.first)<<std::endl;
         }
+        delete out;
     }
 
     void ChopBin()
@@ -148,9 +147,9 @@ struct AppConfig
 int main(int argc , char ** argv)
 {
     START_PARSE_ARGS
-    DEFINE_ARG_REQUIRED(int , bin_size, "bin size");
-    DEFINE_ARG_REQUIRED(std::string ,prefix, "prefix");
-    DEFINE_ARG_OPTIONAL(bool ,p_b2c , "print barcode on contig ?", "no");
+    DEFINE_ARG_REQUIRED(int , bin_size, "bin size . must be smaller than seed min length");
+    DEFINE_ARG_REQUIRED(std::string ,prefix, "prefix . Input xxx.seeds && xxx.read2contig ; Output xxx.barcodeOnBin && xxx.barcodeOnContig");
+    DEFINE_ARG_OPTIONAL(bool ,p_b2c , "print barcode on contig ?", "0");
     END_PARSE_ARGS
 
     config.Init( prefix.to_string() , bin_size.to_int() );
@@ -159,9 +158,10 @@ int main(int argc , char ** argv)
 
     config.LoadSeeds();
 
-    config.LoadBarcodeOnContig(std::cin);
+    config.LoadBarcodeOnContig();
 
-    config.PrintBarcodeOnContig(p_b2c.to_bool() , prefix.to_string());
+    if( p_b2c.to_bool() )
+        config.PrintBarcodeOnContig();
 
     config.ChopBin();
 

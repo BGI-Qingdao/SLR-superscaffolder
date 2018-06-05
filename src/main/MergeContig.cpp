@@ -1011,8 +1011,7 @@ int main(int argc , char **argv)
 
     DEFINE_ARG_REQUIRED(std::string , prefix, "prefix");
     DEFINE_ARG_REQUIRED(int , kvalue, "K value");
-    DEFINE_ARG_OPTIONAL(int , t_num, "thread num . default[8]", "8");
-    DEFINE_ARG_OPTIONAL(int , round, "round num. default[0]", "0");
+    DEFINE_ARG_OPTIONAL(int , round, "round num", "0");
     DEFINE_ARG_REQUIRED(int , strategy, "merge strategy. \n\
                                                     SuperContigUsed = 1\n\
                                                     SuperContigOnly = 2\n\
@@ -1021,17 +1020,6 @@ int main(int argc , char **argv)
                                                     All = 5 ");
     END_PARSE_ARGS
 
-        if(! t_num.setted )
-        {
-            t_num.setted = true;
-            t_num.d.i = 8;
-        }
-
-    if( !round.setted )
-    {
-        round.setted = true ;
-        round.d.i = 0;
-    }
     // init
     config.Init(prefix.to_string() , round.to_int() 
             , kvalue.to_int()

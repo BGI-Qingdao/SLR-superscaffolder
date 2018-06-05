@@ -28,6 +28,7 @@ namespace BGIQD {
                 }\
             }
 
+            // SOAP2
             DEFINE_SUFFIX(Arc,".Arc");
 
             DEFINE_SUFFIX(updatedEdge,".updated.edge");
@@ -35,31 +36,34 @@ namespace BGIQD {
             DEFINE_SUFFIX(contig, ".contig");
 
             DEFINE_SUFFIX(ContigIndex, ".ContigIndex");
+            // StaticUnique
+            DEFINE_SUFFIX(seeds, ".seeds");
+            // Same2ReadOnContig
+            DEFINE_SUFFIX(read2contig_sam, ".read2contig.sam");
 
-            DEFINE_SUFFIX(contigroadfill,".contigroadfill");
+            DEFINE_SUFFIX(read2contig, ".read2contig");
+            // ChopBin
+            DEFINE_SUFFIX(barcodeList, ".barcodeList");
 
-            DEFINE_SUFFIX(contigroad , ".contigroad");
+            DEFINE_SUFFIX(BarcodeOnBin, ".barcodeOnBin");
 
+            DEFINE_SUFFIX(BarcodeOnContig, ".barcodeOnContig");
+            // Bin Cluster
+            DEFINE_SUFFIX(cluster, ".cluster");
+
+            DEFINE_SUFFIX(bin_cluster, ".bin_cluster");
+            // ContigDLink
             DEFINE_SUFFIX(connInfo, ".connInfo");
-
+            // LinearCDG
+            DEFINE_SUFFIX(contigroad , ".contigroad");
+            // FillContigRoad
+            DEFINE_SUFFIX(contigroadfill,".contigroadfill");
+            // MergeContig
             DEFINE_SUFFIX(super_used, ".super_used");
 
             DEFINE_SUFFIX(super_only, ".super_only");
 
             DEFINE_SUFFIX(super_and_left, ".super_and_left");
-
-            DEFINE_SUFFIX(barcodeList, ".barcodeList");
-
-            DEFINE_SUFFIX(BarcodeOnContig, ".barcodeOnContig");
-
-            DEFINE_SUFFIX(BarcodeOnBin, ".barcodeOnBin");
-
-            DEFINE_SUFFIX(seeds, ".seeds");
-
-            DEFINE_SUFFIX(cluster, ".cluster");
-
-            DEFINE_SUFFIX(bin_cluster, ".bin_cluster");
-
             private:
                 std::string m_prefix;
         };
