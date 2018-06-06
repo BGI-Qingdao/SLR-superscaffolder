@@ -34,10 +34,9 @@ struct GlobalConfig
     {
         Unknow = 0 ,
         ShortestPath = 1,
-        BarcodeCov = 2 ,
-        BarcodeCov_BreakPalindrome = 3 ,
+        BarcodeCov_GiveUpCircle = 2 ,
+        BarcodeCov_CutCircle = 3,
         BarcodeCov_FillCircle = 4,
-        BarcodeCov_BreakPalindromeAndFillCircle = 5
     };
     FillStrategy strategy;
     float Ecov ;
@@ -190,21 +189,9 @@ void FindCorrectPath(unsigned int from , unsigned int to,
     {
         assert(0);
     }
-    if( config.strategy == GlobalConfig::FillStrategy::BarcodeCov )
-    {
-        bool p = p2pgrapg.CheckPalindrome();
-        if( !p )
-            p2pgrapg.GeneratePath();
-        else
-            p2pgrapg.path_num = -3 ; 
-    }
-    else if( config.strategy != GlobalConfig::FillStrategy::BarcodeCov_FillCircle )
-    {
-        p2pgrapg.RemovePalindromeLink();
-        p2pgrapg.GeneratePath();
-    }
-    else
-        p2pgrapg.GeneratePath();
+
+    p2pgrapg.RemovePalindromeLink();
+    p2pgrapg.GeneratePath();
 }
 
 bool AppendPath( const  BGIQD::stLFR::P2PGraph & p2pgrapg , const SearchResult & result, BGIQD::stLFR::ContigRoad & road)
@@ -267,9 +254,15 @@ void FillContigRoad( int i ) //BGIQD::stLFR::ContigRoad & road)
                 BGIQD::stLFR::P2PGraph p2pgrapg;
 
                 p2pgrapg.base_graph = &config.graph_eab;
-                p2pgrapg.deal_circle  = 
-                    (config.strategy == GlobalConfig::FillStrategy::BarcodeCov_BreakPalindromeAndFillCircle
-                     || config.strategy == GlobalConfig::FillStrategy::BarcodeCov_FillCircle);
+                if( config.strategy  == GlobalConfig::FillStrategy::BarcodeCov_GiveUpCircle )
+                    p2pgrapg.deal_circle = BGIQD::stLFR::P2PGraph::CircleStrategy::GiveUp ;
+                else if (config.strategy  == GlobalConfig::FillStrategy::BarcodeCov_CutCircle )
+                    p2pgrapg.deal_circle = BGIQD::stLFR::P2PGraph::CircleStrategy::IgnoreCircle;
+                else if (config.strategy  == GlobalConfig::FillStrategy::BarcodeCov_FillCircle)
+                    p2pgrapg.deal_circle = BGIQD::stLFR::P2PGraph::CircleStrategy::FillCircle ;
+                else 
+                    assert(0);
+
                 p2pgrapg.ecov = config.Ecov ;
                 p2pgrapg.K =config.K ;
 
@@ -427,13 +420,12 @@ int  main(int argc, char **argv)
     DEFINE_ARG_OPTIONAL(int , thread,"thread num ","8");
     DEFINE_ARG_OPTIONAL(float , Ecov, "Ecov of contigs. must set this if fill circle.","10.0");
     DEFINE_ARG_REQUIRED(int, fill_strategy, "fill strategy \n\
-                                                        ShortestPath=1\n\
-                                                        BarcodeCov = 2 ,\n\
-                                                        BarcodeCov_BreakPalindrome = 3 ,\n\
-                                                        BarcodeCov_FillCircle = 4,\n\
-                                                        BarcodeCov_BreakPalindromeAndFillCircle = 5\n\
+                                                        ShortestPath = 1,\n\
+                                                        BarcodeCov_GiveUpCircle = 2 ,\n\
+                                                        BarcodeCov_CutCircle = 3,\n\
+                                                        BarcodeCov_FillCircle = 4\
     ");
-    DEFINE_ARG_REQUIRED(int, searchDepth, "search depth (bp) default 10000");
+    DEFINE_ARG_OPTIONAL(int, searchDepth, "search depth (bp) ","10000");
     END_PARSE_ARGS
 
     config.K = kvalue.to_int();

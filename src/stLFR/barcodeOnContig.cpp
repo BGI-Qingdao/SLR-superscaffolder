@@ -158,7 +158,7 @@ namespace BGIQD {
 
         void P2PGraph::findAllPath( unsigned int id  ,Path p , Circle & circle)
         {
-            if( deal_circle )
+            if( deal_circle == P2PGraph::CircleStrategy::FillCircle )
             {
                 if( p.IsPathInCircle(circle ) )
                 {
@@ -174,7 +174,7 @@ namespace BGIQD {
             {
                 if( ! p.AddEdge(sub_graph[curr]) )
                 {
-                    if( deal_circle )
+                    if( deal_circle == P2PGraph::CircleStrategy::FillCircle )
                     {
                         if( ! circle.Is_set() )
                         {
@@ -183,8 +183,12 @@ namespace BGIQD {
                         else
                             path_num = -2 ;
                     }
-                    else
+                    else if ( deal_circle == P2PGraph::CircleStrategy::IgnoreCircle )
+                        return ;
+                    else  if ( deal_circle == P2PGraph::CircleStrategy::GiveUp )
                         path_num = -1 ;
+                    else 
+                        assert(0);
                     return ;
                 }
                 curr = * sub_graph[curr].tos.begin();
@@ -204,7 +208,7 @@ namespace BGIQD {
                 assert( sub_graph[curr].tos.size() >1 );
                 if( ! p.AddEdge(sub_graph[curr]) )
                 {
-                    if( deal_circle )
+                    if( deal_circle == P2PGraph::CircleStrategy::FillCircle )
                     {
                         if( ! circle.Is_set() )
                         {
@@ -213,8 +217,13 @@ namespace BGIQD {
                         else 
                             path_num = -2 ;
                     }
-                    else
+                    else if ( deal_circle == P2PGraph::CircleStrategy::IgnoreCircle )
+                        return ;
+                    else  if ( deal_circle == P2PGraph::CircleStrategy::GiveUp )
                         path_num = -1 ;
+                    else
+                        assert(0);
+
                     return ;
                 }
                 for( const auto & i : sub_graph[curr].tos )

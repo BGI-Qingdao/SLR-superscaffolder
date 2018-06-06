@@ -53,7 +53,16 @@ namespace BGIQD {
 
             int final_circled ;
 
-            bool deal_circle;
+            enum CircleStrategy
+            {
+                Unknow = 0 ,
+                GiveUp = 1 ,
+                FillCircle = 2 ,
+                IgnoreCircle = 3 ,
+                Invalid = 4 
+            };
+
+            CircleStrategy deal_circle;
 
             int K ;
 
