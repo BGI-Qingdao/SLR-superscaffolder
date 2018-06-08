@@ -149,6 +149,7 @@ namespace BGIQD {
                 float cov;
                 float barcode_cov ;
                 int K ;
+                int junction ;
                 void Init()
                 {
                     total_length = 0 ;
@@ -156,6 +157,7 @@ namespace BGIQD {
                     total_barcode = 0;
                     total_cov = 0;
                     barcode_cov = 0;
+                    junction = 0 ;
                     circle.Clean();
                 }
 

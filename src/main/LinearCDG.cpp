@@ -430,6 +430,7 @@ int main(int argc , char ** argv)
         }
         else
         {
+            curr.Mark();
             for( auto next : curr.to )
             {
                 if(! next.second.IsValid() )
@@ -442,8 +443,15 @@ int main(int argc , char ** argv)
                     continue;
                 extractPath(next.second.to,next.second.IsPositive(),false, curr , path);
             }
-            curr.Mark();
         }
+    }
+    for( auto m : config.edges)
+    {
+        auto & curr = m.second;
+        if( curr.IsMarked()
+                ||( !curr.IsLinear()) || curr.IsCircle())
+            continue ;
+        extractPath(curr.to.begin()->second.to,curr.to.begin()->second.IsPositive(),true, curr , path);
     }
     auto outf = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(config.fName.contigroad());
     BGIQD::FREQ::Freq<int> len_freq;

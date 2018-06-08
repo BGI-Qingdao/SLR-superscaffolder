@@ -158,6 +158,8 @@ namespace BGIQD {
 
         void P2PGraph::findAllPath( unsigned int id  ,Path p , Circle & circle)
         {
+            if( p.junction  > 10 )
+                return ;
             if( deal_circle == P2PGraph::CircleStrategy::FillCircle )
             {
                 if( p.IsPathInCircle(circle ) )
@@ -189,6 +191,7 @@ namespace BGIQD {
                         path_num = -1 ;
                     else 
                         assert(0);
+
                     return ;
                 }
                 curr = * sub_graph[curr].tos.begin();
@@ -205,6 +208,7 @@ namespace BGIQD {
                 return ;
             }
             else {
+                p.junction ++ ;
                 assert( sub_graph[curr].tos.size() >1 );
                 if( ! p.AddEdge(sub_graph[curr]) )
                 {

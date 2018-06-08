@@ -405,8 +405,6 @@ void report()
 
 int  main(int argc, char **argv)
 {
-    BGIQD::LOG::logfilter::singleton().get("FillContigRoad",BGIQD::LOG::loglevel::INFO , config.lger);
-    BGIQD::LOG::timer t(config.lger,"FillContigRoad");
     //step0 Parse parmeters...
     START_PARSE_ARGS
     DEFINE_ARG_REQUIRED(std::string , prefix, "prefix \n \
@@ -428,6 +426,8 @@ int  main(int argc, char **argv)
     DEFINE_ARG_OPTIONAL(int, searchDepth, "search depth (bp) ","10000");
     END_PARSE_ARGS
 
+    BGIQD::LOG::logfilter::singleton().get("FillContigRoad",BGIQD::LOG::loglevel::INFO , config.lger);
+    BGIQD::LOG::timer t(config.lger,"FillContigRoad");
     config.K = kvalue.to_int();
     config.arc = prefix.to_string() +".Arc";
     config.updateEdge = prefix.to_string() +".updated.edge";
