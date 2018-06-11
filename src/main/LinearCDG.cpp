@@ -258,11 +258,13 @@ int main(int argc , char ** argv)
 
     // print linear collection
 
-    auto extractPath = []( unsigned int to_s , bool to_order, bool search_order,BGIQD::SOAP2::KeyEdge & curr,BGIQD::SOAP2::ContigRoad & path )
+    auto extractPath = []( unsigned int to_s , bool to_order, bool search_order,BGIQD::SOAP2::KeyEdge & curr,BGIQD::SOAP2::ContigRoad & path , bool circle = false)
     {
         unsigned int to = to_s ;
         path.contig.clear();
         path.real_contig.clear();
+        unsigned int root = curr.edge_id;
+        unsigned int root_bal = curr.bal_id;
         if( search_order )
         {
             path.downstream = true ;
@@ -301,7 +303,7 @@ int main(int argc , char ** argv)
         bool torder = to_order; // 
         if( config.edges.at(to).IsMarked())
             return ;
-        while( (! config.edges.at(to).IsCircle())&& config.edges.at(to).IsLinear() && !config.edges.at(to).IsMarked() )
+        while( (! config.edges.at(to).IsCircle())&& config.edges.at(to).IsLinear() && !config.edges.at(to).IsMarked() && to != root && to != root_bal)
         {
             auto & curr_to = config.edges.at(to);
             curr_to.Mark();
@@ -382,28 +384,33 @@ int main(int argc , char ** argv)
             }
             path.contig.push_back(to) ;
         }
-        if( config.edges.at(to).IsMarked() )
+        if( ! circle && config.edges.at(to).IsMarked() )
             return ;
         // line->next_k->
         // <-next_k<-line
         path.tailin = false;
 
-        auto & curr_to = config.edges.at(to);
-        if( ! curr_to.IsCircle() )
+        if( circle && config.edges.at(to).IsMarked())
+            path.tailin = false ;
+        else 
         {
+            auto & curr_to = config.edges.at(to);
+            if( ! curr_to.IsCircle() )
+            {
 
-            if( ( torder && order ) || ( !torder && !order ) )
-            {
-                if( curr_to.from_size == 1 )
+                if( ( torder && order ) || ( !torder && !order ) )
                 {
-                    path.tailin = true;
+                    if( curr_to.from_size == 1 )
+                    {
+                        path.tailin = true;
+                    }
                 }
-            }
-            else
-            {
-                if( curr_to.to_size == 1 )
+                else
                 {
-                    path.tailin = true;
+                    if( curr_to.to_size == 1 )
+                    {
+                        path.tailin = true;
+                    }
                 }
             }
         }
@@ -445,13 +452,14 @@ int main(int argc , char ** argv)
             }
         }
     }
-    for( auto m : config.edges)
+    for( auto & m : config.edges)
     {
         auto & curr = m.second;
         if( curr.IsMarked()
                 ||( !curr.IsLinear()) || curr.IsCircle())
             continue ;
-        extractPath(curr.to.begin()->second.to,curr.to.begin()->second.IsPositive(),true, curr , path);
+        curr.Mark();
+        extractPath(curr.to.begin()->second.to,curr.to.begin()->second.IsPositive(),true, curr , path,true);
     }
     auto outf = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(config.fName.contigroad());
     BGIQD::FREQ::Freq<int> len_freq;
