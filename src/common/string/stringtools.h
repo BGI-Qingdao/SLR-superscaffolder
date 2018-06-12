@@ -17,6 +17,11 @@ namespace STRING{
 
     // split by blank
     std::vector<std::string>  split(const std::string & str) ;
+
+    // replace all substr
+    void replace_all( std::string &strBig,
+            const std::string &strsrc,
+            const std::string &strdst );
 } //STRING
 } //BGIQD
 
