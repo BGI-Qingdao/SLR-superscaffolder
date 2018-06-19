@@ -110,15 +110,19 @@ int main(int argc , char **argv)
 
     auto in_p1 = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(read1.to_string());
     auto in_p2 = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(read2.to_string());
-    std::string r13f = std::string("read-RA_si_")+indices.to_string()+"_lane-"+lane.to_string()+"-chunk-001.fastq.gz";
-    std::string r2f =  std::string("read-I1_si_")+indices.to_string()+"_lane-"+lane.to_string()+"-chunk-001.fastq.gz";
+    std::string r13f = std::string("read-RA_si-")+indices.to_string()+"_lane-"+lane.to_string()+"-chunk-001.fastq.gz";
+    std::string r2f =  std::string("read-I1_si-")+indices.to_string()+"_lane-"+lane.to_string()+"-chunk-001.fastq.gz";
     auto o1 = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(r13f);
+    BGIQD::FILES::FileReaderFactory::ResizeBuff(*in_p1,1000000000);
+    BGIQD::FILES::FileReaderFactory::ResizeBuff(*in_p2,1000000000);
+    BGIQD::FILES::FileWriterFactory::ResizeBuff(*o1,1000000000);
     config.FilterAllReads(*in_p1,*in_p2,*o1);
     delete o1 ;
     delete in_p1;
     delete in_p2;
 
-    auto o2 = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(r13f);
+    auto o2 = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(r2f);
+    BGIQD::FILES::FileWriterFactory::ResizeBuff(*o2,1000000000);
     config.PrintRead2(*o2,indices.to_string());
     delete o2 ;
 

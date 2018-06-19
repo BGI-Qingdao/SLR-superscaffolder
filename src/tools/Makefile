@@ -36,15 +36,20 @@ source_o		= ${source_cpp:%.cpp=%.o}
 stLFR_2_10X_cpp 	=	stLFR_2_10X.cpp
 stLFR_2_10X_o   =	${stLFR_2_10X_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
+cpSpeed_cpp 	=	cpSpeed.cpp
+cpSpeed_o   =	${cpSpeed_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
 .cpp.o:
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
-jobs 	   =	stLFR_2_10X\
+jobs 	   =	stLFR_2_10X cpSpeed\
 
-jobs_o 	   =	${stLFR_2_10X_o} \
+jobs_o 	   =	${stLFR_2_10X_o} ${cpSpeed_o}\
 
 all : ${jobs}
+
+cpSpeed : clean ${cpSpeed_o}
+	${CXX} ${DEUBG_CXX} ${cpSpeed_o} -o cpSpeed
 
 stLFR_2_10X : clean ${stLFR_2_10X_o}
 	${CXX} ${DEUBG_CXX} ${stLFR_2_10X_o} -o stLFR_2_10X

@@ -34,6 +34,7 @@ source_cpp =	../common/files/file_reader.cpp \
 test_cpp   =	test.cpp\
 				../algorithm/graph/SPFSearch_test.cpp\
 				../algorithm/graph/GraphTest.cpp\
+				../algorithm/graph/GraphBasic_test.cpp\
 				../algorithm/bi_list/bi_list_test.cpp\
 				../algorithm/fibheap/fib_heap_test.cpp\
 				../algorithm/collection/collection_test.cpp\
