@@ -1011,7 +1011,7 @@ int main(int argc , char **argv)
 
     DEFINE_ARG_REQUIRED(std::string , prefix, "prefix");
     DEFINE_ARG_REQUIRED(int , kvalue, "K value");
-    DEFINE_ARG_OPTIONAL(int , round, "round num", "0");
+    //DEFINE_ARG_OPTIONAL(int , round, "round num", "0");
     DEFINE_ARG_REQUIRED(int , strategy, "merge strategy. \n\
                                                     SuperContigUsed = 1\n\
                                                     SuperContigOnly = 2\n\
@@ -1021,7 +1021,8 @@ int main(int argc , char **argv)
     END_PARSE_ARGS
 
     // init
-    config.Init(prefix.to_string() , round.to_int() 
+    //config.Init(prefix.to_string() ,round.to_int() 
+    config.Init(prefix.to_string() , 0 
             , kvalue.to_int()
             ,static_cast<AppConfig::WorkType>(strategy.to_int()));
 

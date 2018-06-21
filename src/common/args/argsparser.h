@@ -50,17 +50,17 @@ namespace BGIQD{
             static std::string get_type( type t)
             {
                 if( t == is_bool )
-                    return "no args";
+                    return "[ no arg ]";
                 if( t == is_int)
-                    return "int";
+                    return "[ int arg ]";
                 if( t == is_long)
-                    return "long";
+                    return "[ long arg ]";
                 if( t == is_float)
-                    return "float";
+                    return "[ float arg ]";
                 if( t == is_string)
-                    return "string";
+                    return "[ string arg ]";
                 if( t == is_vector_string)
-                    return "vector_string";
+                    return "[ vector_string arg ] ";
                 return "";
             }
 
@@ -245,7 +245,7 @@ namespace BGIQD{
     std::cerr<<"\t"<<BGIQD::ARGS::args_union::get_type(i.second->t);\
     std::cerr<<"\t"<<i.second->explain;\
     if( i.second->optional ){\
-        std::cerr<<"\t default= [ "<<i.second->default_value<<" ]";\
+        std::cerr<<"\t [ default= "<<i.second->default_value<<" ]";\
     }\
     std::cerr<<std::endl;\
 }

@@ -97,24 +97,24 @@ int main(int argc , char ** argv)
 {
     START_PARSE_ARGS
     DEFINE_ARG_REQUIRED(std::string , prefix, "prefix. Input xxx.connInfo ; Ouput xxx.contigroad");
-    DEFINE_ARG_REQUIRED(float, len_threshold_factor, "len_threshold_factor ,within [0.1,1.0]  ");
-    DEFINE_ARG_REQUIRED(float, sim_threshold_factor, "sim_threshold_factor ,within [0.1,1.0]  " );
+    DEFINE_ARG_REQUIRED(float, len_factor, "len_threshold_factor ,within [0.1,1.0]  ");
+    DEFINE_ARG_REQUIRED(float, sim_factor, "sim_threshold_factor ,within [0.1,1.0]  " );
     END_PARSE_ARGS
 
     
-    if( len_threshold_factor.to_float() < 0.1f )
-        len_threshold_factor.d.f = 0.9f ;
+    if( len_factor.to_float() < 0.1f )
+        len_factor.d.f = 0.9f ;
 
-    if( len_threshold_factor.to_float() > 1.0f )
-        len_threshold_factor.d.f = 1.0f ;
-    if( sim_threshold_factor.to_float() < 0.1f )
-        sim_threshold_factor.d.f = 0.9f ;
+    if( len_factor.to_float() > 1.0f )
+        len_factor.d.f = 1.0f ;
+    if( sim_factor.to_float() < 0.1f )
+        sim_factor.d.f = 0.9f ;
 
-    if( len_threshold_factor.to_float() > 1.0f )
-        len_threshold_factor.d.f = 1.0f ;
+    if( len_factor.to_float() > 1.0f )
+        len_factor.d.f = 1.0f ;
 
-    config.loger<<BGIQD::LOG::lstart()<<" len_threshold_factor used is "<<len_threshold_factor.to_float()<<BGIQD::LOG::lend();
-    config.loger<<BGIQD::LOG::lstart()<<" sim_threshold_factor used is "<<sim_threshold_factor.to_float()<<BGIQD::LOG::lend();
+    config.loger<<BGIQD::LOG::lstart()<<" len_threshold_factor used is "<<len_factor.to_float()<<BGIQD::LOG::lend();
+    config.loger<<BGIQD::LOG::lstart()<<" sim_threshold_factor used is "<<sim_factor.to_float()<<BGIQD::LOG::lend();
 
     config.Init(prefix.to_string());
     // Load graph
@@ -180,8 +180,8 @@ int main(int argc , char ** argv)
     config.loger<<BGIQD::LOG::lstart()<<" total linear node "<<index<<BGIQD::LOG::lend();
     std::sort(linear_len.begin() , linear_len.end());
     std::sort(linear_sim.rbegin() , linear_sim.rend());
-    int len_threshold = linear_len[ int(index * len_threshold_factor.to_float()) -1];
-    float sim_threshold = linear_sim[ int(index * sim_threshold_factor.to_float()) -1];
+    int len_threshold = linear_len[ int(index * len_factor.to_float()) -1];
+    float sim_threshold = linear_sim[ int(index * sim_factor.to_float()) -1];
     config.loger<<BGIQD::LOG::lstart()<<" used linear len threshold "<<len_threshold<<BGIQD::LOG::lend();
     config.loger<<BGIQD::LOG::lstart()<<" used linear sim threshold "<<sim_threshold<<BGIQD::LOG::lend();
 

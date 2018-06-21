@@ -144,7 +144,7 @@ struct AppConfig
         }
     }
 
-    void PrintBinRalation()
+    void PrintBinRelation()
     {
         BGIQD::stLFR::PrintBinRelationArray(fName.bin_cluster() , relations);
     }
@@ -211,7 +211,7 @@ int main(int argc ,char **argv)
 
     config.BuildABBAResult();
 
-    config.PrintBinRalation();
+    config.PrintBinRelation();
 
     config.BuildContigRelation();
 

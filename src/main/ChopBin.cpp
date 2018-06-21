@@ -149,7 +149,7 @@ int main(int argc , char ** argv)
     START_PARSE_ARGS
     DEFINE_ARG_REQUIRED(int , bin_size, "bin size . must be smaller than seed min length");
     DEFINE_ARG_REQUIRED(std::string ,prefix, "prefix . Input xxx.seeds && xxx.read2contig ; Output xxx.barcodeOnBin && xxx.barcodeOnContig");
-    DEFINE_ARG_OPTIONAL(bool ,p_b2c , "print barcode on contig ?", "0");
+    DEFINE_ARG_OPTIONAL(bool ,p_b2c , "print barcode on contig", "0");
     END_PARSE_ARGS
 
     config.Init( prefix.to_string() , bin_size.to_int() );

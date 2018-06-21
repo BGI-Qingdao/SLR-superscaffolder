@@ -407,13 +407,13 @@ int  main(int argc, char **argv)
 {
     //step0 Parse parmeters...
     START_PARSE_ARGS
-    DEFINE_ARG_REQUIRED(std::string , prefix, "prefix \n \
-                                            Input xxx.Arc\n\
-                                                    xxx.updated.edge\n\
-                                                    xxx.cluster\n\
-                                                    xxx.contigroad\n\
-                                                    xxx.read2contig;\n\
-                                            Output xxx.contigroadfill");
+    DEFINE_ARG_REQUIRED(std::string , prefix, "prefix \n\
+                                                  Input xxx.Arc\n\
+                                                        xxx.updated.edge\n\
+                                                        xxx.cluster\n\
+                                                        xxx.contigroad\n\
+                                                        xxx.read2contig;\n\
+                                                 Output xxx.contigroadfill");
     DEFINE_ARG_REQUIRED(int , kvalue, "K value");
     DEFINE_ARG_OPTIONAL(int , thread,"thread num ","8");
     DEFINE_ARG_OPTIONAL(float , Ecov, "Ecov of contigs. must set this if fill circle.","10.0");
