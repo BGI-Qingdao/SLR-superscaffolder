@@ -55,6 +55,9 @@ namespace BGIQD {
             {
                 typedef IGraphEdgeBasic<NodeId, EdgeId> BaseType ;
 
+                typedef NodeId EdgeNodeId;
+                typedef EdgeId EdgeEdgeId;
+
                 bool operator == (const  IDigraphEdgeBase & i )
                 {
                     return ( (BaseType::from == i.from && BaseType::to == i.to ));
@@ -95,7 +98,6 @@ namespace BGIQD {
                     edge_ids.find(id) != edge_ids.end() ; 
                 }
             };
-
 
         template<class TNode 
             , class TEdge 
@@ -161,7 +163,6 @@ namespace BGIQD {
                     return false ;
                 }
 
-
                 void PrintAsDOT()
                 {
                     std::cout<<Edge::DOTHead()<<std::endl;
@@ -185,22 +186,41 @@ namespace BGIQD {
             >
             struct ListGraph : public ListGraphBasic<TNode , TEdge, TNodes , TEdges>
             {
+                typedef TNode Node ;
+                typedef TEdge Edge ;
+                typedef TNodes Nodes ;
+                typedef TEdges Edges ;
+
+                typedef typename Node::NodeNodeId NodeId ;
+                typedef typename Edge::EdgeEdgeId EdgeId ;
+
                 typedef ListGraphBasic<TNode , TEdge, TNodes , TEdges> Basic;
                 void AddEdge( typename Basic::NodeId from , typename Basic::NodeId to )
                 {
+                    // Make a new edge
+                    TEdge tmp ;
+                    tmp.from = from ;
+                    tmp.to = to ;
+                    AddEdge(tmp);
+                }
+
+                void AddEdge(const TEdge &tmp)
+                {
+
+                    auto from = tmp.from ;
+                    auto to = tmp.to ;
+
                     if( Basic::CheckEdge(from , to ) )
                         return ;
                     if( ! Basic::HasNode( from ) )
                         Basic::AddNode(from) ;
                     if ( ! Basic::HasNode( to ) )
                         Basic::AddNode(to );
-                    size_t nId = Basic::edges.size() ;
-                    TEdge tmp ;
-                    tmp.id = nId ;
-                    tmp.from = from ;
-                    tmp.to = to ;
-                    // Make a new edge
+
                     Basic::edges.push_back(tmp);
+
+                    size_t nId = Basic::edges.size() ;
+                    Basic::edges.rbegin()->id = nId;
                     Basic::GetNode(from).AddEdge(nId);
                     Basic::GetNode(to).AddEdge(nId);
                 }
@@ -218,6 +238,14 @@ namespace BGIQD {
             >
             struct ListDigraph  : public ListGraphBasic<TNode , TEdge, TNodes , TEdges>
             {
+                typedef TNode Node ;
+                typedef TEdge Edge ;
+                typedef TNodes Nodes ;
+                typedef TEdges Edges ;
+
+                typedef typename Node::NodeNodeId NodeId ;
+                typedef typename Edge::EdgeEdgeId EdgeId ;
+
                 typedef ListGraphBasic<TNode , TEdge, TNodes , TEdges> Basic;
                 void AddEdge( typename Basic::NodeId from , typename Basic::NodeId to )
                 {
