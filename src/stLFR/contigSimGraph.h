@@ -31,7 +31,7 @@ namespace BGIQD {
 
         struct EdgeAttr 
         {
-            float Attr(const Edge & e ) const 
+            float GetValue(const Edge & e ) const 
             {
                 return 1.0f - e.sim ;
             }
@@ -58,11 +58,6 @@ namespace BGIQD {
                 MTHelper helper;
                 return helper.MinTree(*this , attr);
             };
-
-            void LoadEdgesFromString( const std::string & str)
-            {
-
-            }
 
         };
     }

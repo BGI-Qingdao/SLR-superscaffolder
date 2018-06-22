@@ -47,7 +47,7 @@ namespace BGIQD{
             int binIndex ;
             unsigned int contigId ;
             int binId ;
-            std::map<int , BinSimularity> sims;
+            std::map<unsigned int , BinSimularity> sims;
 
             std::string ToString() const ;
 
