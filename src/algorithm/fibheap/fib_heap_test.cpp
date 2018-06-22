@@ -82,9 +82,10 @@ TEST(FibDecrese)
     } 
     auto & t = test.ExtractMin();
     test.Insert(t);
+
     for( int i = 0 ; i < 10 ; i += 2 )
     {
-        test.DecreaseKey( array[i] , array[i].key / 2);
+        test.DecreaseKey( array[i] , array[i].key / ((i%3) + 1));
     }
     int prev = -1 ;
     while( ! test.Empty() )

@@ -13,6 +13,7 @@
 #include "common/log/logfilter.h"
 #include "common/files/file_reader.h"
 #include "common/files/file_writer.h"
+#include "common/error/Error.h"
 
 #include "soap2/contigGraph.h"
 #include "soap2/fileName.h"
@@ -121,6 +122,8 @@ int main(int argc , char ** argv)
     std::string line ;
     int id  = 0 ;
     auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(config.fName.connInfo());
+    if(in == NULL )
+        FATAL("failed to open xxx.connInfo for read !!! ");
     while( ! std::getline( *in , line).eof() )
     {
         auto items1 = BGIQD::STRING::split( line , "\t") ;
@@ -462,6 +465,8 @@ int main(int argc , char ** argv)
         extractPath(curr.to.begin()->second.to,curr.to.begin()->second.IsPositive(),true, curr , path,true);
     }
     auto outf = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(config.fName.contigroad());
+    if( outf == NULL )
+        FATAL("failed to open xxx.contigroad for write !!! ");
     BGIQD::FREQ::Freq<int> len_freq;
     for(const auto & i : config.contigs)
     {

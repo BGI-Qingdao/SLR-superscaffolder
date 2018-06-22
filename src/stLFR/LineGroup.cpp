@@ -83,7 +83,7 @@ namespace BGIQD{
 
             auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(file);
             if( in == NULL )
-                FATAL(" open xxx.contigraod to read failed !!! ");
+                FATAL(" open xxx.contigroad to read failed !!! ");
             std::string line;
             while(!std::getline(*in,line).eof())
             {
@@ -99,7 +99,7 @@ namespace BGIQD{
         {
             auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(file);
             if( in == NULL )
-                FATAL(" open xxx.contigraodfill to read failed !!! ");
+                FATAL(" open xxx.contigroadfill to read failed !!! ");
             std::string line;
             while(!std::getline(*in,line).eof())
             {

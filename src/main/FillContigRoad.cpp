@@ -1,15 +1,19 @@
 #include "stLFR/barcodeOnContig.h"
 #include "stLFR/ContigCluster.h"
 #include "stLFR/LineGroup.h"
+
 #include "soap2/contigGraph.h"
+#include "soap2/contigGraphSPF.h"
+#include "soap2/fileName.h"
+
 #include "common/args/argsparser.h"
 #include "common/log/log.h"
 #include "common/log/logfilter.h"
 #include "common/multithread/MultiThread.h"
 #include "common/files/file_reader.h"
+#include "common/files/file_writer.h"
 #include "common/freq/freq.h"
-#include "soap2/contigGraphSPF.h"
-
+#include "common/error/Error.h"
 #include <set>
 #include <queue>
 
@@ -29,7 +33,7 @@ struct GlobalConfig
     BGIQD::stLFR::ContigCluster clusters;
     BGIQD::stLFR::ContigRoads roads;
     BGIQD::LOG::logger lger;
-
+    BGIQD::SOAP2::FileNames fNames;
     enum FillStrategy
     {
         Unknow = 0 ,
@@ -42,13 +46,16 @@ struct GlobalConfig
     float Ecov ;
     int max_length;
     int K;
-
-    std::string updateEdge;
-    std::string arc;
-    std::string cluster;
-    std::string road;
-    std::string read2contig;
-
+    void Init(const std::string & prefix)
+    {
+        fNames.Init(prefix) ;
+    }
+    //std::string updateEdge;
+    //std::string arc;
+    //std::string cluster;
+    //std::string road;
+    //std::string read2contig;
+    //std::string contigroadfill;
     void LoadKeyInfo()
     {
         for(const auto & i : clusters.connections)
@@ -356,6 +363,9 @@ void FillContigRoad( int i ) //BGIQD::stLFR::ContigRoad & road)
 void report()
 {
     int filled = 0 ;
+    auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(config.fNames.contigroadfill());
+    if( out == NULL )
+        FATAL("failed to open xxx.contigroadfill for write ");
     for( const auto &road : config.roads.roads)
     {
         if( ! road.needMerge() )
@@ -387,19 +397,20 @@ void report()
         }
         if( has_circle )
         {
-            std::cout<<"c\t";
+            *out<<"c\t";
         }
         else
         {
-            std::cout<<"l\t";
+            *out<<"l\t";
         }
         for( const auto i : road.contig_path )
         {
-            std::cout<<i<<'\t';
+            *out<<i<<'\t';
         }
         filled += (road.fill_num + 1 );
-        std::cout<<std::endl;
+        *out<<std::endl;
     }
+    delete out ;
     config.lger<<BGIQD::LOG::lstart()<<"road fill use seed contig \n"<<filled<<BGIQD::LOG::lend();
 }
 
@@ -429,25 +440,21 @@ int  main(int argc, char **argv)
     BGIQD::LOG::logfilter::singleton().get("FillContigRoad",BGIQD::LOG::loglevel::INFO , config.lger);
     BGIQD::LOG::timer t(config.lger,"FillContigRoad");
     config.K = kvalue.to_int();
-    config.arc = prefix.to_string() +".Arc";
-    config.updateEdge = prefix.to_string() +".updated.edge";
-    config.cluster= prefix.to_string() +".cluster";
-    config.road = prefix.to_string() +".contigroad";
-    config.read2contig = prefix.to_string() +".read2contig";
+    config.Init(prefix.to_string());
     config.max_length = searchDepth.to_int();
     config.Ecov = Ecov.to_float();
     config.strategy = static_cast<GlobalConfig::FillStrategy>(fill_strategy.to_int());
     config.lger<<BGIQD::LOG::lstart()<<"parse args end ... "<<BGIQD::LOG::lend();
     //step1 .Loading files...
-    config.graph_eab.graph_ea.LoadEdge(config.updateEdge,config.K);
+    config.graph_eab.graph_ea.LoadEdge(config.fNames.updatedEdge(),config.K);
     config.lger<<BGIQD::LOG::lstart()<<"load updateEdg end ... "<<BGIQD::LOG::lend();
-    config.graph_eab.graph_ea.LoadArc(config.arc);
+    config.graph_eab.graph_ea.LoadArc(config.fNames.Arc());
     config.lger<<BGIQD::LOG::lstart()<<"load arc  end ... "<<BGIQD::LOG::lend();
-    config.graph_eab.LoadBarcodeOnConfig(config.read2contig);
+    config.graph_eab.LoadBarcodeOnConfig(config.fNames.read2contig());
     config.lger<<BGIQD::LOG::lstart()<<"load read2contig end ... "<<BGIQD::LOG::lend();
-    config.clusters.loadCluster(config.cluster);
+    config.clusters.loadCluster(config.fNames.cluster());
     config.lger<<BGIQD::LOG::lstart()<<"load cluster end ... "<<BGIQD::LOG::lend();
-    config.roads.LoadRoads(config.road);
+    config.roads.LoadRoads(config.fNames.contigroad());
     config.lger<<BGIQD::LOG::lstart()<<"load road end ... "<<BGIQD::LOG::lend();
     config.LoadKeyInfo();
     config.lger<<BGIQD::LOG::lstart()<<"load key end ... "<<BGIQD::LOG::lend();
