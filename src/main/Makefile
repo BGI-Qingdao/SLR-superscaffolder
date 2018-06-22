@@ -57,6 +57,9 @@ MergeContig_o			= ${MergeContig_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 LinearCDG_cpp 			= LinearCDG.cpp
 LinearCDG_o				= ${LinearCDG_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
+MinTree_cpp 			= MinTree.cpp
+MinTree_o				= ${MinTree_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+
 .cpp.o:
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
@@ -67,7 +70,8 @@ jobs 	   =	ChopBin\
 				ContigDlink \
 				FillContigRoad \
 				MergeContig\
-				LinearCDG
+				LinearCDG\
+				MinTree
 
 jobs_o 	   =	${ChopBin_o} \
 				${BinCluster_o} \
@@ -105,6 +109,8 @@ MergeContig : clean ${MergeContig_o}
 
 LinearCDG: clean ${LinearCDG_o}
 	${CXX} ${DEUBG_CXX} ${LinearCDG_o} -o LinearCDG 
+MinTree: clean ${MinTree_o}
+	${CXX} ${DEUBG_CXX} ${MinTree_o} -o MinTree 
 
 dirty	   =${jobs_o} ${jobs}  
 

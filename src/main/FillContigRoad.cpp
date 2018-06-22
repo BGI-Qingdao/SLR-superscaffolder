@@ -418,9 +418,9 @@ int  main(int argc, char **argv)
     DEFINE_ARG_OPTIONAL(int , thread,"thread num ","8");
     DEFINE_ARG_OPTIONAL(float , Ecov, "Ecov of contigs. must set this if fill circle.","10.0");
     DEFINE_ARG_REQUIRED(int, fill_strategy, "fill strategy \n\
-                                                        ShortestPath = 1,\n\
-                                                        BarcodeCov_GiveUpCircle = 2 ,\n\
-                                                        BarcodeCov_CutCircle = 3,\n\
+                                                        ShortestPath = 1\n\
+                                                        BarcodeCov_GiveUpCircle = 2\n\
+                                                        BarcodeCov_CutCircle = 3\n\
                                                         BarcodeCov_FillCircle = 4\
     ");
     DEFINE_ARG_OPTIONAL(int, searchDepth, "search depth (bp) ","10000");

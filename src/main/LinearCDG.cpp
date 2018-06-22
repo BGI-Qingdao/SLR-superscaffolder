@@ -97,18 +97,18 @@ int main(int argc , char ** argv)
 {
     START_PARSE_ARGS
     DEFINE_ARG_REQUIRED(std::string , prefix, "prefix. Input xxx.connInfo ; Ouput xxx.contigroad");
-    DEFINE_ARG_REQUIRED(float, len_factor, "len_threshold_factor ,within [0.1,1.0]  ");
-    DEFINE_ARG_REQUIRED(float, sim_factor, "sim_threshold_factor ,within [0.1,1.0]  " );
+    DEFINE_ARG_OPTIONAL(float, len_factor, "len_threshold_factor ,within [0.1,1.0]","0.7");
+    DEFINE_ARG_OPTIONAL(float, sim_factor, "sim_threshold_factor ,within [0.1,1.0]","0.8" );
     END_PARSE_ARGS
 
-    
-    if( len_factor.to_float() < 0.1f )
-        len_factor.d.f = 0.9f ;
+
+    if( len_factor.to_float() < 0.01f )
+        len_factor.d.f = 0.01f ;
 
     if( len_factor.to_float() > 1.0f )
         len_factor.d.f = 1.0f ;
-    if( sim_factor.to_float() < 0.1f )
-        sim_factor.d.f = 0.9f ;
+    if( sim_factor.to_float() < 0.01f )
+        sim_factor.d.f = 0.01f ;
 
     if( len_factor.to_float() > 1.0f )
         len_factor.d.f = 1.0f ;

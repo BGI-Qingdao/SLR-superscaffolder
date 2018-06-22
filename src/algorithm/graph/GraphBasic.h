@@ -36,6 +36,15 @@ namespace BGIQD {
                     return ! operator == ( i ) ;
                 }
 
+                NodeId OppoNode(const NodeId & one) const 
+                {
+                    if( one == from ) 
+                        return to ;
+                    else if ( one == to )
+                        return from ;
+                    assert(0);
+                }
+
                 std::string ToString() const
                 {
                     std::ostringstream ost;
@@ -137,6 +146,11 @@ namespace BGIQD {
                     return nodes[id] ;
                 }
 
+                const Node & GetNode( NodeId id )const 
+                {
+                    return nodes.at(id) ;
+                }
+
                 bool HasNode( NodeId id )
                 {
                     return nodes.find(id) != nodes.end() ;
@@ -147,6 +161,10 @@ namespace BGIQD {
                     return edges[id] ;
                 }
 
+                const Edge & GetEdge( EdgeId id )const
+                {
+                    return edges[id] ;
+                }
                 bool CheckEdge(NodeId from , NodeId to )
                 {
                     Edge tmp ;
@@ -206,7 +224,6 @@ namespace BGIQD {
 
                 void AddEdge(const TEdge &tmp)
                 {
-
                     auto from = tmp.from ;
                     auto to = tmp.to ;
 
@@ -217,9 +234,8 @@ namespace BGIQD {
                     if ( ! Basic::HasNode( to ) )
                         Basic::AddNode(to );
 
-                    Basic::edges.push_back(tmp);
-
                     size_t nId = Basic::edges.size() ;
+                    Basic::edges.push_back(tmp);
                     Basic::edges.rbegin()->id = nId;
                     Basic::GetNode(from).AddEdge(nId);
                     Basic::GetNode(to).AddEdge(nId);
@@ -249,19 +265,29 @@ namespace BGIQD {
                 typedef ListGraphBasic<TNode , TEdge, TNodes , TEdges> Basic;
                 void AddEdge( typename Basic::NodeId from , typename Basic::NodeId to )
                 {
+                    // Make a new edge
+                    TEdge tmp ;
+                    tmp.from = from ;
+                    tmp.to = to ;
+                    AddEdge(tmp);
+                }
+
+                void AddEdge(const TEdge &tmp)
+                {
+                    auto from = tmp.from ;
+                    auto to = tmp.to ;
+
                     if( Basic::CheckEdge(from , to ) )
                         return ;
                     if( ! Basic::HasNode( from ) )
                         Basic::AddNode(from) ;
                     if ( ! Basic::HasNode( to ) )
                         Basic::AddNode(to );
+
+
                     size_t nId = Basic::edges.size() ;
-                    TEdge tmp ;
-                    tmp.id = nId ;
-                    tmp.from = from ;
-                    tmp.to = to ;
-                    // Make a new edge
                     Basic::edges.push_back(tmp);
+                    Basic::edges.rbegin()->id = nId;
                     Basic::GetNode(from).AddEdge(nId);
                 }
             };

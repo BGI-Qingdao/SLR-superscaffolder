@@ -1009,7 +1009,19 @@ int main(int argc , char **argv)
 
     START_PARSE_ARGS
 
-    DEFINE_ARG_REQUIRED(std::string , prefix, "prefix");
+    DEFINE_ARG_REQUIRED(std::string , prefix, "prefix.\n\
+                                                    Input :\n\
+                                                        xxx.contig\n\
+                                                        xxx.Arc\n\
+                                                        xxx.updated.edge\n\
+                                                        xxx.contigroadfill\n\
+                                                    Output :\n\
+                                                        xxx.super_used\n\
+                                                        xxx.super_only\n\
+                                                        xxx.super_and_left\n\
+                                                        xxx.contig_round_1\n\
+                                                        xxx.Arc_round_1\n\
+                                                        xxx.updated.edge_round_1\n");
     DEFINE_ARG_REQUIRED(int , kvalue, "K value");
     //DEFINE_ARG_OPTIONAL(int , round, "round num", "0");
     DEFINE_ARG_REQUIRED(int , strategy, "merge strategy. \n\
@@ -1017,7 +1029,7 @@ int main(int argc , char **argv)
                                                     SuperContigOnly = 2\n\
                                                     SuperContigAndLeft = 3 \n\
                                                     SuperContigAndReLinear = 4\n\
-                                                    All = 5 ");
+                                                    All = 5\n");
     END_PARSE_ARGS
 
     // init

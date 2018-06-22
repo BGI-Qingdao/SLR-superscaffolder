@@ -41,7 +41,7 @@ namespace BGIQD {
         {
             typedef BGIQD::GRAPH::ListGraph<Node,Edge> Basic ;
 
-            void AddEdge( unsigned int from , unsigned int to , float sim)
+            void AddEdgeSim( unsigned int from , unsigned int to , float sim)
             {
                 Edge tmp;
                 tmp.from = from ;
@@ -54,7 +54,16 @@ namespace BGIQD {
 
             ContigSimGraph  MinTree() const 
             {
+                EdgeAttr attr ;
+                MTHelper helper;
+                return helper.MinTree(*this , attr);
             };
+
+            void LoadEdgesFromString( const std::string & str)
+            {
+
+            }
+
         };
     }
 }

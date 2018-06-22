@@ -151,8 +151,9 @@ namespace BGIQD {
                     node.key = new_key ;
                     if( node.father != NULL && node.key < node.father->key )
                     {
+                        auto & f  = *node.father ;
                         Cut(node,*node.father);
-                        CascadingCut(*node.father);
+                        CascadingCut(f);
                     }
                     assert( min );
                     if ( node.key < min->key )

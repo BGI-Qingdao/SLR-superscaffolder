@@ -191,11 +191,11 @@ int main(int argc ,char **argv)
 {
     START_PARSE_ARGS
     DEFINE_ARG_REQUIRED(std::string , prefix, "prefix. Input xxx.barcodeOnBin ; Output xxx.bin_cluster && xxx.cluster");
-    DEFINE_ARG_REQUIRED(float , thresold, "simularity thresold");
+    DEFINE_ARG_REQUIRED(float , threshold, "simularity threshold");
     DEFINE_ARG_OPTIONAL(int , thread, "thread num" ,"8");
     END_PARSE_ARGS
 
-    config.Init(prefix.to_string() , thresold.to_float());
+    config.Init(prefix.to_string() , threshold.to_float());
 
     BGIQD::LOG::timer t(config.lger,"BinCluster");
 

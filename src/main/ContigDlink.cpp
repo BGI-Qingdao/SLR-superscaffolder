@@ -401,7 +401,7 @@ struct AppConfig
 int main(int argc , char **argv)
 {
     START_PARSE_ARGS;
-    DEFINE_ARG_REQUIRED(std::string , prefix, "prefix. Input xxx.cluster && xxx.Arc && xxx.update.edge ; Ouput xxx.connInfo" );
+    DEFINE_ARG_REQUIRED(std::string , prefix, "prefix. Input xxx.cluster && xxx.Arc && xxx.updated.edge ; Ouput xxx.connInfo" );
     DEFINE_ARG_REQUIRED(int , kvalue,"K value");
     DEFINE_ARG_OPTIONAL(int , thread, "thread num .","8");
     DEFINE_ARG_OPTIONAL(int, searchDepth,"search depth (bp) ","10000");
