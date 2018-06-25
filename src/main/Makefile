@@ -80,7 +80,8 @@ jobs_o 	   =	${ChopBin_o} \
 				${ContigDlink_o}\
 				${FillContigRoad_o}\
 				${MergeContig_o}\
-				${LinearCDG_o}
+				${LinearCDG_o} \
+				${MinTree_o}
 
 all : ${jobs}
 
