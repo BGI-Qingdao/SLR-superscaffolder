@@ -69,6 +69,6 @@ TEST(MinTree)
     MTHelper mtHelper;
     EAttr attr;
     auto m = mtHelper.MinTree(test,attr);
-    m.PrintAsDOT();
+    m.PrintAsDOT(std::cout);
 }
 

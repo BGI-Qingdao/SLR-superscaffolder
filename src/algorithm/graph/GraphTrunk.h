@@ -4,6 +4,7 @@
 #include <map>
 #include <set>
 #include <cassert>
+#include <vector>
 
 namespace BGIQD{
     namespace GRAPH{
@@ -35,10 +36,69 @@ namespace BGIQD{
                     typedef typename Edge::EdgeEdgeId EdgeId;
                     typedef typename Edge::EdgeNodeId NodeId;
 
-                    std::map<NodeId, TrunkNode> nodes;
 
-                    void Init(const ListGraph &  base )
+                    // Make sure input is a trunk
+                    static std::vector<NodeId> LinearTrunk(const ListGraph &  base )
                     {
+
+                        std::vector<NodeId> ret ;
+                        NodeId starter ;
+                        for( const auto & pair : base.nodes )
+                        {
+                            auto & node = pair.second ;
+                            if( node.edge_ids.size() == 1 )
+                            {
+                                starter = node.id ;
+                                break;
+                            }
+                            else
+                            {
+                                assert( node.edge_ids.size() == 2 );
+                            }
+                        }
+                        ret.push_back( starter ) ;
+
+                        auto & node = base.GetNode(starter);;
+                        auto edge_id = *(node.edge_ids.begin());
+                        auto & edge = base.GetEdge(edge_id);
+                        NodeId next = edge.OppoNode(starter);
+                        NodeId curr = starter;
+                        while(1)
+                        {
+                            auto & next_node = base.GetNode(next) ;
+                            ret.push_back(next);
+                            if( next_node.edge_ids.size() == 1 )
+                            {
+                                break;
+                            }
+                            else
+                            {
+                                assert( next_node.edge_ids.size() == 2 );
+                                auto edge_id1 = *(next_node.edge_ids.begin());
+                                auto edge_id2 = *(std::next(next_node.edge_ids.begin()));
+                                auto &edge1 = base.GetEdge(edge_id1);
+                                auto &edge2 = base.GetEdge(edge_id2);
+                                if( edge1.OppoNode(next) != curr)
+                                {
+                                    curr = next ;
+                                    next = edge1.OppoNode(next) ;
+                                }
+                                else
+                                {
+                                    assert(edge2.OppoNode(next) != curr);
+                                    curr = next ;
+                                    next = edge2.OppoNode(next);
+                                }
+                            }
+                        }
+                        return ret ;
+                    }
+
+                    // Make sure input is a mintree 
+                    static ListGraph  Trunk(const ListGraph &  base )
+                    {
+                        std::map<NodeId, TrunkNode> nodes;
+
                         for( const auto & pair  : base.nodes )
                         {
                             const auto & node = pair.second ;
@@ -48,10 +108,7 @@ namespace BGIQD{
                             new_node.level = -1 ;
                             new_node.marked = false ;
                         }
-                    }
 
-                    ListGraph  Trunk(const ListGraph &  base )
-                    {
                         ListGraph ret ;
                         auto add_node_into_ret= [&]( NodeId i) -> void
                         {

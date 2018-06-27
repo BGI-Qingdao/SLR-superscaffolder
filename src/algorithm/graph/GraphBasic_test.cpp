@@ -40,7 +40,7 @@ struct TestDigraphBasic : public BGIQD::GRAPH::ListDigraph<TestNode , TestDiEdge
 TEST(ListGraph)
 {
     auto  test = TestGraphBasic::TestData();
-    test.PrintAsDOT();
+    test.PrintAsDOT(std::cout);
     CHECK( true ,test.CheckEdge("NodeA","NodeB") ) 
     CHECK( true ,test.CheckEdge("NodeB","NodeA") ) 
     CHECK( true , test.GetNode("NodeA").HasEdge(0));
@@ -50,7 +50,7 @@ TEST(ListGraph)
 TEST(ListDigraph)
 {
     auto  test = TestDigraphBasic::TestData();
-    test.PrintAsDOT();
+    test.PrintAsDOT(std::cout);
     CHECK( true ,test.CheckEdge("NodeA","NodeB") ) 
     CHECK( false ,test.CheckEdge("NodeB","NodeA") ) 
     CHECK( true , test.GetNode("NodeA").HasEdge(0));

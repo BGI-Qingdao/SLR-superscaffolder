@@ -82,10 +82,14 @@ namespace BGIQD {
                 {
                     return ! operator == ( i ) ;
                 }
+                std::string AttrString() const
+                {
+                    return BaseType::AttrString();
+                }
                 std::string ToString() const
                 {
                     std::ostringstream ost;
-                    ost<<BaseType::from<<"\t->\t"<<BaseType::to<<" [ "<<BaseType::AttrString()<<" ]";
+                    ost<<BaseType::from<<"\t->\t"<<BaseType::to<<" [ "<<AttrString()<<" ]";
                     return ost.str();
                 }
                 static std::string DOTHead()
@@ -197,14 +201,14 @@ namespace BGIQD {
                     return nodes.size();
                 }
 
-                void PrintAsDOT()
+                void PrintAsDOT(std::ostream & out)
                 {
-                    std::cout<<Edge::DOTHead()<<std::endl;
+                    out<<Edge::DOTHead()<<std::endl;
                     for( const auto & e : edges )
                     {
-                        std::cout<<"\t"<<e.ToString()<<std::endl;
+                        out<<"\t"<<e.ToString()<<std::endl;
                     }
-                    std::cout<<"}"<<std::endl;
+                    out<<"}"<<std::endl;
                 }
             };
 

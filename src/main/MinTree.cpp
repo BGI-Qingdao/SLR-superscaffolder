@@ -50,7 +50,29 @@ int main(int argc , char **argv )
     END_PARSE_ARGS
     config.Init(prefix.to_string());
     config.LoadContigSimGraph();
+
     auto mintree = config.graph.MinTree() ;
-    mintree.PrintAsDOT() ;
+    auto out1 = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(config.fNames.mintree());
+    if( out1 == NULL )
+        FATAL(" failed to open xxx.mintree for write !!! ");
+    mintree.PrintAsDOT(*out1) ;
+    delete out1;
+
+    auto trunk = config.graph.TrunkFromMinTree(mintree);
+    auto out2 = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(config.fNames.mintreetrunk());
+    if( out2 == NULL )
+        FATAL(" failed to open xxx.mintree_trunk for write !!! ");
+    trunk.PrintAsDOT(*out2) ;
+    delete out2;
+
+    auto linear = config.graph.TrunkLinear(trunk);
+    auto out3 = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(config.fNames.mintreetrunklinear());
+    if( out3 == NULL )
+        FATAL(" failed to open xxx.mintree_trunk_linear for write !!! ");
+    for(const auto x : linear )
+    {
+        (*out3)<<x<<std::endl;
+    }
+    delete out3;
     return 0 ;
 }

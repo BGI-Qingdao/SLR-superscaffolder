@@ -4,7 +4,6 @@
 
 TEST_MODULE_INIT(MinTreeTrunk)
 
-
 typedef BGIQD::GRAPH::IGraphNodeBasic<std::string , int > TKTestNode ;
 
 typedef BGIQD::GRAPH::IGraphEdgeBasic<std::string , int > TKTestEdge;
@@ -19,8 +18,6 @@ struct TKEdge : public TKTestEdge
         return ost.str();
     }
 };
-
-
 
 struct TKTestGraphBasic : public BGIQD::GRAPH::ListGraph<TKTestNode , TKEdge>
 {
@@ -68,17 +65,25 @@ typedef BGIQD::GRAPH::TrunkHelper<TKTestGraphBasic> TKHelper;
 TEST(MinTree_test1)
 {
     auto test = TKTestGraphBasic::TestData1();
-    TKHelper tkHelper;
-    tkHelper.Init(test);
-    auto m = tkHelper.Trunk(test);
-    m.PrintAsDOT();
+    auto m = TKHelper::Trunk(test);
+    m.PrintAsDOT(std::cout);
+    auto linear = TKHelper::LinearTrunk(m);
+    for(const auto & x : linear)
+    {
+        std::cout<<'\t'<<x;
+    }
+    std::cout<<std::endl;
 }
 
 TEST(MinTree_test2)
 {
     auto test = TKTestGraphBasic::TestData2();
-    TKHelper tkHelper;
-    tkHelper.Init(test);
-    auto m = tkHelper.Trunk(test);
-    m.PrintAsDOT();
+    auto m = TKHelper::Trunk(test);
+    m.PrintAsDOT(std::cout);
+    auto linear = TKHelper::LinearTrunk(m);
+    for(const auto & x : linear)
+    {
+        std::cout<<'\t'<<x;
+    }
+    std::cout<<std::endl;
 }

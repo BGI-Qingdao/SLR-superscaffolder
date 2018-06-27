@@ -7,6 +7,7 @@
 
 #include "algorithm/graph/GraphBasic.h"
 #include "algorithm/graph/MinTree.h"
+#include "algorithm/graph/GraphTrunk.h"
 namespace BGIQD {
     namespace stLFR {
 
@@ -27,9 +28,16 @@ namespace BGIQD {
         struct Edge : public BGIQD::GRAPH::IGraphEdgeBasic<unsigned int , long >
         {
             float sim ;
+
+            std::string AttrString() const
+            {
+                std::ostringstream ost;
+                ost<<" id= "<<id<<" sim= "<<sim;
+                return ost.str();
+            }
         };
 
-        struct EdgeAttr 
+        struct EdgeAttr
         {
             float GetValue(const Edge & e ) const 
             {
@@ -43,14 +51,15 @@ namespace BGIQD {
 
             void AddEdgeSim( unsigned int from , unsigned int to , float sim)
             {
-                Edge tmp;
+                Edge tmp ;
                 tmp.from = from ;
                 tmp.to = to ;
                 tmp.sim = sim ;
                 Basic::AddEdge(tmp);
             }
 
-            typedef BGIQD::GRAPH::MinTreeHelper<ContigSimGraph,float , EdgeAttr> MTHelper;
+            typedef BGIQD::GRAPH::MinTreeHelper<ContigSimGraph, float , EdgeAttr> MTHelper;
+            typedef BGIQD::GRAPH::TrunkHelper< ContigSimGraph> TKHelper;
 
             ContigSimGraph  MinTree() const 
             {
@@ -59,6 +68,15 @@ namespace BGIQD {
                 return helper.MinTree(*this , attr);
             };
 
+            ContigSimGraph TrunkFromMinTree(const ContigSimGraph & mintree)
+            {
+                return TKHelper::Trunk(mintree);
+            }
+
+            std::vector<Basic::NodeId> TrunkLinear(const ContigSimGraph & mintree)
+            {
+                return TKHelper::LinearTrunk( mintree );
+            }
         };
     }
 }

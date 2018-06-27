@@ -51,6 +51,12 @@ namespace BGIQD {
             // Bin Cluster
             DEFINE_SUFFIX(cluster, ".cluster");
 
+            DEFINE_SUFFIX(mintree, ".mintree");
+
+            DEFINE_SUFFIX(mintreetrunk, ".mintree_trunk");
+
+            DEFINE_SUFFIX(mintreetrunklinear, ".mintree_trunk_linear");
+
             DEFINE_SUFFIX(bin_cluster, ".bin_cluster");
             // ContigDLink
             DEFINE_SUFFIX(connInfo, ".connInfo");
