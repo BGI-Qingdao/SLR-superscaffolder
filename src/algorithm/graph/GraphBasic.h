@@ -45,10 +45,16 @@ namespace BGIQD {
                     assert(0);
                 }
 
+                std::string AttrString() const
+                {
+                    std::ostringstream ost;
+                    ost<<" id = "<<id;
+                    return ost.str();
+                }
                 std::string ToString() const
                 {
                     std::ostringstream ost;
-                    ost<<from<<"\t--\t"<<to<<" [ id = "<<id << "]";
+                    ost<<from<<"\t--\t"<<to<<" [ "<<AttrString()<<" ]";
                     return ost.str();
                 }
 
@@ -79,7 +85,7 @@ namespace BGIQD {
                 std::string ToString() const
                 {
                     std::ostringstream ost;
-                    ost<<BaseType::from<<"\t->\t"<<BaseType::to<<" [ id = "<<BaseType::id << "]";
+                    ost<<BaseType::from<<"\t->\t"<<BaseType::to<<" [ "<<BaseType::AttrString()<<" ]";
                     return ost.str();
                 }
                 static std::string DOTHead()
@@ -97,12 +103,12 @@ namespace BGIQD {
                 NodeId                          id ;
                 std::set<EdgeId>               edge_ids;
 
-                void AddEdge(const NodeEdgeId id )
+                void AddEdge(const NodeEdgeId &id )
                 {
                     edge_ids.insert(id);
                 }
 
-                bool HasEdge(const NodeEdgeId id )
+                bool HasEdge(const NodeEdgeId &id )
                 {
                     edge_ids.find(id) != edge_ids.end() ; 
                 }
@@ -130,7 +136,7 @@ namespace BGIQD {
                 {
                 }
 
-                void AddNode(NodeId id )
+                void AddNode(const NodeId &id )
                 {
                     nodes[id].id = id ;
                     //nodes[id].edge_id = Edge::invalid ;
@@ -141,31 +147,31 @@ namespace BGIQD {
                     nodes[n.id] = n ;
                 }
 
-                Node & GetNode( NodeId id )
+                Node & GetNode(const NodeId & id )
                 {
                     return nodes[id] ;
                 }
 
-                const Node & GetNode( NodeId id )const 
+                const Node & GetNode(const NodeId & id )const 
                 {
                     return nodes.at(id) ;
                 }
 
-                bool HasNode( NodeId id )
+                bool HasNode( const NodeId & id )
                 {
                     return nodes.find(id) != nodes.end() ;
                 }
 
-                Edge & GetEdge( EdgeId id )
+                Edge & GetEdge( const EdgeId & id )
                 {
                     return edges[id] ;
                 }
 
-                const Edge & GetEdge( EdgeId id )const
+                const Edge & GetEdge( const EdgeId &id )const
                 {
                     return edges[id] ;
                 }
-                bool CheckEdge(NodeId from , NodeId to )
+                bool CheckEdge(const NodeId & from ,const  NodeId & to )
                 {
                     Edge tmp ;
                     tmp.from = from ;
@@ -179,6 +185,16 @@ namespace BGIQD {
                             return true ;
                     }
                     return false ;
+                }
+
+                size_t EdgesSize() const 
+                {
+                    return edges.size();
+                }
+
+                size_t NodesSize() const 
+                {
+                    return nodes.size();
                 }
 
                 void PrintAsDOT()
@@ -213,7 +229,8 @@ namespace BGIQD {
                 typedef typename Edge::EdgeEdgeId EdgeId ;
 
                 typedef ListGraphBasic<TNode , TEdge, TNodes , TEdges> Basic;
-                void AddEdge( typename Basic::NodeId from , typename Basic::NodeId to )
+
+                void AddEdge( const typename Basic::NodeId & from ,const typename Basic::NodeId & to )
                 {
                     // Make a new edge
                     TEdge tmp ;
@@ -263,7 +280,7 @@ namespace BGIQD {
                 typedef typename Edge::EdgeEdgeId EdgeId ;
 
                 typedef ListGraphBasic<TNode , TEdge, TNodes , TEdges> Basic;
-                void AddEdge( typename Basic::NodeId from , typename Basic::NodeId to )
+                void AddEdge( const typename Basic::NodeId & from , const typename Basic::NodeId & to )
                 {
                     // Make a new edge
                     TEdge tmp ;
