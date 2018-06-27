@@ -8,6 +8,8 @@
 #include "algorithm/graph/GraphBasic.h"
 #include "algorithm/graph/MinTree.h"
 #include "algorithm/graph/GraphTrunk.h"
+#include "algorithm/disjoin_set/disjoin_set.h"
+
 namespace BGIQD {
     namespace stLFR {
 
@@ -35,6 +37,12 @@ namespace BGIQD {
                 ost<<" id= "<<id<<" sim= "<<sim;
                 return ost.str();
             }
+            std::string ToString() const
+            {
+                std::ostringstream ost;
+                ost<<from<<"\t--\t"<<to<<" [ "<<AttrString()<<" ]";
+                return ost.str();
+            }
         };
 
         struct EdgeAttr
@@ -48,7 +56,8 @@ namespace BGIQD {
         struct ContigSimGraph : public BGIQD::GRAPH::ListGraph<Node,Edge>
         {
             typedef BGIQD::GRAPH::ListGraph<Node,Edge> Basic ;
-
+            typedef Basic::NodeId NodeId;
+            typedef Basic::EdgeId EdgeId;
             void AddEdgeSim( unsigned int from , unsigned int to , float sim)
             {
                 Edge tmp ;
@@ -60,6 +69,8 @@ namespace BGIQD {
 
             typedef BGIQD::GRAPH::MinTreeHelper<ContigSimGraph, float , EdgeAttr> MTHelper;
             typedef BGIQD::GRAPH::TrunkHelper< ContigSimGraph> TKHelper;
+
+            typedef BGIQD::Algorithm::DisJoin_Set<NodeId> DJ_Sets;
 
             ContigSimGraph  MinTree() const 
             {
@@ -73,6 +84,23 @@ namespace BGIQD {
                 return TKHelper::Trunk(mintree);
             }
 
+            static std::map<NodeId , ContigSimGraph>  UnicomGraph(const ContigSimGraph & mintree)
+            {
+                std::map<NodeId , ContigSimGraph> ret;
+                DJ_Sets dj_sets;
+                for( const auto & edge : mintree.edges )
+                {
+                    dj_sets.AddConnect(edge.from , edge.to);
+                }
+                for( const auto & edge : mintree.edges )
+                {
+                    auto rep = dj_sets.GetGroup(edge.from);
+                    ret[rep].AddNode(mintree.GetNode(edge.from));
+                    ret[rep].AddNode(mintree.GetNode(edge.to));
+                    ret[rep].AddEdge(edge);
+                }
+                return ret ;
+            }
             std::vector<Basic::NodeId> TrunkLinear(const ContigSimGraph & mintree)
             {
                 return TKHelper::LinearTrunk( mintree );

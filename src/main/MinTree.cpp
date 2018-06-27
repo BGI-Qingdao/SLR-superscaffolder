@@ -19,6 +19,12 @@ struct AppConf
 
     BGIQD::stLFR::ContigSimGraph graph;
 
+    BGIQD::stLFR::ContigSimGraph mintree;
+
+    std::map<BGIQD::stLFR::ContigSimGraph::NodeId , BGIQD::stLFR::ContigSimGraph> mintrees;
+
+    std::map<BGIQD::stLFR::ContigSimGraph::NodeId , BGIQD::stLFR::ContigSimGraph> mintreetrunks;
+
     void Init(const std::string & prefix)
     {
         fNames.Init(prefix);
@@ -41,6 +47,56 @@ struct AppConf
         BGIQD::FILES::FileReaderFactory::EachLine(*in,parseline);
         delete  in;
     }
+
+    void GenerateMinTree()
+    {
+        mintree = graph.MinTree() ;
+        auto out1 = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fNames.mintree());
+        if( out1 == NULL )
+            FATAL(" failed to open xxx.mintree for write !!! ");
+        mintree.PrintAsDOT(*out1) ;
+        delete out1;
+    }
+
+    void SplitMinTree()
+    {
+        mintrees = graph.UnicomGraph(mintree);
+    }
+
+    void GenerateMinTreeTrunks()
+    {
+        auto out2 = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fNames.mintreetrunk());
+        if( out2 == NULL )
+            FATAL(" failed to open xxx.mintree_trunk for write !!! ");
+        for(const auto & pair : mintrees)
+        {
+            auto trunk = graph.TrunkFromMinTree(pair.second);
+            mintreetrunks[pair.first] = trunk ;
+            trunk.PrintAsDOT(*out2) ;
+        }
+        delete out2;
+    }
+
+    void GenerateMinTreeTrunkLinears()
+    {
+        int trunk_count = 1;;
+        auto out3 = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fNames.mintreetrunklinear());
+        if( out3 == NULL )
+            FATAL(" failed to open xxx.mintree_trunk_linear for write !!! ");
+        for(const auto & pair : mintreetrunks )
+        {
+            (*out3)<<"---\t"<<trunk_count<<"\t---"<<std::endl;
+            trunk_count++;
+            auto linear = graph.TrunkLinear(pair.second);
+            for(const auto x : linear )
+            {
+                (*out3)<<x<<std::endl;
+            }
+        }
+        delete out3;
+    }
+
+
 }config;
 
 int main(int argc , char **argv )
@@ -48,31 +104,12 @@ int main(int argc , char **argv )
     START_PARSE_ARGS
     DEFINE_ARG_REQUIRED(std::string , prefix , "prefix , Input xxx.connInfo . Output xxx.minTree ");
     END_PARSE_ARGS
+
     config.Init(prefix.to_string());
     config.LoadContigSimGraph();
-
-    auto mintree = config.graph.MinTree() ;
-    auto out1 = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(config.fNames.mintree());
-    if( out1 == NULL )
-        FATAL(" failed to open xxx.mintree for write !!! ");
-    mintree.PrintAsDOT(*out1) ;
-    delete out1;
-
-    auto trunk = config.graph.TrunkFromMinTree(mintree);
-    auto out2 = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(config.fNames.mintreetrunk());
-    if( out2 == NULL )
-        FATAL(" failed to open xxx.mintree_trunk for write !!! ");
-    trunk.PrintAsDOT(*out2) ;
-    delete out2;
-
-    auto linear = config.graph.TrunkLinear(trunk);
-    auto out3 = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(config.fNames.mintreetrunklinear());
-    if( out3 == NULL )
-        FATAL(" failed to open xxx.mintree_trunk_linear for write !!! ");
-    for(const auto x : linear )
-    {
-        (*out3)<<x<<std::endl;
-    }
-    delete out3;
+    config.GenerateMinTree();
+    config.SplitMinTree();
+    config.GenerateMinTreeTrunks();
+    config.GenerateMinTreeTrunkLinears();
     return 0 ;
 }
