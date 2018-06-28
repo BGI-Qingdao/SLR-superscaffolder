@@ -276,10 +276,10 @@ namespace BGIQD{
 }
 
 #define __PARSE_ARGS \
-    int curr_flag , out = 0;\
-    while( ( curr_flag = getopt_long_only( argc , argv,"",BGIQD::ARGS::long_options, &out  ) ) != EOF )\
+    int __curr_flag , __out = 0;\
+    while( ( __curr_flag = getopt_long_only( argc , argv,"",BGIQD::ARGS::long_options, &__out  ) ) != EOF )\
 {\
-    auto itr = BGIQD::ARGS::infos.find( curr_flag ) ;\
+    auto itr = BGIQD::ARGS::infos.find( __curr_flag ) ;\
     if ( itr == BGIQD::ARGS::infos.end() )\
     {    continue; }\
     itr->second->setted = true ;\

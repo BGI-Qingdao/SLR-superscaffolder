@@ -39,14 +39,20 @@ stLFR_2_10X_o   =	${stLFR_2_10X_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 cpSpeed_cpp 	=	cpSpeed.cpp
 cpSpeed_o   =	${cpSpeed_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
+trunk_mark_cpp 	=	trunk_mark.cpp
+trunk_mark_o   =	${trunk_mark_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+
 .cpp.o:
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
-jobs 	   =	stLFR_2_10X cpSpeed\
+jobs 	   =	stLFR_2_10X cpSpeed trunk_mark\
 
 jobs_o 	   =	${stLFR_2_10X_o} ${cpSpeed_o}\
 
 all : ${jobs}
+	
+trunk_mark : clean ${trunk_mark_o}
+	${CXX} ${DEUBG_CXX} ${trunk_mark_o} -o trunk_mark
 
 cpSpeed : clean ${cpSpeed_o}
 	${CXX} ${DEUBG_CXX} ${cpSpeed_o} -o cpSpeed
@@ -54,7 +60,7 @@ cpSpeed : clean ${cpSpeed_o}
 stLFR_2_10X : clean ${stLFR_2_10X_o}
 	${CXX} ${DEUBG_CXX} ${stLFR_2_10X_o} -o stLFR_2_10X
 
-dirty	   =${jobs_o} ${jobs}  
+dirty	   =${jobs_o} ${jobs} 
 
 clean:
 	rm -rf ${dirty}

@@ -2,6 +2,8 @@
 #include "common/files/file_reader.h"
 #include "common/files/file_writer.h"
 #include "common/error/Error.h"
+#include "common/log/log.h"
+#include "common/log/logfilter.h"
 
 #include "stLFR/CBB.h"
 #include "stLFR/contigSimGraph.h"
@@ -19,9 +21,9 @@ struct AppConf
 
     BGIQD::stLFR::ContigSimGraph graph;
 
-    BGIQD::stLFR::ContigSimGraph mintree;
-
     std::map<BGIQD::stLFR::ContigSimGraph::NodeId , BGIQD::stLFR::ContigSimGraph> mintrees;
+
+    std::map<BGIQD::stLFR::ContigSimGraph::NodeId , BGIQD::stLFR::ContigSimGraph> split_graphs;
 
     std::map<BGIQD::stLFR::ContigSimGraph::NodeId , BGIQD::stLFR::ContigSimGraph> mintreetrunks;
 
@@ -48,19 +50,25 @@ struct AppConf
         delete  in;
     }
 
-    void GenerateMinTree()
+
+    void SplitGraph()
     {
-        mintree = graph.MinTree() ;
+        split_graphs = graph.UnicomGraph(graph);
+    }
+
+    void GenerateMinTrees()
+    {
+
         auto out1 = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fNames.mintree());
         if( out1 == NULL )
             FATAL(" failed to open xxx.mintree for write !!! ");
-        mintree.PrintAsDOT(*out1) ;
+        for(const auto & pair : split_graphs)
+        {
+            auto mintree = pair.second.MinTree() ;
+            mintrees[pair.first] = mintree;
+            mintree.PrintAsDOT(*out1) ;
+        }
         delete out1;
-    }
-
-    void SplitMinTree()
-    {
-        mintrees = graph.UnicomGraph(mintree);
     }
 
     void GenerateMinTreeTrunks()
@@ -107,8 +115,8 @@ int main(int argc , char **argv )
 
     config.Init(prefix.to_string());
     config.LoadContigSimGraph();
-    config.GenerateMinTree();
-    config.SplitMinTree();
+    config.SplitGraph();
+    config.GenerateMinTrees();
     config.GenerateMinTreeTrunks();
     config.GenerateMinTreeTrunkLinears();
     return 0 ;

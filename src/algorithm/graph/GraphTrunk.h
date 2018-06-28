@@ -40,7 +40,6 @@ namespace BGIQD{
                     // Make sure input is a trunk
                     static std::vector<NodeId> LinearTrunk(const ListGraph &  base )
                     {
-
                         std::vector<NodeId> ret ;
                         NodeId starter ;
                         for( const auto & pair : base.nodes )
@@ -97,6 +96,8 @@ namespace BGIQD{
                     // Make sure input is a mintree 
                     static ListGraph  Trunk(const ListGraph &  base )
                     {
+                        if( base.nodes.size() < 3 )
+                            return base ;
                         std::map<NodeId, TrunkNode> nodes;
 
                         for( const auto & pair  : base.nodes )

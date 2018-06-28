@@ -95,8 +95,16 @@ namespace BGIQD {
                 for( const auto & edge : mintree.edges )
                 {
                     auto rep = dj_sets.GetGroup(edge.from);
-                    ret[rep].AddNode(mintree.GetNode(edge.from));
-                    ret[rep].AddNode(mintree.GetNode(edge.to));
+                    if( ! ret[rep].HasNode(edge.from) )
+                    {
+                        ret[rep].AddNode(mintree.GetNode(edge.from));
+                        ret[rep].GetNode(edge.from).edge_ids.clear();
+                    }
+                    if( ! ret[rep].HasNode(edge.to) )
+                    {
+                        ret[rep].AddNode(mintree.GetNode(edge.to));
+                        ret[rep].GetNode(edge.to).edge_ids.clear();
+                    }
                     ret[rep].AddEdge(edge);
                 }
                 return ret ;
