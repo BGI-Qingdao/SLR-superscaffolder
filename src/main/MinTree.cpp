@@ -58,7 +58,6 @@ struct AppConf
 
     void GenerateMinTrees()
     {
-
         auto out1 = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fNames.mintree());
         if( out1 == NULL )
             FATAL(" failed to open xxx.mintree for write !!! ");
@@ -103,8 +102,10 @@ struct AppConf
         }
         delete out3;
     }
-
-
+    void test()
+    {
+        //BGIQD::FILES
+    }
 }config;
 
 int main(int argc , char **argv )
