@@ -27,9 +27,12 @@ struct AppConf
 
     std::map<BGIQD::stLFR::ContigSimGraph::NodeId , BGIQD::stLFR::ContigSimGraph> mintreetrunks;
 
+    BGIQD::LOG::logger lger;
+
     void Init(const std::string & prefix)
     {
         fNames.Init(prefix);
+        BGIQD::LOG::logfilter::singleton().get("MST", BGIQD::LOG::loglevel::INFO,lger);
     }
 
     void LoadContigSimGraph()
@@ -48,12 +51,14 @@ struct AppConf
         };
         BGIQD::FILES::FileReaderFactory::EachLine(*in,parseline);
         delete  in;
+        lger<<BGIQD::LOG::lstart() << "load contig sim graph done "<<BGIQD::LOG::lend() ;
     }
 
 
     void SplitGraph()
     {
         split_graphs = graph.UnicomGraph(graph);
+        lger<<BGIQD::LOG::lstart() << "split contig sim graph into "<<split_graphs.size()<<" sub graph"<<BGIQD::LOG::lend() ;
     }
 
     void GenerateMinTrees()
@@ -80,6 +85,7 @@ struct AppConf
             auto trunk = graph.TrunkFromMinTree(pair.second);
             mintreetrunks[pair.first] = trunk ;
             trunk.PrintAsDOT(*out2) ;
+            lger<<BGIQD::LOG::lstart() << "generete a MST trunk from "<<pair.second.nodes.size()<<" into to nodes "<<trunk.nodes.size() <<BGIQD::LOG::lend() ;
         }
         delete out2;
     }
