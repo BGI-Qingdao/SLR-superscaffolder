@@ -96,6 +96,7 @@ struct MatchData
     //int flag ;
     std::string ref_name;
     size_t first_match_position;
+    size_t read_1bp_match_postion;
     int  quality;
     MatchDetail detail;
     int read_len;
@@ -105,6 +106,7 @@ struct MatchData
                   , first_match_position(0)
                   , quality(0) , read_len(-1){}
 
+    size_t CalcRead1Position() const;
     bool IsP() const ;
     bool IsE() const ;
     bool IsPrimaryMatch() const ;

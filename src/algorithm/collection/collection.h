@@ -32,6 +32,7 @@ namespace BGIQD{
                         elements.clear();
                         elements = other.elements ;
                     }
+                    return *this;
                 }
 
                 void IncreaseElement(const Element & e, int num = 1)

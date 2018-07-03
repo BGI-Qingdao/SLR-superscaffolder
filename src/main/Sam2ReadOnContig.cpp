@@ -53,17 +53,17 @@ struct AppConfig
         auto b2r_out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.read2contig());
         // basic function
         long long readId = 1 ;
-        auto print1read= [&](const BGIQD::SAM::MatchData &d )
+        auto print1read= [&](const BGIQD::SAM::MatchData &d)
         {
             //readId\tcontigId\treadInContigPos\torigin\tbarcodeId\n
             (*b2r_out)<<readId++<<'\t'
                 <<d.ref_name<<'\t'
-                <<d.first_match_position<<'\t'
+                <<d.CalcRead1Position()<<'\t'
                 <<(d.IsReverseComplete() ? '-':'+')<<'\t';
             if( has_barcode_in_read_name )
                 (*b2r_out)<<BGIQD::stLFR::BarcodeIdHelper::Id( 
                         BGIQD::stLFR::readName2Barcode(d.read_name));
-            (*b2r_out)<<std::endl;
+            (*b2r_out)<<"\n";
         };
 
         // parse sam and print

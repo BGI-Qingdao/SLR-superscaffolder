@@ -1,9 +1,9 @@
 #include "biocommon/sam_bam/sam_parser.h"
 #include <sstream>
 #include "common/string/stringtools.h"
+
 namespace BGIQD{
 namespace SAM{
-
 
 bool MatchData::UnMap() const 
 {
@@ -50,6 +50,26 @@ int MatchData::firstMatchInRefNoReverse() const
         }
     }
     return -1 ;
+}
+
+size_t MatchData::CalcRead1Position() const
+{
+    for( int i = 0 ; i < (int) detail.infos.size() ; i ++ )
+    {
+        const auto & info = detail.infos[i] ;
+        if( info.type == CIGAR::EQUAL || info.type == CIGAR::M )
+        {
+            if( IsReverseComplete() )
+            {
+                return info.start_position_on_ref + read_len - info.start_position_on_read ;
+            }
+            else
+            {
+                return info.start_position_on_ref - info.start_position_on_read ;
+            }
+        }
+    }
+    return 0;
 }
 
 Head LineParser::ParseAsHead()const
