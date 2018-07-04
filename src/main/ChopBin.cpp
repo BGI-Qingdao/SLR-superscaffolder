@@ -1,3 +1,5 @@
+#include "algorithm/interval/Interval.h"
+
 #include "common/files/file_reader.h"
 #include "common/files/file_writer.h"
 #include "common/args/argsparser.h"
@@ -13,6 +15,7 @@
 
 #include <vector>
 #include <map>
+#include <set>
 
 struct AppConfig
 {
@@ -20,7 +23,7 @@ struct AppConfig
     {
         int length;
 
-        std::map<unsigned int , std::vector<unsigned int > > barcodesOnPos;
+        std::map<int , std::set<unsigned int > > barcodesOnPos;
 
         std::string format(unsigned int id) const 
         {
@@ -28,10 +31,14 @@ struct AppConfig
             ost<<id<<':'<<length<<'\t';
             for( const auto & i : barcodesOnPos)
             {
-                ost<<i.first<<':'<<i.second[0];
-                for( int m = 1 ; m < (int)i.second.size(); m++)
+                bool first = true ;
+                for( unsigned int barcode : i.second )
                 {
-                    ost<<'|'<<i.second[m];
+                    if( first )
+                        first = false ;
+                    else
+                        ost<<'|';
+                    ost<<barcode;
                 }
                 ost<<'\t';
             }
@@ -40,16 +47,50 @@ struct AppConfig
     };
 
     typedef std::map<unsigned int, ConfigBarcodeInfo>  BarcodeOnContig;
+    typedef BGIQD::INTERVAL::Interval<int,
+                BGIQD::INTERVAL::Left_Close_Right_Close > BinInterval;
 
     BGIQD::LOG::logger log;
 
     int bin_size ;
+
+    int del_at_tail;
+
+    float bin_factor ;
 
     BarcodeOnContig boc;
 
     BGIQD::SOAP2::FileNames fName;
 
     BGIQD::stLFR::BarcodeOnBinArray b2b_array;
+
+    std::map<int ,BinInterval> MakeBin(int contig_len)
+    {
+        std::map<int , BinInterval > ret ;
+        int bin_num  = contig_len / bin_size +(float ( contig_len % bin_size ) /(float) bin_size) >= bin_size ? 1 : 0 ;
+        int start = 1 ;
+        int end = contig_len - del_at_tail ;
+
+        for( int i = 0 ; i< bin_num ; i++ )
+        {
+            assert( start <= end );
+            if( i % 2 == 0 )
+            {
+                ret[i/2] = 
+                    BinInterval(start , start+bin_size -1 );
+                start += bin_size ;
+            }
+            else
+            {
+                ret[bin_num-(i/2)-1] = 
+                    BinInterval(end -bin_size +1 , end );
+                end -= bin_size ;
+            }
+        }
+        assert( bin_num > 0 );
+        return ret ;
+    };
+
 
     void LoadSeeds()
     {
@@ -67,9 +108,14 @@ struct AppConfig
         delete in ;
     }
 
-    void Init(const std::string & prefix,const  int bin)
+    void Init(const std::string & prefix
+            ,const  int bin 
+            , int del
+            , float bin_f)
     {
         bin_size = bin;
+        del_at_tail = del;
+        bin_factor = bin_f;
         BGIQD::LOG::logfilter::singleton().get("ChopBin",BGIQD::LOG::loglevel::INFO,log);
         fName.Init(prefix);
         b2b_array.Init(1024);
@@ -84,7 +130,8 @@ struct AppConfig
         while(!std::getline(*in,line).eof())
         {
             long readId ;
-            unsigned int contigId, pos , barcode;
+            int pos ;
+            unsigned int contigId, barcode;
             char dir;
             std::istringstream ist(line);
             ist>>readId>>contigId>>pos>>dir>>barcode;
@@ -92,7 +139,7 @@ struct AppConfig
             {
                 continue;
             }
-            boc[contigId].barcodesOnPos[pos].push_back(barcode);
+            boc[contigId].barcodesOnPos[pos].insert(barcode);
         }
         delete in;
     }
@@ -110,23 +157,31 @@ struct AppConfig
         delete out;
     }
 
+
     void ChopBin()
     {
         for(const auto & contig :boc )
         {
             unsigned int contigId = contig.first;
+            int len = contig.second.length ;
+            auto bin_intervals = MakeBin(len);
             std::map<int,BGIQD::stLFR::BarcodeOnBin> b2b;
             for( const auto & posData : contig.second.barcodesOnPos )
             {
                 int pos = posData.first ;
-                int binId = pos/bin_size;
-                auto & d = b2b[binId];
-                d.contigId = contigId;
-                d.binId = binId ;
-
                 for( const auto & vv : posData.second)
                 {
-                    d.collections.IncreaseElement(vv,1);
+                    for( const auto & pair : bin_intervals )
+                    {
+                        if(pair.second.IsContain(pos))
+                        {
+                            int binId = pair.first ;
+                            auto & d = b2b[binId];
+                            d.contigId = contigId;
+                            d.binId = binId ;
+                            d.collections.IncreaseElement(vv,1);
+                        }
+                    }
                 }
             }
 
@@ -148,11 +203,13 @@ int main(int argc , char ** argv)
 {
     START_PARSE_ARGS
     DEFINE_ARG_REQUIRED(int , bin_size, "bin size . must be smaller than seed min length");
+    DEFINE_ARG_REQUIRED(int , delete_tail, "delete size at contig tail . depends on you alignment tools and args");
+    DEFINE_ARG_OPTIONAL(float ,bin_factor , "factor of smallest bin in the millde", "0.5");
     DEFINE_ARG_REQUIRED(std::string ,prefix, "prefix . Input xxx.seeds && xxx.read2contig ; Output xxx.barcodeOnBin && xxx.barcodeOnContig");
     DEFINE_ARG_OPTIONAL(bool ,p_b2c , "print barcode on contig", "0");
     END_PARSE_ARGS
 
-    config.Init( prefix.to_string() , bin_size.to_int() );
+    config.Init( prefix.to_string() , bin_size.to_int() ,delete_tail.to_int() , bin_factor.to_float());
 
     BGIQD::LOG::timer t(config.log,"ChopBin");
 

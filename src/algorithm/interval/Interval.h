@@ -63,7 +63,7 @@ namespace BGIQD{
                 ValueType min;
                 ValueType max;
 
-                bool IsContain(const ValueType& x )
+                bool IsContain(const ValueType& x ) const
                 {
                     if( type == Type::Left_Close_Right_Close )
                     {
