@@ -114,7 +114,7 @@ namespace BGIQD {
 
                 bool HasEdge(const NodeEdgeId &id )
                 {
-                    edge_ids.find(id) != edge_ids.end() ; 
+                    return edge_ids.find(id) != edge_ids.end() ; 
                 }
             };
 
