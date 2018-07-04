@@ -52,7 +52,7 @@ int MatchData::firstMatchInRefNoReverse() const
     return -1 ;
 }
 
-size_t MatchData::CalcRead1Position() const
+int MatchData::CalcRead1Position() const
 {
     for( int i = 0 ; i < (int) detail.infos.size() ; i ++ )
     {
@@ -61,11 +61,11 @@ size_t MatchData::CalcRead1Position() const
         {
             if( IsReverseComplete() )
             {
-                return info.start_position_on_ref + read_len - info.start_position_on_read ;
+                return (int)info.start_position_on_ref + read_len - (int)info.start_position_on_read ;
             }
             else
             {
-                return info.start_position_on_ref - info.start_position_on_read ;
+                return (int)info.start_position_on_ref - (int)info.start_position_on_read ;
             }
         }
     }
