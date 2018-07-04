@@ -58,24 +58,24 @@ struct AppConf
                 continue ;
             }
             std::string barcode = itr->second ;
-            out<<fake_read_name<<N<<" 1:N:0"<<std::endl;
+            out<<fake_read_name<<N<<" 1:N:0"<<"\n";
             std::getline(r1,line1);
-            out<<barcode<<random_seq<<line1<<std::endl;
+            out<<barcode<<random_seq<<line1<<"\n";
             std::getline(r1,line1);
-            out<<line1<<std::endl;
+            out<<line1<<"\n";
             std::getline(r1,line1);
             BGIQD::STRING::replace_all(line1,"!","#");
-            out<<fake_q<<line1<<std::endl;
+            out<<fake_q<<line1<<"\n";
 
             std::getline(r2,line1);
-            out<<fake_read_name<<N<<" 3:N:0"<<std::endl;
+            out<<fake_read_name<<N<<" 3:N:0"<<"\n";
             std::getline(r2,line1);
-            out<<line1<<std::endl;
+            out<<line1<<"\n";
             std::getline(r2,line1);
-            out<<line1<<std::endl;
+            out<<line1<<"\n";
             std::getline(r2,line1);
             BGIQD::STRING::replace_all(line1,"!","#");
-            out<<line1<<std::endl;
+            out<<line1<<"\n";
 
             pair_num++;
         }
@@ -85,7 +85,7 @@ struct AppConf
     {
         for( long i = 0 ; i < pair_num ; i++ )
         {
-            out<<fake_read_name<<i<<" 2:N:0"<<std::endl;
+            out<<fake_read_name<<i<<" 2:N:0"<<"\n";
             out<<indice<<"\n+\nAAFFFKKK\n";
         }
     }
@@ -122,9 +122,8 @@ int main(int argc , char **argv)
     delete in_p2;
 
     auto o2 = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(r2f);
-    BGIQD::FILES::FileWriterFactory::ResizeBuff(*o2,1000000000);
     config.PrintRead2(*o2,indices.to_string());
     delete o2 ;
-
+    std::cerr<<"Total pair_num is "<<config.pair_num<<"\n";
     return 0;
 }

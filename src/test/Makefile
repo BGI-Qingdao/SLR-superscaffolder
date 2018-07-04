@@ -32,6 +32,7 @@ source_cpp =	../common/files/file_reader.cpp \
 				../soap2/contigType.cpp\
 
 test_cpp   =	test.cpp\
+				../algorithm/interval/Interval_test.cpp\
 				../algorithm/graph/GraphTrunk_test.cpp\
 				../algorithm/graph/MinTree_test.cpp\
 				../algorithm/graph/SPFSearch_test.cpp\
