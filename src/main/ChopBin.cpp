@@ -32,6 +32,7 @@ struct AppConfig
             for( const auto & i : barcodesOnPos)
             {
                 bool first = true ;
+                ost<<i.first<<":";
                 for( unsigned int barcode : i.second )
                 {
                     if( first )
@@ -67,24 +68,32 @@ struct AppConfig
     std::map<int ,BinInterval> MakeBin(int contig_len)
     {
         std::map<int , BinInterval > ret ;
-        int bin_num  = contig_len / bin_size +(float ( contig_len % bin_size ) /(float) bin_size) >= bin_size ? 1 : 0 ;
+        int bin_num = contig_len / bin_size + ( (float ( contig_len % bin_size ) /(float) bin_size) >= bin_factor? 1 : 0 );
         int start = 1 ;
         int end = contig_len - del_at_tail ;
 
-        for( int i = 0 ; i< bin_num ; i++ )
+        if ( bin_num == 1 )
         {
-            assert( start <= end );
-            if( i % 2 == 0 )
+            start += (end -start- bin_size) / 2;
+            ret[0] = BinInterval(start , start+bin_size -1 );
+        }
+        else 
+        {
+            for( int i = 0 ; i< bin_num ; i++ )
             {
-                ret[i/2] = 
-                    BinInterval(start , start+bin_size -1 );
-                start += bin_size ;
-            }
-            else
-            {
-                ret[bin_num-(i/2)-1] = 
-                    BinInterval(end -bin_size +1 , end );
-                end -= bin_size ;
+                assert( start <= end );
+                if( i % 2 == 0 )
+                {
+                    ret[i/2] = 
+                        BinInterval(start , start+bin_size -1 );
+                    start += bin_size ;
+                }
+                else
+                {
+                    ret[bin_num-(i/2)-1] = 
+                        BinInterval(end -bin_size +1 , end );
+                    end -= bin_size ;
+                }
             }
         }
         assert( bin_num > 0 );
