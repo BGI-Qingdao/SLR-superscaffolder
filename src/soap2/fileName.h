@@ -74,7 +74,9 @@ namespace BGIQD {
 
             DEFINE_SUFFIX(super_and_left, ".super_and_left");
 
-            
+            //ClusterSeeds
+            DEFINE_SUFFIX(seeds_cluster_seeds,".seeds_cluster_seeds");
+
             private:
                 std::string m_prefix;
         };

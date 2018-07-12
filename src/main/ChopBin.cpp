@@ -68,9 +68,10 @@ struct AppConfig
     std::map<int ,BinInterval> MakeBin(int contig_len)
     {
         std::map<int , BinInterval > ret ;
-        int bin_num = contig_len / bin_size + ( (float ( contig_len % bin_size ) /(float) bin_size) >= bin_factor? 1 : 0 );
+        int contig_used_len = contig_len - del_at_tail;
+        int bin_num = contig_used_len / bin_size + ( (float ( contig_used_len % bin_size ) /(float) bin_size) >= bin_factor? 1 : 0 );
         int start = 1 ;
-        int end = contig_len - del_at_tail ;
+        int end = contig_used_len ;
 
         if ( bin_num == 1 )
         {
