@@ -140,6 +140,7 @@ namespace BGIQD {
                 {
                 }
 
+                // DO NOT use this if your TNode has more member variable.
                 void AddNode(const NodeId &id )
                 {
                     nodes[id].id = id ;
@@ -234,6 +235,7 @@ namespace BGIQD {
 
                 typedef ListGraphBasic<TNode , TEdge, TNodes , TEdges> Basic;
 
+                // DO NOT use this if your TEdge has more member variable.
                 void AddEdge( const typename Basic::NodeId & from ,const typename Basic::NodeId & to )
                 {
                     // Make a new edge
@@ -284,6 +286,8 @@ namespace BGIQD {
                 typedef typename Edge::EdgeEdgeId EdgeId ;
 
                 typedef ListGraphBasic<TNode , TEdge, TNodes , TEdges> Basic;
+
+                // DO NOT use this if your TEdge has more member variable.
                 void AddEdge( const typename Basic::NodeId & from , const typename Basic::NodeId & to )
                 {
                     // Make a new edge

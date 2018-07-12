@@ -9,6 +9,14 @@ bool MatchData::UnMap() const
 {
     return (flags.flags.ox4 & 0x1) == 1 ;
 }
+bool MatchData::IsPEBothMatch() const 
+{
+    return next_ref_name != "*";
+}
+bool MatchData::IsPEInSameRef() const
+{
+    return next_ref_name == "=" ;
+}
 bool MatchData::OtherUnMap() const 
 {
     return (flags.flags.ox8 & 0x1) == 1 ;
@@ -126,7 +134,16 @@ MatchData LineParser::ParseAsMatchData() const
     MatchData data;
     std::istringstream ist(m_line);
     std::string cigar;
-    ist>>data.read_name>>data.flags.num>>data.ref_name>>data.first_match_position>>data.quality>>cigar;
+    ist>>data.read_name
+        >>data.flags.num
+        >>data.ref_name
+        >>data.first_match_position
+        >>data.quality
+        >>cigar
+        >>data.next_ref_name
+        >>data.next_ref_pos
+        >>data.insert_size
+        ;
     data.read_len = ParseStringAsCIGAR(cigar,data.first_match_position,data.detail);
     return data;
 }//ParseAsMatchData

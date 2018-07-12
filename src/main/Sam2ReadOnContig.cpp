@@ -62,7 +62,10 @@ struct AppConfig
                 <<(d.IsReverseComplete() ? '-':'+')<<'\t';
             if( has_barcode_in_read_name )
                 (*b2r_out)<<BGIQD::stLFR::BarcodeIdHelper::Id( 
-                        BGIQD::stLFR::readName2Barcode(d.read_name));
+                        BGIQD::stLFR::readName2Barcode(d.read_name))<<'\t';
+            (*b2r_out)<<(d.IsP() ? 'P' : 'E')<<'\t'
+                <<(d.IsPEBothMatch() ? 'Y' : 'N')<<'\t'
+                <<d.insert_size;
             (*b2r_out)<<"\n";
         };
 

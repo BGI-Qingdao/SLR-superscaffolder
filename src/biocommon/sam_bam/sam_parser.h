@@ -100,6 +100,9 @@ struct MatchData
     MatchDetail detail;
     int read_len;
     bool origin ;
+    std::string next_ref_name ;
+    int next_ref_pos;
+    int insert_size ;
     MatchData() : read_name("") , ref_name("")
                   , first_match_position(0)
                   , quality(0) , read_len(-1){}
@@ -109,6 +112,8 @@ struct MatchData
     bool IsE() const ;
     bool IsPrimaryMatch() const ;
     bool IsPCRduplicae() const ;
+    bool IsPEInSameRef() const ;
+    bool IsPEBothMatch() const ;
     bool Valid() const { return ! detail.infos.empty() ; }
     bool UnMap() const ;
     bool OtherUnMap() const ;

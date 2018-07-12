@@ -14,15 +14,15 @@ int main(int argc , char **argv)
     END_PARSE_ARGS
 
     std::map<unsigned int , std::set<int> > seedPos;
+    std::map<unsigned int , int > seedLens;
     auto sf = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(seedLinear.to_string());
     std::string line;
     int line_index = 1 ;
     while(!std::getline(*sf,line).eof())
     {
         auto items = BGIQD::STRING::split(line,"\t");
-        //unsigned int seed = std::stoul(items[0]);
-        //if( seedPos.find()
         seedPos[std::stoul(items[0])].insert( line_index) ;
+        seedLens[std::stoul(items[0])] = std::stoul(items[1]);
         line_index ++ ;
     }
     delete sf ;
@@ -30,6 +30,7 @@ int main(int argc , char **argv)
     auto tf = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(trunkLinear.to_string());
     std::ostream * out = NULL ;
     int trunk_index = 1 ;
+    int trunk_len = 0;
     while(!std::getline(*sf,line).eof())
     {
         if(line[0] == '-')
@@ -46,7 +47,9 @@ int main(int argc , char **argv)
         for( auto x : seedPos[contig])
             (*out)<<'\t'<<x;
         (*out)<<'\n';
+        trunk_len += seedLens[contig];
     }
     delete tf ;
+    std::cerr<<"Total trunk len is "<<trunk_len<<std::endl;
     return 0 ;
 }

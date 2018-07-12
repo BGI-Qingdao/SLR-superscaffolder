@@ -59,7 +59,7 @@ namespace BGIQD {
         {
             std::ostringstream ost;
             //">%d length %d cvg_%f_tip_%d"
-            ost<<'>'<<new_id<<" length "<<length+K.size()<<" cov_"<<cov<<"_tip_"<<tip<<'\t';
+            ost<<'>'<<new_id<<" length "<<length+K.size()<<" cvg_"<<cov<<"_tip_"<<tip<<'\t';
             ost<<marker<<"\n";
 
             int index = 0 ;
