@@ -51,8 +51,8 @@ namespace BGIQD {
                 typedef Node1                        Node;
                 typedef Edge1                        Edge;
 
-                Node & AccessNode(NodeId) { assert(0) ; }
-                Edge & AccessEdge(EdgeId , GraphNodeId ){ assert(0); }
+                Node & AccessNode(const NodeId &) { assert(0) ; }
+                Edge & AccessEdge(const EdgeId & , const GraphNodeId &){ assert(0); }
 
                 BaseGraph * base ;
 

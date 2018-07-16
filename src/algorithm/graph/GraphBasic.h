@@ -162,7 +162,7 @@ namespace BGIQD {
                     return nodes.at(id) ;
                 }
 
-                bool HasNode( const NodeId & id )
+                bool HasNode( const NodeId & id ) const
                 {
                     return nodes.find(id) != nodes.end() ;
                 }
@@ -263,6 +263,35 @@ namespace BGIQD {
                     Basic::GetNode(from).AddEdge(nId);
                     Basic::GetNode(to).AddEdge(nId);
                 }
+
+                template<class Me>
+                Me SubGraph(const std::set<NodeId>& subs) const 
+                {
+                    Me ret ;
+
+                    for(const auto & id : subs )
+                    {
+                        if( !Basic::HasNode( id ) )
+                            continue;
+                        const auto & node = Basic::GetNode(id);
+                        ret.AddNode(node);
+                        ret.GetNode(id).edge_ids.clear();
+                    }
+
+                    for(const auto & id : subs )
+                    {
+                        if( !Basic::HasNode( id ) )
+                            continue;
+                        const auto & node = Basic::GetNode(id);
+                        for( const auto & edge_id : node.edge_ids)
+                        {
+                            const auto & edge = GetEdge(edge_id);
+                            if( ret.HasNode( edge.from) && ret.HasNode(edge.to) )
+                                ret.AddEdge(edge);
+                        }
+                    }
+                    return ret;
+                };
             };
 
         //
@@ -315,7 +344,40 @@ namespace BGIQD {
                     Basic::edges.rbegin()->id = nId;
                     Basic::GetNode(from).AddEdge(nId);
                 }
+
+                template<class Me>
+                Me SubGraph(const std::set<NodeId>& subs) const 
+                {
+                    Me ret ;
+
+                    for(const auto & id : subs )
+                    {
+                        if( !Basic::HasNode( id ) )
+                            continue;
+                        const auto & node = Basic::GetNode(id);
+                        ret.AddNode(node);
+                        ret.GetNode(id).edge_ids.clear();
+                    }
+
+                    for(const auto & id : subs )
+                    {
+                        if( !Basic::HasNode( id ) )
+                            continue;
+                        const auto & node = Basic::GetNode(id);
+                        for( const auto & edge_id : node.edge_ids)
+                        {
+                            const auto & edge = Basic::GetEdge(edge_id);
+                            if( ret.HasNode( edge.from) && ret.HasNode(edge.to) )
+                                ret.AddEdge(edge);
+                        }
+                    }
+                    return ret;
+                }
+
             };
+
+
+
 
     } // GRAPH
 } // BGIQD 

@@ -4,8 +4,8 @@
 #include "algorithm/graph/Graph.h"
 #include "soap2/contigGraph.h"
 
-namespace BGIQD{
-    namespace SOAP2{
+namespace BGIQD {
+    namespace SOAP2 {
 
         struct Node_EA : public BGIQD::GRAPH::GraphNodeBase<unsigned int , long>
         {
@@ -32,7 +32,7 @@ namespace BGIQD{
                                 >
         {
             int K ;
-            Node & AccessNode(GraphNodeId i)
+            Node & AccessNode(const GraphNodeId &i)
             {
                 auto itr = nodes.find(i); 
                 if( itr == nodes.end() )
@@ -51,7 +51,7 @@ namespace BGIQD{
                 return itr->second ;
             }
 
-            Edge & AccessEdge(GraphEdgeId i , GraphNodeId from)
+            Edge & AccessEdge(const GraphEdgeId & i , const GraphNodeId & from)
             {
                 if( i == Edge::invalid )
                 {

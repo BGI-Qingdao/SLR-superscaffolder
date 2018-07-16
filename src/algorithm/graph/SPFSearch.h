@@ -10,7 +10,6 @@
 namespace BGIQD{
     namespace GRAPH{
 
-
         template<class BaseNode>
             struct SPFNode
             {
