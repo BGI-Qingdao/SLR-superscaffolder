@@ -25,8 +25,20 @@ namespace BGIQD{
                     return (*base).GetNode(id);
                 }
 
-                Edge & AccessEdge(const GraphEdgeId & id, const GraphNodeId & )
+                Edge invalid ;
+
+                void Init()
                 {
+                    invalid.id = Edge::invalid ;
+                }
+
+                Edge & AccessEdge(const GraphEdgeId & id, const GraphNodeId & nodeId)
+                {
+                    if( id == Edge::invalid )
+                    {
+                        invalid.from = nodeId ;
+                        return invalid ;
+                    }
                     return (*base).GetEdge(id);
                 }
 
@@ -67,8 +79,15 @@ namespace BGIQD{
 
             int last_len ;
 
+            bool first_in  ;
+
             void AddNode(const Node & node , const SNode & )
             {
+                if( ! first_in )
+                {
+                    first_in = true ;
+                    return ;
+                }
                 auto ret =  keyer(node.id);
                 if( ret == NodeType::Unknow )
                 {
@@ -104,6 +123,11 @@ namespace BGIQD{
                 ender_flag  = false ;
                 curr_len -= last_len ;
                 last_len = 0 ;
+                if( curr_len < 0 )
+                {
+                    curr_len = 0 ;
+                    first_in  = false ;
+                }
             }
 
             void AddEdge(const Edge & ) { ender_flag = false ; }
@@ -117,6 +141,7 @@ namespace BGIQD{
             {
                 keyer= k ;
                 max_length = max_l;
+                first_in = false ;
             }
             bool IsEnd() const { return ender_flag ; }
         };

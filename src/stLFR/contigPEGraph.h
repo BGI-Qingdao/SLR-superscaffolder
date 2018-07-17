@@ -73,10 +73,14 @@ namespace BGIQD {
                 for( auto i = node.edge_ids.rbegin() ; i != node.edge_ids.rend() ; i =  std::next(i) )
                 {
                     EdgeId eid = *i;
+                    auto & edge = GetEdge(eid);
                     if( next != Edge::invalid )
                     {
-                        auto & edge = GetEdge(eid);
                         edge.next = next ;
+                    }
+                    else
+                    {
+                        edge.next = Edge::invalid ;
                     }
                     next = eid ;
                 }

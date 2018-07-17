@@ -24,11 +24,17 @@ struct AppConfig
     {
         unsigned int prev ;
         unsigned int next ;
+        unsigned int prev_1 ;
+        unsigned int next_1 ;
         std::set<unsigned int> relations;
         void InitFromString(const std::string & line)
         {
             std::istringstream ist(line);
             ist>>prev>>next;
+            relations.insert(prev);
+            relations.insert(prev+1);
+            relations.insert(next);
+            relations.insert(next+1);
             while( !ist.eof() )
             {
                 unsigned int r ;
@@ -48,7 +54,7 @@ struct AppConfig
     std::vector<GapInfo> all_gaps;
     BGIQD::stLFR::ContigPEGraph pe_graph;
     std::map<unsigned int , int > contigLen_cache;
-
+    BGIQD::FREQ::Freq<int> fill_freq;
     void LoadSeedCluster()
     {
         auto parseline = [this](const std::string & line) -> void 
@@ -96,6 +102,43 @@ struct AppConfig
                 return BGIQD::stLFR::DepthEnder::NodeType::Others;
         };
 
+        typedef BGIQD::GRAPH::EdgeIterator<BGIQD::stLFR::ContigPEGraphAccess> EdgeItr;
+
+        typedef BGIQD::GRAPH::DepthSearch<
+            BGIQD::stLFR::ContigPEGraphAccess,
+            EdgeItr,
+            BGIQD::stLFR::DepthEnder
+                > Searcher;
+
+        auto get_path = [](const Searcher & searcher , unsigned int root , unsigned int end )
+        {
+            std::vector<unsigned int> ret ;
+            if( searcher.nodes.find( end) == searcher.nodes.end() )
+                return ret;
+            std::stack<unsigned int> path;
+            auto & ender = searcher.nodes.at( end ) ;
+            unsigned int prev = ender.prev ;
+            int max_depth = 1000 ;
+            int curr = 0 ;
+            path.push( end );
+            while( prev != root  && curr < max_depth )
+            {
+                path.push(prev) ;
+                auto & prever = searcher.nodes.at(prev) ;
+                prev = prever.prev ;
+                curr ++ ;
+            }
+            if( prev== root )
+            {
+                path.push(root);
+                while(!path.empty() )
+                {
+                    ret.push_back( path.top() );
+                    path.pop();
+                }
+            }
+            return ret;
+        };
         for (auto & gap : all_gaps)
         {
             BGIQD::stLFR::ContigPEGraph sub_graph = pe_graph.SubGraph(gap.relations);
@@ -103,24 +146,26 @@ struct AppConfig
             {
                 sub_graph.MakeEdgeNext(node.second.id);
             }
-            int succ = 0;
+            std::vector<std::vector<unsigned int> > paths;
+            unsigned int s1 , e1 ;
             //try 1 order
             {
-                typedef BGIQD::GRAPH::EdgeIterator<BGIQD::stLFR::ContigPEGraphAccess> EdgeItr;
-
-                typedef BGIQD::GRAPH::DepthSearch<
-                    BGIQD::stLFR::ContigPEGraphAccess,
-                    EdgeItr,
-                    BGIQD::stLFR::DepthEnder
-                        > Searcher;
                 Searcher searcher;
                 searcher.accesser.base = &sub_graph;
+                searcher.accesser.Init();
                 searcher.ender.Init(typer, searchMax );
                 searcher.DoDepthSearch(gap.prev,0);
-                if( searcher.nodes.find(gap.next) != searcher.nodes.end() 
-                        || searcher.nodes.find(gap.next +1 ) != searcher.nodes.end() )
+                if( searcher.nodes.find(gap.next) != searcher.nodes.end()  )
                 {
-                    succ ++ ;
+                    s1= gap.prev ;
+                    e1 = gap.next;
+                    paths.push_back(get_path(searcher,gap.prev,gap.next));
+                }
+                if( searcher.nodes.find(gap.next +1 ) != searcher.nodes.end() )
+                {
+                    paths.push_back(get_path(searcher,gap.prev,gap.next+1));
+                    s1= gap.prev ;
+                    e1 = gap.next +1;
                 }
             }
             // try another order
@@ -134,24 +179,48 @@ struct AppConfig
                         > Searcher;
                 Searcher searcher;
                 searcher.accesser.base = &sub_graph;
+                searcher.accesser.Init();
                 searcher.ender.Init(typer, searchMax );
-                if( searcher.nodes.find(gap.next) != searcher.nodes.end() 
-                        || searcher.nodes.find(gap.next +1 ) != searcher.nodes.end() )
+                searcher.DoDepthSearch(gap.prev+1,0);
+                if( searcher.nodes.find(gap.next) != searcher.nodes.end()  )
                 {
-                    succ ++ ;
+                    paths.push_back(get_path(searcher,gap.prev+1,gap.next));
+                    s1= gap.prev +1 ;
+                    e1 = gap.next;
+                }
+                if( searcher.nodes.find(gap.next +1 ) != searcher.nodes.end() )
+                {
+                    paths.push_back(get_path(searcher,gap.prev+1,gap.next+1));
+                    s1= gap.prev + 1 ;
+                    e1 = gap.next +1;
                 }
             }
-
-            if ( succ > 0 )
-                total_fill ++ ;
-
+            fill_freq.Touch(paths.size());
+            if( paths.size() > 0 )
+            {
+                gap.path = * paths.begin() ;
+                gap.prev_1 = s1 ;
+                gap.next_1 = e1 ;
+            }
         }
     }
 
 
     void PrintFillResult()
     {
-        std::cout<<"total fill "<<total_fill<<" in "<<all_gaps.size()<<std::endl;
+        std::cout<<fill_freq.ToString()<<std::endl;
+        for( const auto & gap :all_gaps )
+        {
+            if( gap.path.empty() )
+                continue ;
+            std::cout<<gap.prev<<'\t'<<gap.next<<'\t'
+                <<gap.prev_1<<'\t'<<gap.next_1;
+            for( auto i : gap.path )
+            {
+                std::cout<<'\t'<<i;
+            }
+            std::cout<<'\n';
+        }
     }
 
     void Init(const std::string & prefix , int search_len_max )
