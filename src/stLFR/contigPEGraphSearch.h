@@ -81,11 +81,20 @@ namespace BGIQD{
 
             bool first_in  ;
 
-            void AddNode(const Node & node , const SNode & )
+            std::stack<const Node * > path;
+
+            void AddNode(const Node & node , const SNode & snode )
             {
+                path.push(&node);
+
                 if( ! first_in )
                 {
                     first_in = true ;
+                    return ;
+                }
+                if( snode.type != BGIQD::GRAPH::DepthSearchEdgeType::White )
+                {
+                    ender_flag = true ;
                     return ;
                 }
                 auto ret =  keyer(node.id);
@@ -103,7 +112,7 @@ namespace BGIQD{
                     else
                     {
                         curr_len += node.contigLen;
-                        last_len = node.contigLen;
+                        return ;
                     }
                 }
                 else if ( ret == NodeType::Seed)
@@ -118,16 +127,17 @@ namespace BGIQD{
 
             void PopEdge() { ender_flag  = false ; }
 
-            void PopNode() 
+            void PopNode()
             {
-                ender_flag  = false ;
-                curr_len -= last_len ;
-                last_len = 0 ;
-                if( curr_len < 0 )
+                if( path.empty() )
                 {
-                    curr_len = 0 ;
-                    first_in  = false ;
+                    assert(0);
+                    return ;
                 }
+                const Node * top = path.top();
+                path.pop();
+                ender_flag  = false ;
+                curr_len = top->contigLen ;
             }
 
             void AddEdge(const Edge & ) { ender_flag = false ; }

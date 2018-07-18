@@ -33,12 +33,14 @@ struct AppConfig
     std::set<unsigned int> trunk_seeds;
     std::set<unsigned int> PE_seeds;
     std::vector<GapInfo>  infos ;
+    int strategy;
 
-    void Init( const std::string & prefix, float m)
+    void Init( const std::string & prefix, float m , int s)
     {
         fName.Init(prefix);
         BGIQD::LOG::logfilter::singleton().get("SeedCluster",BGIQD::LOG::loglevel::INFO, loger);
         min = m;
+        strategy = s;
     }
 
 
@@ -106,7 +108,13 @@ struct AppConfig
            FATAL( " failed to open xxx.seeds_cluster_seeds to write"); 
         for(auto & info : infos)
         {
-            auto both = Cols::Intersection(relations[info.prev] , relations[info.next]);
+            Cols both;
+            if( strategy == 0 )
+                both = Cols::Intersection(relations[info.prev] , relations[info.next]);
+            else if( strategy == 1 )
+                both = Cols::Union(relations[info.prev] , relations[info.next]);
+            else
+                assert(0);
             (*out)<<info.prev<<'\t'<<info.next;
             freqs.Touch(both.keysize());
             for(const auto x : both)
@@ -127,9 +135,10 @@ int main(int argc , char ** argv)
     START_PARSE_ARGS
         DEFINE_ARG_REQUIRED(std::string, prefix ,"prefix of files.");
         DEFINE_ARG_REQUIRED(float , threshold, "min simularity threshold");
+        DEFINE_ARG_REQUIRED(int, strategy, "0 for Intersection ; 1 for Union");
     END_PARSE_ARGS;
     BGIQD::LOG::timer t(config.loger,"SeedCluster");
-    config.Init(prefix.to_string(), threshold.to_float());
+    config.Init(prefix.to_string(), threshold.to_float(), strategy.to_int());
     config.LoadTrunk();
     config.LoadBinCluster();
     config.PrintCluster();

@@ -6,12 +6,14 @@
 #include "common/string/stringtools.h"
 #include "common/error/Error.h"
 #include "common/stl/mapHelper.h"
+#include "common/freq/freq.h"
 
 #include "biocommon/sam_bam/sam_parser.h"
 
 #include "stLFR/contigPEGraph.h"
 
 #include "soap2/fileName.h"
+
 struct AppConfig
 {
     BGIQD::LOG::logger loger;
@@ -132,6 +134,7 @@ struct AppConfig
     void LoadPECahce()
     {
         BGIQD::LOG::timer t(loger,"LoadPECahce");
+        BGIQD::FREQ::Freq<int> ISFreq;
         std::string line ;
         {
             auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.read2contig());
@@ -143,34 +146,71 @@ struct AppConfig
             long insert_size_num = 0;
             // round 1 . calc mean value of insert size.
             unsigned int  prev = -1 ;
+
+            std::vector<int> pos;
+
+            bool isP_wait = false ;
             while( ! std::getline( *in , line ).eof() )
             {
                 auto items = BGIQD::STRING::split(line,"\t");
+
                 if( items[5] == "P"  )
                 {
+                    pos.clear();
                     if( items[6] == "Y" )
                     {
                         total_pair ++ ;
                         prev = std::stoul(items[1]);
+                        int first_1bp = std::stoul(items[2]);
+                        pos.push_back(first_1bp);
+                        int last_1bp = 0 ;
+                        if( items[3] == "+" )
+                            last_1bp = first_1bp + 100 -1 ;
+                        else
+                            last_1bp = first_1bp - 100 +1 ;
+                        pos.push_back(last_1bp);
+                        isP_wait = true ;
                     }
                     else
+                    {
                         prev = -1 ;
+                        isP_wait = false ;
+                    }
+
                 }
-                else 
+                else
                 {
-                    if( std::stoul(items[1]) == prev )
+                    if( items[6] == "Y" && std::stoul(items[1]) == prev && isP_wait )
                     {
                         total_pair_pe_same ++ ;
                         insert_size_num ++ ;
-                        insert_size_sum += std::abs(std::stoi(items[7]) );
+                        int first_1bp = std::stoul(items[2]);
+                        pos.push_back(first_1bp);
+                        int last_1bp = 0 ;
+                        if( items[3] == "+" )
+                            last_1bp = first_1bp + 100 -1 ;
+                        else
+                            last_1bp = first_1bp - 100 +1 ;
+                        pos.push_back(last_1bp);
+
+                        assert(pos.size() == 4 );
+                        std::sort(pos.begin() ,pos.end());
+                        int smallest = pos[0];
+                        int biggest = pos[3] ;
+                        int IS = biggest - smallest +1 ;
+                        insert_size_sum += IS ;
+                        ISFreq.Touch(IS);
                     }
+                    isP_wait = false ;
                 }
             }
+
             delete in ;
             insert_size = insert_size_sum / insert_size_num ;
             loger<<BGIQD::LOG::lstart() << " average insert_size "<<insert_size<<BGIQD::LOG::lend();
             loger<<BGIQD::LOG::lstart() << " total_pair "<<total_pair<<BGIQD::LOG::lend();
             loger<<BGIQD::LOG::lstart() << " total_pair_pe_same "<<total_pair_pe_same<<BGIQD::LOG::lend();
+            loger<<BGIQD::LOG::lstart() << " insert size freq is "<<ISFreq.ToString()<<BGIQD::LOG::lend();
         }
 
         {
@@ -291,6 +331,7 @@ struct AppConfig
         pe_graph.PrintAsDOT(*out);
         delete out;
     }
+
 }config;
 
 

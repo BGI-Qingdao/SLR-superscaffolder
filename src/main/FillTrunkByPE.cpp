@@ -55,6 +55,8 @@ struct AppConfig
     BGIQD::stLFR::ContigPEGraph pe_graph;
     std::map<unsigned int , int > contigLen_cache;
     BGIQD::FREQ::Freq<int> fill_freq;
+    int is_max;
+
     void LoadSeedCluster()
     {
         auto parseline = [this](const std::string & line) -> void 
@@ -75,16 +77,18 @@ struct AppConfig
 
     void LoadPEGraph()
     {
-        auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.seeds_cluster_seeds());
+        auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.pe_graph());
         if( in == NULL )
             FATAL( " failed to open xxx.seeds_cluster_seeds to read !!!" );
 
         auto parseline = [this](const std::string & line) -> void 
         {
-            if( line == "bigraph {" || line == "}" )
+            if( line == "digraph {" || line == "}" )
                 return ;
             BGIQD::stLFR::PEEdge edge;
             edge.InitFromString(line);
+            if( std::abs(edge.len) > is_max )
+                return ;
             pe_graph.AddEdge(edge);
         };
         BGIQD::FILES::FileReaderFactory::EachLine(*in,parseline);
@@ -196,39 +200,64 @@ struct AppConfig
                 }
             }
             fill_freq.Touch(paths.size());
-            if( paths.size() > 0 )
+            if( paths.size() == 1 )
             {
-                gap.path = * paths.begin() ;
+                gap.path = paths[0] ;
                 gap.prev_1 = s1 ;
                 gap.next_1 = e1 ;
             }
         }
+        loger<<BGIQD::LOG::lstart()<<fill_freq.ToString()<<BGIQD::LOG::lend();
     }
 
 
     void PrintFillResult()
     {
-        std::cout<<fill_freq.ToString()<<std::endl;
+        auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.trunk_fill());
+        if( out == NULL )
+            FATAL(" failed to open xxx.trunk_fill to write !! ");
         for( const auto & gap :all_gaps )
         {
             if( gap.path.empty() )
                 continue ;
-            std::cout<<gap.prev<<'\t'<<gap.next<<'\t'
+            
+            (*out)<<gap.prev<<'\t'<<gap.next<<'\t'
                 <<gap.prev_1<<'\t'<<gap.next_1;
             for( auto i : gap.path )
             {
-                std::cout<<'\t'<<i;
+                (*out)<<'\t'<<i;
             }
-            std::cout<<'\n';
+            (*out)<<'\n';
         }
+        delete out ;
+    }
+    void PrintTest()
+    {
+        auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName("test.fill");
+        if( out == NULL )
+            FATAL(" failed to open test.fill to write !! ");
+        for( const auto & gap :all_gaps )
+        {
+            if( gap.path.empty() )
+                continue ;
+
+            (*out)<<gap.path.size();
+            for( auto i : gap.path )
+            {
+                (*out)<<'\t'<<i;
+            }
+            (*out)<<'\n';
+        }
+        delete out ;
     }
 
-    void Init(const std::string & prefix , int search_len_max )
+    void Init(const std::string & prefix , int search_len_max , int max_is )
     {
         fName.Init(prefix);
         searchMax = search_len_max ;
         BGIQD::LOG::logfilter::singleton().get("FillTrunkByPE", BGIQD::LOG::loglevel::INFO,loger);
         total_fill = 0 ;
+        is_max = max_is ;
     }
 
     void LoadSeeds()
@@ -255,14 +284,17 @@ int main(int argc , char ** argv)
     START_PARSE_ARGS
         DEFINE_ARG_REQUIRED(std::string, prefix ,"prefix of files.");
         DEFINE_ARG_OPTIONAL(int, searchMax,"max search length." ,"5000");
+        DEFINE_ARG_OPTIONAL(int, insert_max,"max insert_size avaliable." ,"1000");
+        DEFINE_ARG_OPTIONAL(bool,ptest,"print date for test." ,"false");
     END_PARSE_ARGS;
-    config.Init(prefix.to_string() , searchMax.to_int());
+    config.Init(prefix.to_string() , searchMax.to_int(),insert_max.to_int());
     BGIQD::LOG::timer t(config.loger,"FillTrunkByPE");
     config.LoadSeedCluster();
     config.LoadSeeds();
     config.LoadPEGraph();
     config.CalcAll();
     config.PrintFillResult();
-
+    if( ptest.to_bool() )
+        config.PrintTest();
     return 0;
 }

@@ -22,7 +22,9 @@ int main(int argc , char **argv)
     BGIQD::LOG::logfilter::singleton().get("SuperContig",BGIQD::LOG::loglevel::INFO , lger);
     BGIQD::LOG::timer t(lger,"SuperContig");
     START_PARSE_ARGS
-    DEFINE_ARG_REQUIRED(std::string , pos, "postion order of contig");
+    DEFINE_ARG_REQUIRED(std::string , pos, "postion order of contig file");
+    DEFINE_ARG_OPTIONAL(int, single_gap, "the biggest of single_gap, inside is del , outside is wrong","3");
+    //DEFINE_ARG_OPTIONAL(int, total_gap, "the biggest of total_gap, inside is del , outside is wrong","5");
     DEFINE_ARG_OPTIONAL(bool , detail, "print error detail","0");
     END_PARSE_ARGS
 
@@ -134,14 +136,14 @@ int main(int argc , char **argv)
                             del ++ ;
                             start += order;
                         }
-                        if( del > 3 )
+                        if( del > single_gap.to_int() )
                             break;
                     }
                     if ( conflict )
                     {
                         break ;
                     }
-                    if( del > 3 ) 
+                    if( del > single_gap.to_int() )
                         break;
                     else
                         del_total += del;
@@ -182,10 +184,10 @@ int main(int argc , char **argv)
                             del ++ ;
                             start += order;
                         }
-                        if( del > 5 )
+                        if( del > single_gap.to_int() )
                             break;
                     }
-                    if( del > 5 ) 
+                    if( del > single_gap.to_int() )
                         break;
                     else
                         del_total +=del;

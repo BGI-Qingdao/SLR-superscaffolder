@@ -39,10 +39,11 @@ namespace BGIQD {
 
             void InitFromString(const std::string & line )
             {
+                //\t317165\t->\t346282 [  count= 11 len= -153 ]
                 char tmp_char ;
                 std::string tmp_str;
                 std::istringstream ist(line);
-                ist>>from>>to>>tmp_char>>tmp_str>>count>>tmp_str>>len;
+                ist>>from>>tmp_str>>to>>tmp_char>>tmp_str>>count>>tmp_str>>len;
             }
         };
 
@@ -68,11 +69,22 @@ namespace BGIQD {
                 {
                     return ;
                 }
-                node.edge_id = *( node.edge_ids.begin() );
-                EdgeId next = Edge::invalid ;
-                for( auto i = node.edge_ids.rbegin() ; i != node.edge_ids.rend() ; i =  std::next(i) )
+
+                std::vector<std::tuple<int,long> >  edges;
+
+                for( auto i : node.edge_ids )
                 {
-                    EdgeId eid = *i;
+                    auto & edge = GetEdge(i);
+                    edges.push_back(std::make_tuple(edge.count, i) );
+                }
+
+                std::sort(edges.rbegin() ,edges.rend());
+                node.edge_id = std::get<1>(*edges.begin());
+
+                EdgeId next = Edge::invalid ;
+                for( auto i = edges.rbegin() ; i != edges.rend() ; i =  std::next(i) )
+                {
+                    EdgeId eid = std::get<1>(*i);
                     auto & edge = GetEdge(eid);
                     if( next != Edge::invalid )
                     {
