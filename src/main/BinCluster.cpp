@@ -193,6 +193,7 @@ int main(int argc ,char **argv)
     DEFINE_ARG_REQUIRED(std::string , prefix, "prefix. Input xxx.barcodeOnBin ; Output xxx.bin_cluster && xxx.cluster");
     DEFINE_ARG_REQUIRED(float , threshold, "simularity threshold");
     DEFINE_ARG_OPTIONAL(int , thread, "thread num" ,"8");
+    DEFINE_ARG_OPTIONAL(bool, pbc, "print bin cluster" ,"0");
     END_PARSE_ARGS
 
     config.Init(prefix.to_string() , threshold.to_float());
@@ -211,6 +212,7 @@ int main(int argc ,char **argv)
 
     config.BuildABBAResult();
 
+    if( pbc.to_bool() )
     config.PrintBinRelation();
 
     config.BuildContigRelation();

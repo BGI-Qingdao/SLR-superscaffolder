@@ -42,15 +42,23 @@ cpSpeed_o   =	${cpSpeed_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 trunk_mark_cpp 	=	trunk_mark.cpp
 trunk_mark_o   =	${trunk_mark_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
+seedGapFreq_cpp 	=	seedGapFreq.cpp
+seedGapFreq_o   =	${seedGapFreq_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+
 .cpp.o:
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
 jobs 	   =	stLFR_2_10X cpSpeed trunk_mark\
+				seedGapFreq
 
 jobs_o 	   =	${stLFR_2_10X_o} ${cpSpeed_o}\
+				${seedGapFreq_o}
 
 all : ${jobs}
 	
+seedGapFreq : clean ${seedGapFreq_o}
+	${CXX} ${DEUBG_CXX} ${seedGapFreq_o} -o seedGapFreq
+
 trunk_mark : clean ${trunk_mark_o}
 	${CXX} ${DEUBG_CXX} ${trunk_mark_o} -o trunk_mark
 

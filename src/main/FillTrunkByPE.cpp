@@ -56,7 +56,7 @@ struct AppConfig
     std::map<unsigned int , int > contigLen_cache;
     BGIQD::FREQ::Freq<int> fill_freq;
     int is_max;
-
+    bool use_all_pe_graph;
     void LoadSeedCluster()
     {
         auto parseline = [this](const std::string & line) -> void 
@@ -79,7 +79,7 @@ struct AppConfig
     {
         auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.pe_graph());
         if( in == NULL )
-            FATAL( " failed to open xxx.seeds_cluster_seeds to read !!!" );
+            FATAL( " failed to open xxx.pe_graph to read !!!" );
 
         auto parseline = [this](const std::string & line) -> void 
         {
@@ -143,12 +143,30 @@ struct AppConfig
             }
             return ret;
         };
+
+        for(auto & node : pe_graph.nodes )
+        {
+            pe_graph.MakeEdgeNext(node.second.id);
+        }
+
         for (auto & gap : all_gaps)
         {
-            BGIQD::stLFR::ContigPEGraph sub_graph = pe_graph.SubGraph(gap.relations);
-            for(auto & node : sub_graph.nodes )
+            BGIQD::stLFR::ContigPEGraph cluster_sub_graph;
+            BGIQD::stLFR::ContigPEGraph * sub_graph_ptr ;
+            if( !use_all_pe_graph )
             {
-                sub_graph.MakeEdgeNext(node.second.id);
+                cluster_sub_graph = pe_graph.SubGraph(gap.relations);
+                sub_graph_ptr = &cluster_sub_graph ;
+            }
+            else 
+                sub_graph_ptr = &pe_graph ;
+            BGIQD::stLFR::ContigPEGraph & sub_graph = *(sub_graph_ptr);
+            if( ! use_all_pe_graph )
+            {
+                for(auto & node : sub_graph.nodes )
+                {
+                    sub_graph.MakeEdgeNext(node.second.id);
+                }
             }
             std::vector<std::vector<unsigned int> > paths;
             unsigned int s1 , e1 ;
@@ -210,7 +228,6 @@ struct AppConfig
         loger<<BGIQD::LOG::lstart()<<fill_freq.ToString()<<BGIQD::LOG::lend();
     }
 
-
     void PrintFillResult()
     {
         auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.trunk_fill());
@@ -220,7 +237,7 @@ struct AppConfig
         {
             if( gap.path.empty() )
                 continue ;
-            
+
             (*out)<<gap.prev<<'\t'<<gap.next<<'\t'
                 <<gap.prev_1<<'\t'<<gap.next_1;
             for( auto i : gap.path )
@@ -251,13 +268,14 @@ struct AppConfig
         delete out ;
     }
 
-    void Init(const std::string & prefix , int search_len_max , int max_is )
+    void Init(const std::string & prefix , int search_len_max , int max_is , bool  use_pe)
     {
         fName.Init(prefix);
         searchMax = search_len_max ;
         BGIQD::LOG::logfilter::singleton().get("FillTrunkByPE", BGIQD::LOG::loglevel::INFO,loger);
         total_fill = 0 ;
         is_max = max_is ;
+        use_all_pe_graph = use_pe;
     }
 
     void LoadSeeds()
@@ -285,9 +303,10 @@ int main(int argc , char ** argv)
         DEFINE_ARG_REQUIRED(std::string, prefix ,"prefix of files.");
         DEFINE_ARG_OPTIONAL(int, searchMax,"max search length." ,"5000");
         DEFINE_ARG_OPTIONAL(int, insert_max,"max insert_size avaliable." ,"1000");
+        DEFINE_ARG_OPTIONAL(bool,use_all_pe_graph,"use all pe_graph instead of cluster sub graph." ,"false");
         DEFINE_ARG_OPTIONAL(bool,ptest,"print date for test." ,"false");
     END_PARSE_ARGS;
-    config.Init(prefix.to_string() , searchMax.to_int(),insert_max.to_int());
+    config.Init(prefix.to_string() , searchMax.to_int(),insert_max.to_int(),use_all_pe_graph.to_bool());
     BGIQD::LOG::timer t(config.loger,"FillTrunkByPE");
     config.LoadSeedCluster();
     config.LoadSeeds();

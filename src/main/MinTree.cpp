@@ -29,9 +29,11 @@ struct AppConf
 
     BGIQD::LOG::logger lger;
 
-    void Init(const std::string & prefix)
+    float smallest ;
+    void Init(const std::string & prefix, float f)
     {
         fNames.Init(prefix);
+        smallest = f ;
         BGIQD::LOG::logfilter::singleton().get("MST", BGIQD::LOG::loglevel::INFO,lger);
     }
 
@@ -46,7 +48,8 @@ struct AppConf
             tmp.InitFromString(line);
             for( auto x : tmp.sims )
             {
-                graph.AddEdgeSim( tmp.contigId , x.first , x.second.simularity );
+                if( x.second.simularity >= smallest )
+                    graph.AddEdgeSim( tmp.contigId , x.first , x.second.simularity );
             }
         };
         BGIQD::FILES::FileReaderFactory::EachLine(*in,parseline);
@@ -118,9 +121,10 @@ int main(int argc , char **argv )
 {
     START_PARSE_ARGS
     DEFINE_ARG_REQUIRED(std::string , prefix , "prefix , Input xxx.connInfo . Output xxx.minTree ");
+    DEFINE_ARG_OPTIONAL(float , threshold, " threshold of simularity","0.1");
     END_PARSE_ARGS
 
-    config.Init(prefix.to_string());
+    config.Init(prefix.to_string(),threshold.to_float());
     config.LoadContigSimGraph();
     config.SplitGraph();
     config.GenerateMinTrees();

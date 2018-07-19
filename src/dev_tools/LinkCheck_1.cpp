@@ -118,6 +118,11 @@ int main(int argc , char **argv)
                     int del = 0;
                     while(1)
                     {
+                        if( start < 1 )
+                        {
+                            conflict = true ;
+                            break ;
+                        }
                         if( ref_keys[ start ].contig == line[i] )
                         {
                             if ( orders[i] && ( ref_keys[start].is_reverse_complete )) 
@@ -166,6 +171,11 @@ int main(int argc , char **argv)
                     int del = 0;
                     while(1)
                     {
+                        if( start < 1 )
+                        {
+                            conflict = true ;
+                            break ;
+                        }
                         if( ref_keys[ start ].contig == line[i] )
                         {
                             if ( orders[i] && ( !ref_keys[start].is_reverse_complete )) 
