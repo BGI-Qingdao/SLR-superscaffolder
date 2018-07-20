@@ -29,7 +29,9 @@ int main(int argc ,char ** argv)
         int s = std::stoi(item[2]);
         int e = std::stoi(item[3]);
         if( prev != -1 )
+        {
             freq.Touch((s - prev )/1000);
+        }
         prev = e ;
     }
     std::cout<<freq.ToString()<<std::endl;

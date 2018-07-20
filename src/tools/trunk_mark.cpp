@@ -13,6 +13,7 @@ int main(int argc , char **argv)
     DEFINE_ARG_REQUIRED(std::string , seedLinear , " the seed linear file ");
     DEFINE_ARG_REQUIRED(std::string , trunkLinear , " the trunk linear file ");
     DEFINE_ARG_REQUIRED(std::string , outPrefix, " the out file prefix");
+    DEFINE_ARG_OPTIONAL(bool, pos, "print pos in ref at colomn 2","false");
     END_PARSE_ARGS
 
     std::map<unsigned int , std::set<int> > seedPos;
@@ -54,6 +55,8 @@ int main(int argc , char **argv)
         }
         unsigned int contig = std::stoul(line);
         (*out)<<contig;
+        if( pos.to_bool() )
+            (*out)<<'\t'<<seedBegin[contig];
         for( auto x : seedPos[contig])
         {
             (*out)<<'\t'<<x;

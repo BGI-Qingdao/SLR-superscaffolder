@@ -86,6 +86,8 @@ struct AppConfig
         for( const auto &i : contigInfo)
         {
             auto & contig = i.second ;
+            if ( contig.length < min )
+                continue;
             index1 ++ ;
             if( pass.find(contig.id) == pass.end() && contig.cov > UniqueLow && contig.cov < UniqueHigh && contig.length >=min )
             {
@@ -93,7 +95,7 @@ struct AppConfig
                 (*out)<<contig.id<<'\t'<<contig.length<<std::endl;
             }
         }
-        log<<BGIQD::LOG::lstart()<<index << " seed in "<<index1<<" contigs"<< BGIQD::LOG::lend();
+        log<<BGIQD::LOG::lstart()<<index << " seed in "<<index1<<" candidate contigs"<< BGIQD::LOG::lend();
         delete out;
     }
 

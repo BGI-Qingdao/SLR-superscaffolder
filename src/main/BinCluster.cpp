@@ -39,10 +39,13 @@ struct AppConfig
 
     BGIQD::LOG::logger lger;
 
-    void Init(const std::string & p , float t)
+    bool calc_same_contig;
+
+    void Init(const std::string & p , float t, bool cs)
     {
         fName.Init(p);
         thresold = t;
+        calc_same_contig = cs ;
         barcodeOnBin.Init(1024);
         relations.Init(1024);
         contig_relations.Init(1024);
@@ -85,6 +88,8 @@ struct AppConfig
             int barcode = pair.first ;
             for( auto index : binOnBarcode[barcode] )
             {
+                if(! calc_same_contig && barcodeOnBin[index].contigId == bin.contigId )
+                    continue ;
                 if ( index > i )
                     relates.insert(index);
             }
@@ -194,9 +199,10 @@ int main(int argc ,char **argv)
     DEFINE_ARG_REQUIRED(float , threshold, "simularity threshold");
     DEFINE_ARG_OPTIONAL(int , thread, "thread num" ,"8");
     DEFINE_ARG_OPTIONAL(bool, pbc, "print bin cluster" ,"0");
+    DEFINE_ARG_OPTIONAL(bool, bin_same_contig, "calc for bin on same contig ." ,"false");
     END_PARSE_ARGS
 
-    config.Init(prefix.to_string() , threshold.to_float());
+    config.Init(prefix.to_string() , threshold.to_float(), bin_same_contig.to_bool());
 
     BGIQD::LOG::timer t(config.lger,"BinCluster");
 

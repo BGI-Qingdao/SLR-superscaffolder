@@ -32,6 +32,9 @@ struct GlobalConfig
     BGIQD::stLFR::GraphEA_withBarcode graph_eab;
     BGIQD::stLFR::ContigCluster clusters;
     BGIQD::stLFR::ContigRoads roads;
+
+    BGIQD::stLFR::ContigRoads extras;
+
     BGIQD::LOG::logger lger;
     BGIQD::SOAP2::FileNames fNames;
     enum FillStrategy
@@ -127,24 +130,24 @@ void SearchAllPath(unsigned int from  , unsigned int to , SearchResult & ret){
 
     // Check result
     auto & ender = ret.searcher.ender ;
+    ret.succ = true ;
     auto itr = ender.founder.find(to_key_id);
     if( itr == ender.founder.end() )
     {
-        assert(0);
+        //assert(0);
         ret.succ = false;
     }
     auto & tos = itr->second;
     if( node.IsKey() &&  ! tos.base )
     {
-        assert(0);
+        //assert(0);
         ret.succ = false;
     }
     else if ( ! node.IsKey() && ! tos.bal )
     {
-        assert(0);
+        //assert(0);
         ret.succ = false;
     }
-    ret.succ = true ;
 }
 
 void FindCorrectPath(unsigned int from , unsigned int to, 
@@ -219,10 +222,10 @@ bool AppendPath( const  BGIQD::stLFR::P2PGraph & p2pgrapg , const SearchResult &
     return true;
 }
 
-void FillContigRoad( int i ) //BGIQD::stLFR::ContigRoad & road)
+void FillContigRoad1( BGIQD::stLFR::ContigRoad & road )
 {
-    auto & road = config.roads.roads[i];
     static std::mutex write_mutex;
+    static std::mutex extra_mutex;
     static std::mutex path_num_mutex;
     if ( ! road.needMerge() )
         return ;
@@ -337,6 +340,18 @@ void FillContigRoad( int i ) //BGIQD::stLFR::ContigRoad & road)
     {
         road.status = BGIQD::stLFR::ContigRoad::FillStatus::Complete;
     }
+    else
+    {
+        if( road.fill_num > 0 && road.fill_num < road.linear_length - 2 )
+        {
+            auto extra= road.Left(road.fill_num+1);
+            FillContigRoad1(extra);
+            {
+                std::lock_guard<std::mutex> l(extra_mutex);
+                config.extras.roads.push_back(extra);
+            }
+        }
+    }
     {
         std::lock_guard<std::mutex> l(write_mutex);
         if (road.status == BGIQD::stLFR::ContigRoad::FillStatus::Conflict)
@@ -359,6 +374,11 @@ void FillContigRoad( int i ) //BGIQD::stLFR::ContigRoad & road)
         }
     }
 }
+void FillContigRoad( int i ) //BGIQD::stLFR::ContigRoad & road)
+{
+    auto & road = config.roads.roads[i];
+    FillContigRoad1(road);
+}
 
 void report()
 {
@@ -366,19 +386,19 @@ void report()
     auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(config.fNames.contigroadfill());
     if( out == NULL )
         FATAL("failed to open xxx.contigroadfill for write ");
-    for( const auto &road : config.roads.roads)
+    auto report_road = [&]( const BGIQD::stLFR::ContigRoad & road )
     {
         if( ! road.needMerge() )
-            continue;
+            return;
         if (road.status == BGIQD::stLFR::ContigRoad::FillStatus::Conflict)
         {
             config.road_fill_freq.Touch("Conflict");
-            continue;
+            return;
         }
         if( road.status == BGIQD::stLFR::ContigRoad::FillStatus::None )
         {
             config.road_fill_freq.Touch("None");
-            continue;
+            return;
         }
         if (road.status == BGIQD::stLFR::ContigRoad::FillStatus::Complete)
         {
@@ -409,6 +429,16 @@ void report()
         }
         filled += (road.fill_num + 1 );
         *out<<std::endl;
+        return ;
+    };
+
+    for( const auto &road : config.roads.roads)
+    {
+        report_road(road);
+    }
+    for( const auto & road: config.extras.roads )
+    {
+        report_road(road);
     }
     delete out ;
     config.lger<<BGIQD::LOG::lstart()<<"road fill use seed contig \n"<<filled<<BGIQD::LOG::lend();

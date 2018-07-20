@@ -44,6 +44,17 @@ namespace BGIQD {
                 PartSucc = 2 ,
                 Complete = 3
             } status;
+
+            ContigRoad Left(int fill)
+            {
+                ContigRoad ret ;
+                ret.headin = ret.tailin = true ;
+                if( fill >= linear_length - 1 )
+                    return ret ;
+                ret.linear_length = linear_length - fill - 1 ;
+                ret.group.insert(ret.group.end(), group.begin() + fill , group.end() );
+                return ret ;
+            }
         };
 
         struct ContigRoads

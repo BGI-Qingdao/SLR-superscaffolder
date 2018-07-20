@@ -66,10 +66,11 @@ PEGraph_o				= ${PEGraph_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 SeedCluster_cpp 			= SeedCluster.cpp
 SeedCluster_o				= ${SeedCluster_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
-
 FillTrunkByPE_cpp 			= FillTrunkByPE.cpp
 FillTrunkByPE_o				= ${FillTrunkByPE_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
+FCRFByTF_cpp 			= FCRFByTF.cpp
+FCRFByTF_o				= ${FCRFByTF_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
 .cpp.o:
 	${CXX} ${DEUBG_CXX} -c $< -o $@
@@ -84,6 +85,7 @@ jobs 	   =	ChopBin\
 				LinearCDG\
 				MinTree\
 				PEGraph\
+				FCRFByTF\
 				FillTrunkByPE\
 				SeedCluster\
 
@@ -97,6 +99,7 @@ jobs_o 	   =	${ChopBin_o} \
 				${LinearCDG_o} \
 				${MinTree_o}\
 				${PEGraph_o}\
+				${FCRFByTF_o}\
 				${FillTrunkByPE_o}\
 				${SeedCluster_o}\
 
@@ -138,6 +141,9 @@ SeedCluster: clean ${SeedCluster_o}
 
 FillTrunkByPE: clean ${FillTrunkByPE_o}
 	${CXX} ${DEUBG_CXX} ${FillTrunkByPE_o} -o FillTrunkByPE 
+
+FCRFByTF: clean ${FCRFByTF_o}
+	${CXX} ${DEUBG_CXX} ${FCRFByTF_o} -o FCRFByTF 
 
 PEGraph: clean ${PEGraph_o}
 	${CXX} ${DEUBG_CXX} ${PEGraph_o} -o PEGraph 

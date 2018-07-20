@@ -16,8 +16,8 @@ struct AppConf
     long pair_num ;
     AppConf() : 
         fake_read_name("@ST-E0:0:SIMULATE:8:0:0:")
-        ,random_seq("ATCGAG")
-        , fake_q(16+6,'F')
+        ,random_seq("ATCGAGA")
+        , fake_q(16+7,'F')
         , pair_num (0)
     {}
 

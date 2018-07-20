@@ -11,14 +11,16 @@ ACCESS	algorithm/graph/SPFSearch_test.cpp	/^struct ACCESS : public BGIQD::GRAPH:
 ADD_A_FLAG	common/flags/flags.h	8;"	d
 ARGS	common/args/argsparser.h	/^    namespace ARGS{$/;"	n	namespace:BGIQD
 Access	algorithm/graph/Graph.h	/^                typedef GraphAccess                       Access;$/;"	t	struct:BGIQD::GRAPH::PathEndHelperBase
-AccessEdge	algorithm/graph/Graph.h	/^                Edge & AccessEdge(EdgeId , GraphNodeId ){ assert(0); }$/;"	f	struct:BGIQD::GRAPH::GraphAccessBase
+AccessEdge	algorithm/graph/Graph.h	/^                Edge & AccessEdge(const EdgeId & , const GraphNodeId &){ assert(0); }$/;"	f	struct:BGIQD::GRAPH::GraphAccessBase
 AccessEdge	algorithm/graph/GraphTest.cpp	/^    Edge & AccessEdge(GraphEdgeId i , GraphNodeId )$/;"	f	struct:ACCESS
 AccessEdge	algorithm/graph/SPFSearch_test.cpp	/^    Edge & AccessEdge(GraphEdgeId i , GraphNodeId )$/;"	f	struct:ACCESS
-AccessEdge	soap2/contigGraphSearch.h	/^            Edge & AccessEdge(GraphEdgeId i , GraphNodeId from)$/;"	f	struct:BGIQD::SOAP2::GraphEA_Access
-AccessNode	algorithm/graph/Graph.h	/^                Node & AccessNode(NodeId) { assert(0) ; }$/;"	f	struct:BGIQD::GRAPH::GraphAccessBase
+AccessEdge	soap2/contigGraphSearch.h	/^            Edge & AccessEdge(const GraphEdgeId & i , const GraphNodeId & from)$/;"	f	struct:BGIQD::SOAP2::GraphEA_Access
+AccessEdge	stLFR/contigPEGraphSearch.h	/^                Edge & AccessEdge(const GraphEdgeId & id, const GraphNodeId & nodeId)$/;"	f	struct:BGIQD::stLFR::ContigPEGraphAccess
+AccessNode	algorithm/graph/Graph.h	/^                Node & AccessNode(const NodeId &) { assert(0) ; }$/;"	f	struct:BGIQD::GRAPH::GraphAccessBase
 AccessNode	algorithm/graph/GraphTest.cpp	/^    Node & AccessNode(GraphNodeId i)$/;"	f	struct:ACCESS
 AccessNode	algorithm/graph/SPFSearch_test.cpp	/^    Node & AccessNode(GraphNodeId i)$/;"	f	struct:ACCESS
-AccessNode	soap2/contigGraphSearch.h	/^            Node & AccessNode(GraphNodeId i)$/;"	f	struct:BGIQD::SOAP2::GraphEA_Access
+AccessNode	soap2/contigGraphSearch.h	/^            Node & AccessNode(const GraphNodeId &i)$/;"	f	struct:BGIQD::SOAP2::GraphEA_Access
+AccessNode	stLFR/contigPEGraphSearch.h	/^                Node & AccessNode(const GraphNodeId & id) $/;"	f	struct:BGIQD::stLFR::ContigPEGraphAccess
 AddChild	algorithm/fibheap/fib_heap.h	/^                void AddChild(Node & child)$/;"	f	struct:BGIQD::FIBHEAP::Node
 AddCircle	stLFR/barcodeOnContig.h	/^                void AddCircle( const Circle & c)$/;"	f	struct:BGIQD::stLFR::P2PGraph::Path
 AddConnect	algorithm/disjoin_set/disjoin_set.h	/^                void AddConnect( const Key a , const Key b )$/;"	f	class:BGIQD::Algorithm::DisJoin_Set
@@ -36,6 +38,9 @@ AddEdge	algorithm/graph/SPFSearch_test.cpp	/^    void AddEdge(const Edge & ) {$/
 AddEdge	soap2/contigGraphDepth.h	/^                void AddEdge(const Edge & ) $/;"	f	struct:BGIQD::SOAP2::DepthSearchEAEnder
 AddEdge	soap2/contigGraphSPF.h	/^            void AddEdge(const Edge & ) { ender_flag = false ; }$/;"	f	struct:BGIQD::SOAP2::SFPEnder
 AddEdge	stLFR/barcodeOnContig.h	/^                bool AddEdge(const Edge & edge ) $/;"	f	struct:BGIQD::stLFR::P2PGraph::Path
+AddEdge	stLFR/contigPEGraph.h	/^            void AddEdge( unsigned int from , unsigned int to ,int len, int count ) $/;"	f	struct:BGIQD::stLFR::ContigPEGraph
+AddEdge	stLFR/contigPEGraph.h	/^            void AddEdge(const Edge & edge)$/;"	f	struct:BGIQD::stLFR::ContigPEGraph
+AddEdge	stLFR/contigPEGraphSearch.h	/^            void AddEdge(const Edge & ) { ender_flag = false ; }$/;"	f	struct:BGIQD::stLFR::DepthEnder
 AddEdge	unused/graph/Graph.h	/^                EdgeIndex AddEdge( I from , I to )$/;"	f	class:BGIQD::Graph::DiGraph_VE
 AddEdgeSim	stLFR/contigSimGraph.h	/^            void AddEdgeSim( unsigned int from , unsigned int to , float sim)$/;"	f	struct:BGIQD::stLFR::ContigSimGraph
 AddEdgeValue	algorithm/graph/GraphTrunk_test.cpp	/^    void AddEdgeValue( const std::string & from , const std::string & to, int value )$/;"	f	struct:TKTestGraphBasic
@@ -51,6 +56,9 @@ AddNode	algorithm/graph/GraphTest.cpp	/^    void AddNode(const Node &n , const S
 AddNode	algorithm/graph/SPFSearch_test.cpp	/^    void AddNode(const Node &n , const SNode & dnode) {$/;"	f	struct:Ender1
 AddNode	soap2/contigGraphDepth.h	/^                void AddNode(const Node & node , const SNode & dnode ) $/;"	f	struct:BGIQD::SOAP2::DepthSearchEAEnder
 AddNode	soap2/contigGraphSPF.h	/^            void AddNode(const Node & node , const SNode & dnode ) $/;"	f	struct:BGIQD::SOAP2::SFPEnder
+AddNode	stLFR/contigPEGraph.h	/^            void AddNode( unsigned int contigId , int len)$/;"	f	struct:BGIQD::stLFR::ContigPEGraph
+AddNode	stLFR/contigPEGraph.h	/^            void AddNode(const Node & tmp)$/;"	f	struct:BGIQD::stLFR::ContigPEGraph
+AddNode	stLFR/contigPEGraphSearch.h	/^            void AddNode(const Node & node , const SNode & snode )$/;"	f	struct:BGIQD::stLFR::DepthEnder
 AddResult	common/multithread/MapReduce.h	/^        void AddResult(const K2& k ,const V2 & v )$/;"	f	class:BGIQD::MultiThread::Shuffler
 AddSeq	dev_tools/ContigRoadFill2Fasta.cpp	/^        void AddSeq ( const std::string & line, int k)$/;"	f	struct:GlobalContig::ContigFastA
 AddSeq	soap2/contigFasta.cpp	/^        void ContigFastA::AddSeq ( const std::string & line, int k)$/;"	f	class:BGIQD::SOAP2::ContigFastA
@@ -66,9 +74,13 @@ AppConf	tools/stLFR_2_10X.cpp	/^struct AppConf$/;"	s	file:
 AppConfig	main/BinCluster.cpp	/^struct AppConfig$/;"	s	file:
 AppConfig	main/ChopBin.cpp	/^struct AppConfig$/;"	s	file:
 AppConfig	main/ContigDlink.cpp	/^struct AppConfig$/;"	s	file:
+AppConfig	main/FCRFByTF.cpp	/^struct AppConfig$/;"	s	file:
+AppConfig	main/FillTrunkByPE.cpp	/^struct AppConfig$/;"	s	file:
 AppConfig	main/LinearCDG.cpp	/^struct  AppConfig$/;"	s	file:
 AppConfig	main/MergeContig.cpp	/^struct AppConfig$/;"	s	file:
+AppConfig	main/PEGraph.cpp	/^struct AppConfig$/;"	s	file:
 AppConfig	main/Sam2ReadOnContig.cpp	/^struct AppConfig$/;"	s	file:
+AppConfig	main/SeedCluster.cpp	/^struct AppConfig$/;"	s	file:
 AppConfig	main/StaticsticUnique.cpp	/^struct AppConfig$/;"	s	file:
 AppendPath	main/FillContigRoad.cpp	/^bool AppendPath( const  BGIQD::stLFR::P2PGraph & p2pgrapg , const SearchResult & result, BGIQD::stLFR::ContigRoad & road)$/;"	f
 Arc	soap2/contigGraph.h	/^        struct Arc$/;"	s	namespace:BGIQD::SOAP2
@@ -78,6 +90,7 @@ ArcNum	soap2/contigGraph.cpp	/^        int Edge::ArcNum() const $/;"	f	class:BGI
 AssignTag	stLFR/barcodeId.cpp	/^    bool BarcodeId::AssignTag( const std::string &tag, int number )$/;"	f	class:BGIQD::stLFR::BarcodeId
 AttrString	algorithm/graph/GraphBasic.h	/^                std::string AttrString() const$/;"	f	struct:BGIQD::GRAPH::IDigraphEdgeBase
 AttrString	algorithm/graph/GraphBasic.h	/^                std::string AttrString() const$/;"	f	struct:BGIQD::GRAPH::IGraphEdgeBasic
+AttrString	stLFR/contigPEGraph.h	/^            std::string AttrString() const$/;"	f	struct:BGIQD::stLFR::PEEdge
 AttrString	stLFR/contigSimGraph.h	/^            std::string AttrString() const$/;"	f	struct:BGIQD::stLFR::Edge
 BGIQD	algorithm/bi_list/bi_list.h	/^namespace BGIQD{$/;"	n
 BGIQD	algorithm/collection/collection.h	/^namespace BGIQD{$/;"	n
@@ -90,6 +103,7 @@ BGIQD	algorithm/graph/GraphTrunk.h	/^namespace BGIQD{$/;"	n
 BGIQD	algorithm/graph/MinTree.h	/^namespace BGIQD {$/;"	n
 BGIQD	algorithm/graph/SPFSearch.h	/^namespace BGIQD{$/;"	n
 BGIQD	algorithm/incr_array/incr_array.h	/^namespace BGIQD {$/;"	n
+BGIQD	algorithm/interval/Interval.h	/^namespace BGIQD{$/;"	n
 BGIQD	biocommon/pair/pair_sam_parser.cpp	/^namespace BGIQD{$/;"	n	file:
 BGIQD	biocommon/pair/pair_sam_parser.h	/^namespace BGIQD{$/;"	n
 BGIQD	biocommon/sam_bam/sam_parser.cpp	/^namespace BGIQD{$/;"	n	file:
@@ -122,7 +136,7 @@ BGIQD	soap2/contigGraph.cpp	/^namespace BGIQD{$/;"	n	file:
 BGIQD	soap2/contigGraph.h	/^namespace BGIQD {$/;"	n
 BGIQD	soap2/contigGraphDepth.h	/^namespace BGIQD{$/;"	n
 BGIQD	soap2/contigGraphSPF.h	/^namespace BGIQD{$/;"	n
-BGIQD	soap2/contigGraphSearch.h	/^namespace BGIQD{$/;"	n
+BGIQD	soap2/contigGraphSearch.h	/^namespace BGIQD {$/;"	n
 BGIQD	soap2/contigType.cpp	/^namespace BGIQD {$/;"	n	file:
 BGIQD	soap2/contigType.h	/^namespace BGIQD {$/;"	n
 BGIQD	soap2/fileName.h	/^namespace BGIQD {$/;"	n
@@ -140,6 +154,8 @@ BGIQD	stLFR/barcodeId.cpp	/^namespace BGIQD{$/;"	n	file:
 BGIQD	stLFR/barcodeId.h	/^namespace BGIQD{$/;"	n
 BGIQD	stLFR/barcodeOnContig.cpp	/^namespace BGIQD {$/;"	n	file:
 BGIQD	stLFR/barcodeOnContig.h	/^namespace BGIQD {$/;"	n
+BGIQD	stLFR/contigPEGraph.h	/^namespace BGIQD {$/;"	n
+BGIQD	stLFR/contigPEGraphSearch.h	/^namespace BGIQD{$/;"	n
 BGIQD	stLFR/contigSimGraph.h	/^namespace BGIQD {$/;"	n
 BGIQD	stLFR/readName2Barcode.cpp	/^namespace BGIQD{$/;"	n	file:
 BGIQD	stLFR/readName2Barcode.h	/^namespace BGIQD{$/;"	n
@@ -180,6 +196,9 @@ Basic	algorithm/graph/GraphBasic.h	/^                typedef ListGraphBasic<TNod
 Basic	algorithm/graph/GraphBasic.h	/^                typedef ListGraphBasic<TNode , TEdge, TNodes , TEdges> Basic;$/;"	t	struct:BGIQD::GRAPH::ListGraph
 Basic	algorithm/graph/GraphTrunk_test.cpp	/^    typedef BGIQD::GRAPH::ListGraph<TKTestNode , TKEdge> Basic;$/;"	t	struct:TKTestGraphBasic	file:
 Basic	algorithm/graph/MinTree_test.cpp	/^    typedef BGIQD::GRAPH::ListGraph<MTestNode , MTEdge> Basic;$/;"	t	struct:MTestGraphBasic	file:
+Basic	stLFR/contigPEGraph.h	/^            typedef BGIQD::GRAPH::IGraphNodeBasic<unsigned int , long >  Basic;$/;"	t	struct:BGIQD::stLFR::ContigNode
+Basic	stLFR/contigPEGraph.h	/^            typedef BGIQD::GRAPH::ListDigraph<ContigNode , PEEdge > Basic;$/;"	t	struct:BGIQD::stLFR::ContigPEGraph
+Basic	stLFR/contigPEGraphSearch.h	/^            > Basic;$/;"	t	struct:BGIQD::stLFR::DepthEnder
 Basic	stLFR/contigSimGraph.h	/^            typedef BGIQD::GRAPH::ListGraph<Node,Edge> Basic ;$/;"	t	struct:BGIQD::stLFR::ContigSimGraph
 BiList	algorithm/bi_list/bi_list.h	/^            struct BiList$/;"	s	namespace:BGIQD::BILIST
 BiList	algorithm/fibheap/fib_heap.h	/^                typedef BGIQD::BILIST::BiList<Node> BiList;$/;"	t	struct:BGIQD::FIBHEAP::Node
@@ -187,6 +206,7 @@ BiListPtr	algorithm/bi_list/bi_list.h	/^                typedef BiList * BiListP
 BinCluster_cpp	main/Makefile	/^BinCluster_cpp =	BinCluster.cpp$/;"	m
 BinCluster_o	main/Makefile	/^BinCluster_o   =	${BinCluster_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}$/;"	m
 BinIndexOnBarcode	main/BinCluster.cpp	/^    typedef std::map< int , std::set<int> > BinIndexOnBarcode;$/;"	t	struct:AppConfig	file:
+BinInterval	main/ChopBin.cpp	/^                BGIQD::INTERVAL::Left_Close_Right_Close > BinInterval;$/;"	t	struct:AppConfig	file:
 BinRelation	stLFR/CBB.h	/^        struct BinRelation$/;"	s	namespace:BGIQD::stLFR
 BinRelationArray	stLFR/CBB.h	/^        typedef  BGIQD::INCRARRAY::IncrArray<BinRelation>       BinRelationArray;$/;"	t	namespace:BGIQD::stLFR
 BinSimularity	stLFR/CBB.h	/^        struct BinSimularity$/;"	s	namespace:BGIQD::stLFR
@@ -194,6 +214,7 @@ Black	algorithm/graph/DepthSearch.h	/^            Black = 2 ,$/;"	e	enum:BGIQD::
 BuildABBAResult	main/BinCluster.cpp	/^    void BuildABBAResult()$/;"	f	struct:AppConfig
 BuildBinIndexOnBarcode	main/BinCluster.cpp	/^    void BuildBinIndexOnBarcode()$/;"	f	struct:AppConfig
 BuildContigRelation	main/BinCluster.cpp	/^    void BuildContigRelation()$/;"	f	struct:AppConfig
+BuildPEGraph	main/PEGraph.cpp	/^    void BuildPEGraph()$/;"	f	struct:AppConfig
 CC	dev_tools/Makefile	/^CC 		   =	gcc$/;"	m
 CC	main/Makefile	/^CC 		   =	gcc$/;"	m
 CC	test/Makefile	/^CC 		   =	gcc$/;"	m
@@ -214,8 +235,10 @@ CXXFLAGS	main/Makefile	/^CXXFLAGS   =	-std=c++11\\$/;"	m
 CXXFLAGS	test/Makefile	/^CXXFLAGS   =	-std=c++11\\$/;"	m
 CXXFLAGS	tools/Makefile	/^CXXFLAGS   =	-std=c++11\\$/;"	m
 Calc1Bin2All	main/BinCluster.cpp	/^    void Calc1Bin2All(int i )$/;"	f	struct:AppConfig
+CalcAll	main/FillTrunkByPE.cpp	/^    void CalcAll()$/;"	f	struct:AppConfig
 CalcCov	main/StaticsticUnique.cpp	/^    void CalcCov()$/;"	f	struct:AppConfig
 CalcCov	stLFR/barcodeOnContig.h	/^                void CalcCov()$/;"	f	struct:BGIQD::stLFR::P2PGraph::Path
+CalcRead1Position	biocommon/sam_bam/sam_parser.cpp	/^int MatchData::CalcRead1Position() const$/;"	f	class:BGIQD::SAM::MatchData
 CascadingCut	algorithm/fibheap/fib_heap.h	/^                    void CascadingCut(Node & father)$/;"	f	struct:BGIQD::FIBHEAP::FibHeap
 CharCollect	algorithm/collection/collection_test.cpp	/^typedef BGIQD::Collection::Collection<char> CharCollect;$/;"	t	file:
 CheckCircle	soap2/contigGraph.cpp	/^        void KeyEdge::CheckCircle()$/;"	f	class:BGIQD::SOAP2::KeyEdge
@@ -238,6 +261,7 @@ Collection	algorithm/collection/collection.h	/^                Collection() {}$/
 Collection	algorithm/collection/collection.h	/^                Collection(const Collection & other ) $/;"	f	struct:BGIQD::Collection::Collection
 Collection	algorithm/collection/collection.h	/^            struct Collection$/;"	s	namespace:BGIQD::Collection
 Collection	algorithm/collection/collection.h	/^    namespace Collection{$/;"	n	namespace:BGIQD
+Cols	main/SeedCluster.cpp	/^    typedef BGIQD::Collection::Collection<unsigned int>  Cols;$/;"	t	struct:AppConfig	file:
 Combiner	common/multithread/MapReduce.h	/^class Combiner$/;"	c	namespace:BGIQD::MultiThread
 Complete	stLFR/LineGroup.h	/^                Complete = 3$/;"	e	enum:BGIQD::stLFR::ContigRoad::FillStatus
 ConfigBarcodeInfo	main/ChopBin.cpp	/^    struct ConfigBarcodeInfo$/;"	s	struct:AppConfig	file:
@@ -255,6 +279,9 @@ ContigGraphType_o	dev_tools/Makefile	/^ContigGraphType_o   =	${ContigGraphType_c
 ContigId	soap2/soap2.h	/^        typedef unsigned int ContigId;$/;"	t	namespace:BGIQD::SOAP2
 ContigId	stLFR/barcodeOnContig.h	/^        typedef unsigned int ContigId; $/;"	t	namespace:BGIQD::stLFR
 ContigInfo	main/StaticsticUnique.cpp	/^    struct ContigInfo$/;"	s	struct:AppConfig	file:
+ContigNode	stLFR/contigPEGraph.h	/^        struct ContigNode : public BGIQD::GRAPH::IGraphNodeBasic<unsigned int , long >$/;"	s	namespace:BGIQD::stLFR
+ContigPEGraph	stLFR/contigPEGraph.h	/^        struct ContigPEGraph : public BGIQD::GRAPH::ListDigraph<ContigNode , PEEdge >$/;"	s	namespace:BGIQD::stLFR
+ContigPEGraphAccess	stLFR/contigPEGraphSearch.h	/^        struct  ContigPEGraphAccess  : public BGIQD::GRAPH::GraphAccessBase<$/;"	s	namespace:BGIQD::stLFR
 ContigRelation	stLFR/CBB.h	/^        struct ContigRelation$/;"	s	namespace:BGIQD::stLFR
 ContigRelationArray	stLFR/CBB.h	/^        typedef  BGIQD::INCRARRAY::IncrArray<ContigRelation>    ContigRelationArray;$/;"	t	namespace:BGIQD::stLFR
 ContigRoad	soap2/contigGraph.h	/^        struct ContigRoad$/;"	s	namespace:BGIQD::SOAP2
@@ -294,6 +321,7 @@ DelayHeapLinkInfo	algorithm/fibheap/fib_heap.h	/^                    struct Dela
 DeleteLinearContig	main/MergeContig.cpp	/^    void DeleteLinearContig() $/;"	f	struct:AppConfig	file:
 DeleteMe	algorithm/bi_list/bi_list.h	/^                void DeleteMe() $/;"	f	struct:BGIQD::BILIST::BiList
 DeleteUniqueContigInSuperContig	main/MergeContig.cpp	/^    void DeleteUniqueContigInSuperContig()$/;"	f	struct:AppConfig
+DepthEnder	stLFR/contigPEGraphSearch.h	/^        struct DepthEnder:$/;"	s	namespace:BGIQD::stLFR
 DepthSearch	algorithm/graph/DepthSearch.h	/^            struct DepthSearch$/;"	s	namespace:BGIQD::GRAPH
 DepthSearch	soap2/contigGraph.cpp	/^        void Edge::DepthSearch(Edge * array $/;"	f	class:BGIQD::SOAP2::Edge
 DepthSearchEAEnder	soap2/contigGraphDepth.h	/^        struct DepthSearchEAEnder :$/;"	s	namespace:BGIQD::SOAP2
@@ -383,6 +411,8 @@ FASTQ	unused/fastqa/fasta.h	/^    FASTQ = 1,$/;"	e	enum:BGIQD::FASTQA::Type
 FASTQA	unused/fastqa/fasta.cpp	/^namespace FASTQA{$/;"	n	namespace:BGIQD	file:
 FASTQA	unused/fastqa/fasta.h	/^namespace FASTQA{$/;"	n	namespace:BGIQD
 FATAL	common/error/Error.h	7;"	d
+FCRFByTF_cpp	main/Makefile	/^FCRFByTF_cpp 			= FCRFByTF.cpp$/;"	m
+FCRFByTF_o	main/Makefile	/^FCRFByTF_o				= ${FCRFByTF_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}$/;"	m
 FIBHEAP	algorithm/fibheap/fib_heap.h	/^    namespace FIBHEAP {$/;"	n	namespace:BGIQD
 FILES	common/files/file_reader.cpp	/^namespace FILES {$/;"	n	namespace:BGIQD	file:
 FILES	common/files/file_reader.h	/^namespace FILES{$/;"	n	namespace:BGIQD
@@ -410,6 +440,8 @@ FillContigRoad_cpp	main/Makefile	/^FillContigRoad_cpp		= FillContigRoad.cpp$/;"	
 FillContigRoad_o	main/Makefile	/^FillContigRoad_o 		= ${FillContigRoad_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}$/;"	m
 FillStatus	stLFR/LineGroup.h	/^            enum FillStatus$/;"	g	struct:BGIQD::stLFR::ContigRoad
 FillStrategy	main/FillContigRoad.cpp	/^    enum FillStrategy$/;"	g	struct:GlobalConfig	file:
+FillTrunkByPE_cpp	main/Makefile	/^FillTrunkByPE_cpp 			= FillTrunkByPE.cpp$/;"	m
+FillTrunkByPE_o	main/Makefile	/^FillTrunkByPE_o				= ${FillTrunkByPE_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}$/;"	m
 FilterAllReads	tools/stLFR_2_10X.cpp	/^    void FilterAllReads(std::istream & r1 , std::istream & r2 , std::ostream & out)$/;"	f	struct:AppConf
 FindCorrectPath	main/FillContigRoad.cpp	/^void FindCorrectPath(unsigned int from , unsigned int to, $/;"	f
 Finish	algorithm/graph/SPFSearch.h	/^                    Finish = 2 ,$/;"	e	enum:BGIQD::GRAPH::SPFNode::Type
@@ -431,6 +463,9 @@ GZSTREAM_NAMESPACE	common/files/gzstream.cpp	/^namespace GZSTREAM_NAMESPACE {$/;
 GZSTREAM_NAMESPACE	common/files/gzstream.h	/^namespace GZSTREAM_NAMESPACE {$/;"	n
 G_Edge	unused/graph/Graph.h	/^                typedef Edge<I>  G_Edge;$/;"	t	class:BGIQD::Graph::DiGraph_VE
 G_Vertex	unused/graph/Graph.h	/^                typedef VertexWithEdge<E> G_Vertex;$/;"	t	class:BGIQD::Graph::DiGraph_VE
+GapInfo	main/FCRFByTF.cpp	/^    struct GapInfo$/;"	s	struct:AppConfig	file:
+GapInfo	main/FillTrunkByPE.cpp	/^    struct GapInfo$/;"	s	struct:AppConfig	file:
+GapInfo	main/SeedCluster.cpp	/^    struct GapInfo$/;"	s	struct:AppConfig	file:
 GenerateMinTreeTrunkLinears	main/MinTree.cpp	/^    void GenerateMinTreeTrunkLinears()$/;"	f	struct:AppConf
 GenerateMinTreeTrunks	main/MinTree.cpp	/^    void GenerateMinTreeTrunks()$/;"	f	struct:AppConf
 GenerateMinTrees	main/MinTree.cpp	/^    void GenerateMinTrees()$/;"	f	struct:AppConf
@@ -439,6 +474,7 @@ GenerateNewContigSeq_linear	main/MergeContig.cpp	/^    void GenerateNewContigSeq
 GenerateNewContigSeq_super	main/MergeContig.cpp	/^    void GenerateNewContigSeq_super()$/;"	f	struct:AppConfig	file:
 GeneratePath	stLFR/barcodeOnContig.cpp	/^        void P2PGraph::GeneratePath()$/;"	f	class:BGIQD::stLFR::P2PGraph
 GenerateReaderFromFileName	common/files/file_reader.cpp	/^    std::istream * FileReaderFactory::GenerateReaderFromFileName(const std::string & file_name )$/;"	f	class:BGIQD::FILES::std::FileReaderFactory
+GenerateRoadFill	main/FCRFByTF.cpp	/^    void GenerateRoadFill()$/;"	f	struct:AppConfig
 GenerateWriterFromFileName	common/files/file_writer.cpp	/^    std::ostream * FileWriterFactory::GenerateWriterFromFileName( const std::string & file_name )$/;"	f	class:BGIQD::FILES::std::FileWriterFactory
 Get	common/multithread/JobQueue.h	/^            std::pair<bool , Job> Get()$/;"	f	struct:BGIQD::MultiThread::JobQueue
 GetAttr	algorithm/graph/Graph.h	/^                void GetAttr(const Node & , const Edge & ,$/;"	f	struct:BGIQD::GRAPH::GraphAccessBase
@@ -483,7 +519,7 @@ H	biocommon/sam_bam/sam_parser.h	/^    H = 5 ,$/;"	e	enum:BGIQD::SAM::CIGAR
 Half	soap2/contigType.h	/^                    Half = 2,$/;"	e	enum:BGIQD::SOAP2::ContigTypeDetecter::Type
 HalfCovHigh	soap2/contigType.h	/^                float HalfCovHigh;$/;"	m	struct:BGIQD::SOAP2::ContigTypeDetecter
 HasEdge	algorithm/graph/GraphBasic.h	/^                bool HasEdge(const NodeEdgeId &id )$/;"	f	struct:BGIQD::GRAPH::IGraphNodeBasic
-HasNode	algorithm/graph/GraphBasic.h	/^                bool HasNode( const NodeId & id )$/;"	f	struct:BGIQD::GRAPH::ListGraphBasic
+HasNode	algorithm/graph/GraphBasic.h	/^                bool HasNode( const NodeId & id ) const$/;"	f	struct:BGIQD::GRAPH::ListGraphBasic
 HasPecfectMatch	dev_tools/ContigTypeByRef.cpp	/^bool HasPecfectMatch( const contigMatchData & v)$/;"	f
 Head	biocommon/sam_bam/sam_parser.h	/^struct Head$/;"	s	namespace:BGIQD::SAM
 HeadLine	biocommon/sam_bam/sam_parser.h	/^        HeadLine= 0 ,$/;"	e	enum:BGIQD::SAM::Head::HeadType
@@ -496,6 +532,7 @@ IGraphNodeBasic	algorithm/graph/GraphBasic.h	/^            struct IGraphNodeBasi
 ILine	stLFR/Line.h	/^class ILine$/;"	c	namespace:BGIQD::stLFR
 INCRARRAY	algorithm/incr_array/incr_array.h	/^    namespace INCRARRAY {$/;"	n	namespace:BGIQD
 INFO	common/log/logfilter.h	/^    INFO = 1,$/;"	e	enum:BGIQD::LOG::loglevel
+INTERVAL	algorithm/interval/Interval.h	/^    namespace INTERVAL{$/;"	n	namespace:BGIQD
 Id	algorithm/graph/Graph.h	/^                typedef typename GraphAccess::GraphEdgeId Id;$/;"	t	struct:BGIQD::GRAPH::EdgeIterator
 Id	stLFR/barcodeId.cpp	/^    int BarcodeId::Id(const std::string & tag ) const $/;"	f	class:BGIQD::stLFR::BarcodeId
 Id	stLFR/barcodeId.cpp	/^    int BarcodeIdHelper::Id(const std::string & tag)$/;"	f	class:BGIQD::stLFR::BarcodeIdHelper
@@ -514,13 +551,17 @@ Init	algorithm/incr_array/incr_array.h	/^                void Init( size_t block
 Init	dev_tools/ContigRoadFill2Fasta.cpp	/^        void Init(const std::string & line , int k) {$/;"	f	struct:GlobalContig::ContigFastA
 Init	dev_tools/ContigRoadFill2Fasta.cpp	/^    void Init(int k , const std::string & f)$/;"	f	struct:GlobalContig
 Init	main/BinCluster.cpp	/^    void Init(const std::string & p , float t)$/;"	f	struct:AppConfig
-Init	main/ChopBin.cpp	/^    void Init(const std::string & prefix,const  int bin)$/;"	f	struct:AppConfig
+Init	main/ChopBin.cpp	/^    void Init(const std::string & prefix$/;"	f	struct:AppConfig
 Init	main/ContigDlink.cpp	/^    void Init(const std::string & prefix , int k )$/;"	f	struct:AppConfig
+Init	main/FCRFByTF.cpp	/^    void Init(const std::string & pre) $/;"	f	struct:AppConfig
 Init	main/FillContigRoad.cpp	/^    void Init(const std::string & prefix)$/;"	f	struct:GlobalConfig
+Init	main/FillTrunkByPE.cpp	/^    void Init(const std::string & prefix , int search_len_max , int max_is , bool  use_pe)$/;"	f	struct:AppConfig
 Init	main/LinearCDG.cpp	/^    void Init(const std::string & prefix)$/;"	f	struct:AppConfig
 Init	main/MergeContig.cpp	/^    void Init(const std::string & prefix , int rd, int k , WorkType t)$/;"	f	struct:AppConfig
-Init	main/MinTree.cpp	/^    void Init(const std::string & prefix)$/;"	f	struct:AppConf
+Init	main/MinTree.cpp	/^    void Init(const std::string & prefix, float f)$/;"	f	struct:AppConf
+Init	main/PEGraph.cpp	/^    void Init(const std::string & prefix)$/;"	f	struct:AppConfig
 Init	main/Sam2ReadOnContig.cpp	/^    void Init(const std::string & prefix  ,const std::string & b2n_f, bool b )$/;"	f	struct:AppConfig
+Init	main/SeedCluster.cpp	/^    void Init( const std::string & prefix, float m , int s)$/;"	f	struct:AppConfig
 Init	main/StaticsticUnique.cpp	/^    void Init(int k, int m ,const std::string & prefix )$/;"	f	struct:AppConfig
 Init	soap2/contigFasta.cpp	/^        void ContigFastA::Init(const std::string & line , int k) {$/;"	f	class:BGIQD::SOAP2::ContigFastA
 Init	soap2/contigFasta.h	/^                void Init(int k )$/;"	f	class:BGIQD::SOAP2::ContigFastAMap
@@ -532,16 +573,20 @@ Init	soap2/contigType.h	/^            void Init(int k)$/;"	f	struct:BGIQD::SOAP2
 Init	soap2/fileName.h	/^            void Init(const std::string & prefix)$/;"	f	struct:BGIQD::SOAP2::FileNames
 Init	stLFR/barcodeOnContig.cpp	/^        void P2PGraph::Init( unsigned int from , unsigned int to)$/;"	f	class:BGIQD::stLFR::P2PGraph
 Init	stLFR/barcodeOnContig.h	/^                void Init()$/;"	f	struct:BGIQD::stLFR::P2PGraph::Path
+Init	stLFR/contigPEGraphSearch.h	/^                void Init()$/;"	f	struct:BGIQD::stLFR::ContigPEGraphAccess
+Init	stLFR/contigPEGraphSearch.h	/^            void Init( NodeTypeDetector  k , int max_l )$/;"	f	struct:BGIQD::stLFR::DepthEnder
 Init	unused/fastqa/fasta.h	/^    void Init( Type t) { type = t ; }$/;"	f	struct:BGIQD::FASTQA::SeqItemFactory
 InitAsRoot	algorithm/graph/SPFSearch.h	/^                void InitAsRoot(const BaseNode & node )$/;"	f	struct:BGIQD::GRAPH::SPFNode
 InitC1	algorithm/collection/collection_test.cpp	/^CharCollect InitC1()$/;"	f
 InitC2	algorithm/collection/collection_test.cpp	/^CharCollect InitC2()$/;"	f
 InitEdge	stLFR/barcodeOnContig.cpp	/^        void P2PGraph::InitEdge( unsigned int id)$/;"	f	class:BGIQD::stLFR::P2PGraph
 InitFrom	soap2/contigGraph.cpp	/^        void KeyEdge::InitFrom( const std::string & str )$/;"	f	class:BGIQD::SOAP2::KeyEdge
+InitFromString	main/FillTrunkByPE.cpp	/^        void InitFromString(const std::string & line)$/;"	f	struct:AppConfig::GapInfo
 InitFromString	soap2/contigGraph.cpp	/^        void KeyConn::InitFromString( const std::string & str )$/;"	f	class:BGIQD::SOAP2::KeyConn
 InitFromString	stLFR/CBB.cpp	/^        void BarcodeOnBin::InitFromString(const std::string & line)$/;"	f	class:BGIQD::stLFR::BarcodeOnBin
 InitFromString	stLFR/CBB.cpp	/^        void BinRelation::InitFromString(const std::string & line)$/;"	f	class:BGIQD::stLFR::BinRelation
 InitFromString	stLFR/CBB.cpp	/^        void ContigRelation::InitFromString(const std::string &line )$/;"	f	class:BGIQD::stLFR::ContigRelation
+InitFromString	stLFR/contigPEGraph.h	/^            void InitFromString(const std::string & line )$/;"	f	struct:BGIQD::stLFR::PEEdge
 InitNode	algorithm/graph/SPFSearch.h	/^                void InitNode(const BaseNode & node ,const SPFNode & father , int length)$/;"	f	struct:BGIQD::GRAPH::SPFNode
 InitRoot	algorithm/graph/DepthSearch.h	/^                void InitRoot(const Node & me,int step_start )$/;"	f	struct:BGIQD::GRAPH::DepthSearchNode
 InitRoot	soap2/contigGraphDepth.h	/^            void InitRoot(const Node & me,int step_start )$/;"	f	struct:BGIQD::SOAP2::DNode_EA
@@ -551,7 +596,17 @@ Insert	algorithm/fibheap/fib_heap.h	/^                void Insert( Node & node )
 Insert	algorithm/fibheap/fib_heap.h	/^                void Insert(Node & x)$/;"	f	struct:BGIQD::FIBHEAP::FibHeap
 IntArray	algorithm/incr_array/incr_array_test.cpp	/^typedef BGIQD::INCRARRAY::IncrArray<int> IntArray;$/;"	t	file:
 Intersection	algorithm/collection/collection.h	/^                static Collection Intersection( const Collection & c1 , const Collection & c2 )$/;"	f	struct:BGIQD::Collection::Collection
+Interval	algorithm/interval/Interval.h	/^                Interval( const Interval & other )$/;"	f	struct:BGIQD::INTERVAL::Interval
+Interval	algorithm/interval/Interval.h	/^                Interval() $/;"	f	struct:BGIQD::INTERVAL::Interval
+Interval	algorithm/interval/Interval.h	/^                Interval(const ValueType & l , const ValueType & r )$/;"	f	struct:BGIQD::INTERVAL::Interval
+Interval	algorithm/interval/Interval.h	/^            struct Interval$/;"	s	namespace:BGIQD::INTERVAL
+IntervalInt01	algorithm/interval/Interval_test.cpp	/^    ,BGIQD::INTERVAL::IntervalType::Left_Close_Right_Close> IntervalInt01;$/;"	t	file:
+IntervalInt02	algorithm/interval/Interval_test.cpp	/^    ,BGIQD::INTERVAL::IntervalType::Left_Close_Right_Open> IntervalInt02;$/;"	t	file:
+IntervalInt03	algorithm/interval/Interval_test.cpp	/^    ,BGIQD::INTERVAL::IntervalType::Left_Open_Right_Close> IntervalInt03;$/;"	t	file:
+IntervalInt04	algorithm/interval/Interval_test.cpp	/^    ,BGIQD::INTERVAL::IntervalType::Left_Open_Right_Open> IntervalInt04;$/;"	t	file:
+IntervalType	algorithm/interval/Interval.h	/^        enum IntervalType$/;"	g	namespace:BGIQD::INTERVAL
 Invalid	algorithm/graph/DepthSearch.h	/^            Invalid = -1 ,$/;"	e	enum:BGIQD::GRAPH::DepthSearchEdgeType
+Invalid	algorithm/interval/Interval.h	/^            Invalid = 5$/;"	e	enum:BGIQD::INTERVAL::IntervalType
 Invalid	stLFR/barcodeOnContig.h	/^                Invalid = 4 $/;"	e	enum:BGIQD::stLFR::P2PGraph::CircleStrategy
 IsBase	dev_tools/ContigRoadFill2Fasta.cpp	/^        bool IsBase() const { return flag & 0x4; }$/;"	f	struct:GlobalContig::ContigFastA
 IsBase	soap2/contigFasta.h	/^            bool IsBase() const     { return    flag &  0x4; }$/;"	f	struct:BGIQD::SOAP2::ContigFastA
@@ -559,6 +614,7 @@ IsBase	soap2/contigGraph.h	/^            bool IsBase() const     { return flag &
 IsBiNotSupport	soap2/contigGraph.h	/^            bool IsBiNotSupport() const { return flag & 0x4 ;}$/;"	f	struct:BGIQD::SOAP2::KeyConn
 IsCircle	soap2/contigGraph.h	/^            bool IsCircle() const { return flag & 0x40 ; }$/;"	f	struct:BGIQD::SOAP2::KeyEdge
 IsConnected	unused/graph/Graph.h	/^                bool IsConnected(I i1 , I i2 , E & e)$/;"	f	class:BGIQD::Graph::DiGraph_VE
+IsContain	algorithm/interval/Interval.h	/^                bool IsContain(const ValueType& x ) const$/;"	f	struct:BGIQD::INTERVAL::Interval
 IsDelete	soap2/contigGraph.h	/^            bool IsDelete() const   { return flag & 0x1 ; }$/;"	f	struct:BGIQD::SOAP2::Edge
 IsE	biocommon/sam_bam/sam_parser.cpp	/^bool MatchData::IsE() const$/;"	f	class:BGIQD::SAM::MatchData
 IsEnd	algorithm/graph/Graph.h	/^                bool IsEnd() const { assert(0) ;} ;$/;"	f	struct:BGIQD::GRAPH::PathEndHelperBase
@@ -567,6 +623,7 @@ IsEnd	algorithm/graph/GraphTest.cpp	/^    bool IsEnd() const {$/;"	f	struct:Ende
 IsEnd	algorithm/graph/SPFSearch_test.cpp	/^    bool IsEnd() const {$/;"	f	struct:Ender1
 IsEnd	soap2/contigGraphDepth.h	/^                bool IsEnd() const {$/;"	f	struct:BGIQD::SOAP2::DepthSearchEAEnder
 IsEnd	soap2/contigGraphSPF.h	/^            bool IsEnd() const { return ender_flag ; }$/;"	f	struct:BGIQD::SOAP2::SFPEnder
+IsEnd	stLFR/contigPEGraphSearch.h	/^            bool IsEnd() const { return ender_flag ; }$/;"	f	struct:BGIQD::stLFR::DepthEnder
 IsHead	biocommon/sam_bam/sam_parser.h	/^        bool IsHead() const { return m_line.at(0) == '@' ; }$/;"	f	class:BGIQD::SAM::LineParser
 IsHeaderFile	.ycm_extra_conf.py	/^def IsHeaderFile( filename ):$/;"	f
 IsJumpConn	soap2/contigGraph.h	/^            bool IsJumpConn() const { return flag & 0x1 ;}$/;"	f	struct:BGIQD::SOAP2::KeyConn
@@ -583,6 +640,8 @@ IsMerge	dev_tools/ContigRoadFill2Fasta.cpp	/^        bool IsMerge() const { retu
 IsMerge	soap2/contigFasta.h	/^            bool IsMerge() const    { return    flag &  0x1 ; }$/;"	f	struct:BGIQD::SOAP2::ContigFastA
 IsP	biocommon/sam_bam/sam_parser.cpp	/^bool MatchData::IsP() const$/;"	f	class:BGIQD::SAM::MatchData
 IsPCRduplicae	biocommon/sam_bam/sam_parser.cpp	/^bool MatchData::IsPCRduplicae() const$/;"	f	class:BGIQD::SAM::MatchData
+IsPEBothMatch	biocommon/sam_bam/sam_parser.cpp	/^bool MatchData::IsPEBothMatch() const $/;"	f	class:BGIQD::SAM::MatchData
+IsPEInSameRef	biocommon/sam_bam/sam_parser.cpp	/^bool MatchData::IsPEInSameRef() const$/;"	f	class:BGIQD::SAM::MatchData
 IsPalindrome	soap2/contigGraph.h	/^            bool IsPalindrome()const{ return flag & 0x100 ; }$/;"	f	struct:BGIQD::SOAP2::Edge
 IsParlindorme	soap2/contigFasta.h	/^            bool IsParlindorme()const{return    flag &  0x8; }$/;"	f	struct:BGIQD::SOAP2::ContigFastA
 IsPathInCircle	stLFR/barcodeOnContig.h	/^                bool IsPathInCircle(const Circle & c)$/;"	f	struct:BGIQD::stLFR::P2PGraph::Path
@@ -640,6 +699,10 @@ LOG	common/log/logfilter.cpp	/^namespace LOG {$/;"	n	namespace:BGIQD	file:
 LOG	common/log/logfilter.h	/^namespace LOG{$/;"	n	namespace:BGIQD
 L_NodeBase	algorithm/graph/SPFSearch_test.cpp	/^struct L_NodeBase : public BGIQD::GRAPH::GraphNodeBase<char , int>$/;"	s	file:
 Last	algorithm/fibheap/fib_heap.h	/^                Node & Last()$/;"	f	struct:BGIQD::FIBHEAP::Node
+Left_Close_Right_Close	algorithm/interval/Interval.h	/^            Left_Close_Right_Close = 1 ,$/;"	e	enum:BGIQD::INTERVAL::IntervalType
+Left_Close_Right_Open	algorithm/interval/Interval.h	/^            Left_Close_Right_Open = 3 ,$/;"	e	enum:BGIQD::INTERVAL::IntervalType
+Left_Open_Right_Close	algorithm/interval/Interval.h	/^            Left_Open_Right_Close = 4 ,$/;"	e	enum:BGIQD::INTERVAL::IntervalType
+Left_Open_Right_Open	algorithm/interval/Interval.h	/^            Left_Open_Right_Open = 2 ,$/;"	e	enum:BGIQD::INTERVAL::IntervalType
 Line	stLFR/Line.h	/^class Line : public ILine$/;"	c	namespace:BGIQD::stLFR
 Line1	unused/fastqa/fasta.h	/^        Line1 = 1 ,$/;"	e	enum:BGIQD::FASTQA::SeqItemFactory::Process
 Line2	unused/fastqa/fasta.h	/^        Line2 = 2 ,$/;"	e	enum:BGIQD::FASTQA::SeqItemFactory::Process
@@ -676,6 +739,7 @@ LoadBarcodeMap	tools/stLFR_2_10X.cpp	/^    void LoadBarcodeMap(std::istream & in
 LoadBarcodeOnBinArray	stLFR/CBB.cpp	/^        void LoadBarcodeOnBinArray( const std::string & file , BarcodeOnBinArray & data )$/;"	f	namespace:BGIQD::stLFR
 LoadBarcodeOnConfig	stLFR/barcodeOnContig.cpp	/^        void GraphEA_withBarcode::LoadBarcodeOnConfig(const std::string & file)$/;"	f	class:BGIQD::stLFR::GraphEA_withBarcode
 LoadBarcodeOnContig	main/ChopBin.cpp	/^    void LoadBarcodeOnContig()$/;"	f	struct:AppConfig
+LoadBinCluster	main/SeedCluster.cpp	/^    void LoadBinCluster()$/;"	f	struct:AppConfig
 LoadBinRelationArray	stLFR/CBB.cpp	/^        void LoadBinRelationArray(const std::string & file , BinRelationArray & data)$/;"	f	namespace:BGIQD::stLFR
 LoadContig	dev_tools/ContigRoadFill2Fasta.cpp	/^    void LoadContig()$/;"	f	struct:GlobalContig
 LoadContig	soap2/contigFasta.cpp	/^        void ContigFastAMap::LoadContig(const std::string & file)$/;"	f	class:BGIQD::SOAP2::ContigFastAMap
@@ -685,8 +749,16 @@ LoadContigRoadFills	stLFR/LineGroup.cpp	/^        void ContigRoadFills::LoadCont
 LoadContigSimGraph	main/MinTree.cpp	/^    void LoadContigSimGraph()$/;"	f	struct:AppConf
 LoadEdge	soap2/contigGraph.cpp	/^        void GraphEA::LoadEdge( const std::string & file, int K)$/;"	f	class:BGIQD::SOAP2::GraphEA
 LoadKeyInfo	main/FillContigRoad.cpp	/^    void LoadKeyInfo()$/;"	f	struct:GlobalConfig
+LoadPECahce	main/PEGraph.cpp	/^    void LoadPECahce()$/;"	f	struct:AppConfig
+LoadPEGraph	main/FillTrunkByPE.cpp	/^    void LoadPEGraph()$/;"	f	struct:AppConfig
 LoadRoads	stLFR/LineGroup.cpp	/^        void ContigRoads::LoadRoads(const std::string &file)$/;"	f	class:BGIQD::stLFR::ContigRoads
+LoadSeedCluster	main/FillTrunkByPE.cpp	/^    void LoadSeedCluster()$/;"	f	struct:AppConfig
 LoadSeeds	main/ChopBin.cpp	/^    void LoadSeeds()$/;"	f	struct:AppConfig
+LoadSeeds	main/FillTrunkByPE.cpp	/^    void LoadSeeds()$/;"	f	struct:AppConfig
+LoadSeeds	main/PEGraph.cpp	/^    void LoadSeeds()$/;"	f	struct:AppConfig
+LoadTrunk	main/FCRFByTF.cpp	/^    void LoadTrunk()$/;"	f	struct:AppConfig
+LoadTrunk	main/SeedCluster.cpp	/^    void LoadTrunk()$/;"	f	struct:AppConfig
+LoadTrunkFill	main/FCRFByTF.cpp	/^    void LoadTrunkFill()$/;"	f	struct:AppConfig
 LogFreq	main/ContigDlink.cpp	/^    void LogFreq()$/;"	f	struct:AppConfig
 M	biocommon/sam_bam/sam_parser.h	/^    M = 0 ,$/;"	e	enum:BGIQD::SAM::CIGAR
 MTEdge	algorithm/graph/MinTree_test.cpp	/^struct MTEdge : public MTestEdge$/;"	s	file:
@@ -696,6 +768,8 @@ MTSearchNode	algorithm/graph/MinTree.h	/^                struct MTSearchNode$/;"
 MTestEdge	algorithm/graph/MinTree_test.cpp	/^typedef BGIQD::GRAPH::IGraphEdgeBasic<std::string , int > MTestEdge;$/;"	t	file:
 MTestGraphBasic	algorithm/graph/MinTree_test.cpp	/^struct MTestGraphBasic : public BGIQD::GRAPH::ListGraph<MTestNode , MTEdge>$/;"	s	file:
 MTestNode	algorithm/graph/MinTree_test.cpp	/^typedef BGIQD::GRAPH::IGraphNodeBasic<std::string , int > MTestNode ;$/;"	t	file:
+MakeBin	main/ChopBin.cpp	/^    std::map<int ,BinInterval> MakeBin(int contig_len)$/;"	f	struct:AppConfig
+MakeEdgeNext	stLFR/contigPEGraph.h	/^            void MakeEdgeNext(const NodeId & id)$/;"	f	struct:BGIQD::stLFR::ContigPEGraph
 MakeRelativePathsInFlagsAbsolute	.ycm_extra_conf.py	/^def MakeRelativePathsInFlagsAbsolute( flags, working_directory ):$/;"	f
 MapHelper	common/stl/mapHelper.h	/^            struct MapHelper$/;"	s	namespace:BGIQD::STL
 MapReduce	common/multithread/MapReduce.h	/^class MapReduce$/;"	c	namespace:BGIQD::MultiThread
@@ -771,12 +845,15 @@ NodeId	algorithm/graph/GraphTrunk.h	/^                typedef typename TEdge::Ed
 NodeId	algorithm/graph/MinTree.h	/^                typedef typename Edge::EdgeNodeId NodeId;$/;"	t	struct:BGIQD::GRAPH::MinTreeHelper
 NodeId	algorithm/graph/SPFSearch.h	/^                typedef typename BaseNode::NodeNodeId NodeId;$/;"	t	struct:BGIQD::GRAPH::SPFNode
 NodeId	algorithm/graph/SPFSearch.h	/^                typedef typename GraphAccess::GraphNodeId   NodeId;$/;"	t	struct:BGIQD::GRAPH::SPFSearch
+NodeId	stLFR/contigPEGraphSearch.h	/^            typedef typename Basic::NodeId NodeId;$/;"	t	struct:BGIQD::stLFR::DepthEnder
 NodeId	stLFR/contigSimGraph.h	/^            typedef Basic::NodeId NodeId;$/;"	t	struct:BGIQD::stLFR::ContigSimGraph
 NodeNodeId	algorithm/graph/Graph.h	/^                typedef NodeId NodeNodeId;$/;"	t	struct:BGIQD::GRAPH::GraphNodeBase
 NodeNodeId	algorithm/graph/GraphBasic.h	/^                typedef NodeId NodeNodeId;$/;"	t	struct:BGIQD::GRAPH::IGraphNodeBasic
 NodeType	soap2/contigGraphSearch.h	/^        enum NodeType$/;"	g	namespace:BGIQD::SOAP2
+NodeType	stLFR/contigPEGraphSearch.h	/^            enum NodeType$/;"	g	struct:BGIQD::stLFR::DepthEnder
 NodeTypeDetector	soap2/contigGraphDepth.h	/^                typedef std::function<NodeType(NodeId)> NodeTypeDetector;$/;"	t	struct:BGIQD::SOAP2::DepthSearchEAEnder
 NodeTypeDetector	soap2/contigGraphSPF.h	/^            typedef std::function<NodeType(NodeId)> NodeTypeDetector;$/;"	t	struct:BGIQD::SOAP2::SFPEnder
+NodeTypeDetector	stLFR/contigPEGraphSearch.h	/^            typedef std::function<NodeType(const NodeId &)> NodeTypeDetector;$/;"	t	struct:BGIQD::stLFR::DepthEnder
 Node_EA	soap2/contigGraphSearch.h	/^        struct Node_EA : public BGIQD::GRAPH::GraphNodeBase<unsigned int , long>$/;"	s	namespace:BGIQD::SOAP2
 Nodes	algorithm/graph/GraphBasic.h	/^                typedef TNodes Nodes ;$/;"	t	struct:BGIQD::GRAPH::ListDigraph
 Nodes	algorithm/graph/GraphBasic.h	/^                typedef TNodes Nodes ;$/;"	t	struct:BGIQD::GRAPH::ListGraph
@@ -788,8 +865,13 @@ ORIGINAL	main/MergeContig.cpp	/^        ORIGINAL = 1 ,$/;"	e	enum:AppConfig::Con
 OneLineComment	biocommon/sam_bam/sam_parser.h	/^        OneLineComment = 4$/;"	e	enum:BGIQD::SAM::Head::HeadType
 OppoNode	algorithm/graph/GraphBasic.h	/^                NodeId OppoNode(const NodeId & one) const $/;"	f	struct:BGIQD::GRAPH::IGraphEdgeBasic
 OtherUnMap	biocommon/sam_bam/sam_parser.cpp	/^bool MatchData::OtherUnMap() const $/;"	f	class:BGIQD::SAM::MatchData
+Others	stLFR/contigPEGraphSearch.h	/^                Others = 1 ,$/;"	e	enum:BGIQD::stLFR::DepthEnder::NodeType
 P	biocommon/sam_bam/sam_parser.h	/^    P = 6 ,$/;"	e	enum:BGIQD::SAM::CIGAR
 P2PGraph	stLFR/barcodeOnContig.h	/^        struct  P2PGraph$/;"	s	namespace:BGIQD::stLFR
+PEEdge	stLFR/contigPEGraph.h	/^        struct PEEdge : public BGIQD::GRAPH::IDigraphEdgeBase<unsigned int ,long>$/;"	s	namespace:BGIQD::stLFR
+PEGraph_cpp	main/Makefile	/^PEGraph_cpp 			= PEGraph.cpp$/;"	m
+PEGraph_o	main/Makefile	/^PEGraph_o				= ${PEGraph_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}$/;"	m
+PE_seeds	main/SeedCluster.cpp	/^    std::set<unsigned int> PE_seeds;$/;"	m	struct:AppConfig	file:
 PairedSAMParser	biocommon/pair/pair_sam_parser.h	/^        PairedSAMParser( std::istream & ist ) : m_ist(ist) {}$/;"	f	class:BGIQD::SAM::PairedSAMParser
 PairedSAMParser	biocommon/pair/pair_sam_parser.h	/^class PairedSAMParser$/;"	c	namespace:BGIQD::SAM
 ParseAsHead	biocommon/sam_bam/sam_parser.cpp	/^Head LineParser::ParseAsHead()const$/;"	f	class:BGIQD::SAM::LineParser
@@ -806,12 +888,14 @@ PopEdge	algorithm/graph/GraphTest.cpp	/^    void PopEdge() {clean();}$/;"	f	stru
 PopEdge	algorithm/graph/SPFSearch_test.cpp	/^    void PopEdge() {clean();}$/;"	f	struct:Ender1
 PopEdge	soap2/contigGraphDepth.h	/^                void PopEdge() {$/;"	f	struct:BGIQD::SOAP2::DepthSearchEAEnder
 PopEdge	soap2/contigGraphSPF.h	/^            void PopEdge() { ender_flag  = false ; }$/;"	f	struct:BGIQD::SOAP2::SFPEnder
+PopEdge	stLFR/contigPEGraphSearch.h	/^            void PopEdge() { ender_flag  = false ; }$/;"	f	struct:BGIQD::stLFR::DepthEnder
 PopNode	algorithm/graph/Graph.h	/^                void PopNode() {assert(0);}$/;"	f	struct:BGIQD::GRAPH::PathEndHelperBase
 PopNode	algorithm/graph/GraphTest.cpp	/^    void PopNode() {$/;"	f	struct:Ender2
 PopNode	algorithm/graph/GraphTest.cpp	/^    void PopNode() {clean();}$/;"	f	struct:Ender1
 PopNode	algorithm/graph/SPFSearch_test.cpp	/^    void PopNode() {clean();}$/;"	f	struct:Ender1
 PopNode	soap2/contigGraphDepth.h	/^                void PopNode() {$/;"	f	struct:BGIQD::SOAP2::DepthSearchEAEnder
 PopNode	soap2/contigGraphSPF.h	/^            void PopNode() { ender_flag  = false ; }$/;"	f	struct:BGIQD::SOAP2::SFPEnder
+PopNode	stLFR/contigPEGraphSearch.h	/^            void PopNode()$/;"	f	struct:BGIQD::stLFR::DepthEnder
 Print	stLFR/barcodeId.cpp	/^    void BarcodeId::Print( std::ostream & out ) const $/;"	f	class:BGIQD::stLFR::BarcodeId
 Print	stLFR/barcodeId.cpp	/^    void BarcodeIdHelper::Print(const std::string & file)$/;"	f	class:BGIQD::stLFR::BarcodeIdHelper
 PrintAsDOT	algorithm/graph/GraphBasic.h	/^                void PrintAsDOT(std::ostream & out)$/;"	f	struct:BGIQD::GRAPH::ListGraphBasic
@@ -821,15 +905,20 @@ PrintBarcodeOnContig	main/ChopBin.cpp	/^    void PrintBarcodeOnContig()$/;"	f	st
 PrintBinInfo	main/ChopBin.cpp	/^    void PrintBinInfo()$/;"	f	struct:AppConfig
 PrintBinRelation	main/BinCluster.cpp	/^    void PrintBinRelation()$/;"	f	struct:AppConfig
 PrintBinRelationArray	stLFR/CBB.cpp	/^        void PrintBinRelationArray(const std::string & file ,const BinRelationArray & data)$/;"	f	namespace:BGIQD::stLFR
+PrintCluster	main/SeedCluster.cpp	/^    void PrintCluster()$/;"	f	struct:AppConfig
 PrintContigDlinkGraph	main/ContigDlink.cpp	/^    void PrintContigDlinkGraph()$/;"	f	struct:AppConfig
+PrintContigPEGraph	main/PEGraph.cpp	/^    void PrintContigPEGraph()$/;"	f	struct:AppConfig
 PrintContigRelation	main/BinCluster.cpp	/^    void PrintContigRelation()$/;"	f	struct:AppConfig
 PrintContigRelationArray	stLFR/CBB.cpp	/^        void PrintContigRelationArray(const std::string & file ,const ContigRelationArray & data)$/;"	f	namespace:BGIQD::stLFR
+PrintFillResult	main/FillTrunkByPE.cpp	/^    void PrintFillResult()$/;"	f	struct:AppConfig
 PrintNodes	algorithm/graph/DepthSearch.h	/^                void PrintNodes() const$/;"	f	struct:BGIQD::GRAPH::DepthSearch
 PrintNodes	algorithm/graph/SPFSearch.h	/^                void PrintNodes()$/;"	f	struct:BGIQD::GRAPH::SPFSearch
 PrintRead2	tools/stLFR_2_10X.cpp	/^    void PrintRead2(std::ostream & out ,const std::string & indice )$/;"	f	struct:AppConf
+PrintRoadFill	main/FCRFByTF.cpp	/^    void PrintRoadFill()$/;"	f	struct:AppConfig
 PrintSuperAndLeft	main/MergeContig.cpp	/^    void PrintSuperAndLeft()$/;"	f	struct:AppConfig
 PrintSuperOnly	main/MergeContig.cpp	/^    void PrintSuperOnly()$/;"	f	struct:AppConfig
 PrintSuperUsedOnly	main/MergeContig.cpp	/^    void PrintSuperUsedOnly()$/;"	f	struct:AppConfig
+PrintTest	main/FillTrunkByPE.cpp	/^    void PrintTest()$/;"	f	struct:AppConfig
 PrintUniqueInfo	main/StaticsticUnique.cpp	/^    void PrintUniqueInfo()$/;"	f	struct:AppConfig
 Process	unused/fastqa/fasta.h	/^    enum Process$/;"	g	struct:BGIQD::FASTQA::SeqItemFactory
 Program	biocommon/sam_bam/sam_parser.h	/^        Program = 3,$/;"	e	enum:BGIQD::SAM::Head::HeadType
@@ -878,7 +967,7 @@ SOAP2	soap2/contigGraph.cpp	/^    namespace SOAP2{$/;"	n	namespace:BGIQD	file:
 SOAP2	soap2/contigGraph.h	/^    namespace SOAP2 {$/;"	n	namespace:BGIQD
 SOAP2	soap2/contigGraphDepth.h	/^    namespace SOAP2{$/;"	n	namespace:BGIQD
 SOAP2	soap2/contigGraphSPF.h	/^    namespace SOAP2{$/;"	n	namespace:BGIQD
-SOAP2	soap2/contigGraphSearch.h	/^    namespace SOAP2{$/;"	n	namespace:BGIQD
+SOAP2	soap2/contigGraphSearch.h	/^    namespace SOAP2 {$/;"	n	namespace:BGIQD
 SOAP2	soap2/contigType.cpp	/^    namespace SOAP2 {$/;"	n	namespace:BGIQD	file:
 SOAP2	soap2/contigType.h	/^    namespace SOAP2 {$/;"	n	namespace:BGIQD
 SOAP2	soap2/fileName.h	/^    namespace SOAP2 {$/;"	n	namespace:BGIQD
@@ -904,6 +993,9 @@ Searcher	main/FillContigRoad.cpp	/^    > Searcher;$/;"	t	file:
 Searcher1	algorithm/graph/GraphTest.cpp	/^typedef BGIQD::GRAPH::DepthSearch<ACCESS,EdgeItr,Ender1> Searcher1;$/;"	t	file:
 Searcher1	algorithm/graph/SPFSearch_test.cpp	/^typedef BGIQD::GRAPH::SPFSearch<ACCESS,EdgeItr,Ender1> Searcher1;$/;"	t	file:
 Searcher2	algorithm/graph/GraphTest.cpp	/^typedef BGIQD::GRAPH::DepthSearch<ACCESS,EdgeItr,Ender2> Searcher2;$/;"	t	file:
+Seed	stLFR/contigPEGraphSearch.h	/^                Seed = 2 ,$/;"	e	enum:BGIQD::stLFR::DepthEnder::NodeType
+SeedCluster_cpp	main/Makefile	/^SeedCluster_cpp 			= SeedCluster.cpp$/;"	m
+SeedCluster_o	main/Makefile	/^SeedCluster_o				= ${SeedCluster_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}$/;"	m
 SelectBySort	stLFR/Line.h	/^        void SelectBySort( LineFactor & factor )$/;"	f	class:BGIQD::stLFR::MultiLine
 SeqDatabase	unused/fastqa/fasta.h	/^struct SeqDatabase$/;"	s	namespace:BGIQD::FASTQA
 SeqItem	unused/fastqa/fasta.h	/^struct SeqItem$/;"	s	namespace:BGIQD::FASTQA
@@ -941,8 +1033,12 @@ Start	algorithm/graph/SPFSearch_test.cpp	/^    void Start() $/;"	f	struct:Ender1
 Start	common/multithread/MultiThread.h	/^        void Start(int thread_num)$/;"	f	struct:BGIQD::MultiThread::MultiThread
 Start	soap2/contigGraphDepth.h	/^                void Start() $/;"	f	struct:BGIQD::SOAP2::DepthSearchEAEnder
 Start	soap2/contigGraphSPF.h	/^            void Start()$/;"	f	struct:BGIQD::SOAP2::SFPEnder
+Start	stLFR/contigPEGraphSearch.h	/^            void Start()$/;"	f	struct:BGIQD::stLFR::DepthEnder
 StaticsticUnique_cpp	main/Makefile	/^StaticsticUnique_cpp =	StaticsticUnique.cpp$/;"	m
 StaticsticUnique_o	main/Makefile	/^StaticsticUnique_o   =	${StaticsticUnique_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}$/;"	m
+SubGraph	algorithm/graph/GraphBasic.h	/^                Me SubGraph(const std::set<NodeId>& subs) const $/;"	f	struct:BGIQD::GRAPH::ListDigraph
+SubGraph	algorithm/graph/GraphBasic.h	/^                Me SubGraph(const std::set<NodeId>& subs) const $/;"	f	struct:BGIQD::GRAPH::ListGraph
+SubGraph	stLFR/contigPEGraph.h	/^            ContigPEGraph SubGraph(const std::set<NodeId>& subs) const$/;"	f	struct:BGIQD::stLFR::ContigPEGraph
 SuperContigAndLeft	main/MergeContig.cpp	/^        SuperContigAndLeft = 3 ,$/;"	e	enum:AppConfig::WorkType	file:
 SuperContigAndReLinear	main/MergeContig.cpp	/^        SuperContigAndReLinear = 4 ,$/;"	e	enum:AppConfig::WorkType	file:
 SuperContigOnly	main/MergeContig.cpp	/^        SuperContigOnly = 2 ,$/;"	e	enum:AppConfig::WorkType	file:
@@ -969,6 +1065,10 @@ TEST	algorithm/graph/GraphTrunk_test.cpp	/^TEST(MinTree_test2)$/;"	f
 TEST	algorithm/graph/MinTree_test.cpp	/^TEST(MinTree)$/;"	f
 TEST	algorithm/graph/SPFSearch_test.cpp	/^TEST( SPFSearch )$/;"	f
 TEST	algorithm/incr_array/incr_array_test.cpp	/^TEST(IncrArrayAcess)$/;"	f
+TEST	algorithm/interval/Interval_test.cpp	/^TEST(TIntervalInt01)$/;"	f
+TEST	algorithm/interval/Interval_test.cpp	/^TEST(TIntervalInt02)$/;"	f
+TEST	algorithm/interval/Interval_test.cpp	/^TEST(TIntervalInt03)$/;"	f
+TEST	algorithm/interval/Interval_test.cpp	/^TEST(TIntervalInt04)$/;"	f
 TEST	biocommon/sam_bam/sam_parser_test.cpp	/^TEST(FLAGS_test)$/;"	f
 TEST	biocommon/sam_bam/sam_parser_test.cpp	/^TEST(LineParser_test)$/;"	f
 TEST	common/args/argsparser_test.cpp	/^TEST(simulator_args)$/;"	f
@@ -1024,6 +1124,7 @@ ToString	soap2/contigFasta.cpp	/^        std::string ContigFastA::ToString(int n
 ToString	stLFR/CBB.cpp	/^        std::string BarcodeOnBin::ToString() const $/;"	f	class:BGIQD::stLFR::BarcodeOnBin
 ToString	stLFR/CBB.cpp	/^        std::string BinRelation::ToString() const$/;"	f	class:BGIQD::stLFR::BinRelation
 ToString	stLFR/CBB.cpp	/^        std::string ContigRelation::ToString() const $/;"	f	class:BGIQD::stLFR::ContigRelation
+ToString	stLFR/contigPEGraph.h	/^            std::string ToString() const$/;"	f	struct:BGIQD::stLFR::PEEdge
 ToString	stLFR/contigSimGraph.h	/^            std::string ToString() const$/;"	f	struct:BGIQD::stLFR::Edge
 Tos	soap2/contigGraphDepth.h	/^                    Tos() : base(false) , bal( false) {}$/;"	f	struct:BGIQD::SOAP2::DepthSearchEAEnder::Tos
 Tos	soap2/contigGraphDepth.h	/^                struct Tos$/;"	s	struct:BGIQD::SOAP2::DepthSearchEAEnder
@@ -1040,6 +1141,7 @@ TrunkNode	algorithm/graph/GraphTrunk.h	/^            struct TrunkNode$/;"	s	name
 TryLoadBarcode2Num	main/Sam2ReadOnContig.cpp	/^    void TryLoadBarcode2Num()$/;"	f	struct:AppConfig
 Type	algorithm/graph/DepthSearch.h	/^                typedef DepthSearchEdgeType           Type;$/;"	t	struct:BGIQD::GRAPH::DepthSearchNode
 Type	algorithm/graph/SPFSearch.h	/^                enum Type$/;"	g	struct:BGIQD::GRAPH::SPFNode
+Type	algorithm/interval/Interval.h	/^                typedef IntervalType Type ;$/;"	t	struct:BGIQD::INTERVAL::Interval
 Type	soap2/contigType.h	/^                enum Type$/;"	g	struct:BGIQD::SOAP2::ContigTypeDetecter
 Type	stLFR/contigSimGraph.h	/^            enum Type $/;"	g	struct:BGIQD::stLFR::Node
 Type	unused/fastqa/fasta.h	/^enum Type$/;"	g	namespace:BGIQD::FASTQA
@@ -1059,6 +1161,7 @@ UniqueCovHigh	soap2/contigType.h	/^                float UniqueCovHigh;$/;"	m	st
 UniqueHigh	main/StaticsticUnique.cpp	/^    float UniqueHigh  ;$/;"	m	struct:AppConfig	file:
 UniqueLow	main/StaticsticUnique.cpp	/^    float UniqueLow ;$/;"	m	struct:AppConfig	file:
 Unknow	algorithm/graph/SPFSearch.h	/^                    Unknow = 0 ,$/;"	e	enum:BGIQD::GRAPH::SPFNode::Type
+Unknow	algorithm/interval/Interval.h	/^            Unknow = 0,$/;"	e	enum:BGIQD::INTERVAL::IntervalType
 Unknow	biocommon/sam_bam/sam_parser.h	/^        Unknow = -1,$/;"	e	enum:BGIQD::SAM::Head::HeadType
 Unknow	main/FillContigRoad.cpp	/^        Unknow = 0 ,$/;"	e	enum:GlobalConfig::FillStrategy	file:
 Unknow	main/MergeContig.cpp	/^        Unknow = 0 ,$/;"	e	enum:AppConfig::WorkType	file:
@@ -1066,6 +1169,7 @@ Unknow	soap2/contigGraphSearch.h	/^                Unknow = 0 ,$/;"	e	enum:BGIQD
 Unknow	soap2/contigGraphSearch.h	/^            Unknow = 0 ,$/;"	e	enum:BGIQD::SOAP2::NodeType
 Unknow	soap2/contigType.h	/^                    Unknow = 0,$/;"	e	enum:BGIQD::SOAP2::ContigTypeDetecter::Type
 Unknow	stLFR/barcodeOnContig.h	/^                Unknow = 0 ,$/;"	e	enum:BGIQD::stLFR::P2PGraph::CircleStrategy
+Unknow	stLFR/contigPEGraphSearch.h	/^                Unknow = 0 ,$/;"	e	enum:BGIQD::stLFR::DepthEnder::NodeType
 Unknow	stLFR/contigSimGraph.h	/^                Unknow = 0 ,$/;"	e	enum:BGIQD::stLFR::Node::Type
 UpdateAsBiggest	common/stl/mapHelper.h	/^                static void UpdateAsBiggest(Map & map , const Key & k , const Value & value)$/;"	f	struct:BGIQD::STL::MapHelper
 UpdateAsSmallest	common/stl/mapHelper.h	/^                static void UpdateAsSmallest(Map & map , const Key & k , const Value & value)$/;"	f	struct:BGIQD::STL::MapHelper
@@ -1074,6 +1178,7 @@ Value	algorithm/fibheap/fib_heap.h	/^                typedef TValue Value ;$/;"	
 Value	algorithm/fibheap/fib_heap.h	/^                typedef typename TNode::Value Value ;$/;"	t	struct:BGIQD::FIBHEAP::FibHeap
 Value	algorithm/graph/MinTree.h	/^                typedef TValue      Value;$/;"	t	struct:BGIQD::GRAPH::MinTreeHelper
 Value	common/stl/mapHelper.h	/^                typedef typename Map::mapped_type Value;$/;"	t	struct:BGIQD::STL::MapHelper
+ValueType	algorithm/interval/Interval.h	/^                typedef T ValueType;$/;"	t	struct:BGIQD::INTERVAL::Interval
 VersionData	biocommon/sam_bam/sam_parser.h	/^    struct VersionData$/;"	s	struct:BGIQD::SAM::Head
 VertexIndex	unused/graph/Edge.h	/^                typedef V VertexIndex;$/;"	t	class:BGIQD::Graph::Edge
 VertexIndex	unused/graph/Graph.h	/^                typedef I VertexIndex;$/;"	t	class:BGIQD::Graph::DiGraph_VE
@@ -1097,6 +1202,7 @@ __ALGORITHM_GRAPH_H__	algorithm/graph/GraphBasic.h	2;"	d
 __ALGORITHM_GRAPH_MINTREE_H__	algorithm/graph/MinTree.h	2;"	d
 __ALGORITHM_GRAPH_SPFSEARCH_H__	algorithm/graph/SPFSearch.h	2;"	d
 __ALGORITHM_INCR_ARRAY_INCR_ARRAY_H__	algorithm/incr_array/incr_array.h	2;"	d
+__ALGORITHM_INTERVAL_INTERVAL_H__	algorithm/interval/Interval.h	2;"	d
 __BIOCOMMON_FASTQA_FASTA_H__	unused/fastqa/fasta.h	2;"	d
 __BIOCOMMON_PAIR_PAIR_SAM_PARSER_H__	biocommon/pair/pair_sam_parser.h	2;"	d
 __BIOCOMMON_SAM_BAM_SAM_PARSER_H__	biocommon/sam_bam/sam_parser.h	2;"	d
@@ -1144,6 +1250,8 @@ __STLFR_BARCODEID_H__	stLFR/barcodeId.h	2;"	d
 __STLFR_BARCODEONCONTIG_H__	stLFR/barcodeOnContig.h	2;"	d
 __STLFR_CBB_H__	stLFR/CBB.h	2;"	d
 __STLFR_CONTIGCLUSTER_H__	stLFR/ContigCluster.h	2;"	d
+__STLFR_CONTIGPEGRAPHSEARCH_H__	stLFR/contigPEGraphSearch.h	2;"	d
+__STLFR_CONTIGPEGRAPH_H__	stLFR/contigPEGraph.h	2;"	d
 __STLFR_CONTIGSIMGRAPH_H__	stLFR/contigSimGraph.h	2;"	d
 __STLFR_LINEGROUP_H__	stLFR/LineGroup.h	2;"	d
 __STLFR_LINE_H__	stLFR/Line.h	2;"	d
@@ -1156,6 +1264,7 @@ add_edge	algorithm/graph/SPFSearch_test.cpp	/^    void add_edge( int id , char f
 add_node	algorithm/graph/GraphTest.cpp	/^    void add_node( char id , int edge_id )$/;"	f	struct:TestGraph1	file:
 add_node	algorithm/graph/SPFSearch_test.cpp	/^    void add_node( char id , int edge_id , int l)$/;"	f	struct:TestGraph	file:
 allPaths	stLFR/barcodeOnContig.h	/^            std::vector<Path> allPaths;$/;"	m	struct:BGIQD::stLFR::P2PGraph
+all_gaps	main/FillTrunkByPE.cpp	/^    std::vector<GapInfo> all_gaps;$/;"	m	struct:AppConfig	file:
 arc	soap2/contigGraph.h	/^            Arc * arc;$/;"	m	struct:BGIQD::SOAP2::Edge
 arc	soap2/graphEA.h	/^            Arc * arc;$/;"	m	struct:BGIQD::SOAP2::Edge
 arcNum	soap2/contigGraph.h	/^            long long arcNum;$/;"	m	struct:BGIQD::SOAP2::GraphEA
@@ -1195,7 +1304,7 @@ barcode_2_num_file	main/Sam2ReadOnContig.cpp	/^    std::string barcode_2_num_fil
 barcode_cov	stLFR/barcodeOnContig.h	/^                float barcode_cov ;$/;"	m	struct:BGIQD::stLFR::P2PGraph::Path
 barcode_cov	stLFR/barcodeOnContig.h	/^                unsigned int barcode_cov;$/;"	m	struct:BGIQD::stLFR::P2PGraph::Edge
 barcode_on_contig	stLFR/barcodeOnContig.h	/^            std::map<ContigId,BarcodeOnContig > barcode_on_contig;$/;"	m	struct:BGIQD::stLFR::GraphEA_withBarcode
-barcodesOnPos	main/ChopBin.cpp	/^        std::map<unsigned int , std::vector<unsigned int > > barcodesOnPos;$/;"	m	struct:AppConfig::ConfigBarcodeInfo	file:
+barcodesOnPos	main/ChopBin.cpp	/^        std::map<int , std::set<unsigned int > > barcodesOnPos;$/;"	m	struct:AppConfig::ConfigBarcodeInfo	file:
 base	algorithm/graph/Graph.h	/^                BaseGraph * base ;$/;"	m	struct:BGIQD::GRAPH::GraphAccessBase
 base	algorithm/incr_array/incr_array.h	/^            BasePointer base;$/;"	m	struct:BGIQD::INCRARRAY::iterator_base
 base	soap2/contigGraphDepth.h	/^                    bool base ;$/;"	m	struct:BGIQD::SOAP2::DepthSearchEAEnder::Tos
@@ -1212,6 +1321,7 @@ binId	stLFR/CBB.h	/^            int binId ;$/;"	m	struct:BGIQD::stLFR::BinSimula
 binIndex	stLFR/CBB.h	/^            int binIndex ;$/;"	m	struct:BGIQD::stLFR::BinRelation
 binIndex	stLFR/CBB.h	/^            int binIndex ;$/;"	m	struct:BGIQD::stLFR::BinSimularity
 binOnBarcode	main/BinCluster.cpp	/^    BinIndexOnBarcode binOnBarcode ;$/;"	m	struct:AppConfig	file:
+bin_factor	main/ChopBin.cpp	/^    float bin_factor ;$/;"	m	struct:AppConfig	file:
 bin_size	main/ChopBin.cpp	/^    int bin_size ;$/;"	m	struct:AppConfig	file:
 bn	dev_tools/contig_barcode.cpp	/^    static BarcodeNum bn;$/;"	m	namespace:BGIQD::JOB01	file:
 boc	main/ChopBin.cpp	/^    BarcodeOnContig boc;$/;"	m	struct:AppConfig	file:
@@ -1248,11 +1358,15 @@ config	dev_tools/ContigRoadFill2Fasta.cpp	/^} config;$/;"	v	typeref:struct:Globa
 config	main/BinCluster.cpp	/^} config;$/;"	v	typeref:struct:AppConfig
 config	main/ChopBin.cpp	/^}config;$/;"	v	typeref:struct:AppConfig
 config	main/ContigDlink.cpp	/^} config;$/;"	v	typeref:struct:AppConfig
+config	main/FCRFByTF.cpp	/^}config;$/;"	v	typeref:struct:AppConfig
 config	main/FillContigRoad.cpp	/^} config;$/;"	v	typeref:struct:GlobalConfig
+config	main/FillTrunkByPE.cpp	/^} config;$/;"	v	typeref:struct:AppConfig
 config	main/LinearCDG.cpp	/^}config;$/;"	v	typeref:struct:AppConfig
 config	main/MergeContig.cpp	/^} config;$/;"	v	typeref:struct:AppConfig
 config	main/MinTree.cpp	/^}config;$/;"	v	typeref:struct:AppConf
+config	main/PEGraph.cpp	/^}config;$/;"	v	typeref:struct:AppConfig
 config	main/Sam2ReadOnContig.cpp	/^}config;$/;"	v	typeref:struct:AppConfig
+config	main/SeedCluster.cpp	/^}config;$/;"	v	typeref:struct:AppConfig
 config	main/StaticsticUnique.cpp	/^} config;$/;"	v	typeref:struct:AppConfig
 config	tools/stLFR_2_10X.cpp	/^} config;$/;"	v	typeref:struct:AppConf
 connectionNum	main/ContigDlink.cpp	/^    long long connectionNum;$/;"	m	struct:AppConfig	file:
@@ -1274,6 +1388,9 @@ contigId	stLFR/CBB.h	/^            unsigned int contigId ;$/;"	m	struct:BGIQD::s
 contigId	stLFR/CBB.h	/^            unsigned int contigId ;$/;"	m	struct:BGIQD::stLFR::ContigRelation
 contigId	stLFR/CBB.h	/^            unsigned int contigId ;$/;"	m	struct:BGIQD::stLFR::ContigSimularity
 contigInfo	main/StaticsticUnique.cpp	/^    std::map<BGIQD::SOAP2::ContigId , ContigInfo> contigInfo;$/;"	m	struct:AppConfig	file:
+contigLen	stLFR/contigPEGraph.h	/^            int contigLen ;$/;"	m	struct:BGIQD::stLFR::ContigNode
+contigLen_cache	main/FillTrunkByPE.cpp	/^    std::map<unsigned int , int > contigLen_cache;$/;"	m	struct:AppConfig	file:
+contigLen_cache	main/PEGraph.cpp	/^    std::map<unsigned int , int > contigLen_cache ;$/;"	m	struct:AppConfig	file:
 contigLens	dev_tools/contig_barcode.h	/^typedef std::map<int , int > contigLens;$/;"	t	namespace:BGIQD::JOB01
 contigList	dev_tools/contig_barcode.h	/^typedef std::vector<contigPosInfo> contigList;$/;"	t	namespace:BGIQD::JOB01
 contigMatchData	dev_tools/ContigTypeByRef.cpp	/^typedef std::vector<SAM::MatchData> contigMatchData;$/;"	t	file:
@@ -1293,6 +1410,7 @@ contigs	dev_tools/ContigRoadFill2Fasta.cpp	/^    std::map<unsigned int , ContigF
 contigs	main/ContigDlink.cpp	/^    std::vector<BGIQD::SOAP2::ContigRoad> contigs ;\/\/std::vector<unsigned int> > contigs;$/;"	m	struct:AppConfig	file:
 contigs	main/LinearCDG.cpp	/^    std::vector<BGIQD::SOAP2::ContigRoad> contigs ; $/;"	m	struct:AppConfig	file:
 contigs	soap2/contigFasta.h	/^                std::map<unsigned int , ContigFastA> contigs;$/;"	m	class:BGIQD::SOAP2::ContigFastAMap
+count	stLFR/contigPEGraph.h	/^            int count ;$/;"	m	struct:BGIQD::stLFR::PEEdge
 cov	dev_tools/ContigRoadFill2Fasta.cpp	/^        float           cov ;$/;"	m	struct:GlobalContig::ContigFastA	file:
 cov	main/StaticsticUnique.cpp	/^        float cov ;$/;"	m	struct:AppConfig::ContigInfo	file:
 cov	soap2/contigFasta.h	/^            float           cov ;$/;"	m	struct:BGIQD::SOAP2::ContigFastA
@@ -1316,6 +1434,7 @@ curr	algorithm/incr_array/incr_array.h	/^            size_t curr ;$/;"	m	struct:
 curr	stLFR/barcodeId.h	/^        int curr ;$/;"	m	class:BGIQD::stLFR::BarcodeId
 curr	unused/fastqa/fasta.h	/^    Process curr;$/;"	m	struct:BGIQD::FASTQA::SeqItemFactory
 curr_depth	soap2/contigGraphDepth.h	/^                int curr_depth ;$/;"	m	struct:BGIQD::SOAP2::DepthSearchEAEnder
+curr_len	stLFR/contigPEGraphSearch.h	/^            int curr_len ;$/;"	m	struct:BGIQD::stLFR::DepthEnder
 curr_length	soap2/contigGraphDepth.h	/^                int curr_length ;$/;"	m	struct:BGIQD::SOAP2::DepthSearchEAEnder
 d	biocommon/sam_bam/sam_parser.h	/^    Data d ;$/;"	m	struct:BGIQD::SAM::Head
 d	common/args/argsparser.h	/^            data d;$/;"	m	struct:BGIQD::ARGS::args_union
@@ -1329,6 +1448,7 @@ deal_circle	stLFR/barcodeOnContig.h	/^            CircleStrategy deal_circle;$/;
 deep_clean	algorithm/incr_array/incr_array.h	/^                void deep_clean()$/;"	f	struct:BGIQD::INCRARRAY::IncrArray
 default_value	common/args/argsparser.h	/^            std::string default_value ;$/;"	m	struct:BGIQD::ARGS::args_union
 degree	algorithm/fibheap/fib_heap.h	/^                int    degree ;$/;"	m	struct:BGIQD::FIBHEAP::Node
+del_at_tail	main/ChopBin.cpp	/^    int del_at_tail;$/;"	m	struct:AppConfig	file:
 depth	algorithm/disjoin_set/disjoin_set.h	/^                    unsigned depth;$/;"	m	struct:BGIQD::Algorithm::DisJoin_Set::Node
 detail	biocommon/sam_bam/sam_parser.h	/^    MatchDetail detail;$/;"	m	struct:BGIQD::SAM::MatchData
 detaillog	common/log/log.h	/^        detaillog( const std::string m, const std::string l)$/;"	f	class:BGIQD::LOG::detaillog
@@ -1349,6 +1469,7 @@ edge_id	algorithm/graph/Graph.h	/^                EdgeId                        
 edge_id	algorithm/graph/GraphTest.cpp	/^        int edge_id ;$/;"	m	struct:TestGraph1::Node	file:
 edge_id	algorithm/graph/SPFSearch_test.cpp	/^        int edge_id ;$/;"	m	struct:TestGraph::Node	file:
 edge_id	soap2/contigGraph.h	/^            unsigned int edge_id ;$/;"	m	struct:BGIQD::SOAP2::KeyEdge
+edge_id	stLFR/contigPEGraph.h	/^            long edge_id;$/;"	m	struct:BGIQD::stLFR::ContigNode
 edge_ids	algorithm/graph/GraphBasic.h	/^                std::set<EdgeId>               edge_ids;$/;"	m	struct:BGIQD::GRAPH::IGraphNodeBasic
 edges	algorithm/graph/Graph.h	/^                std::map<GraphEdgeId , Edge > edges ;$/;"	m	struct:BGIQD::GRAPH::GraphAccessBase
 edges	algorithm/graph/GraphBasic.h	/^                Edges edges ;$/;"	m	struct:BGIQD::GRAPH::ListGraphBasic
@@ -1376,6 +1497,7 @@ ender	algorithm/graph/DepthSearch.h	/^                PathEnder                 
 ender	algorithm/graph/SPFSearch.h	/^                PathEnder ender;$/;"	m	struct:BGIQD::GRAPH::SPFSearch
 ender_flag	soap2/contigGraphDepth.h	/^                bool ender_flag ;$/;"	m	struct:BGIQD::SOAP2::DepthSearchEAEnder
 ender_flag	soap2/contigGraphSPF.h	/^            bool ender_flag ;$/;"	m	struct:BGIQD::SOAP2::SFPEnder
+ender_flag	stLFR/contigPEGraphSearch.h	/^            bool ender_flag ;$/;"	m	struct:BGIQD::stLFR::DepthEnder
 eof	biocommon/pair/pair_sam_parser.h	/^        bool eof() const { return m_ist.eof() ; }$/;"	f	class:BGIQD::SAM::PairedSAMParser
 explain	common/args/argsparser.h	/^            std::string explain;$/;"	m	struct:BGIQD::ARGS::args_union
 extra_flags	unused/fastqa/fasta.h	/^    std::string extra_flags;$/;"	m	struct:BGIQD::FASTQA::SeqItem
@@ -1383,8 +1505,12 @@ f	common/args/argsparser.h	/^                float f;$/;"	m	union:BGIQD::ARGS::a
 fName	main/BinCluster.cpp	/^    BGIQD::SOAP2::FileNames fName;$/;"	m	struct:AppConfig	file:
 fName	main/ChopBin.cpp	/^    BGIQD::SOAP2::FileNames fName;$/;"	m	struct:AppConfig	file:
 fName	main/ContigDlink.cpp	/^    BGIQD::SOAP2::FileNames fName;$/;"	m	struct:AppConfig	file:
+fName	main/FCRFByTF.cpp	/^    BGIQD::SOAP2::FileNames fName;$/;"	m	struct:AppConfig	file:
+fName	main/FillTrunkByPE.cpp	/^    BGIQD::SOAP2::FileNames fName;$/;"	m	struct:AppConfig	file:
 fName	main/LinearCDG.cpp	/^    BGIQD::SOAP2::FileNames fName;$/;"	m	struct:AppConfig	file:
+fName	main/PEGraph.cpp	/^    BGIQD::SOAP2::FileNames fName;$/;"	m	struct:AppConfig	file:
 fName	main/Sam2ReadOnContig.cpp	/^    BGIQD::SOAP2::FileNames fName;$/;"	m	struct:AppConfig	file:
+fName	main/SeedCluster.cpp	/^    BGIQD::SOAP2::FileNames fName;$/;"	m	struct:AppConfig	file:
 fName	main/StaticsticUnique.cpp	/^    BGIQD::SOAP2::FileNames fName ;$/;"	m	struct:AppConfig	file:
 fNames	main/FillContigRoad.cpp	/^    BGIQD::SOAP2::FileNames fNames;$/;"	m	struct:GlobalConfig	file:
 fNames	main/MinTree.cpp	/^    BGIQD::SOAP2::FileNames fNames ;$/;"	m	struct:AppConf	file:
@@ -1398,7 +1524,9 @@ fib_nodes	algorithm/graph/SPFSearch.h	/^                    std::map<NodeId ,SPF
 file	common/files/gzstream.h	/^    gzFile           file;               \/\/ file handle for compressed file$/;"	m	class:GZSTREAM_NAMESPACE::gzstreambuf
 filename	common/log/logfilter.h	/^            std::string filename;$/;"	m	struct:BGIQD::LOG::logfilter::modulelogrole
 filename	common/log/logfilter.h	/^            std::string filename;$/;"	m	struct:BGIQD::LOG::logfilter::specialrole
+fill	main/FCRFByTF.cpp	/^        std::vector<unsigned int> fill;$/;"	m	struct:AppConfig::GapInfo	file:
 fill_flag	stLFR/LineGroup.h	/^        struct fill_flag$/;"	s	namespace:BGIQD::stLFR
+fill_freq	main/FillTrunkByPE.cpp	/^    BGIQD::FREQ::Freq<int> fill_freq;$/;"	m	struct:AppConfig	file:
 fill_num	stLFR/LineGroup.h	/^            int fill_num;$/;"	m	struct:BGIQD::stLFR::ContigRoad
 fills	main/MergeContig.cpp	/^    BGIQD::stLFR::ContigRoadFills fills;$/;"	m	struct:AppConfig	file:
 fills	stLFR/LineGroup.h	/^            std::vector<ContigRoadFill>  fills;$/;"	m	struct:BGIQD::stLFR::ContigRoadFills
@@ -1411,6 +1539,7 @@ findConnection	main/ContigDlink.cpp	/^    void findConnection(unsigned int edge_
 finish_search	algorithm/graph/DepthSearch.h	/^                int                                 finish_search ;$/;"	m	struct:BGIQD::GRAPH::DepthSearchNode
 firstMatchInRefNoReverse	biocommon/sam_bam/sam_parser.cpp	/^int MatchData::firstMatchInRefNoReverse() const $/;"	f	class:BGIQD::SAM::MatchData
 first_found	algorithm/graph/DepthSearch.h	/^                int                                 first_found ;$/;"	m	struct:BGIQD::GRAPH::DepthSearchNode
+first_in	stLFR/contigPEGraphSearch.h	/^            bool first_in  ;$/;"	m	struct:BGIQD::stLFR::DepthEnder
 first_match_position	biocommon/sam_bam/sam_parser.h	/^    size_t first_match_position;$/;"	m	struct:BGIQD::SAM::MatchData
 flag	dev_tools/ContigRoadFill2Fasta.cpp	/^        int flag ;$/;"	m	struct:GlobalContig::ContigFastA	file:
 flag	soap2/contigFasta.h	/^            int flag ;$/;"	m	struct:BGIQD::SOAP2::ContigFastA
@@ -1428,6 +1557,8 @@ format	main/ChopBin.cpp	/^        std::string format(unsigned int id) const $/;"
 forword_from	algorithm/graph/DepthSearch.h	/^                std::set<NodeId>                    forword_from ;$/;"	m	struct:BGIQD::GRAPH::DepthSearchNode
 founder	soap2/contigGraphDepth.h	/^                std::map<NodeId,Tos> founder;$/;"	m	struct:BGIQD::SOAP2::DepthSearchEAEnder
 founder	soap2/contigGraphSPF.h	/^            std::map<NodeId , Tos> founder ;$/;"	m	struct:BGIQD::SOAP2::SFPEnder
+freqs	main/FCRFByTF.cpp	/^    BGIQD::FREQ::Freq<int> freqs;$/;"	m	struct:AppConfig	file:
+freqs	main/SeedCluster.cpp	/^    BGIQD::FREQ::Freq<int> freqs;$/;"	m	struct:AppConfig	file:
 from	algorithm/graph/Graph.h	/^                NodeId      from ;$/;"	m	struct:BGIQD::GRAPH::GraphEdgeBase
 from	algorithm/graph/GraphBasic.h	/^                NodeId      from ;$/;"	m	struct:BGIQD::GRAPH::IGraphEdgeBasic
 from	algorithm/graph/GraphTest.cpp	/^        char from ; $/;"	m	struct:TestGraph1::Edge	file:
@@ -1491,14 +1622,19 @@ incrMap1	dev_tools/job12.cpp	/^void incrMap1(std::map<int,int> & map , int key  
 incrMap2	dev_tools/LinearClusterResult.cpp	/^void incrMap2(std::map<int,int> & map , int key )$/;"	f
 index	main/ContigDlink.cpp	/^    std::atomic<int> index ;$/;"	m	struct:AppConfig	file:
 index_map	dev_tools/SolveMulti.cpp	/^std::vector<int> index_map;$/;"	v
+infobuffer	main/FCRFByTF.cpp	/^    std::vector<GapInfo> infobuffer;$/;"	m	struct:AppConfig	file:
 infos	biocommon/sam_bam/sam_parser.h	/^    std::vector<MatchInfo> infos;$/;"	m	struct:BGIQD::SAM::MatchDetail
 infos	common/args/argsparser.h	/^        static std::map<int,args_union*>  infos;$/;"	m	namespace:BGIQD::ARGS
+infos	main/SeedCluster.cpp	/^    std::vector<GapInfo>  infos ;$/;"	m	struct:AppConfig	file:
 init	stLFR/LineGroup.cpp	/^        void ContigRoad::init(const std::string & buff)$/;"	f	class:BGIQD::stLFR::ContigRoad
 initLog	dev_tools/contig_barcode.cpp	/^    void initLog(const std::string & module)$/;"	f	namespace:BGIQD::JOB01
 init_n_element	algorithm/incr_array/incr_array.h	/^                void init_n_element(size_t i )$/;"	f	struct:BGIQD::INCRARRAY::IncrArray
+insert_size	biocommon/sam_bam/sam_parser.h	/^    int insert_size ;$/;"	m	struct:BGIQD::SAM::MatchData
+insert_size	main/PEGraph.cpp	/^    int insert_size ;$/;"	m	struct:AppConfig	file:
 invalid	algorithm/graph/DepthSearch.h	/^                static const  NodeId                invalid = -1;$/;"	m	struct:BGIQD::GRAPH::DepthSearchNode
 invalid	algorithm/graph/Graph.h	/^                static const EdgeId invalid = -1 ;$/;"	m	struct:BGIQD::GRAPH::GraphEdgeBase
 invalid	algorithm/graph/GraphBasic.h	/^                static const EdgeId invalid = -1 ;$/;"	m	struct:BGIQD::GRAPH::IGraphEdgeBasic
+invalid	stLFR/contigPEGraphSearch.h	/^                Edge invalid ;$/;"	m	struct:BGIQD::stLFR::ContigPEGraphAccess
 isSeqPalindrome	biocommon/seq/tool_func.h	/^        static bool isSeqPalindrome(const std::string & line)$/;"	f	namespace:BGIQD::SEQ
 isSeqPalindrome	dev_tools/ContigRoadFill2Fasta.cpp	/^    static bool isSeqPalindrome(const std::string & line)$/;"	f	struct:GlobalContig
 isSeqPalindrome	unused/fastqa/tool_func.h	/^    static bool isSeqPalindrome(const std::string & line)$/;"	f
@@ -1506,6 +1642,7 @@ is_bool	common/args/argsparser.h	/^                is_bool = 0,$/;"	e	enum:BGIQD
 is_float	common/args/argsparser.h	/^                is_float = 4,$/;"	e	enum:BGIQD::ARGS::args_union::type
 is_int	common/args/argsparser.h	/^                is_int = 2,$/;"	e	enum:BGIQD::ARGS::args_union::type
 is_long	common/args/argsparser.h	/^                is_long = 3,$/;"	e	enum:BGIQD::ARGS::args_union::type
+is_max	main/FillTrunkByPE.cpp	/^    int is_max;$/;"	m	struct:AppConfig	file:
 is_open	common/files/gzstream.h	/^    int is_open() { return opened; }$/;"	f	class:GZSTREAM_NAMESPACE::gzstreambuf
 is_reverse_complete	dev_tools/LinkCheck_1.cpp	/^    bool is_reverse_complete;$/;"	m	struct:A	file:
 is_string	common/args/argsparser.h	/^                is_string = 1,$/;"	e	enum:BGIQD::ARGS::args_union::type
@@ -1537,11 +1674,14 @@ key_map	main/ContigDlink.cpp	/^    std::map<unsigned int , unsigned int> key_map
 key_mutex	main/ContigDlink.cpp	/^    std::mutex * key_mutex;$/;"	m	class:AppConfig::std	file:
 keyer	soap2/contigGraphDepth.h	/^                NodeTypeDetector keyer ;$/;"	m	struct:BGIQD::SOAP2::DepthSearchEAEnder
 keyer	soap2/contigGraphSPF.h	/^            NodeTypeDetector keyer ;$/;"	m	struct:BGIQD::SOAP2::SFPEnder
+keyer	stLFR/contigPEGraphSearch.h	/^            NodeTypeDetector keyer ;$/;"	m	struct:BGIQD::stLFR::DepthEnder
 keys	main/ContigDlink.cpp	/^    std::set<unsigned int> keys;$/;"	m	struct:AppConfig	file:
 keysize	algorithm/collection/collection.h	/^                size_t keysize() const $/;"	f	struct:BGIQD::Collection::Collection
 l	common/args/argsparser.h	/^                long l;$/;"	m	union:BGIQD::ARGS::args_union::data
 l	common/log/log.h	/^        logger & l;$/;"	m	class:BGIQD::LOG::timer
+last_len	stLFR/contigPEGraphSearch.h	/^            int last_len ;$/;"	m	struct:BGIQD::stLFR::DepthEnder
 left	algorithm/bi_list/bi_list.h	/^                BiListPtr left;$/;"	m	struct:BGIQD::BILIST::BiList
+len	stLFR/contigPEGraph.h	/^            int len;$/;"	m	struct:BGIQD::stLFR::PEEdge
 len_map	dev_tools/SolveMulti.cpp	/^std::vector<int> len_map;$/;"	v
 lend	common/log/log.h	/^struct lend{};$/;"	s	namespace:BGIQD::LOG
 length	algorithm/graph/SPFSearch_test.cpp	/^        int length ;$/;"	m	struct:TestGraph::Node	file:
@@ -1566,6 +1706,7 @@ lger	dev_tools/LinkCheck_1.cpp	/^BGIQD::LOG::logger lger;$/;"	v
 lger	main/BinCluster.cpp	/^    BGIQD::LOG::logger lger;$/;"	m	struct:AppConfig	file:
 lger	main/ContigDlink.cpp	/^    BGIQD::LOG::logger lger;$/;"	m	struct:AppConfig	file:
 lger	main/FillContigRoad.cpp	/^    BGIQD::LOG::logger lger;$/;"	m	struct:GlobalConfig	file:
+lger	main/MinTree.cpp	/^    BGIQD::LOG::logger lger;$/;"	m	struct:AppConf	file:
 linear	dev_tools/ContigRoadFill2Fasta.cpp	/^        std::string     linear;$/;"	m	struct:GlobalContig::ContigFastA	file:
 linear	soap2/contigFasta.h	/^            std::string     linear;$/;"	m	struct:BGIQD::SOAP2::ContigFastA
 linear	soap2/graphEA.h	/^            std::string     linear;$/;"	m	struct:BGIQD::SOAP2::Edge
@@ -1593,9 +1734,13 @@ log	dev_tools/ContigRoadFill2Fasta.cpp	/^    BGIQD::LOG::logger log;$/;"	m	struc
 log	main/ChopBin.cpp	/^    BGIQD::LOG::logger log;$/;"	m	struct:AppConfig	file:
 log	main/StaticsticUnique.cpp	/^    BGIQD::LOG::logger log;$/;"	m	struct:AppConfig	file:
 log	test/test.cpp	/^BGIQD::LOG::logger Test::log ;$/;"	m	class:Test	file:
+loger	main/FCRFByTF.cpp	/^    BGIQD::LOG::logger loger;$/;"	m	struct:AppConfig	file:
+loger	main/FillTrunkByPE.cpp	/^    BGIQD::LOG::logger loger;$/;"	m	struct:AppConfig	file:
 loger	main/LinearCDG.cpp	/^    BGIQD::LOG::logger loger;$/;"	m	struct:AppConfig	file:
 loger	main/MergeContig.cpp	/^    BGIQD::LOG::logger loger;$/;"	m	struct:AppConfig	file:
+loger	main/PEGraph.cpp	/^    BGIQD::LOG::logger loger;$/;"	m	struct:AppConfig	file:
 loger	main/Sam2ReadOnContig.cpp	/^    BGIQD::LOG::logger loger;$/;"	m	struct:AppConfig	file:
+loger	main/SeedCluster.cpp	/^    BGIQD::LOG::logger loger;$/;"	m	struct:AppConfig	file:
 logfilter	common/log/logfilter.h	/^        logfilter(){}$/;"	f	class:BGIQD::LOG::logfilter
 logfilter	common/log/logfilter.h	/^class logfilter$/;"	c	namespace:BGIQD::LOG
 logger	common/log/log.h	/^class logger$/;"	c	namespace:BGIQD::LOG
@@ -1654,14 +1799,19 @@ main	dev_tools/job12.cpp	/^int main()$/;"	f
 main	main/BinCluster.cpp	/^int main(int argc ,char **argv)$/;"	f
 main	main/ChopBin.cpp	/^int main(int argc , char ** argv)$/;"	f
 main	main/ContigDlink.cpp	/^int main(int argc , char **argv)$/;"	f
+main	main/FCRFByTF.cpp	/^int  main(int argc, char **argv)$/;"	f
 main	main/FillContigRoad.cpp	/^int  main(int argc, char **argv)$/;"	f
+main	main/FillTrunkByPE.cpp	/^int main(int argc , char ** argv)$/;"	f
 main	main/LinearCDG.cpp	/^int main(int argc , char ** argv)$/;"	f
 main	main/MergeContig.cpp	/^int main(int argc , char **argv)$/;"	f
 main	main/MinTree.cpp	/^int main(int argc , char **argv )$/;"	f
+main	main/PEGraph.cpp	/^int main(int argc , char ** argv)$/;"	f
 main	main/Sam2ReadOnContig.cpp	/^int main(int argc , char ** argv)$/;"	f
+main	main/SeedCluster.cpp	/^int main(int argc , char ** argv)$/;"	f
 main	main/StaticsticUnique.cpp	/^int main(int argc , char ** argv)$/;"	f
 main	test/test.cpp	/^int main(int argc, char ** argv)$/;"	f
 main	tools/cpSpeed.cpp	/^int main(int argc , char **argv)$/;"	f
+main	tools/seedGapFreq.cpp	/^int main(int argc ,char ** argv)$/;"	f
 main	tools/stLFR_2_10X.cpp	/^int main(int argc , char **argv)$/;"	f
 main	tools/trunk_mark.cpp	/^int main(int argc , char **argv)$/;"	f
 main	unused/graph/test.cpp	/^int main()$/;"	f
@@ -1674,19 +1824,23 @@ maper	common/multithread/MapReduce.h	/^        typedef std::function<std::pair<K
 maps	dev_tools/SolveMulti.cpp	/^std::map<std::string, std::map<int, sort_t1> > maps;$/;"	v
 mark	algorithm/fibheap/fib_heap.h	/^                bool   mark;$/;"	m	struct:BGIQD::FIBHEAP::Node
 marked	algorithm/graph/GraphTrunk.h	/^                bool marked;$/;"	m	struct:BGIQD::GRAPH::TrunkNode
+max	algorithm/interval/Interval.h	/^                ValueType max;$/;"	m	struct:BGIQD::INTERVAL::Interval
 maxContig	dev_tools/ContigRoadFill2Fasta.cpp	/^    unsigned int maxContig;$/;"	m	struct:GlobalContig	file:
 maxContig	soap2/contigFasta.h	/^                unsigned int maxContig;$/;"	m	class:BGIQD::SOAP2::ContigFastAMap
 max_depth	soap2/contigGraphDepth.h	/^                int max_depth ;$/;"	m	struct:BGIQD::SOAP2::DepthSearchEAEnder
 max_length	main/FillContigRoad.cpp	/^    int max_length;$/;"	m	struct:GlobalConfig	file:
 max_length	soap2/contigGraphDepth.h	/^                int max_length ;$/;"	m	struct:BGIQD::SOAP2::DepthSearchEAEnder
 max_length	soap2/contigGraphSPF.h	/^            int max_length ;$/;"	m	struct:BGIQD::SOAP2::SFPEnder
+max_length	stLFR/contigPEGraphSearch.h	/^            int max_length ;$/;"	m	struct:BGIQD::stLFR::DepthEnder
 maxlevel	common/log/logfilter.h	/^            loglevel maxlevel;$/;"	m	struct:BGIQD::LOG::logfilter::modulelogrole
 maxlevel	common/log/logfilter.h	/^            loglevel maxlevel;$/;"	m	struct:BGIQD::LOG::logfilter::specialrole
 median	dev_tools/bin_sim_len.cpp	/^void median(std::map<size_t,double> & map , const std::map<size_t , size_t> index)$/;"	f
 median	dev_tools/bin_simularity.cpp	/^void median(std::map<size_t,double> & map , const std::map<size_t , size_t> index)$/;"	f
 min	algorithm/fibheap/fib_heap.h	/^                Node * min ;$/;"	m	struct:BGIQD::FIBHEAP::FibHeap
+min	algorithm/interval/Interval.h	/^                ValueType min;$/;"	m	struct:BGIQD::INTERVAL::Interval
 min	dev_tools/bin_sim_len.cpp	/^inline size_t min(size_t i , size_t j) $/;"	f
 min	dev_tools/bin_simularity.cpp	/^inline size_t min(size_t i , size_t j) $/;"	f
+min	main/SeedCluster.cpp	/^    float min;$/;"	m	struct:AppConfig	file:
 min	main/StaticsticUnique.cpp	/^    int min;$/;"	m	struct:AppConfig	file:
 min_len	soap2/contigType.h	/^                int min_len;$/;"	m	struct:BGIQD::SOAP2::ContigTypeDetecter
 mintrees	main/MinTree.cpp	/^    std::map<BGIQD::stLFR::ContigSimGraph::NodeId , BGIQD::stLFR::ContigSimGraph> mintrees;$/;"	m	struct:AppConf	file:
@@ -1697,6 +1851,7 @@ module	common/log/logfilter.h	/^            std::string module;$/;"	m	struct:BGI
 module	common/log/logfilter.h	/^            std::string module;$/;"	m	struct:BGIQD::LOG::logfilter::specialrole
 modulelogrole	common/log/logfilter.h	/^        struct modulelogrole$/;"	s	class:BGIQD::LOG::logfilter
 n	algorithm/fibheap/fib_heap.h	/^                long long n ;$/;"	m	struct:BGIQD::FIBHEAP::FibHeap
+n1	main/FCRFByTF.cpp	/^        unsigned int n1 ;$/;"	m	struct:AppConfig::GapInfo	file:
 name	biocommon/sam_bam/sam_parser.h	/^        std::string name ;$/;"	m	struct:BGIQD::SAM::Head::SequenceData
 name	common/args/argsparser.h	/^            std::string name ;$/;"	m	struct:BGIQD::ARGS::args_union
 name	unused/fastqa/fasta.h	/^    std::string name;$/;"	m	struct:BGIQD::FASTQA::SeqItem
@@ -1706,13 +1861,20 @@ next	algorithm/graph/Graph.h	/^                EdgeId      next;$/;"	m	struct:BG
 next	algorithm/graph/GraphTest.cpp	/^        int next ;$/;"	m	struct:TestGraph1::Edge	file:
 next	algorithm/graph/SPFSearch_test.cpp	/^        int next ;$/;"	m	struct:TestGraph::Edge	file:
 next	dev_tools/contig_barcode.h	/^        int next ;$/;"	m	struct:BGIQD::JOB01::BarcodeNum
+next	main/FCRFByTF.cpp	/^        unsigned int next ;$/;"	m	struct:AppConfig::GapInfo	file:
+next	main/FillTrunkByPE.cpp	/^        unsigned int next ;$/;"	m	struct:AppConfig::GapInfo	file:
+next	main/SeedCluster.cpp	/^        unsigned int next ;$/;"	m	struct:AppConfig::GapInfo	file:
 next	soap2/contigGraph.h	/^            Arc * next ;$/;"	m	struct:BGIQD::SOAP2::Arc
 next	soap2/graphEA.h	/^            Arc * next ;$/;"	m	struct:BGIQD::SOAP2::Arc
+next	stLFR/contigPEGraph.h	/^            long next ; \/\/ to use the SPFsearch code .$/;"	m	struct:BGIQD::stLFR::PEEdge
 next	unused/fastqa/fasta.h	/^    SeqItem next;$/;"	m	struct:BGIQD::FASTQA::SeqItemFactory
 nextContigNum	dev_tools/ContigRoadFill2Fasta.cpp	/^    unsigned int nextContigNum()$/;"	f	struct:GlobalContig
 nextContigNum	soap2/contigFasta.h	/^                unsigned int nextContigNum()$/;"	f	class:BGIQD::SOAP2::ContigFastAMap
 nextE	unused/graph/Graph.h	/^                EdgeIndex nextE;$/;"	m	class:BGIQD::Graph::DiGraph_VE
 nextV	unused/graph/Graph.h	/^                VertexIndex nextV;$/;"	m	class:BGIQD::Graph::DiGraph_VE
+next_1	main/FillTrunkByPE.cpp	/^        unsigned int next_1 ;$/;"	m	struct:AppConfig::GapInfo	file:
+next_ref_name	biocommon/sam_bam/sam_parser.h	/^    std::string next_ref_name ;$/;"	m	struct:BGIQD::SAM::MatchData
+next_ref_pos	biocommon/sam_bam/sam_parser.h	/^    int next_ref_pos;$/;"	m	struct:BGIQD::SAM::MatchData
 nexts	unused/graph/Vertex.h	/^            std::vector<EdgeIndex> nexts;$/;"	m	struct:BGIQD::Graph::VertexWithEdge
 nodeHash	algorithm/disjoin_set/disjoin_set.h	/^            typedef std::map<Key , Node * > nodeHash;$/;"	t	class:BGIQD::Algorithm::DisJoin_Set
 node_id	algorithm/graph/Graph.h	/^                typename Edge::EdgeNodeId node_id ;$/;"	m	struct:BGIQD::GRAPH::EdgeIterator
@@ -1771,6 +1933,7 @@ operator =	algorithm/graph/Graph.h	/^                EdgeIterator & operator = (
 operator =	algorithm/incr_array/incr_array.h	/^            const_iterator& operator = ( const const_iterator& o )$/;"	f	struct:BGIQD::INCRARRAY::const_iterator
 operator =	algorithm/incr_array/incr_array.h	/^            iterator& operator = ( const iterator& o )$/;"	f	struct:BGIQD::INCRARRAY::iterator
 operator =	algorithm/incr_array/incr_array.h	/^            iterator_base & operator = ( const iterator_base & o )$/;"	f	struct:BGIQD::INCRARRAY::iterator_base
+operator =	algorithm/interval/Interval.h	/^                Interval & operator = ( const Interval & other )$/;"	f	struct:BGIQD::INTERVAL::Interval
 operator ==	algorithm/graph/Graph.h	/^                bool operator == ( const EdgeIterator & ei )const$/;"	f	struct:BGIQD::GRAPH::EdgeIterator
 operator ==	algorithm/graph/GraphBasic.h	/^                bool operator == (const  IDigraphEdgeBase & i )$/;"	f	struct:BGIQD::GRAPH::IDigraphEdgeBase
 operator ==	algorithm/graph/GraphBasic.h	/^                bool operator == (const  IGraphEdgeBasic & i )$/;"	f	struct:BGIQD::GRAPH::IGraphEdgeBasic
@@ -1796,15 +1959,21 @@ ox400	biocommon/sam_bam/sam_parser.h	/^    int ox400:1;$/;"	m	struct:BGIQD::SAM:
 ox8	biocommon/sam_bam/sam_parser.h	/^    int ox8:1;$/;"	m	struct:BGIQD::SAM::FLAGS
 ox80	biocommon/sam_bam/sam_parser.h	/^    int ox80:1;$/;"	m	struct:BGIQD::SAM::FLAGS
 ox800	biocommon/sam_bam/sam_parser.h	/^    int ox800:1;$/;"	m	struct:BGIQD::SAM::FLAGS
+p1	main/FCRFByTF.cpp	/^        unsigned int p1 ;$/;"	m	struct:AppConfig::GapInfo	file:
 pair_num	tools/stLFR_2_10X.cpp	/^    long pair_num ;$/;"	m	struct:AppConf	file:
 parent	algorithm/disjoin_set/disjoin_set.h	/^                    Node * parent;$/;"	m	struct:BGIQD::Algorithm::DisJoin_Set::Node
 parse_string	dev_tools/SolveMulti.cpp	/^sort_t1 parse_string(const std::string &s)$/;"	f
 pass	main/StaticsticUnique.cpp	/^    std::set<unsigned int> pass ;$/;"	m	struct:AppConfig	file:
 path	algorithm/graph/DepthSearch.h	/^                std::stack<EdgeItr>                         path;$/;"	m	struct:BGIQD::GRAPH::DepthSearch
+path	main/FillTrunkByPE.cpp	/^        std::vector<unsigned int> path;$/;"	m	struct:AppConfig::GapInfo	file:
+path	stLFR/contigPEGraphSearch.h	/^            std::stack<const Node * > path;$/;"	m	struct:BGIQD::stLFR::DepthEnder
 path_length	soap2/contigGraphDepth.h	/^            int path_length ;$/;"	m	struct:BGIQD::SOAP2::DNode_EA
 path_num	stLFR/barcodeOnContig.h	/^            int path_num;$/;"	m	struct:BGIQD::stLFR::P2PGraph
 path_num_freq	main/FillContigRoad.cpp	/^    BGIQD::FREQ::Freq<int> path_num_freq;$/;"	m	struct:GlobalConfig	file:
 paths	stLFR/barcodeOnContig.h	/^                std::vector<Edge> paths;$/;"	m	struct:BGIQD::stLFR::P2PGraph::Path
+pe_cache	main/PEGraph.cpp	/^    std::map<unsigned int , std::map<unsigned int , std::vector<int> > > pe_cache ;$/;"	m	struct:AppConfig	file:
+pe_graph	main/FillTrunkByPE.cpp	/^    BGIQD::stLFR::ContigPEGraph pe_graph;$/;"	m	struct:AppConfig	file:
+pe_graph	main/PEGraph.cpp	/^    BGIQD::stLFR::ContigPEGraph pe_graph;$/;"	m	struct:AppConfig	file:
 pointer	algorithm/incr_array/incr_array.h	/^                typedef typename T::Element * pointer;$/;"	t	class:BGIQD::INCRARRAY::non_const_traits::T
 pointer	algorithm/incr_array/incr_array.h	/^                typedef typename T::Element const * pointer;$/;"	t	class:BGIQD::INCRARRAY::const_traits::T
 pointer	algorithm/incr_array/incr_array.h	/^            typedef typename T::pointer pointer;$/;"	t	struct:BGIQD::INCRARRAY::iterator_base
@@ -1814,6 +1983,10 @@ preload	stLFR/barcodeId.h	/^        static bool preload ;$/;"	m	class:BGIQD::stL
 prev	algorithm/graph/DepthSearch.h	/^                NodeId                              prev ;$/;"	m	struct:BGIQD::GRAPH::DepthSearchNode
 prev	algorithm/graph/GraphTrunk.h	/^                NodeId prev;$/;"	m	struct:BGIQD::GRAPH::TrunkNode
 prev	algorithm/graph/SPFSearch.h	/^                NodeId prev ;$/;"	m	struct:BGIQD::GRAPH::SPFNode
+prev	main/FCRFByTF.cpp	/^        unsigned int prev ;$/;"	m	struct:AppConfig::GapInfo	file:
+prev	main/FillTrunkByPE.cpp	/^        unsigned int prev ;$/;"	m	struct:AppConfig::GapInfo	file:
+prev	main/SeedCluster.cpp	/^        unsigned int prev ;$/;"	m	struct:AppConfig::GapInfo	file:
+prev_1	main/FillTrunkByPE.cpp	/^        unsigned int prev_1 ;$/;"	m	struct:AppConfig::GapInfo	file:
 prev_2	algorithm/graph/GraphTrunk.h	/^                NodeId prev_2;$/;"	m	struct:BGIQD::GRAPH::TrunkNode
 printContigBarcodeInfo	dev_tools/contig_barcode.cpp	/^    void printContigBarcodeInfo($/;"	f	namespace:BGIQD::JOB01
 printContigTypes	dev_tools/ContigTypeByRef.cpp	/^void printContigTypes( const std::string & file , const contigTypes & types)$/;"	f
@@ -1848,12 +2021,16 @@ reference	algorithm/incr_array/incr_array.h	/^                typedef typename T
 reference	algorithm/incr_array/incr_array.h	/^                typedef typename T::Element const & reference;$/;"	t	class:BGIQD::INCRARRAY::const_traits::T
 reference	algorithm/incr_array/incr_array.h	/^            typedef typename T::reference reference;$/;"	t	struct:BGIQD::INCRARRAY::iterator_base
 relations	main/BinCluster.cpp	/^    BGIQD::stLFR::BinRelationArray  relations;$/;"	m	struct:AppConfig	file:
+relations	main/FillTrunkByPE.cpp	/^        std::set<unsigned int> relations;$/;"	m	struct:AppConfig::GapInfo	file:
+relations	main/SeedCluster.cpp	/^        std::set<unsigned int> relations;$/;"	m	struct:AppConfig::GapInfo	file:
+relations	main/SeedCluster.cpp	/^    std::map<unsigned int , Cols> relations;$/;"	m	struct:AppConfig	file:
 replace_all	common/string/stringtools.cpp	/^    void replace_all( std::string &strBig,$/;"	f	namespace:BGIQD::STRING
 report	main/FillContigRoad.cpp	/^void report()$/;"	f
 report_freq	main/LinearCDG.cpp	/^    void report_freq()$/;"	f	struct:AppConfig
 resize	algorithm/incr_array/incr_array.h	/^                void resize( size_t i )$/;"	f	struct:BGIQD::INCRARRAY::IncrArray
 right	algorithm/bi_list/bi_list.h	/^                BiListPtr right;$/;"	m	struct:BGIQD::BILIST::BiList
 road_fill_freq	main/FillContigRoad.cpp	/^    BGIQD::FREQ::Freq<std::string> road_fill_freq;$/;"	m	struct:GlobalConfig	file:
+roadfill	main/FCRFByTF.cpp	/^    std::vector< std::vector<unsigned int> > roadfill ;$/;"	m	struct:AppConfig	file:
 roads	main/FillContigRoad.cpp	/^    BGIQD::stLFR::ContigRoads roads;$/;"	m	struct:GlobalConfig	file:
 roads	stLFR/LineGroup.h	/^            std::vector<ContigRoad>  roads;$/;"	m	struct:BGIQD::stLFR::ContigRoads
 roles	common/log/logfilter.h	/^        std::vector<specialrole> roles;$/;"	m	class:BGIQD::LOG::logfilter
@@ -1867,7 +2044,11 @@ s	common/args/argsparser.h	/^                std::string *s;$/;"	m	class:BGIQD::
 save	dev_tools/contig_barcode.cpp	/^    void BarcodeNum::save( const std::string & file) const$/;"	f	class:BGIQD::JOB01::BarcodeNum
 saveBinBarcodeInfo	dev_tools/contig_barcode.cpp	/^    void saveBinBarcodeInfo(const std::string & file ,const  binBarcodeInfo &data)$/;"	f	namespace:BGIQD::JOB01
 saveRefBarcodeUniqueInfo	dev_tools/contig_barcode.cpp	/^    void saveRefBarcodeUniqueInfo(const std::string & file , const refBarcodeUniqueInfo & data)$/;"	f	namespace:BGIQD::JOB01
+searchMax	main/FillTrunkByPE.cpp	/^    int searchMax ;$/;"	m	struct:AppConfig	file:
 searcher	main/FillContigRoad.cpp	/^    Searcher searcher;$/;"	m	struct:SearchResult	file:
+seedGapFreq_cpp	tools/Makefile	/^seedGapFreq_cpp 	=	seedGapFreq.cpp$/;"	m
+seedGapFreq_o	tools/Makefile	/^seedGapFreq_o   =	${seedGapFreq_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}$/;"	m
+seed_pos	main/FCRFByTF.cpp	/^    std::map<unsigned int , int> seed_pos ;$/;"	m	struct:AppConfig	file:
 self	algorithm/bi_list/bi_list.h	/^                T * self;$/;"	m	struct:BGIQD::BILIST::BiList
 seq	unused/fastqa/fasta.h	/^    std::string seq;$/;"	m	struct:BGIQD::FASTQA::SeqItem
 seqCompleteReverse	biocommon/seq/tool_func.h	/^        static std::string seqCompleteReverse(const std::string & line)$/;"	f	namespace:BGIQD::SEQ
@@ -1891,6 +2072,7 @@ simularity	stLFR/CBB.h	/^            float simularity;$/;"	m	struct:BGIQD::stLFR
 singleton	common/log/logfilter.cpp	/^    logfilter & logfilter::singleton() $/;"	f	class:BGIQD::LOG::logfilter
 size	algorithm/collection/collection.h	/^                size_t size() const $/;"	f	struct:BGIQD::Collection::Collection
 size	algorithm/incr_array/incr_array.h	/^                size_t size() const { return m_curr ; }$/;"	f	struct:BGIQD::INCRARRAY::IncrArray
+smallest	main/MinTree.cpp	/^    float smallest ;$/;"	m	struct:AppConf	file:
 smallest_edge_id	algorithm/graph/MinTree.h	/^                    EdgeId   smallest_edge_id ;$/;"	m	struct:BGIQD::GRAPH::MinTreeHelper::MTSearchNode
 son	algorithm/fibheap/fib_heap.h	/^                Node * son;$/;"	m	struct:BGIQD::FIBHEAP::Node
 sort_t1	dev_tools/SolveMulti.cpp	/^typedef std::tuple<int,float,std::string> sort_t1;$/;"	t	file:
@@ -1918,6 +2100,8 @@ stLFR	stLFR/barcodeId.cpp	/^namespace stLFR{$/;"	n	namespace:BGIQD	file:
 stLFR	stLFR/barcodeId.h	/^namespace stLFR{$/;"	n	namespace:BGIQD
 stLFR	stLFR/barcodeOnContig.cpp	/^    namespace stLFR {$/;"	n	namespace:BGIQD	file:
 stLFR	stLFR/barcodeOnContig.h	/^    namespace stLFR {$/;"	n	namespace:BGIQD
+stLFR	stLFR/contigPEGraph.h	/^    namespace stLFR {$/;"	n	namespace:BGIQD
+stLFR	stLFR/contigPEGraphSearch.h	/^    namespace stLFR{$/;"	n	namespace:BGIQD
 stLFR	stLFR/contigSimGraph.h	/^    namespace stLFR {$/;"	n	namespace:BGIQD
 stLFR	stLFR/readName2Barcode.cpp	/^namespace stLFR{$/;"	n	namespace:BGIQD	file:
 stLFR	stLFR/readName2Barcode.h	/^namespace stLFR{$/;"	n	namespace:BGIQD
@@ -1931,6 +2115,7 @@ start_position_on_read	biocommon/sam_bam/sam_parser.h	/^    int start_position_o
 start_position_on_ref	biocommon/sam_bam/sam_parser.h	/^    int start_position_on_ref;$/;"	m	struct:BGIQD::SAM::MatchInfo
 status	stLFR/LineGroup.h	/^            } status;$/;"	m	struct:BGIQD::stLFR::ContigRoad	typeref:enum:BGIQD::stLFR::ContigRoad::FillStatus
 strategy	main/FillContigRoad.cpp	/^    FillStrategy strategy;$/;"	m	struct:GlobalConfig	file:
+strategy	main/SeedCluster.cpp	/^    int strategy;$/;"	m	struct:AppConfig	file:
 sub_graph	stLFR/barcodeOnContig.h	/^            std::map<unsigned int , P2PGraph::Edge> sub_graph;$/;"	m	struct:BGIQD::stLFR::P2PGraph
 succ	main/FillContigRoad.cpp	/^    bool succ ;$/;"	m	struct:SearchResult	file:
 sum	dev_tools/bin_sim_len.cpp	/^inline size_t sum(const std::map<size_t , size_t> & hash)$/;"	f
@@ -1941,6 +2126,7 @@ t	common/args/argsparser.h	/^            type t;$/;"	m	struct:BGIQD::ARGS::args_
 tailin	soap2/contigGraph.h	/^            bool tailin;$/;"	m	struct:BGIQD::SOAP2::ContigRoad
 tailin	stLFR/LineGroup.h	/^            bool tailin;$/;"	m	struct:BGIQD::stLFR::ContigRoad
 target	stLFR/barcodeOnContig.h	/^            unsigned int target;$/;"	m	struct:BGIQD::stLFR::P2PGraph
+test	main/MinTree.cpp	/^    void test()$/;"	f	struct:AppConf
 testFibHeap	algorithm/fibheap/fib_heap_test.cpp	/^typedef BGIQD::FIBHEAP::FibHeap<testFibHeapNode> testFibHeap;$/;"	t	file:
 testFibHeapNode	algorithm/fibheap/fib_heap_test.cpp	/^typedef BGIQD::FIBHEAP::Node<int , int > testFibHeapNode;$/;"	t	file:
 testFunc	common/test/Test.h	/^    typedef std::function<void()> testFunc ;$/;"	t	struct:Test
@@ -1986,6 +2172,7 @@ tos	stLFR/barcodeOnContig.h	/^                std::set<unsigned int> tos;$/;"	m	
 total	main/StaticsticUnique.cpp	/^    long total ;$/;"	m	struct:AppConfig	file:
 total_barcode	stLFR/barcodeOnContig.h	/^                int total_barcode;$/;"	m	struct:BGIQD::stLFR::P2PGraph::Path
 total_cov	stLFR/barcodeOnContig.h	/^                float total_cov;$/;"	m	struct:BGIQD::stLFR::P2PGraph::Path
+total_fill	main/FillTrunkByPE.cpp	/^    int total_fill ; $/;"	m	struct:AppConfig	file:
 total_length	stLFR/barcodeOnContig.h	/^                int total_length;$/;"	m	struct:BGIQD::stLFR::P2PGraph::Path
 total_size	soap2/contigGraph.h	/^            int total_size;$/;"	m	struct:BGIQD::SOAP2::KeyEdge
 traisId	algorithm/graph/Graph.h	/^                typedef traits                            traisId;$/;"	t	struct:BGIQD::GRAPH::PathEndHelperBase
@@ -1994,14 +2181,19 @@ traits_1	algorithm/graph/SPFSearch_test.cpp	/^struct traits_1 {} ;$/;"	s	file:
 traits_2	algorithm/graph/GraphTest.cpp	/^struct traits_2 {} ;$/;"	s	file:
 traits_2	algorithm/graph/SPFSearch_test.cpp	/^struct traits_2 {} ;$/;"	s	file:
 traits_search_node	soap2/contigGraphSearch.h	/^        struct traits_search_node {} ;$/;"	s	namespace:BGIQD::SOAP2
+traits_search_node	stLFR/contigPEGraphSearch.h	/^        struct traits_search_node{};$/;"	s	namespace:BGIQD::stLFR
 traits_search_path	soap2/contigGraphSearch.h	/^        struct traits_search_path {} ;$/;"	s	namespace:BGIQD::SOAP2
 trim	common/string/stringtools.cpp	/^    std::string trim(const std::string & str)$/;"	f	namespace:BGIQD::STRING
 true_from	main/FillContigRoad.cpp	/^    unsigned int true_from ;$/;"	m	struct:SearchResult	file:
 true_to	main/FillContigRoad.cpp	/^    unsigned int true_to ;$/;"	m	struct:SearchResult	file:
 trunk_mark_cpp	tools/Makefile	/^trunk_mark_cpp 	=	trunk_mark.cpp$/;"	m
 trunk_mark_o	tools/Makefile	/^trunk_mark_o   =	${trunk_mark_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}$/;"	m
+trunk_seeds	main/FillTrunkByPE.cpp	/^    std::set<unsigned int> trunk_seeds;$/;"	m	struct:AppConfig	file:
+trunk_seeds	main/SeedCluster.cpp	/^    std::set<unsigned int> trunk_seeds;$/;"	m	struct:AppConfig	file:
+trunks	main/FCRFByTF.cpp	/^    std::map<int ,std::vector<int> > trunks;$/;"	m	struct:AppConfig	file:
 type	algorithm/graph/DepthSearch.h	/^                Type                                type ;$/;"	m	struct:BGIQD::GRAPH::DepthSearchNode
 type	algorithm/graph/SPFSearch.h	/^                Type type;$/;"	m	struct:BGIQD::GRAPH::SPFNode
+type	algorithm/interval/Interval.h	/^                Type type;$/;"	m	struct:BGIQD::INTERVAL::Interval
 type	biocommon/sam_bam/sam_parser.h	/^    CIGAR type;$/;"	m	struct:BGIQD::SAM::MatchInfo
 type	biocommon/sam_bam/sam_parser.h	/^    HeadType type ;$/;"	m	struct:BGIQD::SAM::Head
 type	common/args/argsparser.h	/^                args_union::type type() { return args_union::type::is_bool; }$/;"	f	struct:BGIQD::ARGS::args_traits
@@ -2020,6 +2212,7 @@ updateMap1	dev_tools/ClusterGap.cpp	/^void updateMap1(std::map<int,float> & map 
 updateMap1	dev_tools/LinearClusterResult.cpp	/^void updateMap1(std::map<int,float> & map , int key , float value )$/;"	f
 updateMap1	dev_tools/MergeClusterResult.cpp	/^void updateMap1(std::map<int,float> & map , int key , float value )$/;"	f
 updateMap1	dev_tools/job12.cpp	/^void updateMap1(lines&map1, int key1 , int key2, float v)$/;"	f
+use_all_pe_graph	main/FillTrunkByPE.cpp	/^    bool use_all_pe_graph;$/;"	m	struct:AppConfig	file:
 value	algorithm/fibheap/fib_heap.h	/^                Value  value;$/;"	m	struct:BGIQD::FIBHEAP::Node
 value	algorithm/graph/GraphTrunk_test.cpp	/^    int value ;$/;"	m	struct:TKEdge	file:
 value	algorithm/graph/MinTree_test.cpp	/^    int value ;$/;"	m	struct:MTEdge	file:
