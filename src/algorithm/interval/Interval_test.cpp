@@ -23,6 +23,13 @@ TEST(TIntervalInt01)
     CHECK(true , t.IsContain(3));
     CHECK(false, t.IsContain(0));
     CHECK(false, t.IsContain(6));
+
+    IntervalInt01 t1(1,4);
+    CHECK(true , t.IsContain(t1));
+    CHECK(false, t1.IsContain(t));
+    IntervalInt01 t2(1,7);
+    CHECK(1, t.Overlap(t2).min);
+    CHECK(5, t.Overlap(t2).max);
 }
 TEST(TIntervalInt02)
 {
@@ -32,6 +39,12 @@ TEST(TIntervalInt02)
     CHECK(true , t.IsContain(3));
     CHECK(false, t.IsContain(0));
     CHECK(false, t.IsContain(6));
+    IntervalInt02 t1(1,4);
+    CHECK(true , t.IsContain(t1));
+    CHECK(false, t1.IsContain(t));
+    IntervalInt02 t2(1,7);
+    CHECK(1, t.Overlap(t2).min);
+    CHECK(5, t.Overlap(t2).max);
 }
 
 TEST(TIntervalInt03)
@@ -42,6 +55,12 @@ TEST(TIntervalInt03)
     CHECK(true , t.IsContain(3));
     CHECK(false, t.IsContain(0));
     CHECK(false, t.IsContain(6));
+    IntervalInt03 t1(1,4);
+    CHECK(true , t.IsContain(t1));
+    CHECK(false, t1.IsContain(t));
+    IntervalInt03 t2(1,7);
+    CHECK(1, t.Overlap(t2).min);
+    CHECK(5, t.Overlap(t2).max);
 }
 
 
@@ -53,4 +72,10 @@ TEST(TIntervalInt04)
     CHECK(true , t.IsContain(3));
     CHECK(false, t.IsContain(0));
     CHECK(false, t.IsContain(6));
+    IntervalInt04 t1(1,4);
+    CHECK(true , t.IsContain(t1));
+    CHECK(false, t1.IsContain(t));
+    IntervalInt04 t2(1,7);
+    CHECK(1, t.Overlap(t2).min);
+    CHECK(5, t.Overlap(t2).max);
 }
