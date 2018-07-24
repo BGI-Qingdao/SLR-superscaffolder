@@ -81,13 +81,16 @@ namespace BGIQD{
                 {
                     if( &other != this )
                     {
-                        type = other.type ;
                         min = other.min ;
                         max = other.max ;
                     }
                     return *this;
                 }
-
+                // ONLY USED FOR CONTAINER !!!
+                bool operator < ( const Interval & other ) const
+                {
+                    return min < other.min ;
+                }
                 static const Type type = t;
                 ValueType min;
                 ValueType max;
