@@ -15,7 +15,7 @@ struct GlobalConfig
     std::string seedLinear ;
     std::string trunkLinear;
     std::string outPrefix;
-
+    int bin;
     std::map<unsigned int , std::set<int> > seedPos;
     std::map<unsigned int , std::set<ContigArea> > seedArea;
     std::map<unsigned int , int > seedLens;
@@ -118,9 +118,9 @@ struct GlobalConfig
         }
 
         std::cerr<<"____________________"<<std::endl;
-        for(int i = 0 ; i <= 60000000 ; i+= 100000 )
+        for(int i = 0 ; i <= 60000000 ; i+= bin)
         {
-            ContigArea area(i , i+100000 );
+            ContigArea area(i , i+bin );
             int scaff_len = 0 ;
             int contig_len = 0;
             for( const auto & scaff : scaffold_area )
@@ -173,9 +173,11 @@ int main(int argc , char **argv)
     DEFINE_ARG_REQUIRED(std::string , seedLinear , " the seed linear file ");
     DEFINE_ARG_REQUIRED(std::string , trunkLinear , " the trunk linear file ");
     DEFINE_ARG_REQUIRED(std::string , outPrefix, " the out file prefix");
+    DEFINE_ARG_OPTIONAL(int ,bin, " the bin size for calc freq","100000");
     END_PARSE_ARGS
 
     config.Init(seedLinear.to_string() , trunkLinear.to_string() , outPrefix.to_string() );
+    config.bin = bin.to_int();
     config.LoadSeedLinear() ;
     config.ParseTrunkLinear();
     config.Report() ;
