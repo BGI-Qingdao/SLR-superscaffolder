@@ -63,6 +63,9 @@ MinTree_o				= ${MinTree_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 PEGraph_cpp 			= PEGraph.cpp
 PEGraph_o				= ${PEGraph_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
+Gap_OAO_cpp 			= Gap_OAO.cpp
+Gap_OAO_o				= ${Gap_OAO_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+
 SeedCluster_cpp 			= SeedCluster.cpp
 SeedCluster_o				= ${SeedCluster_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
@@ -85,6 +88,7 @@ jobs 	   =	ChopBin\
 				LinearCDG\
 				MinTree\
 				PEGraph\
+				Gap_OAO\
 				FCRFByTF\
 				FillTrunkByPE\
 				SeedCluster\
@@ -99,6 +103,7 @@ jobs_o 	   =	${ChopBin_o} \
 				${LinearCDG_o} \
 				${MinTree_o}\
 				${PEGraph_o}\
+				${Gap_OAO_o}\
 				${FCRFByTF_o}\
 				${FillTrunkByPE_o}\
 				${SeedCluster_o}\
@@ -145,6 +150,8 @@ FillTrunkByPE: clean ${FillTrunkByPE_o}
 FCRFByTF: clean ${FCRFByTF_o}
 	${CXX} ${DEUBG_CXX} ${FCRFByTF_o} -o FCRFByTF 
 
+Gap_OAO: clean ${Gap_OAO_o}
+	${CXX} ${DEUBG_CXX} ${Gap_OAO_o} -o Gap_OAO 
 PEGraph: clean ${PEGraph_o}
 	${CXX} ${DEUBG_CXX} ${PEGraph_o} -o PEGraph 
 

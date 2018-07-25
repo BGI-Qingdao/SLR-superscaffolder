@@ -13,6 +13,7 @@
 #include "soap2/fileName.h"
 
 #include "stLFR/CBB.h"
+#include "stLFR/TrunkGap.h"
 
 #include <set>
 
@@ -22,12 +23,14 @@ struct AppConfig
     BGIQD::SOAP2::FileNames fName;
     BGIQD::FREQ::Freq<int> freqs;
     float min;
+    /*
     struct GapInfo
     {
         unsigned int prev ;
         unsigned int next ;
         std::set<unsigned int> relations;
-    };
+    };*/
+    typedef BGIQD::stLFR::TrunkGap<int> GapInfo ;
     typedef BGIQD::Collection::Collection<unsigned int>  Cols;
     std::map<unsigned int , Cols> relations;
     std::set<unsigned int> trunk_seeds;
@@ -49,7 +52,7 @@ struct AppConfig
         auto in  = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.mintreetrunklinear());
         if( in == NULL )
             FATAL(" failed to open xxx.mintree_trunk_linear for read!!! ");
-
+        /*
         std::string line ;
         unsigned int prev = -1 ;
         while(! std::getline(*in,line).eof() )
@@ -70,9 +73,12 @@ struct AppConfig
             }
             prev = now ;
         }
+        */
+        BGIQD::stLFR::Load_MST_Trunk_Linear(*in,infos);
         delete in ;
         loger<<BGIQD::LOG::lstart() << "LoadTrunk done "<<BGIQD::LOG::lend() ;
     }
+
     void LoadBinCluster()
     {
         auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.cluster());
