@@ -35,6 +35,7 @@ struct AppConfig
     {
         fName.Init(prefix);
         BGIQD::LOG::logfilter::singleton().get("PEGraph",BGIQD::LOG::loglevel::INFO, loger);
+        bra.Init(10000);
     }
 
     void LoadTrunk()
@@ -78,6 +79,7 @@ struct AppConfig
         }
         loger<<BGIQD::LOG::lstart() << "GetGapSim done "<<BGIQD::LOG::lend() ;
     }
+
     void CalcAll()
     {
         int total = 0 ;
@@ -91,7 +93,7 @@ struct AppConfig
                 if( x > max )
                     max = x ;
                 if( x < min )
-                    x = min ;
+                    min = x ;
             }
 
             /*
@@ -99,7 +101,7 @@ struct AppConfig
              *   <-----   ----->
              */
             // LL max , RR min
-            if( max == gap.data.bin_index[0] && min == gap.data.bin_index[3] )
+            if( max == gap.data.bin_index[0]) // && min == gap.data.bin_index[3] )
             {
                 gap.data.true_prev = gap.prev +1 ;
                 gap.data.true_next = gap.next ;
@@ -109,7 +111,7 @@ struct AppConfig
              *   ----->   <-----
              */
             // RR  max , LL min 
-            else if( max == gap.data.bin_index[3] && min == gap.data.bin_index[0] )
+            else if( max == gap.data.bin_index[3] )// && min == gap.data.bin_index[0] )
             {
                 gap.data.true_prev = gap.prev ;
                 gap.data.true_next = gap.next +1 ;
@@ -119,7 +121,7 @@ struct AppConfig
              *   ----->   ----->
              */
             // RL max LR min
-            else if( max == gap.data.bin_index[2] && min == gap.data.bin_index[1] )
+            else if( max == gap.data.bin_index[2] )//&& min == gap.data.bin_index[1] )
             {
                 gap.data.true_prev = gap.prev ;
                 gap.data.true_next = gap.next ;
@@ -129,7 +131,7 @@ struct AppConfig
              *   <-----   <-----
              */
             // LR max RL min
-            else if( max == gap.data.bin_index[1] && min == gap.data.bin_index[2] )
+            else if( max == gap.data.bin_index[1] )//&& min == gap.data.bin_index[2] )
             {
                 gap.data.true_prev = gap.prev +1 ;
                 gap.data.true_next = gap.next +1 ;

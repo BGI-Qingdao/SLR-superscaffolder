@@ -92,7 +92,7 @@ namespace BGIQD{
             {
                 BinSimularity sinfo;
                 ist>>sinfo.contigId>>split
-                    >>sinfo.binIndex>>split
+                    >>sinfo.binId>>split
                     >>sinfo.simularity;
                 sinfo.binIndex = i ; //Not valid now
                 sims[i] = sinfo ;
