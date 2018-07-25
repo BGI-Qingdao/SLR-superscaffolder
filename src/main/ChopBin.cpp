@@ -59,6 +59,8 @@ struct AppConfig
 
     float bin_factor ;
 
+    bool head_tail_only;
+
     BarcodeOnContig boc;
 
     BGIQD::SOAP2::FileNames fName;
@@ -80,7 +82,10 @@ struct AppConfig
         }
         else 
         {
-            for( int i = 0 ; i< bin_num ; i++ )
+            assert( bin_num >= 2 );
+            if( head_tail_only )
+                bin_num = 2;
+            for( int i = 0  ; i< bin_num ; i++ )
             {
                 assert( start <= end );
                 if( i % 2 == 0 )
@@ -217,9 +222,11 @@ int main(int argc , char ** argv)
     DEFINE_ARG_OPTIONAL(float ,bin_factor , "factor of smallest bin in the millde", "0.5");
     DEFINE_ARG_REQUIRED(std::string ,prefix, "prefix . Input xxx.seeds && xxx.read2contig ; Output xxx.barcodeOnBin && xxx.barcodeOnContig");
     DEFINE_ARG_OPTIONAL(bool ,p_b2c , "print barcode on contig", "0");
+    DEFINE_ARG_OPTIONAL(bool ,ht_only, "only chop bin at head at tail", "0");
     END_PARSE_ARGS
 
     config.Init( prefix.to_string() , bin_size.to_int() ,delete_tail.to_int() , bin_factor.to_float());
+    config.head_tail_only= ht_only.to_bool() ;
 
     BGIQD::LOG::timer t(config.log,"ChopBin");
 
