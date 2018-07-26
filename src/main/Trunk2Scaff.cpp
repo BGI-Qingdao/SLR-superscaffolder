@@ -23,6 +23,9 @@ struct AppConfig
 
     BGIQD::SOAP2::ContigFastAMap contig_fasta_map;
     BGIQD::FREQ::Freq<std::string> pfreq;
+    int gap_trunk ;
+    int gap_petrunk ;
+    int gap_pe ;
     struct TrueContig
     {
         public:
@@ -408,7 +411,7 @@ struct AppConfig
     {
         auto in  = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.trunk_fill());
         if( in == NULL )
-            FATAL(" failed to open xxx.trunk_fill for read!!! ");
+            WARN(" failed to open xxx.trunk_fill for read!!! ");
         auto fill = [this](const std::string & line) ->void
         {
             BGIQD::stLFR::GapFill fill;
@@ -551,20 +554,20 @@ struct AppConfig
                     {
                         if (tc.pe_next_ask == 0)
                         {
-                            line += std::string(5000,'N');
+                            line += std::string(gap_trunk,'N');
                         }
                         else
                         {
                             if( i != a_scaff.size() - 1 )
                             {
-                                line += std::string(500,'N');
+                                line += std::string(gap_petrunk,'N');
                             }
                         }
                     }
                 }
                 else
                 {
-                    line += std::string(10,'N');
+                    line += std::string(gap_pe,'N');
                     for( unsigned int x : tc.pe_fill )
                     {
                         line+=contigMap.contigs[x].K;
@@ -592,9 +595,15 @@ int main(int argc, char **argv)
     //step 0 Parse parmeters...
     START_PARSE_ARGS
         DEFINE_ARG_REQUIRED(std::string , prefix, " In xxx.mintree_trunk_linear , xxx.bin_cluster ; xxx.gap_order");
+        DEFINE_ARG_OPTIONAL( int , gap_trunk, "gap in trunk" , "5000");
+        DEFINE_ARG_OPTIONAL( int , gap_petrunk, "gap in trunk and has pe conn" , "300");
+        DEFINE_ARG_OPTIONAL( int , gap_pe, "gap in pe" , "10");
     END_PARSE_ARGS;
 
     config.Init(prefix.to_string());
+    config.gap_trunk = gap_trunk.to_int();
+    config.gap_pe = gap_pe.to_int();
+    config.gap_petrunk = gap_petrunk.to_int();
     config.LoadTrunk();
     config.LoadGapOO();
     config.LoadPEFill();
