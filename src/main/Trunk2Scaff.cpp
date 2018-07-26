@@ -22,10 +22,10 @@ struct AppConfig
     BGIQD::LOG::logger loger;
 
     BGIQD::SOAP2::ContigFastAMap contig_fasta_map;
-
+    BGIQD::FREQ::Freq<std::string> pfreq;
     struct TrueContig
     {
-        private:
+        public:
             unsigned int sim_prev_ask;
             unsigned int sim_next_ask;
 
@@ -42,6 +42,7 @@ struct AppConfig
             int pe_next_weight ;
 
             FLAGS_INT;
+        public:
             ADD_A_FLAG(4, has_pe);
             ADD_A_FLAG(2, use_pe);
             ADD_A_FLAG(11, 2_pe);
@@ -49,6 +50,7 @@ struct AppConfig
 
             ADD_A_FLAG(3, use_sim);
             ADD_A_FLAG(5, has_sim);
+            ADD_A_FLAG(13,use_sim_weight);
             ADD_A_FLAG(12,2_sim);
             ADD_A_FLAG(8, sim_confilict);
 
@@ -57,6 +59,7 @@ struct AppConfig
 
             ADD_A_FLAG(1, use_basic);
             ADD_A_FLAG(10, no_confilict);
+            ADD_A_FLAG(14, use_num);
 
             unsigned int pe_value() const 
             {
@@ -189,7 +192,7 @@ struct AppConfig
                 if (vs.size() == 0 )
                 {
                     Set_use_basic();
-                    f_value = 0 ;
+                    f_value = basic ;
                     return ;
                 }
                 else if( vs.size() == 1 )
@@ -203,11 +206,13 @@ struct AppConfig
                     if( Is_2_pe() && !Is_pe_confilict() )
                     {
                         f_value = pe_value() ;
+                        Set_use_pe();
                         return ;
                     }
                     if( Is_2_sim() && !Is_sim_confilict() )
                     {
                         f_value = sim_value() ;
+                        Set_use_sim();
                         return ;
                     }
                     auto p1 = vs.begin() ;
@@ -217,30 +222,31 @@ struct AppConfig
                         if( p1->second > p2->second )
                             f_value = p1->first ;
                         else
-                            f_value = p2->second ;
+                            f_value = p2->first;
+                        Set_use_num();
                         return ;
                     }
                     else
                     {
                         if( Is_has_pe() )
                         {
-                            if( Is_pe_confilict() )
+                            if( ! Is_pe_confilict() )
                             {
                                 f_value = pe_value() ;
+                                Set_use_pe();
                                 return ;
                             }
                         }
-                        else
-                        { // PE 1 + 1^ , SIM 1 + 1^
-                            if( sim_prev_weigth > sim_next_weight )
-                            {
-                                f_value = sim_prev_ask ;
-                            }
-                            else
-                            {
-                                f_value = sim_next_ask ;
-                            }
+
+                        if( sim_prev_weigth > sim_next_weight )
+                        {
+                            f_value = sim_prev_ask ;
                         }
+                        else
+                        {
+                            f_value = sim_next_ask ;
+                        }
+                        Set_use_sim_weight();
                     }
                 }
                 return ;
@@ -407,10 +413,9 @@ struct AppConfig
         {
             BGIQD::stLFR::GapFill fill;
             fill.InitFromString(line);
-            gapfills[fill.prev] = fill ;
-            gapfills[fill.prev+1] = fill ;
+            pefills[fill.prev] = fill ;
+            pefills[fill.prev+1] = fill ;
         };
-
         BGIQD::FILES::FileReaderFactory::EachLine(*in,fill);
         delete in ;
         loger<<BGIQD::LOG::lstart() << "Load PE Trunk fill done "<<BGIQD::LOG::lend() ;
@@ -445,8 +450,8 @@ struct AppConfig
                 if( pefills.find(gap.prev) != pefills.end() )
                 {
                     const auto & pe_fill = pefills[gap.prev];
-                    a_scaff[i].SetValue(pe_fill.true_prev,TrueContig::ValueType::SIM,TrueContig::ValueOrder::NEXT);
-                    a_scaff[i+1].SetValue(pe_fill.true_next,TrueContig::ValueType::SIM,TrueContig::ValueOrder::PREV);
+                    a_scaff[i].SetValue(pe_fill.true_prev,TrueContig::ValueType::PE,TrueContig::ValueOrder::NEXT);
+                    a_scaff[i+1].SetValue(pe_fill.true_next,TrueContig::ValueType::PE,TrueContig::ValueOrder::PREV);
                     if( pe_fill.extra.size() > 2 )
                     {
                         a_scaff[i].pe_fill.insert(
@@ -454,15 +459,71 @@ struct AppConfig
                                 , (pe_fill.extra.begin() +1 )
                                 , (pe_fill.extra.end() -1 )
                                 );
+                        pfreq.Touch("With pe step");
                     }
                 }
             }
+
             for( auto & tc : a_scaff )
             {
                 tc.CalcValue();
+                pfreq.Touch("PointNum");
+                if(tc.Is_has_pe() )
+                {
+                    pfreq.Touch("Has PE");
+                }
+                if(tc.Is_pe_confilict() )
+                {
+                    pfreq.Touch("PE confilict");
+                }
+                if(tc.Is_sim_confilict() )
+                {
+                    pfreq.Touch("SIM confilict");
+                }
+                if(tc.Is_pe_sim_confilict() )
+                {
+                    pfreq.Touch("PE SIM confilict");
+                }
+                if(tc.Is_has_sim() )
+                {
+                    pfreq.Touch("Has SIM");
+                }
+                if(tc.Is_no_confilict() )
+                {
+                    pfreq.Touch("No confilict");
+                }
+                if( tc.Is_2_pe() )
+                {
+                    pfreq.Touch("2 PE");
+                }
+                if( tc.Is_2_sim() )
+                {
+                    pfreq.Touch("2 SIM");
+                }
+                if( tc.Is_use_pe() )
+                {
+                    pfreq.Touch("USE PE");
+                }
+                if( tc.Is_use_sim() )
+                {
+                    pfreq.Touch("USE SIM");
+                }
+                if( tc.Is_use_sim_weight() )
+                {
+                    pfreq.Touch("USE SIM WEIGHT");
+                }
+                if( tc.Is_use_num() )
+                {
+                    pfreq.Touch("USE NUM");
+                }
+                if( tc.Is_use_basic() )
+                {
+                    pfreq.Touch("USE Basic");
+                }
             }
             scaffs.push_back(a_scaff);
         }
+        loger<<BGIQD::LOG::lstart()<<'\n'<<pfreq.ToString()<<BGIQD::LOG::lend();
     }
 
     void BuildScaff()
@@ -488,7 +549,17 @@ struct AppConfig
                 {
                     if( i != a_scaff.size() - 1 )
                     {
-                        line += std::string(5000,'N');
+                        if (tc.pe_next_ask == 0)
+                        {
+                            line += std::string(5000,'N');
+                        }
+                        else
+                        {
+                            if( i != a_scaff.size() - 1 )
+                            {
+                                line += std::string(500,'N');
+                            }
+                        }
                     }
                 }
                 else
