@@ -63,6 +63,9 @@ MinTree_o				= ${MinTree_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 PEGraph_cpp 			= PEGraph.cpp
 PEGraph_o				= ${PEGraph_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
+Trunk2Scaff_cpp 			= Trunk2Scaff.cpp
+Trunk2Scaff_o				= ${Trunk2Scaff_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+
 Gap_OAO_cpp 			= Gap_OAO.cpp
 Gap_OAO_o				= ${Gap_OAO_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
@@ -88,6 +91,7 @@ jobs 	   =	ChopBin\
 				LinearCDG\
 				MinTree\
 				PEGraph\
+				Trunk2Scaff\
 				Gap_OAO\
 				FCRFByTF\
 				FillTrunkByPE\
@@ -103,6 +107,7 @@ jobs_o 	   =	${ChopBin_o} \
 				${LinearCDG_o} \
 				${MinTree_o}\
 				${PEGraph_o}\
+				${Trunk2Scaff_o}\
 				${Gap_OAO_o}\
 				${FCRFByTF_o}\
 				${FillTrunkByPE_o}\
@@ -154,6 +159,9 @@ Gap_OAO: clean ${Gap_OAO_o}
 	${CXX} ${DEUBG_CXX} ${Gap_OAO_o} -o Gap_OAO 
 PEGraph: clean ${PEGraph_o}
 	${CXX} ${DEUBG_CXX} ${PEGraph_o} -o PEGraph 
+
+Trunk2Scaff: clean ${Trunk2Scaff_o}
+	${CXX} ${DEUBG_CXX} ${Trunk2Scaff_o} -o Trunk2Scaff 
 
 dirty	   =${jobs_o} ${jobs}  
 

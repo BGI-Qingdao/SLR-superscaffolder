@@ -35,7 +35,7 @@ struct AppConfig
     std::map<unsigned int , Cols> relations;
     std::set<unsigned int> trunk_seeds;
     std::set<unsigned int> PE_seeds;
-    std::vector<GapInfo>  infos ;
+    std::map<int,std::vector<GapInfo>>  infos ;
     int strategy;
 
     void Init( const std::string & prefix, float m , int s)
@@ -111,23 +111,26 @@ struct AppConfig
     {
         auto  out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.seeds_cluster_seeds());
         if( out == NULL )
-           FATAL( " failed to open xxx.seeds_cluster_seeds to write"); 
-        for(auto & info : infos)
+            FATAL( " failed to open xxx.seeds_cluster_seeds to write"); 
+        for(auto & pair: infos)
         {
-            Cols both;
-            if( strategy == 0 )
-                both = Cols::Intersection(relations[info.prev] , relations[info.next]);
-            else if( strategy == 1 )
-                both = Cols::Union(relations[info.prev] , relations[info.next]);
-            else
-                assert(0);
-            (*out)<<info.prev<<'\t'<<info.next;
-            freqs.Touch(both.keysize());
-            for(const auto x : both)
+            for( auto info : pair.second )
             {
-                (*out)<<'\t'<<x.first;
+                Cols both;
+                if( strategy == 0 )
+                    both = Cols::Intersection(relations[info.prev] , relations[info.next]);
+                else if( strategy == 1 )
+                    both = Cols::Union(relations[info.prev] , relations[info.next]);
+                else
+                    assert(0);
+                (*out)<<info.prev<<'\t'<<info.next;
+                freqs.Touch(both.keysize());
+                for(const auto x : both)
+                {
+                    (*out)<<'\t'<<x.first;
+                }
+                (*out)<<'\n';
             }
-            (*out)<<'\n';
         }
         delete out;
         loger<<BGIQD::LOG::lstart() << "PrintCluster done "<<BGIQD::LOG::lend() ;

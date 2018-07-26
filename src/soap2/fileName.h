@@ -77,8 +77,8 @@ namespace BGIQD {
             //ClusterSeeds
             DEFINE_SUFFIX(seeds_cluster_seeds,".seeds_cluster_seeds");
 
-            //ClusterSeeds
             DEFINE_SUFFIX(gap_oo,".gap_oo");
+            DEFINE_SUFFIX(scaff_seqs,".scaff_seqs");
 
             DEFINE_SUFFIX(trunk_fill,".trunk_fill");
             private:
