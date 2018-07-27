@@ -55,11 +55,20 @@ namespace BGIQD {
 
         struct ContigSimGraph : public BGIQD::GRAPH::ListGraph<Node,Edge>
         {
+
+            bool use_salas ;
+
             typedef BGIQD::GRAPH::ListGraph<Node,Edge> Basic ;
             typedef Basic::NodeId NodeId;
             typedef Basic::EdgeId EdgeId;
+
             void AddEdgeSim( unsigned int from , unsigned int to , float sim)
             {
+                // Force make linear in salas strategy.
+                if( use_salas )
+                    if( ( Basic::HasNode(from) && Basic::GetNode(from).edge_ids.size() >= 2) 
+                    || ( Basic::HasNode(to) &&Basic::GetNode(to).edge_ids.size()>=2) )
+                        return ;
                 Edge tmp ;
                 tmp.from = from ;
                 tmp.to = to ;

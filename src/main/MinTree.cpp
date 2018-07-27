@@ -37,9 +37,12 @@ struct AppConf
         BGIQD::LOG::logfilter::singleton().get("MST", BGIQD::LOG::loglevel::INFO,lger);
     }
 
+    bool use_salas ;
     void LoadContigSimGraph()
     {
+        graph.use_salas = use_salas ;
         auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fNames.cluster());
+        std::vector<std::tuple<float,unsigned int , unsigned int> >simcache;
         if( in == NULL )
             FATAL("failed to open xxx.cluster for read!!! ");
         auto parseline = [&](const std::string & line )
@@ -49,11 +52,26 @@ struct AppConf
             for( auto x : tmp.sims )
             {
                 if( x.second.simularity >= smallest )
-                    graph.AddEdgeSim( tmp.contigId , x.first , x.second.simularity );
+                {
+                    if(!use_salas)
+                        graph.AddEdgeSim( tmp.contigId , x.first , x.second.simularity );
+                    else
+                        simcache.push_back(std::make_tuple( x.second.simularity,tmp.contigId , x.first ));
+                }
             }
         };
         BGIQD::FILES::FileReaderFactory::EachLine(*in,parseline);
         delete  in;
+        if( use_salas )
+        {
+            std::sort(simcache.rbegin() , simcache.rend());
+            for( const auto tp : simcache ) 
+            {
+                unsigned int from , to ; float sim ;
+                std::tie(sim ,from,to) = tp ;
+                graph.AddEdgeSim( from , to , sim  );
+            }
+        }
         lger<<BGIQD::LOG::lstart() << "load contig sim graph done "<<BGIQD::LOG::lend() ;
     }
 
@@ -122,9 +140,11 @@ int main(int argc , char **argv )
     START_PARSE_ARGS
     DEFINE_ARG_REQUIRED(std::string , prefix , "prefix , Input xxx.connInfo . Output xxx.minTree ");
     DEFINE_ARG_OPTIONAL(float , threshold, " threshold of simularity","0.1");
+    DEFINE_ARG_OPTIONAL(bool, salas, "use salas strategy ","false");
     END_PARSE_ARGS
 
     config.Init(prefix.to_string(),threshold.to_float());
+    config.use_salas = salas.to_bool() ;
     config.LoadContigSimGraph();
     config.SplitGraph();
     config.GenerateMinTrees();
