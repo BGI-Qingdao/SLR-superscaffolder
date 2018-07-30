@@ -137,6 +137,7 @@ struct AppConfig
                     {
                         both = Cols::Union(relations[x.first],both);
                     }
+                    both = Cols::Union(s1th,both);
                 }
                 else
                     assert(0);
