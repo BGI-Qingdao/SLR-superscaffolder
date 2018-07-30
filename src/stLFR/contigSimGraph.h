@@ -122,6 +122,18 @@ namespace BGIQD {
             {
                 return TKHelper::LinearTrunk( mintree );
             }
+            void PrintAsDOT(std::ostream & out) const
+            {
+                out<<Edge::DOTHead()<<std::endl;
+                for( const auto & e : edges )
+                {
+                    out<<"\t"<<e.ToString();
+                    if( GetNode(e.from).EdgeNum() > 2 )
+                        out<<"\t+";
+                    out<<std::endl;
+                }
+                out<<"}"<<std::endl;
+            }
         };
     }
 }

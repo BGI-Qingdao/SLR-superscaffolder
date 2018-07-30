@@ -116,6 +116,16 @@ namespace BGIQD {
                 {
                     return edge_ids.find(id) != edge_ids.end() ; 
                 }
+
+                size_t EdgeNum() const 
+                {
+                    return edge_ids.size() ;
+                }
+
+                void CleanEdges()
+                {
+                    edge_ids.clear();
+                }
             };
 
         template<class TNode 

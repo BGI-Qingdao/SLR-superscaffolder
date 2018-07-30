@@ -121,6 +121,15 @@ struct AppConfig
                     both = Cols::Intersection(relations[info.prev] , relations[info.next]);
                 else if( strategy == 1 )
                     both = Cols::Union(relations[info.prev] , relations[info.next]);
+                else if( strategy == 2 )
+                {
+                    Cols s1th;
+                    s1th = Cols::Intersection(relations[info.prev] , relations[info.next]);
+                    for( auto x : s1th)
+                    {
+                        both = Cols::Union(relations[x.first],both);
+                    }
+                }
                 else
                     assert(0);
                 (*out)<<info.prev<<'\t'<<info.next;
@@ -144,7 +153,7 @@ int main(int argc , char ** argv)
     START_PARSE_ARGS
         DEFINE_ARG_REQUIRED(std::string, prefix ,"prefix of files.");
         DEFINE_ARG_REQUIRED(float , threshold, "min simularity threshold");
-        DEFINE_ARG_REQUIRED(int, strategy, "0 for Intersection ; 1 for Union");
+        DEFINE_ARG_REQUIRED(int, strategy, "0 for Intersection ; 1 for Union ; 2 for second cluster");
     END_PARSE_ARGS;
     BGIQD::LOG::timer t(config.loger,"SeedCluster");
     config.Init(prefix.to_string(), threshold.to_float(), strategy.to_int());
