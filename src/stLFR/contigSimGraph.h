@@ -128,7 +128,7 @@ namespace BGIQD {
                 for( const auto & e : edges )
                 {
                     out<<"\t"<<e.ToString();
-                    if( GetNode(e.from).EdgeNum() > 2 )
+                    if( GetNode(e.from).EdgeNum() > 2 || GetNode(e.to).EdgeNum()>2 )
                         out<<"\t+";
                     out<<std::endl;
                 }

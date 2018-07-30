@@ -76,6 +76,14 @@ struct AppConfig
         */
         BGIQD::stLFR::Load_MST_Trunk_Linear(*in,infos);
         delete in ;
+        for(auto & pair: infos)
+        {
+            for( auto & info : pair.second )
+            {
+                trunk_seeds.insert(info.prev);
+                trunk_seeds.insert(info.next);
+            }
+        }
         loger<<BGIQD::LOG::lstart() << "LoadTrunk done "<<BGIQD::LOG::lend() ;
     }
 
