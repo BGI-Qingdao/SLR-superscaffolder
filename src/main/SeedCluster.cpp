@@ -23,6 +23,7 @@ struct AppConfig
     BGIQD::SOAP2::FileNames fName;
     BGIQD::FREQ::Freq<int> freqs;
     float min;
+    int loop_num;
     /*
     struct GapInfo
     {
@@ -115,6 +116,15 @@ struct AppConfig
         loger<<BGIQD::LOG::lstart() << "PE seeds num  "<<PE_seeds.size()<<BGIQD::LOG::lend() ;
     }
 
+    Cols LoopCluster(const Cols seeds)
+    {
+        Cols ret;
+        for( auto x : seeds)
+        {
+            ret = Cols::Union(relations[x.first],ret);
+        }
+        return  Cols::Union(seeds,ret);
+    }
     void PrintCluster()
     {
         auto  out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.seeds_cluster_seeds());
@@ -131,20 +141,13 @@ struct AppConfig
                     both = Cols::Union(relations[info.prev] , relations[info.next]);
                 else if( strategy == 2 )
                 {
-                    Cols both1;
-                    Cols both2;
-                    Cols c1 = relations[info.prev] ;
-                    for( auto x : c1)
+                    Cols both1 = relations[info.prev];
+                    Cols both2 = relations[info.next];
+                    for( int i = 1 ; i < loop_num ; i++ )
                     {
-                        both1 = Cols::Union(relations[x.first],both1);
+                        both1 = LoopCluster(both1);
+                        both2 = LoopCluster(both2);
                     }
-                    both1 = Cols::Union(both1,c1);
-                    Cols c2 = relations[info.next] ;
-                    for( auto x : c2)
-                    {
-                        both2 = Cols::Union(relations[x.first],both2);
-                    }
-                    both2 = Cols::Union(both2,c2);
                     both = Cols::Intersection(both1 , both2);
                 }
                 else
@@ -171,9 +174,11 @@ int main(int argc , char ** argv)
         DEFINE_ARG_REQUIRED(std::string, prefix ,"prefix of files.");
         DEFINE_ARG_REQUIRED(float , threshold, "min simularity threshold");
         DEFINE_ARG_REQUIRED(int, strategy, "0 for Intersection ; 1 for Union ; 2 for second cluster");
+        DEFINE_ARG_OPTIONAL(int, loop_num, "loop num for strategy 2 ","1");
     END_PARSE_ARGS;
     BGIQD::LOG::timer t(config.loger,"SeedCluster");
     config.Init(prefix.to_string(), threshold.to_float(), strategy.to_int());
+    config.loop_num = loop_num.to_int() ;
     config.LoadTrunk();
     config.LoadBinCluster();
     config.PrintCluster();
