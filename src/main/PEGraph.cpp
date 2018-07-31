@@ -24,6 +24,7 @@ struct AppConfig
     std::map<unsigned int , std::map<unsigned int , std::vector<int> > > pe_cache ;
 
     int insert_size ;
+    bool ptest;
 
     void Init(const std::string & prefix)
     {
@@ -311,10 +312,23 @@ struct AppConfig
             for( const auto & pair1 : pair.second )
             {
                 unsigned int EcontigId = pair1.first ;
+                if(ptest)
+                {
+                    std::string pe = std::to_string(PcontigId) + "\t"+std::to_string(EcontigId);
+                    std::cout<<pe;
+                }
                 int total_len = 0 ;
                 for( auto left : pair1.second )
                 {
                     total_len += left ;
+                    if(ptest)
+                    {
+                        std::cout<<'\t'<<left;
+                    }
+                }
+                if(ptest)
+                {
+                    std::cout<<'\n';
                 }
                 int average_len = total_len / (int) pair1.second.size() ;
                 pe_graph.AddEdge(PcontigId ,EcontigId , average_len , pair1.second.size());
@@ -340,9 +354,11 @@ int main(int argc , char ** argv)
 {
     START_PARSE_ARGS
         DEFINE_ARG_REQUIRED(std::string, prefix ,"prefix of files.");
+        DEFINE_ARG_OPTIONAL(bool, test_data ,"print test data","no");
     END_PARSE_ARGS;
 
     config.Init(prefix.to_string());
+    config.ptest = test_data.to_bool();
     BGIQD::LOG::timer t(config.loger,"PEGraph");
     config.LoadSeeds();
     config.LoadPECahce();
