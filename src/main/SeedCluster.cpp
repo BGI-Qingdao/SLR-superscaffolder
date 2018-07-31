@@ -138,11 +138,13 @@ struct AppConfig
                     {
                         both1 = Cols::Union(relations[x.first],both1);
                     }
+                    both1 = Cols::Union(both1,c1);
                     Cols c2 = relations[info.next] ;
                     for( auto x : c2)
                     {
                         both2 = Cols::Union(relations[x.first],both2);
                     }
+                    both2 = Cols::Union(both2,c2);
                     both = Cols::Intersection(both1 , both2);
                 }
                 else
