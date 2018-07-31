@@ -30,6 +30,7 @@ struct GlobalConfig
     std::map<int,unsigned int> pos2Contig;
     std::vector<GapInfo> gaps;
     BGIQD::FREQ::Freq<int>  freq;
+    BGIQD::FREQ::Freq<int>  freq1;
     void LoadSeedLinear()
     {
         auto sf = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(seedLinear);
@@ -92,8 +93,10 @@ struct GlobalConfig
             }
             auto both = SeedVec::Intersection(info.seedsCluster,info.seedsInRef);
             freq.Touch(both.keysize()*100/info.seedsInRef.keysize());
+            freq1.Touch((info.seedsCluster.keysize() -  both.keysize() )*100/info.seedsCluster.keysize());
         }
         std::cerr<<freq.ToString()<<std::endl;
+        std::cerr<<freq1.ToString()<<std::endl;
         delete sf ;
     }
 

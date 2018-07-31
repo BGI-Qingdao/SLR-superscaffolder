@@ -131,13 +131,19 @@ struct AppConfig
                     both = Cols::Union(relations[info.prev] , relations[info.next]);
                 else if( strategy == 2 )
                 {
-                    Cols s1th;
-                    s1th = Cols::Intersection(relations[info.prev] , relations[info.next]);
-                    for( auto x : s1th)
+                    Cols both1;
+                    Cols both2;
+                    Cols c1 = relations[info.prev] ;
+                    for( auto x : c1)
                     {
-                        both = Cols::Union(relations[x.first],both);
+                        both1 = Cols::Union(relations[x.first],both1);
                     }
-                    both = Cols::Union(s1th,both);
+                    Cols c2 = relations[info.next] ;
+                    for( auto x : c2)
+                    {
+                        both2 = Cols::Union(relations[x.first],both2);
+                    }
+                    both = Cols::Intersection(both1 , both2);
                 }
                 else
                     assert(0);
