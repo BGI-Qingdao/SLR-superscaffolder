@@ -26,6 +26,7 @@ struct AppConfig
     int gap_trunk ;
     int gap_petrunk ;
     int gap_pe ;
+    bool ptest;
     struct TrueContig
     {
         public:
@@ -84,7 +85,14 @@ struct AppConfig
             }
         public :
             std::vector<unsigned int> pe_fill ;
-
+            std::string ToString()  const 
+            {
+                std::ostringstream ost;
+                ost<<basic<<'\t'<<Value()<<'\t'
+                    <<sim_prev_ask<<'\t'<<sim_next_ask<<
+                    '\t'<<pe_prev_ask<<'\t'<<pe_next_ask;
+                return ost.str();
+            }
             void Init(unsigned int bs)
             {
                 basic = bs ;
@@ -412,6 +420,9 @@ struct AppConfig
         auto in  = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.trunk_fill());
         if( in == NULL )
             WARN(" failed to open xxx.trunk_fill for read!!! ");
+
+        if( in == NULL )
+            return ;
         auto fill = [this](const std::string & line) ->void
         {
             BGIQD::stLFR::GapFill fill;
@@ -541,11 +552,14 @@ struct AppConfig
             id++ ;
             std::string line ;
             (*out)<<">scaffold"<<id<<"\t20.5\n";
+            if(ptest)
+                std::cout<<">scaffold\n";
             for(size_t i = 0 ; i < a_scaff.size() ; i++ )
             {
                 const auto & tc = a_scaff[i];
                 unsigned int contig = tc.Value() ;
-
+                if(ptest)
+                    std::cout<<tc.ToString()<<'\n';
                 line+=contigMap.contigs[contig].K;
                 line+=contigMap.contigs[contig].linear;
                 if( tc.pe_fill.empty() )
@@ -598,9 +612,11 @@ int main(int argc, char **argv)
         DEFINE_ARG_OPTIONAL( int , gap_trunk, "gap in trunk" , "5000");
         DEFINE_ARG_OPTIONAL( int , gap_petrunk, "gap in trunk and has pe conn" , "300");
         DEFINE_ARG_OPTIONAL( int , gap_pe, "gap in pe" , "10");
+        DEFINE_ARG_OPTIONAL( bool, ptest, "print test data" , "no");
     END_PARSE_ARGS;
 
     config.Init(prefix.to_string());
+    config.ptest = ptest.to_bool();
     config.gap_trunk = gap_trunk.to_int();
     config.gap_pe = gap_pe.to_int();
     config.gap_petrunk = gap_petrunk.to_int();
