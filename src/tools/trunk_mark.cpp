@@ -97,6 +97,8 @@ struct GlobalConfig
             }
             (*out)<<'\n';
         }
+        if( out != NULL )
+            delete out ;
         if( a_scaf.min != -1 && a_scaf.max != -1 )
         { 
             if( a_scaf.min > a_scaf.max )
