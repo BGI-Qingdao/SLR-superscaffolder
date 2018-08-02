@@ -39,6 +39,8 @@ stLFR_2_10X_o   =	${stLFR_2_10X_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 cpSpeed_cpp 	=	cpSpeed.cpp
 cpSpeed_o   =	${cpSpeed_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
+bin_ref_cpp 	=	bin_ref.cpp
+bin_ref_o   =	${bin_ref_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 trunk_mark_cpp 	=	trunk_mark.cpp
 trunk_mark_o   =	${trunk_mark_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
@@ -53,10 +55,12 @@ gap_cluster_check_o   =	${gap_cluster_check_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.
 
 jobs 	   =	stLFR_2_10X cpSpeed trunk_mark\
 				gap_cluster_check\
+				bin_ref\
 				seedGapFreq
 
 jobs_o 	   =	${stLFR_2_10X_o} ${cpSpeed_o}\
 				${gap_cluster_check_o}\
+				${bin_ref_o}\
 				${seedGapFreq_o}
 
 all : ${jobs}
@@ -67,6 +71,8 @@ gap_cluster_check : clean ${gap_cluster_check_o}
 seedGapFreq : clean ${seedGapFreq_o}
 	${CXX} ${DEUBG_CXX} ${seedGapFreq_o} -o seedGapFreq
 
+bin_ref : clean ${bin_ref_o}
+	${CXX} ${DEUBG_CXX} ${bin_ref_o} -o bin_ref
 trunk_mark : clean ${trunk_mark_o}
 	${CXX} ${DEUBG_CXX} ${trunk_mark_o} -o trunk_mark
 
