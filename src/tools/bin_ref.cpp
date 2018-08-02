@@ -28,6 +28,8 @@ struct AppConfig
 
     int step_max ;
 
+    int start;
+
     std::map<int,Bin> bin_data;
 
     int bin_max ;
@@ -57,9 +59,12 @@ struct AppConfig
 
     void CalcAll()
     {
-        for( int i = 1 ; i <= bin_max - step_max ; i ++ )
+        int max = limit + start + step_max ;
+        if ( max > bin_max )
+            max = bin_max ;
+        for( int i = start ; i <= max - step_max ; i ++ )
         {
-            for( int j = i + 1 ; j <= bin_max ; j++ )
+            for( int j = i + 1 ; j <= max ; j++ )
             {
                 xys[ j - i ].push_back( Bin::Jaccard(bin_data[i],bin_data[j]) );
             }
@@ -68,9 +73,9 @@ struct AppConfig
         for( auto & x : xys )
         {
             float total = 0 ;
-            for( float x : x.second )
+            for( float xx : x.second )
             {
-                total += x;
+                total += xx;
             }
             xydata.push_back( LSItem { x.first , total / x.second.size() } );
         }
@@ -97,12 +102,13 @@ int main(int argc , char ** argv)
 
     START_PARSE_ARGS 
         DEFINE_ARG_REQUIRED(int, limit, " limit ");
+        DEFINE_ARG_REQUIRED(int, start, " start ");
     DEFINE_ARG_REQUIRED(int, step, " step ");
     END_PARSE_ARGS;
 
     config.limit = limit.to_int();
     config.step_max = step.to_int();
-
+    config.start = start.to_int() ;
     config.LoadBarcodeOnRef();
     config.CalcAll();
     config.PrintLine();
