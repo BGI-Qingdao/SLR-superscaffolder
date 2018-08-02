@@ -84,14 +84,24 @@ struct AppConfig
     }
     void PrintLine()
     {
-        auto ret = BGIQD::LINEARFITTING::lineFit(xydata);
-        std::cout<<" a= "<<ret.a<<std::endl;
-        std::cout<<" b= "<<ret.b<<std::endl;
-        std::cout<<" c= "<<ret.c<<std::endl;
-        for( float x = 0.1 ; x < 0.3 ; x += 0.01 )
-            std::cout<<x<<" = "<<ret.getX(x) * 100 <<std::endl;
+        if( linear )
+        {
+            auto ret = BGIQD::LINEARFITTING::lineFit(xydata);
+            std::cout<<" a= "<<ret.a<<std::endl;
+            std::cout<<" b= "<<ret.b<<std::endl;
+            std::cout<<" c= "<<ret.c<<std::endl;
+            for( float x = 0.1 ; x < 0.3 ; x += 0.01 )
+                std::cout<<x<<" = "<<ret.getX(x)  <<std::endl;
+        }
+        else
+        {
+            for( auto & x : xydata)
+            {
+                std::cout<<x.x <<'\t'<<x.y<<std::endl;
+            }
+        }
     }
-
+    bool linear;
 } config ;
 
 /******************************************************************************
@@ -107,11 +117,13 @@ int main(int argc , char ** argv)
         DEFINE_ARG_REQUIRED(int, limit, " limit ");
         DEFINE_ARG_REQUIRED(int, start, " start ");
     DEFINE_ARG_REQUIRED(int, step, " step ");
+    DEFINE_ARG_OPTIONAL(bool, linear, " try linear " , "false");
     END_PARSE_ARGS;
 
     config.limit = limit.to_int();
     config.step_max = step.to_int();
     config.start = start.to_int() ;
+    config.linear = linear.to_bool();
     config.LoadBarcodeOnRef();
     config.CalcAll();
     config.PrintLine();
