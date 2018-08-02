@@ -42,7 +42,7 @@ struct AppConfig
             char dot;
             std::cin>>bin>>dot>>num;
             //std::cerr<<"DEBUG : "<<barcode<<":"<<num<<std::endl;
-            if ( limit != 0 && bin>limit +step_max )
+            if ( limit != 0 && bin> start + limit +step_max )
             {
                 break;
             }
@@ -64,9 +64,10 @@ struct AppConfig
             max = bin_max ;
         for( int i = start ; i <= max - step_max ; i ++ )
         {
-            for( int j = i + 1 ; j <= max ; j++ )
+            for( int j = i + 1 ; j <= max && j <= i+step_max ; j++ )
             {
-                xys[ j - i ].push_back( Bin::Jaccard(bin_data[i],bin_data[j]) );
+                if( bin_data[i].keysize() > 0 && bin_data[i+1].keysize() > 0)
+                    xys[ j - i ].push_back( Bin::Jaccard(bin_data[i],bin_data[j]) );
             }
         }
 
@@ -77,7 +78,7 @@ struct AppConfig
             {
                 total += xx;
             }
-            xydata.push_back( LSItem { x.first , total / x.second.size() } );
+            xydata.push_back( LSItem { x.first * 100, total / x.second.size() } );
         }
 
     }
@@ -87,6 +88,8 @@ struct AppConfig
         std::cout<<" a= "<<ret.a<<std::endl;
         std::cout<<" b= "<<ret.b<<std::endl;
         std::cout<<" c= "<<ret.c<<std::endl;
+        for( float x = 0.1 ; x < 0.3 ; x += 0.01 )
+            std::cout<<x<<" = "<<ret.getX(x) * 100 <<std::endl;
     }
 
 } config ;

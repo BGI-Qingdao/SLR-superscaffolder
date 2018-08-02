@@ -82,9 +82,11 @@ struct AppConfig
             auto mdata = l.ParseAsMatchData();
             if( mdata.UnMap()) 
                 return ;
+            if( ! mdata.IsPrimaryMatch() )
+                return ;
             count ++ ;
             print1read(mdata);
-            if( count % 10000 == 0 )
+            if( count % 1000000 == 0 )
                 loger<<BGIQD::LOG::lstart()<<count<<"   pair maped reads processed ..."<<BGIQD::LOG::lend();
         };
         BGIQD::FILES::FileReaderFactory::EachLine(*sam_in , parseline);
