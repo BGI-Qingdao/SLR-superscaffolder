@@ -24,6 +24,7 @@ struct AppConfig
         unsigned int true_next ;
         std::array<float,4> bin_index ;
         float value;
+        float sim ;
     };
 
     typedef BGIQD::stLFR::TrunkGap<GapExtra> GapInfo;
@@ -114,6 +115,7 @@ struct AppConfig
                 assert( 0 < max && max  < 1 );
                 assert( 0 < min && min < 1 );
                 gap.data.value = max / min ;
+                gap.data.sim = max ;
                 /*
                  *   R1  L1   L2 R2
                  *   <-----   ----->
@@ -176,7 +178,11 @@ struct AppConfig
             for( const auto & gap : pairs.second )
             {
                 (*out)<<gap.prev<<'\t'<<gap.next<<'\t'
-                    <<gap.data.true_prev<<'\t'<<gap.data.true_next<<'\t'<< int (gap.data.value >100 ? 10000 :  (gap.data.value * 100)) <<'\n';
+                    <<gap.data.true_prev<<'\t'
+                    <<gap.data.true_next<<'\t'
+                    <<int (gap.data.value >100 ? 10000 :  (gap.data.value * 100)) 
+                    <<int(gap.data.sim * 10000)
+                    <<'\n';
             }
         }
         delete out ;

@@ -127,7 +127,7 @@ int main(int argc , char ** argv)
     config.step_max = step.to_int();
     config.start = start.to_int() ;
     config.linear = linear.to_bool();
-    config.bin = bin.to_bool() ;
+    config.bin = bin.to_int() ;
     config.LoadBarcodeOnRef();
     config.CalcAll();
     config.PrintLine();

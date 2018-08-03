@@ -8,16 +8,21 @@
 #include "common/stl/mapHelper.h"
 #include "common/freq/freq.h"
 #include "common/flags/flags.h"
-
 #include "soap2/fileName.h"
 #include "soap2/contigFasta.h"
 #include "stLFR/CBB.h"
 #include "stLFR/TrunkGap.h"
 
 #include <string.h>
+#include "algorithm/interval/Interval.h"
 
 struct AppConfig
 {
+
+    typedef BGIQD::INTERVAL::Interval<float, BGIQD::INTERVAL::IntervalType::Left_Open_Right_Close> SimArea;
+
+    std::map<SimArea, int> gapArea;
+
     BGIQD::SOAP2::FileNames fName ;
     BGIQD::LOG::logger loger;
 
@@ -27,6 +32,7 @@ struct AppConfig
     int gap_petrunk ;
     int gap_pe ;
     bool ptest;
+
     struct TrueContig
     {
         public:
@@ -47,6 +53,7 @@ struct AppConfig
 
             FLAGS_INT;
         public:
+            float cluster_value ;
             ADD_A_FLAG(4, has_pe);
             ADD_A_FLAG(2, use_pe);
             ADD_A_FLAG(11, 2_pe);
@@ -290,6 +297,30 @@ struct AppConfig
     BGIQD::SOAP2::ContigFastAMap contigMap;
     std::vector<ContigOrientation> scaffs;
 
+    void LoadGapArea()
+    {
+        auto in  = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.gap_area());
+        if( in == NULL )
+            FATAL(" failed to open xxx.gap_area for read!!! ");
+        std::string line;
+        float prev = 1.0f;
+        int gap_prev ;
+        while( ! std::getline(*in,line).eof() )
+        {
+            std::istringstream ist(line);
+            int gap ; bool s ;
+            ist>>gap>>s ;
+            SimArea tmp(s,prev);
+            prev = s ;
+            gap_prev = gap ;
+            gapArea[tmp] = gap ;
+        }
+        SimArea tmp(prev , 0);
+        gapArea[tmp] =  gap_prev;
+        delete in ;
+        loger<<BGIQD::LOG::lstart() << "Load Trunk done "<<BGIQD::LOG::lend() ;
+    }
+
     void Init(const std::string & prefix)
     {
         fName.Init(prefix);
@@ -415,6 +446,16 @@ struct AppConfig
         loger<<BGIQD::LOG::lstart() << "Build scaff done "<<BGIQD::LOG::lend() ;
     }
     */
+    int GetGapLen(float s)
+    {
+        for( const auto p : gapArea )
+        {
+            if( p.first.IsContain(s) )
+                return p.second ;
+        }
+        assert(0);
+        return -1 ;
+    }
     void LoadPEFill()
     {
         auto in  = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.trunk_fill());
@@ -457,10 +498,11 @@ struct AppConfig
             {
                 const auto & gap = pair.second[i];
                 const auto & fill = gapfills[gap.prev];
+                a_scaff[i].cluster_value = fill.extra[1];
                 a_scaff[i].SetValue(fill.true_prev,TrueContig::ValueType::SIM,TrueContig::ValueOrder::NEXT);
                 a_scaff[i+1].SetValue(fill.true_next,TrueContig::ValueType::SIM,TrueContig::ValueOrder::PREV);
-                a_scaff[i].SetWeight(*fill.extra.begin(),TrueContig::ValueType::SIM,TrueContig::ValueOrder::NEXT);
-                a_scaff[i+1].SetWeight(*fill.extra.begin(),TrueContig::ValueType::SIM,TrueContig::ValueOrder::PREV);
+                a_scaff[i].SetWeight(fill.extra[0],TrueContig::ValueType::SIM,TrueContig::ValueOrder::NEXT);
+                a_scaff[i+1].SetWeight(fill.extra[0],TrueContig::ValueType::SIM,TrueContig::ValueOrder::PREV);
                 if( pefills.find(gap.prev) != pefills.end() )
                 {
                     const auto & pe_fill = pefills[gap.prev];
@@ -568,7 +610,7 @@ struct AppConfig
                     {
                         if (tc.pe_next_ask == 0)
                         {
-                            line += std::string(gap_trunk,'N');
+                            line += std::string(GetGapLen(tc.cluster_value),'N');
                         }
                         else
                         {
