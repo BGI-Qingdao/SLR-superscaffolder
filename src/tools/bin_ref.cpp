@@ -31,6 +31,8 @@ struct AppConfig
         float m1;
         float m2;
         float m3;
+        float m4;
+        float m5;
     };
 
     std::map<int , std::vector<float>> xys;
@@ -104,6 +106,10 @@ struct AppConfig
                     item.m2 = x.second[i];
                 if( i == x.second.size() / 4 * 3 )
                     item.m3 = x.second[i];
+                if( i == int(x.second.size()) -1 )
+                    item.m4 = x.second[i];
+                if( i == 0 )
+                    item.m5 = x.second[i];
             }
             item.x = x.first * 100 ;
             item.y = total / x.second.size();
@@ -131,6 +137,8 @@ struct AppConfig
                     <<x.m1<<'\t'
                     <<x.m2<<'\t'
                     <<x.m3<<'\t'
+                    <<x.m4<<'\t'
+                    <<x.m5<<'\t'
                     <<std::endl;
             }
         }

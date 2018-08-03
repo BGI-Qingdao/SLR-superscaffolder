@@ -302,7 +302,12 @@ struct AppConfig
     {
         auto in  = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.gap_area());
         if( in == NULL )
-            FATAL(" failed to open xxx.gap_area for read!!! ");
+            WARN(" failed to open xxx.gap_area for read!!! ");
+
+        if( in == NULL )
+        {
+            return ;
+        }
         std::string line;
         float prev = 1.0f;
         int gap_prev ;
@@ -611,8 +616,15 @@ struct AppConfig
                     {
                         if (tc.pe_next_ask == 0)
                         {
-                            gapFreq.Touch(GetGapLen(tc.cluster_value));
-                            line += std::string(GetGapLen(tc.cluster_value),'N');
+                            if( gapArea.size() > 0 )
+                            {
+                                gapFreq.Touch(GetGapLen(tc.cluster_value));
+                                line += std::string(GetGapLen(tc.cluster_value),'N');
+                            }
+                            else
+                            {
+                                line += std::string(gap_trunk,'N');
+                            }
                         }
                         else
                         {
