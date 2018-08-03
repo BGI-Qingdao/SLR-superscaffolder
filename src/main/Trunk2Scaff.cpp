@@ -664,6 +664,7 @@ int main(int argc, char **argv)
     config.gap_petrunk = gap_petrunk.to_int();
     config.LoadTrunk();
     config.LoadGapOO();
+    config.LoadGapArea();
     config.LoadPEFill();
     config.BuildContigOrientation();
     config.LoadContigs();
