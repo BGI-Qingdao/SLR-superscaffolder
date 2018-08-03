@@ -6,6 +6,7 @@
 #include "algorithm/linear_fitting/Minimum_multiplication.h"
 #include "algorithm/collection/collection.h"
 
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <map>
@@ -18,7 +19,19 @@ struct AppConfig
 {
     typedef BGIQD::Collection::Collection<int> Bin;
 
-    typedef BGIQD::LINEARFITTING::Item<int,float> LSItem;
+    //typedef BGIQD::LINEARFITTING::Item<int,float> LSItem;
+
+    //struct 
+    struct LSItem
+    {
+        typedef int XType;
+        typedef float YType;
+        XType x ;
+        YType y ;
+        float m1;
+        float m2;
+        float m3;
+    };
 
     std::map<int , std::vector<float>> xys;
 
@@ -69,18 +82,32 @@ struct AppConfig
             for( int j = i + bin ; j <= max && j <= i+step_max ; j++ )
             {
                 if( bin_data[i].keysize() > 0 && bin_data[i+1].keysize() > 0)
-                    xys[ j - i ].push_back( Bin::Jaccard(bin_data[i],bin_data[j]) );
+                {
+                    float fac = Bin::Jaccard(bin_data[i],bin_data[j]);
+                    if( fac > 0.05 && fac < 0.5)
+                        xys[ j - i ].push_back(fac);
+                }
             }
         }
 
         for( auto & x : xys )
         {
             float total = 0 ;
-            for( float xx : x.second )
+            std::sort(x.second.begin() , x.second.end());
+            LSItem item;
+            for( int i = 0 ; i < x.second.size() ; i ++ )
             {
-                total += xx;
+                total += x.second[i];
+                if( i == x.second.size() / 4 )
+                    item.m1 = x.second[i];
+                if( i == x.second.size() / 2 )
+                    item.m2 = x.second[i];
+                if( i == x.second.size() / 4 * 3 )
+                    item.m3 = x.second[i];
             }
-            xydata.push_back( LSItem { x.first * 100, total / x.second.size() } );
+            item.x = x.first * 100 ;
+            item.y = total / x.second.size();
+            xydata.push_back( item);
         }
 
     }
@@ -99,7 +126,12 @@ struct AppConfig
         {
             for( auto & x : xydata)
             {
-                std::cout<<x.x <<'\t'<<x.y<<std::endl;
+                std::cout<<x.x <<'\t'
+                    <<x.y<<'\t'
+                    <<x.m1<<'\t'
+                    <<x.m2<<'\t'
+                    <<x.m3<<'\t'
+                    <<std::endl;
             }
         }
     }

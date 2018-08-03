@@ -309,17 +309,17 @@ struct AppConfig
         while( ! std::getline(*in,line).eof() )
         {
             std::istringstream ist(line);
-            int gap ; bool s ;
+            int gap ; float s ;
             ist>>gap>>s ;
             SimArea tmp(s,prev);
             prev = s ;
             gap_prev = gap ;
             gapArea[tmp] = gap ;
         }
-        SimArea tmp(prev , 0);
+        SimArea tmp(0,prev);
         gapArea[tmp] =  gap_prev;
         delete in ;
-        loger<<BGIQD::LOG::lstart() << "Load Trunk done "<<BGIQD::LOG::lend() ;
+        loger<<BGIQD::LOG::lstart() << "Load gap_area done "<<BGIQD::LOG::lend() ;
     }
 
     void Init(const std::string & prefix)
