@@ -30,6 +30,8 @@ struct AppConfig
 
     int start;
 
+    int bin;
+
     std::map<int,Bin> bin_data;
 
     int bin_max ;
@@ -64,7 +66,7 @@ struct AppConfig
             max = bin_max ;
         for( int i = start ; i <= max - step_max ; i ++ )
         {
-            for( int j = i + 1 ; j <= max && j <= i+step_max ; j++ )
+            for( int j = i + bin ; j <= max && j <= i+step_max ; j++ )
             {
                 if( bin_data[i].keysize() > 0 && bin_data[i+1].keysize() > 0)
                     xys[ j - i ].push_back( Bin::Jaccard(bin_data[i],bin_data[j]) );
@@ -117,6 +119,7 @@ int main(int argc , char ** argv)
         DEFINE_ARG_REQUIRED(int, limit, " limit ");
         DEFINE_ARG_REQUIRED(int, start, " start ");
     DEFINE_ARG_REQUIRED(int, step, " step ");
+    DEFINE_ARG_REQUIRED(int, bin, " bin size /100  ");
     DEFINE_ARG_OPTIONAL(bool, linear, " try linear " , "false");
     END_PARSE_ARGS;
 
@@ -124,6 +127,7 @@ int main(int argc , char ** argv)
     config.step_max = step.to_int();
     config.start = start.to_int() ;
     config.linear = linear.to_bool();
+    config.bin = bin.to_bool() ;
     config.LoadBarcodeOnRef();
     config.CalcAll();
     config.PrintLine();
