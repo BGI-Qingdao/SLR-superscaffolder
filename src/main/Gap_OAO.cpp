@@ -181,7 +181,7 @@ struct AppConfig
                     <<gap.data.true_prev<<'\t'
                     <<gap.data.true_next<<'\t'
                     <<int (gap.data.value >100 ? 10000 :  (gap.data.value * 100)) 
-                    <<int(gap.data.sim * 10000)
+                    <<'\t'<<int(gap.data.sim * 10000)
                     <<'\n';
             }
         }

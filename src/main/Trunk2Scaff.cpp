@@ -28,6 +28,7 @@ struct AppConfig
 
     BGIQD::SOAP2::ContigFastAMap contig_fasta_map;
     BGIQD::FREQ::Freq<std::string> pfreq;
+    BGIQD::FREQ::Freq<int>gapFreq;
     int gap_trunk ;
     int gap_petrunk ;
     int gap_pe ;
@@ -498,7 +499,7 @@ struct AppConfig
             {
                 const auto & gap = pair.second[i];
                 const auto & fill = gapfills[gap.prev];
-                a_scaff[i].cluster_value = fill.extra[1];
+                a_scaff[i].cluster_value = float(fill.extra[1])/10000.0f;
                 a_scaff[i].SetValue(fill.true_prev,TrueContig::ValueType::SIM,TrueContig::ValueOrder::NEXT);
                 a_scaff[i+1].SetValue(fill.true_next,TrueContig::ValueType::SIM,TrueContig::ValueOrder::PREV);
                 a_scaff[i].SetWeight(fill.extra[0],TrueContig::ValueType::SIM,TrueContig::ValueOrder::NEXT);
@@ -610,6 +611,7 @@ struct AppConfig
                     {
                         if (tc.pe_next_ask == 0)
                         {
+                            gapFreq.Touch(GetGapLen(tc.cluster_value));
                             line += std::string(GetGapLen(tc.cluster_value),'N');
                         }
                         else
@@ -643,6 +645,9 @@ struct AppConfig
         }
         delete out;
         loger<<BGIQD::LOG::lstart() << "Build scaff done "<<BGIQD::LOG::lend() ;
+        loger<<BGIQD::LOG::lstart() << " gap freq "
+            <<gapFreq.ToString()
+            <<BGIQD::LOG::lend() ;
     }
 } config ;
 
