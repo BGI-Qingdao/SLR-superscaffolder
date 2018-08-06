@@ -231,6 +231,7 @@ struct AppConfig
                 auto items = BGIQD::STRING::split(line,"\t");
                 if( items[5] == "P"  )
                 {
+                    isP_wait = false ;
                     if( items[6] == "Y" )
                     {
                         int first_1bp = std::stoul(items[2]);
@@ -248,10 +249,6 @@ struct AppConfig
                             Pleft = -(contigLen_cache[match_contig] - first_1bp) ;
                             Pright = first_1bp;
                         }
-                    }
-                    else
-                    {
-                        isP_wait = false ;
                     }
                 }
                 else
