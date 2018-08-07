@@ -18,10 +18,12 @@
 struct AppConfig
 {
     typedef BGIQD::Collection::Collection<int> Bin;
-
+    typedef BGIQD::FREQ::Freq<float>  Freq;
+    Freq f01A , f01B , f01AB , f01ABU;
+    Freq f24A , f24B , f24AB , f24ABU;
     //typedef BGIQD::LINEARFITTING::Item<int,float> LSItem;
 
-    //struct 
+    //struct
     struct LSItem
     {
         typedef int XType;
@@ -94,6 +96,20 @@ struct AppConfig
                     float fac = Bin::Jaccard(bin_data[i],bin_data[j]);
                     if( fac > 0.05 && fac < 0.5)
                         xys[ j - i ].push_back(fac);
+                    if( fac < 0.1)
+                    {
+                        f01A.Touch(bin_data[i].size());
+                        f01B.Touch(bin_data[j].size());
+                        f01AB.Touch(Bin::Union(bin_data[i],bin_data[j]).size());
+                        f01ABU.Touch(Bin::Intersection(bin_data[i],bin_data[j]).size());
+                    }
+                    if( 0.3 < fac < 0.4)
+                    {
+                        f24A.Touch(bin_data[i].size());
+                        f24B.Touch(bin_data[j].size());
+                        f24AB.Touch(Bin::Union(bin_data[i],bin_data[j]).size());
+                        f24ABU.Touch(Bin::Intersection(bin_data[i],bin_data[j]).size());
+                    }
                 }
             }
         }
@@ -103,7 +119,7 @@ struct AppConfig
             float total = 0 ;
             std::sort(x.second.begin() , x.second.end());
             LSItem item;
-            for( int i = 0 ; i < x.second.size() ; i ++ )
+            for( int i = 0 ; i < (int)x.second.size() ; i ++ )
             {
                 total += x.second[i];
                 if( i == x.second.size() / 4 )
@@ -146,6 +162,15 @@ struct AppConfig
                     <<x.m4<<'\t'
                     <<x.m5<<'\t'
                     <<std::endl;
+                std::cout<<"F01A"<<f01A.ToString()<<std::endl;
+                std::cout<<"F01B"<<f01B.ToString()<<std::endl;
+                std::cout<<"F01AB"<<f01AB.ToString()<<std::endl;
+                std::cout<<"F01ABU"<<f01ABU.ToString()<<std::endl;
+
+                std::cout<<"F24A"<<f24A.ToString()<<std::endl;
+                std::cout<<"F24B"<<f24B.ToString()<<std::endl;
+                std::cout<<"F24AB"<<f24AB.ToString()<<std::endl;
+                std::cout<<"F24ABU"<<f24ABU.ToString()<<std::endl;
             }
         }
     }
