@@ -19,8 +19,12 @@ struct AppConfig
 {
     typedef BGIQD::Collection::Collection<int> Bin;
     typedef BGIQD::FREQ::Freq<float>  Freq;
+    Freq AA;
+    Freq AB;
+    Freq ABUF ;
     Freq f01A , f01B , f01AB , f01ABU;
-    Freq f24A , f24B , f24AB , f24ABU;
+    Freq f34A , f34B , f34AB , f34ABU;
+    Freq f32A , f32B , f32AB , f32ABU;
     //typedef BGIQD::LINEARFITTING::Item<int,float> LSItem;
 
     //struct
@@ -85,31 +89,39 @@ struct AppConfig
             max = bin_max ;
         for( int i = start ; i <= max - step_max ; i ++ )
         {
-            if ( bin_data[i].size() < (size_t)scs )
+            int A = bin_data[i].size() ;
+            if ( A <= scs )
                 continue ;
             for( int j = i + bin ; j <= max && j <= i+step_max ; j++ )
             {
-                if ( bin_data[j].size() < (size_t)scs )
+                int B = bin_data[j].size() ;
+                if ( B <= scs )
                     continue ;
-                if( bin_data[i].keysize() > 0 && bin_data[i+1].keysize() > 0)
+                int ABI = Bin::Intersection(bin_data[i],bin_data[j]).size() ;
+                int ABU = Bin::Union(bin_data[i],bin_data[j]).size();
+                float fac = float(ABU) / float(ABI);
+                AA.Touch(A);
+                AB.Touch(ABI);
+                ABUF.Touch(ABU);
+                if( fac > 0.05 && fac < 0.5)
+                    xys[ j - i ].push_back(fac);
+                if( fac < 0.1)
                 {
-                    float fac = Bin::Jaccard(bin_data[i],bin_data[j]);
-                    if( fac > 0.05 && fac < 0.5)
-                        xys[ j - i ].push_back(fac);
-                    if( fac < 0.1)
-                    {
-                        f01A.Touch(bin_data[i].size());
-                        f01B.Touch(bin_data[j].size());
-                        f01AB.Touch(Bin::Union(bin_data[i],bin_data[j]).size());
-                        f01ABU.Touch(Bin::Intersection(bin_data[i],bin_data[j]).size());
-                    }
-                    if( 0.3 < fac < 0.4)
-                    {
-                        f24A.Touch(bin_data[i].size());
-                        f24B.Touch(bin_data[j].size());
-                        f24AB.Touch(Bin::Union(bin_data[i],bin_data[j]).size());
-                        f24ABU.Touch(Bin::Intersection(bin_data[i],bin_data[j]).size());
-                    }
+                    f01A.Touch(A);
+                    f01AB.Touch(ABI);
+                    f01ABU.Touch(ABU);
+                }
+                if( 0.2 < fac && fac < 0.3)
+                {
+                    f32A.Touch(A);
+                    f32AB.Touch(ABI);
+                    f32ABU.Touch(ABU);
+                }
+                if( 0.3 < fac && fac < 0.4)
+                {
+                    f32A.Touch(A);
+                    f32AB.Touch(ABI);
+                    f32ABU.Touch(ABU);
                 }
             }
         }
@@ -162,16 +174,22 @@ struct AppConfig
                     <<x.m4<<'\t'
                     <<x.m5<<'\t'
                     <<std::endl;
-                std::cout<<"F01A"<<f01A.ToString()<<std::endl;
-                std::cout<<"F01B"<<f01B.ToString()<<std::endl;
-                std::cout<<"F01AB"<<f01AB.ToString()<<std::endl;
-                std::cout<<"F01ABU"<<f01ABU.ToString()<<std::endl;
-
-                std::cout<<"F24A"<<f24A.ToString()<<std::endl;
-                std::cout<<"F24B"<<f24B.ToString()<<std::endl;
-                std::cout<<"F24AB"<<f24AB.ToString()<<std::endl;
-                std::cout<<"F24ABU"<<f24ABU.ToString()<<std::endl;
             }
+            std::cout<<"A\n"<<AA.ToString()<<std::endl;
+            std::cout<<"ABU\n"<<AB.ToString()<<std::endl;
+            std::cout<<"ABN\n"<<ABUF.ToString()<<std::endl;
+
+            std::cout<<"F01A\n"<<f01A.ToString()<<std::endl;
+            std::cout<<"F01ABU\n"<<f01AB.ToString()<<std::endl;
+            std::cout<<"F01ABN\n"<<f01ABU.ToString()<<std::endl;
+
+            std::cout<<"F34A\n"<<f34A.ToString()<<std::endl;
+            std::cout<<"F34ABU\n"<<f34AB.ToString()<<std::endl;
+            std::cout<<"F34ABN\n"<<f34ABU.ToString()<<std::endl;
+
+            std::cout<<"F32A\n"<<f32A.ToString()<<std::endl;
+            std::cout<<"F32ABU\n"<<f32AB.ToString()<<std::endl;
+            std::cout<<"F32ABN\n"<<f32ABU.ToString()<<std::endl;
         }
     }
     bool linear;
