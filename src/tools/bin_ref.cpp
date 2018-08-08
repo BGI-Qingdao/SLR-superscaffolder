@@ -119,9 +119,9 @@ struct AppConfig
                 }
                 if( 0.3 < fac && fac < 0.4)
                 {
-                    f32A.Touch(A);
-                    f32AB.Touch(ABI);
-                    f32ABU.Touch(ABU);
+                    f34A.Touch(A);
+                    f34AB.Touch(ABI);
+                    f34ABU.Touch(ABU);
                 }
             }
         }
