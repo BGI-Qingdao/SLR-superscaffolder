@@ -162,7 +162,7 @@ struct AppConfig
                 }
                 for( size_t j = r ; j > i ; j -- )
                 {
-                    lindex[pair.second[j].base]=item.LLeft.size();
+                    rindex[pair.second[j].base]=item.RLeft.size();
                     item.RLeft.push_back(0);
                     item.RLeft.push_back(0);
                     item.RRight.push_back(0);
