@@ -200,6 +200,7 @@ int main(int argc ,char **argv)
     DEFINE_ARG_OPTIONAL(int , thread, "thread num" ,"8");
     DEFINE_ARG_OPTIONAL(bool, pbc, "print bin cluster" ,"0");
     DEFINE_ARG_OPTIONAL(bool, bin_same_contig, "calc for bin on same contig ." ,"false");
+    DEFINE_ARG_OPTIONAL(bool, del_small_bin , "calc for bin on same contig ." ,"false");
     END_PARSE_ARGS
 
     config.Init(prefix.to_string() , threshold.to_float(), bin_same_contig.to_bool());

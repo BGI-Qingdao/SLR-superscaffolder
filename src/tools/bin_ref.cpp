@@ -54,6 +54,7 @@ struct AppConfig
     int bin;
 
     int scs ;
+     int bcs ;
 
     std::map<int,Bin> bin_data;
 
@@ -90,12 +91,12 @@ struct AppConfig
         for( int i = start ; i <= max - step_max ; i ++ )
         {
             int A = bin_data[i].size() ;
-            if ( A <= scs )
+            if ( A <= scs || A>= bcs)
                 continue ;
             for( int j = i + bin ; j <= max && j <= i+step_max ; j++ )
             {
                 int B = bin_data[j].size() ;
-                if ( B <= scs )
+                if ( B <= scs || A>=bcs )
                     continue ;
                 int ABI = Bin::Intersection(bin_data[i],bin_data[j]).size() ;
                 int ABU = Bin::Union(bin_data[i],bin_data[j]).size();
@@ -204,13 +205,14 @@ struct AppConfig
 int main(int argc , char ** argv)
 {
 
-    START_PARSE_ARGS 
+    START_PARSE_ARGS
         DEFINE_ARG_REQUIRED(int, limit, " limit ");
         DEFINE_ARG_REQUIRED(int, start, " start ");
     DEFINE_ARG_REQUIRED(int, step, " step ");
     DEFINE_ARG_REQUIRED(int, bin, " bin size /100  ");
     DEFINE_ARG_OPTIONAL(bool, linear, " try linear " , "false");
     DEFINE_ARG_OPTIONAL(int, scs, " smallest Collection size  " , "0");
+    DEFINE_ARG_OPTIONAL(int, bcs, " biggest Collection size  " , "100000");
     END_PARSE_ARGS;
 
     config.limit = limit.to_int();
@@ -219,6 +221,7 @@ int main(int argc , char ** argv)
     config.linear = linear.to_bool();
     config.bin = bin.to_int() ;
     config.scs = scs.to_int() ;
+    config.bcs = bcs.to_int() ;
     config.LoadBarcodeOnRef();
     config.CalcAll();
     config.PrintLine();
