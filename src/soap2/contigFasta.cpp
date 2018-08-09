@@ -77,7 +77,7 @@ namespace BGIQD {
             {
                 ost<<linear[i];
                 index ++ ;
-                if( index % 100  == 0 )
+                if( index % 100  == 0&& (index != (int)linear.size() -1 ) )
                 {
                     ost<<'\n';
                 }
@@ -94,7 +94,7 @@ namespace BGIQD {
             {
                 ost<<K[i];
                 index ++ ;
-                if( index % 100  == 0 && (index != K.size() -1 ))
+                if( index % 100  == 0 )
                 {
                     ost<<'\n';
                 }
@@ -104,7 +104,7 @@ namespace BGIQD {
             {
                 ost<<linear[i];
                 index ++ ;
-                if( index % 100  == 0 && (index != K.size() -1 ))
+                if( index % 100  == 0 && (index != linear.size() -1 ))
                 {
                     ost<<'\n';
                 }

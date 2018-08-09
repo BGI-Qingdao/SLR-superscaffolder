@@ -790,6 +790,8 @@ struct AppConfig
         {
             if ( curr.IsDelete() )
                 return ;
+            if( curr.arc == NULL )
+                return ;
             ost<<NewId(curr.id)<<'\t';
             volatile BGIQD::SOAP2::Arc * next = curr.arc ;
             while(next)

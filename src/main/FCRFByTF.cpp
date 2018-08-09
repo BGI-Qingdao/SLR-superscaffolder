@@ -147,7 +147,7 @@ int  main(int argc, char **argv)
 {
     //step0 Parse parmeters...
     START_PARSE_ARGS
-    DEFINE_ARG_REQUIRED(std::string , prefix, " In xxx.mintree_trunk_linear ; xxx.trunk_fill ");
+    DEFINE_ARG_REQUIRED(std::string , prefix, " In xxx.mintree_trunk_linear ; xxx.trunk_fill . Out xxx.contigroadfill ");
     END_PARSE_ARGS;
     config.Init( prefix.to_string());
     config.LoadTrunk();
