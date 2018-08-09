@@ -22,8 +22,8 @@ struct AppConfig
     struct ScaffItem
     {
         unsigned int base ;
-        std::vector<float> LLeft;
-        std::vector<float> LRight;
+        std::vector<float> LLeft; // Left for left bin
+        std::vector<float> LRight; // Left for right bin
         std::vector<float> RLeft;
         std::vector<float> RRight;
 
@@ -34,7 +34,8 @@ struct AppConfig
         void Calc()
         {
             Calc1Side( LLeft , LRight , Lctg , Lquality);
-            Calc1Side( RLeft , RRight , Rctg , Rquality);
+            // Left and Right is relativity .
+            Calc1Side( RRight, RLeft, Rctg , Rquality);
         }
 
         void Calc1Side( const std::vector<float> & left , const std::vector<float> & right , unsigned int & ctg , int & quality )
@@ -45,20 +46,26 @@ struct AppConfig
             {
                 lt += left[i] ;
                 rt += right[i] ;
-                if( left[i] < right[i] )
+                if( left[i] == 0 && right[i] )
+                {
+                    continue;
+                }
+                if( left[i] > right[i] )
                     l ++ ;
-                else
+                else if ( left[i] < right[i])
                     r++ ;
+                else
+                    ;
             }
             if( l < r ) 
             {
                 ctg = base + 1;
-                quality = l -r ;
+                quality = r - l  ;
             }
             else if ( r < l )
             {
                 ctg = base ;
-                quality = r -l ;
+                quality = l - r ;
             }
             else
             {
@@ -144,15 +151,15 @@ struct AppConfig
         // fill scaffs 
         for(auto & pair : scaffs)
         {
-            for(size_t i = 0 ; i < pair.second.size() ; i++ )
+            for(int i = 0 ; i < (int)pair.second.size() ; i++ )
             {
                 int l = i - rank > 0 ?  i - rank : 0 ;
-                int r = i + rank < pair.second.size() ? i + rank : pair.second.size() -1 ;
+                int r = i + rank < (int)pair.second.size() ? i + rank : pair.second.size() -1 ;
                 auto & item = pair.second[i] ;
                 unsigned int contig = item.base ;
                 std::map<unsigned int , int > lindex;
                 std::map<unsigned int , int > rindex;
-                for ( size_t j = l ; j < i ; j ++ )
+                for ( int j = l ; j < i ; j ++ )
                 {
                     lindex[pair.second[j].base]=item.LLeft.size();
                     item.LLeft.push_back(0);
@@ -160,7 +167,7 @@ struct AppConfig
                     item.LRight.push_back(0);
                     item.LRight.push_back(0);
                 }
-                for( size_t j = r ; j > i ; j -- )
+                for( int j = r ; j > i ; j -- )
                 {
                     rindex[pair.second[j].base]=item.RLeft.size();
                     item.RLeft.push_back(0);
@@ -387,7 +394,7 @@ int main(int argc, char **argv)
     config.rank = rank.to_int() ;
     config.LoadTrunk();
     config.LoadBinRelationArrayFromFile();
-    
+
     //config.GetGapSim();
     config.BuildSims();
     //config.CalcAll() ;

@@ -508,7 +508,7 @@ struct AppConfig
                 a_scaff[i].SetValue(fill.true_prev,TrueContig::ValueType::SIM,TrueContig::ValueOrder::NEXT);
                 a_scaff[i+1].SetValue(fill.true_next,TrueContig::ValueType::SIM,TrueContig::ValueOrder::PREV);
                 a_scaff[i].SetWeight(fill.extra[0],TrueContig::ValueType::SIM,TrueContig::ValueOrder::NEXT);
-                a_scaff[i+1].SetWeight(fill.extra[0],TrueContig::ValueType::SIM,TrueContig::ValueOrder::PREV);
+                a_scaff[i+1].SetWeight(fill.extra[1],TrueContig::ValueType::SIM,TrueContig::ValueOrder::PREV);
                 if( pefills.find(gap.prev) != pefills.end() )
                 {
                     const auto & pe_fill = pefills[gap.prev];
