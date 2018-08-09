@@ -96,11 +96,11 @@ struct AppConfig
             for( int j = i + bin ; j <= max && j <= i+step_max ; j++ )
             {
                 int B = bin_data[j].size() ;
-                if ( B <= scs || A>=bcs )
+                if ( B <= scs || B>=bcs )
                     continue ;
                 int ABI = Bin::Intersection(bin_data[i],bin_data[j]).size() ;
                 int ABU = Bin::Union(bin_data[i],bin_data[j]).size();
-                float fac = float(ABU) / float(ABI);
+                float fac = float(ABI) / float(ABU);
                 AA.Touch(A);
                 AB.Touch(ABI);
                 ABUF.Touch(ABU);

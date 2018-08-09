@@ -35,6 +35,8 @@ struct AppConfig
 
     float thresold;
 
+    bool del;
+
     BGIQD::SOAP2::FileNames fName;
 
     BGIQD::LOG::logger lger;
@@ -62,16 +64,26 @@ struct AppConfig
     {
         relations.init_n_element(barcodeOnBin.size());
     }
+    std::set<size_t> del_indexs;
     void BuildBinIndexOnBarcode()
     {
+        std::vector<int> size_cache;
         for(size_t i = 0 ; i <barcodeOnBin.size() ; i++)
         {
             auto & b2b = barcodeOnBin.at(i);
+            if( del)
+            {
+                size_cache.push_back(b2b.collections.size());
+            }
             for( auto j : b2b.collections )
             {
                 int barcode = j.first ;
                 binOnBarcode[barcode].insert( i);
             }
+        }
+        if( del )
+        {
+            
         }
     }
 
@@ -200,11 +212,11 @@ int main(int argc ,char **argv)
     DEFINE_ARG_OPTIONAL(int , thread, "thread num" ,"8");
     DEFINE_ARG_OPTIONAL(bool, pbc, "print bin cluster" ,"0");
     DEFINE_ARG_OPTIONAL(bool, bin_same_contig, "calc for bin on same contig ." ,"false");
-    DEFINE_ARG_OPTIONAL(bool, del_small_bin , "calc for bin on same contig ." ,"false");
+    DEFINE_ARG_OPTIONAL(bool, del, "calc for bin on same contig ." ,"false");
     END_PARSE_ARGS
 
     config.Init(prefix.to_string() , threshold.to_float(), bin_same_contig.to_bool());
-
+    config.del = del.to_bool();
     BGIQD::LOG::timer t(config.lger,"BinCluster");
 
     config.LoadB2BArray() ;
