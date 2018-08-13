@@ -25,6 +25,10 @@ namespace BGIQD{
 
             int binId ;
 
+            int start ;
+
+            int end ;
+
             BarcodeCollection collections ;
 
             std::string ToString() const ;
@@ -48,6 +52,10 @@ namespace BGIQD{
             unsigned int contigId ;
             int binId ;
             std::map<unsigned int , BinSimularity> sims;
+
+            int start ;
+
+            int end ;
 
             std::string ToString() const ;
 

@@ -192,6 +192,8 @@ struct AppConfig
                         {
                             int binId = pair.first ;
                             auto & d = b2b[binId];
+                            d.start = pair.second.min ;
+                            d.end = pair.second.max ;
                             d.contigId = contigId;
                             d.binId = binId ;
                             d.collections.IncreaseElement(vv,1);

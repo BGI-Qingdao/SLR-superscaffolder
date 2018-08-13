@@ -16,7 +16,7 @@ namespace BGIQD{
         std::string BarcodeOnBin::ToString() const 
         {
             std::ostringstream ost;
-            ost<<contigId<<':'<<binId;
+            ost<<contigId<<':'<<binId<<':'<<start<<':'<<end;
             for( auto i : collections)
             {
                 ost<<'\t'<<i.first<<':'<<i.second;
@@ -31,6 +31,9 @@ namespace BGIQD{
             auto d0 = BGIQD::STRING::split(d1[0],":");
             contigId = std::stoul(d0[0]);
             binId = std::stoi(d0[1]);
+            start =  std::stoi(d0[2]);
+            end =  std::stoi(d0[3]);
+
             for( size_t i = 1 ; i < d1.size(); i++)
             {
                 auto d2 = BGIQD::STRING::split(d1[i],":");
@@ -73,7 +76,7 @@ namespace BGIQD{
         std::string BinRelation::ToString() const
         {
             std::ostringstream ost;
-            ost<<contigId<<':'<<binId;
+            ost<<contigId<<':'<<binId<<':'<<start<<':'<<end;
             for( auto pair : sims )
             {
                 auto & sinfo = pair.second ;
@@ -86,7 +89,7 @@ namespace BGIQD{
         {
             std::istringstream ist(line);
             char split;
-            ist>>contigId>>split>>binId;
+            ist>>contigId>>split>>binId>>split>>start>>split>>end;
             int i = 0;
             while( ! ist.eof() )
             {

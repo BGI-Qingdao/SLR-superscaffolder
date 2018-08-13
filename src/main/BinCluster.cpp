@@ -93,6 +93,8 @@ struct AppConfig
         auto & result = relations[i];
         result.binId = bin.binId ;
         result.contigId = bin.contigId ;
+        result.start = bin.start ;
+        result.end = bin.end;
         result.binIndex = i ;
         std::set<int> relates ;
         for(auto pair : bin.collections)
@@ -232,7 +234,7 @@ int main(int argc ,char **argv)
     config.BuildABBAResult();
 
     if( pbc.to_bool() )
-    config.PrintBinRelation();
+        config.PrintBinRelation();
 
     config.BuildContigRelation();
 

@@ -12,6 +12,8 @@
 #include "stLFR/CBB.h"
 #include "stLFR/TrunkGap.h"
 
+#include "algorithm/linear_fitting/Minimum_multiplication.h"
+
 #include <map>
 #include <vector>
 #include <array>
@@ -19,6 +21,57 @@
 
 struct AppConfig
 {
+    typedef BGIQD::LINEARFITTING::Item<int,float> item;
+    typedef BGIQD::LINEARFITTING::Linear<int,float> LC;
+    LC lc;
+    bool ptest;
+    std::vector<item> linear_cache;
+    struct ContigBinPosSimHeadTail
+    {
+        int s1 , s2 , e1 ,e2 ;
+        float sim ;
+    };
+    std::map<unsigned int , ContigBinPosSimHeadTail> BinPos;
+    void LoadLinearCachce()
+    {
+        for(int i = 0 ; i <(int) bra.size() ; i++ )
+        {
+            const auto & bin = bra[i];
+            unsigned int contig = bin.contigId ;
+            int binId = bin.binId ;
+            if( binId == 0 )
+            {
+                BinPos[contig].s1 = bin.start ;
+                BinPos[contig].e1 = bin.end ;
+                for( const auto & pair : bin.sims)
+                {
+                    if( pair.first == contig )
+                    {
+                        assert( pair.second.contigId == contig );
+                        assert( pair.second.binId == 1);
+                        BinPos[contig].sim = pair.second.simularity ;
+                    }
+                }
+            }
+            else if ( binId == 1 )
+            {
+                BinPos[contig].s2 = bin.start ;
+                BinPos[contig].e2 = bin.end ;
+            }
+            else
+            {
+                assert(0&&" invalid binID ");
+            }
+        }
+
+        std::vector<item> data;
+        for(const auto & pair : BinPos)
+        {
+            data.push_back( item { pair.second.s2 - pair.second.e1 , pair.second.sim } );
+        }
+        lc = BGIQD::LINEARFITTING::lineFit(data);
+    }
+
     struct ScaffItem
     {
         unsigned int base ;
@@ -361,6 +414,19 @@ struct AppConfig
         delete out ;
     }
 
+    void PrintGapArea()
+    {
+        auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.gap_area());
+        if( out == NULL )
+            FATAL( "failed to open xxx.gap_area to write ");
+        for( int i = 1 ; i < 30000 ; i++ )
+        {
+            (*out)<<i<<'\t'<<lc.getY(i)<<'\n';
+        }
+        delete out ;
+        return ;
+    }
+
     void PrintGapOO()
     {
         auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.gap_oo());
@@ -388,18 +454,26 @@ int main(int argc, char **argv)
     START_PARSE_ARGS
     DEFINE_ARG_REQUIRED(std::string , prefix, " In xxx.mintree_trunk_linear , xxx.bin_cluster ; xxx.gap_order");
     DEFINE_ARG_OPTIONAL( int , rank , " rank to detect gap ","3");
+    DEFINE_ARG_OPTIONAL( bool , ptest , " print test data into STDOUT " , "false");
+    DEFINE_ARG_OPTIONAL( bool , calc_linear , "calc linear relationsship between simularity and gap length " , "false");
     END_PARSE_ARGS;
 
     config.Init( prefix.to_string());
     config.rank = rank.to_int() ;
+    config.ptest = ptest.to_bool() ;
     config.LoadTrunk();
     config.LoadBinRelationArrayFromFile();
 
     //config.GetGapSim();
     config.BuildSims();
-    //config.CalcAll() ;
+    //config.CalcAll();
     config.CalcAll1();
     //config.PrintGapOO() ;
     config.PrintGapOO1() ;
+    if( calc_linear.to_bool() )
+    {
+        config.LoadLinearCachce();
+        config.PrintGapArea();
+    }
     return 0;
 }
