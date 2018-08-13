@@ -504,7 +504,7 @@ struct AppConfig
             {
                 const auto & gap = pair.second[i];
                 const auto & fill = gapfills[gap.prev];
-                a_scaff[i].cluster_value = float(fill.extra[1])/10000.0f;
+                a_scaff[i].cluster_value = float(fill.extra[2])/1000000.0f;
                 a_scaff[i].SetValue(fill.true_prev,TrueContig::ValueType::SIM,TrueContig::ValueOrder::NEXT);
                 a_scaff[i+1].SetValue(fill.true_next,TrueContig::ValueType::SIM,TrueContig::ValueOrder::PREV);
                 a_scaff[i].SetWeight(fill.extra[0],TrueContig::ValueType::SIM,TrueContig::ValueOrder::NEXT);

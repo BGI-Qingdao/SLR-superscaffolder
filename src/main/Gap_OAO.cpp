@@ -45,9 +45,8 @@ struct AppConfig
                 BinPos[contig].e1 = bin.end ;
                 for( const auto & pair : bin.sims)
                 {
-                    if( pair.first == contig )
+                    if( pair.second.contigId == contig )
                     {
-                        assert( pair.second.contigId == contig );
                         assert( pair.second.binId == 1);
                         BinPos[contig].sim = pair.second.simularity ;
                     }
@@ -84,6 +83,7 @@ struct AppConfig
         int Lquality;
         unsigned int Rctg;
         int Rquality;
+        float simularity ;
         void Calc()
         {
             Calc1Side( LLeft , LRight , Lctg , Lquality);
@@ -219,8 +219,9 @@ struct AppConfig
                     item.LLeft.push_back(0);
                     item.LRight.push_back(0);
                     item.LRight.push_back(0);
+                    item.simularity = 0;
                 }
-                for( int j = r ; j > i ; j -- )
+                for( int j = i+1 ; j <= r ; j ++ )
                 {
                     rindex[pair.second[j].base]=item.RLeft.size();
                     item.RLeft.push_back(0);
@@ -240,6 +241,10 @@ struct AppConfig
                     }
                     if( rindex.find(sim.contigId) != rindex.end() )
                     {
+                        if( rindex[sim.contigId] == 0 && sim.simularity > item.simularity )
+                        {
+                            item.simularity = sim.simularity ;
+                        }
                         int index = rindex[sim.contigId] + sim.binId;
                         item.RLeft[index] = sim.simularity ;
                     }
@@ -256,6 +261,10 @@ struct AppConfig
                     }
                     if( rindex.find(sim.contigId) != rindex.end() )
                     {
+                        if( rindex[sim.contigId] == 0 && sim.simularity > item.simularity )
+                        {
+                            item.simularity = sim.simularity ;
+                        }
                         int index = rindex[sim.contigId] + sim.binId;
                         item.RRight[index] = sim.simularity ;
                     }
@@ -407,7 +416,9 @@ struct AppConfig
                     <<prev->Rctg<<'\t'
                     <<item.Lctg<<'\t'
                     <<prev->Rquality<<'\t'
-                    <<item.Lquality<<'\n';
+                    <<item.Lquality<<'\t'
+                    <<int(item.simularity * 1000000)
+                    ;
                 prev = & item ;
             }
         }
