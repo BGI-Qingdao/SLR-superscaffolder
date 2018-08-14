@@ -651,7 +651,7 @@ struct AppConfig
             for( int i = 0 ; i < (int)line.size() ; i++ )
             {
                 (*out)<<line[i];
-                if( i % 100 == 0 || i ==(int) line.size() -1 )
+                if( i != 0 && ( i % 100 == 0 || i ==(int) line.size() -1 ))
                 {
                     (*out)<<'\n';
                 }
