@@ -18,7 +18,6 @@
 
 struct AppConfig
 {
-
     typedef BGIQD::INTERVAL::Interval<float, BGIQD::INTERVAL::IntervalType::Left_Open_Right_Close> SimArea;
 
     std::map<SimArea, int> gapArea;
@@ -33,6 +32,7 @@ struct AppConfig
     int gap_petrunk ;
     int gap_pe ;
     bool ptest;
+    bool ptest1;
 
     struct TrueContig
     {
@@ -620,6 +620,8 @@ struct AppConfig
                             {
                                 gapFreq.Touch(GetGapLen(tc.cluster_value));
                                 line += std::string(GetGapLen(tc.cluster_value),'N');
+                                if( ptest1 )
+                                    std::cout<<tc.basic<<'\t'<<GetGapLen(tc.cluster_value)<<'\n';
                             }
                             else
                             {
@@ -671,11 +673,13 @@ int main(int argc, char **argv)
         DEFINE_ARG_OPTIONAL( int , gap_trunk, "gap in trunk" , "5000");
         DEFINE_ARG_OPTIONAL( int , gap_petrunk, "gap in trunk and has pe conn" , "300");
         DEFINE_ARG_OPTIONAL( int , gap_pe, "gap in pe" , "10");
-        DEFINE_ARG_OPTIONAL( bool, ptest, "print test data" , "no");
+        DEFINE_ARG_OPTIONAL( bool, ptest, "print test data ( Orientation) " , "no");
+        DEFINE_ARG_OPTIONAL( bool, ptest1, "print test data ( Gap )" , "no");
     END_PARSE_ARGS;
 
     config.Init(prefix.to_string());
     config.ptest = ptest.to_bool();
+    config.ptest1 = ptest1.to_bool();
     config.gap_trunk = gap_trunk.to_int();
     config.gap_pe = gap_pe.to_int();
     config.gap_petrunk = gap_petrunk.to_int();
