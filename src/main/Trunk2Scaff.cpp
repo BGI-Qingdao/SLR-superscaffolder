@@ -610,9 +610,9 @@ struct AppConfig
                     std::cout<<tc.ToString()<<'\n';
                 line+=contigMap.contigs[contig].K;
                 line+=contigMap.contigs[contig].linear;
-                if( tc.pe_fill.empty() )
+                if( i != a_scaff.size() - 2 )
                 {
-                    if( i != a_scaff.size() - 1 )
+                    if( tc.pe_fill.empty() )
                     {
                         if (tc.pe_next_ask == 0)
                         {
@@ -634,15 +634,15 @@ struct AppConfig
                             }
                         }
                     }
-                }
-                else
-                {
-                    line += std::string(gap_pe,'N');
-                    for( unsigned int x : tc.pe_fill )
+                    else
                     {
-                        line+=contigMap.contigs[x].K;
-                        line+=contigMap.contigs[x].linear;
-                        line += std::string(10,'N');
+                        line += std::string(gap_pe,'N');
+                        for( unsigned int x : tc.pe_fill )
+                        {
+                            line+=contigMap.contigs[x].K;
+                            line+=contigMap.contigs[x].linear;
+                            line += std::string(gap_pe,'N');
+                        }
                     }
                 }
             }
