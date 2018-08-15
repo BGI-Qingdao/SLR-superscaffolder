@@ -66,11 +66,15 @@ struct AppConfig
         std::vector<item> data;
         for(const auto & pair : BinPos)
         {
-            data.push_back( item { pair.second.s2 - pair.second.e1 , pair.second.sim } );
+            int gap = pair.second.s2 - pair.second.e1 ;
+            float sim = pair.second.sim ;
+            if(ptest1 )
+                std::cout<<gap<<'\t'<<sim<<'\n';
+            data.push_back( item { gap , sim } );
         }
         lc = BGIQD::LINEARFITTING::lineFit(data);
     }
-
+    bool ptest1 ;
     struct ScaffItem
     {
         unsigned int base ;
@@ -466,12 +470,14 @@ int main(int argc, char **argv)
     DEFINE_ARG_REQUIRED(std::string , prefix, " In xxx.mintree_trunk_linear , xxx.bin_cluster ; xxx.gap_order");
     DEFINE_ARG_OPTIONAL( int , rank , " rank to detect gap ","3");
     DEFINE_ARG_OPTIONAL( bool , ptest , " print test data into STDOUT " , "false");
+    DEFINE_ARG_OPTIONAL( bool , ptest1, " print gap_sim into STDOUT " , "false");
     DEFINE_ARG_OPTIONAL( bool , calc_linear , "calc linear relationsship between simularity and gap length " , "false");
     END_PARSE_ARGS;
 
     config.Init( prefix.to_string());
     config.rank = rank.to_int() ;
     config.ptest = ptest.to_bool() ;
+    config.ptest1 = ptest1.to_bool() ;
     config.LoadTrunk();
     config.LoadBinRelationArrayFromFile();
 
