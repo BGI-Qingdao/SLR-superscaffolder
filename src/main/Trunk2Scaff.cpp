@@ -622,7 +622,7 @@ struct AppConfig
                                 gapFreq.Touch(fill);
                                 line += std::string(fill,'N');
                                 if( ptest1 )
-                                    std::cout<<tc.basic<<'\t'<<fill<<'\n';
+                                    std::cout<<tc.basic<<'\t'<<fill<<'\t'<<tc.cluster_value<<'\n';
                             }
                             else
                             {
