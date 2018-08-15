@@ -23,6 +23,9 @@ struct GlobalConfig
     std::set<unsigned int> repeats;
     std::vector<ContigArea> scaffold_area;
     std::set<unsigned int> seeds ;
+
+    std::map<unsigned int , int> gaps;
+
     void LoadSeedLinear()
     {
         auto sf = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(seedLinear);
@@ -47,10 +50,14 @@ struct GlobalConfig
 
         std::string line ;
         ContigArea a_scaf(-1,-1);
+        int p_s = -1 , p_e = -1 ;
+        unsigned int prev; 
         while(!std::getline(*tf,line).eof())
         {
             if(line[0] == '-')
             {
+                p_s = - 1 ;
+                p_e = -1 ;
                 if( out != NULL )
                     delete out ;
                 out = NULL ;
@@ -90,7 +97,16 @@ struct GlobalConfig
                 else
                     a_scaf.max = seedArea[contig].begin()->min ;
             }
-
+            if( p_s != -1 && p_e != -1 )
+            {
+                if( seedArea[contig].begin()->min > p_e )
+                    gaps[prev] = seedArea[contig].begin()->min - p_e ;
+                else
+                    gaps[prev] = p_s - seedArea[contig].begin()->max ;
+            }
+            prev = contig ;
+            p_s = seedArea[contig].begin()->min ;
+            p_e = seedArea[contig].begin()->max ;
             for( auto x : seedPos[contig])
             {
                 (*out)<<'\t'<<x;
@@ -166,7 +182,13 @@ struct GlobalConfig
         trunkLinear = t ;
         outPrefix = o ;
     }
-
+    void ReportGaps()
+    {
+        for( const auto & pair : gaps )
+        {
+            std::cout<<pair.first<<'\t'<<pair.second<<'\n';
+        }
+    }
 }config;
 
 int main(int argc , char **argv)
@@ -176,6 +198,7 @@ int main(int argc , char **argv)
     DEFINE_ARG_REQUIRED(std::string , trunkLinear , " the trunk linear file ");
     DEFINE_ARG_REQUIRED(std::string , outPrefix, " the out file prefix");
     DEFINE_ARG_OPTIONAL(int ,bin, " the bin size for calc freq","100000");
+    DEFINE_ARG_OPTIONAL(bool,gap, " print gaps ","false");
     END_PARSE_ARGS
 
     config.Init(seedLinear.to_string() , trunkLinear.to_string() , outPrefix.to_string() );
@@ -183,5 +206,9 @@ int main(int argc , char **argv)
     config.LoadSeedLinear() ;
     config.ParseTrunkLinear();
     config.Report() ;
+    if( gap.to_bool() )
+    {
+        config.ReportGaps();
+    }
     return 0 ;
 }

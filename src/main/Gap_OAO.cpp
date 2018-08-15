@@ -417,7 +417,7 @@ struct AppConfig
                     <<item.Lctg<<'\t'
                     <<prev->Rquality<<'\t'
                     <<item.Lquality<<'\t'
-                    <<int(item.simularity * 1000000)
+                    <<int(prev->simularity * 1000000)
                     ;
                 prev = & item ;
             }

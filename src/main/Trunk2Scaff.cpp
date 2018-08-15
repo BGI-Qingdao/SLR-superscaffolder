@@ -610,7 +610,7 @@ struct AppConfig
                     std::cout<<tc.ToString()<<'\n';
                 line+=contigMap.contigs[contig].K;
                 line+=contigMap.contigs[contig].linear;
-                if( i != a_scaff.size() - 2 )
+                if( i != a_scaff.size() - 1 )
                 {
                     if( tc.pe_fill.empty() )
                     {
@@ -618,10 +618,11 @@ struct AppConfig
                         {
                             if( gapArea.size() > 0 )
                             {
-                                gapFreq.Touch(GetGapLen(tc.cluster_value));
-                                line += std::string(GetGapLen(tc.cluster_value),'N');
+                                int fill = GetGapLen(tc.cluster_value) ;
+                                gapFreq.Touch(fill);
+                                line += std::string(fill,'N');
                                 if( ptest1 )
-                                    std::cout<<tc.basic<<'\t'<<GetGapLen(tc.cluster_value)<<'\n';
+                                    std::cout<<tc.basic<<'\t'<<fill<<'\n';
                             }
                             else
                             {
