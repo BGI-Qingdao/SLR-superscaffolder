@@ -17,6 +17,10 @@ bool MatchData::IsPEInSameRef() const
 {
     return next_ref_name == "=" ;
 }
+bool MatchData::IsPEBothProperlyMatch() const 
+{
+    return (flags.flags.ox2 & 0x1) == 1 ;
+}
 bool MatchData::OtherUnMap() const 
 {
     return (flags.flags.ox8 & 0x1) == 1 ;

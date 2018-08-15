@@ -114,6 +114,8 @@ struct MatchData
     bool IsPCRduplicae() const ;
     bool IsPEInSameRef() const ;
     bool IsPEBothMatch() const ;
+    bool IsPEBothProperlyMatch() const ;
+
     bool Valid() const { return ! detail.infos.empty() ; }
     bool UnMap() const ;
     bool OtherUnMap() const ;
