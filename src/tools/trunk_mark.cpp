@@ -75,38 +75,44 @@ struct GlobalConfig
             }
             unsigned int contig = std::stoul(line);
             (*out)<<contig;
-            if( seedPos[contig].size() > 1 )
-            {/*
-                if( a_scaf.min != -1 && a_scaf.max != -1 )
+
+            ContigArea area;
+            if ( p_s != -1 && seedPos[contig].size() > 1)
+            {
+                int ps = -1 ;
+                for( const auto & a : seedArea[contig] )
                 {
-                    if( a_scaf.min > a_scaf.max )
-                        std::swap( a_scaf.min , a_scaf.max );
-                    scaffold_area.push_back(a_scaf);
+                    if(std::abs( a.min - ps ) > ps)
+                    {
+                        ps = std::abs( a.min - ps );
+                        area = a ;
+                    }
                 }
-                a_scaf = ContigArea(-1,-1);
-                repeats.insert(contig);*/
             }
             else
             {
-                seeds.insert( contig );
-                if( a_scaf.min == -1 )
-                {
-                    a_scaf.min = seedArea[contig].begin()->min ;
-                    a_scaf.max = seedArea[contig].begin()->max ;
-                }
-                else
-                    a_scaf.max = seedArea[contig].begin()->min ;
+                area = *(seedArea[contig].begin());
             }
+
+            seeds.insert( contig );
+            if( a_scaf.min == -1 )
+            {
+                a_scaf.min = area.min ;
+                a_scaf.max = area.max ;
+            }
+            else
+                a_scaf.max = area.min ;
             if( p_s != -1 && p_e != -1 )
             {
-                if( seedArea[contig].begin()->min > p_e )
-                    gaps[prev] = seedArea[contig].begin()->min - p_e ;
+
+                if(area.min + 63 > p_e )
+                    gaps[prev] = area.min - p_e ;
                 else
-                    gaps[prev] = p_s - seedArea[contig].begin()->max ;
+                    gaps[prev] = p_s - area.max ;
             }
             prev = contig ;
-            p_s = seedArea[contig].begin()->min ;
-            p_e = seedArea[contig].begin()->max ;
+            p_s = area.min ;
+            p_e = area.max ;
             for( auto x : seedPos[contig])
             {
                 (*out)<<'\t'<<x;
