@@ -64,7 +64,7 @@ struct AppConfig
                 (*b2r_out)<<BGIQD::stLFR::BarcodeIdHelper::Id( 
                         BGIQD::stLFR::readName2Barcode(d.read_name))<<'\t';
             (*b2r_out)<<(d.IsP() ? 'P' : 'E')<<'\t'
-                <<(d.IsPEBothProperlyMatch() ? 'Y' : 'N')<<'\t'
+                <<((d.IsPEBothMatch() && ! d.XA ) ? 'Y' : 'N')<<'\t'
                 <<d.insert_size;
             (*b2r_out)<<"\n";
         };

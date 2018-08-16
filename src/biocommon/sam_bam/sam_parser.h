@@ -103,6 +103,7 @@ struct MatchData
     std::string next_ref_name ;
     int next_ref_pos;
     int insert_size ;
+    bool XA;
     MatchData() : read_name("") , ref_name("")
                   , first_match_position(0)
                   , quality(0) , read_len(-1){}

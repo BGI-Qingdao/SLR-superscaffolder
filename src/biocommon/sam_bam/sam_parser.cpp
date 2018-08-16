@@ -148,6 +148,19 @@ MatchData LineParser::ParseAsMatchData() const
         >>data.next_ref_pos
         >>data.insert_size
         ;
+    std::string extra;
+    while( ! ist.eof() )
+    {
+        ist>>extra;
+    }
+    if(extra.size() >1 &&  extra[0]  == 'X' && extra[1] == 'A' )
+    {
+        data.XA = true ;
+    }
+    else
+    {
+        data.XA = false ;
+    }
     data.read_len = ParseStringAsCIGAR(cigar,data.first_match_position,data.detail);
     return data;
 }//ParseAsMatchData
