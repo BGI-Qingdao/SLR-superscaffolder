@@ -54,4 +54,5 @@ TEST(FLAGS_test)
     CHECK((i.flags.ox400 & 0x1), 1 );
     CHECK((i.flags.ox200 & 0x1), 0 );
     CHECK((i.flags.ox100 & 0x1), 1 );
+    i.num = 147 ;
 }

@@ -24,7 +24,7 @@ struct AppConfig
     std::map<unsigned int , std::map<unsigned int , std::vector<int> > > pe_cache ;
 
     int insert_size ;
-    int max_gap ;
+    int max_is ;
     bool ptest;
 
     void Init(const std::string & prefix)
@@ -138,7 +138,7 @@ struct AppConfig
         BGIQD::LOG::timer t(loger,"LoadPECahce");
         BGIQD::FREQ::Freq<int> ISFreq;
         std::string line ;
-        /*{
+        {
             auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.read2contig());
             if ( in == NULL )
                 FATAL(" open xxx.read2contig to read failed !!! ");
@@ -214,7 +214,7 @@ struct AppConfig
             loger<<BGIQD::LOG::lstart() << " total_pair "<<total_pair<<BGIQD::LOG::lend();
             loger<<BGIQD::LOG::lstart() << " total_pair_pe_same "<<total_pair_pe_same<<BGIQD::LOG::lend();
             loger<<BGIQD::LOG::lstart() << " insert size freq is "<<ISFreq.ToString()<<BGIQD::LOG::lend();
-        }*/
+        }
 
         {
             auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.read2contig());
@@ -289,7 +289,7 @@ struct AppConfig
                     if( Pleft < Eleft ) 
                     {
                         int gap = Eleft - Pright ;
-                        if( std::abs(gap) < max_gap )
+                        if( ( insert_size - gap ) < max_is )
                         {
                             pe_cache[Pcontig][Econtig].push_back(gap);
                             pe_cache[Econtig_1][Pcontig_1].push_back(gap);
@@ -360,13 +360,13 @@ int main(int argc , char ** argv)
         DEFINE_ARG_REQUIRED(std::string, prefix ,"prefix of files.");
         DEFINE_ARG_OPTIONAL(bool, test_data ,"print test data","no");
         DEFINE_ARG_OPTIONAL(int, insert_size ,"insert_size ","500");
-        DEFINE_ARG_OPTIONAL(int, max_gap,"max valid gap ","1000");
+        DEFINE_ARG_OPTIONAL(int, max_is ,"max valid insert_size","1000");
     END_PARSE_ARGS;
 
     config.Init(prefix.to_string());
     config.ptest = test_data.to_bool();
     config.insert_size = insert_size.to_int();
-    config.max_gap = max_gap.to_int();
+    config.max_is= max_is.to_int();
     BGIQD::LOG::timer t(config.loger,"PEGraph");
     config.LoadSeeds();
     config.LoadPECahce();
