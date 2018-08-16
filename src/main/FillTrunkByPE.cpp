@@ -56,6 +56,7 @@ struct AppConfig
     std::map<unsigned int , int > contigLen_cache;
     BGIQD::FREQ::Freq<int> fill_freq;
     int is_max;
+    int min_count ;
     bool use_all_pe_graph;
     void LoadSeedCluster()
     {
@@ -88,6 +89,8 @@ struct AppConfig
             BGIQD::stLFR::PEEdge edge;
             edge.InitFromString(line);
             if( std::abs(edge.len) > is_max )
+                return ;
+            if( edge.count < min_count ) 
                 return ;
             pe_graph.AddEdge(edge);
         };
@@ -303,10 +306,12 @@ int main(int argc , char ** argv)
         DEFINE_ARG_REQUIRED(std::string, prefix ,"prefix of files.");
         DEFINE_ARG_OPTIONAL(int, searchMax,"max search length." ,"5000");
         DEFINE_ARG_OPTIONAL(int, insert_max,"max insert_size avaliable." ,"1000");
+        DEFINE_ARG_OPTIONAL(int, min_count ,"min valid count ." ,"2");
         DEFINE_ARG_OPTIONAL(bool,use_all_pe_graph,"use all pe_graph instead of cluster sub graph." ,"false");
         DEFINE_ARG_OPTIONAL(bool,ptest,"print date for test." ,"false");
     END_PARSE_ARGS;
     config.Init(prefix.to_string() , searchMax.to_int(),insert_max.to_int(),use_all_pe_graph.to_bool());
+    config.min_count = min_count.to_int();
     BGIQD::LOG::timer t(config.loger,"FillTrunkByPE");
     config.LoadSeedCluster();
     config.LoadSeeds();
