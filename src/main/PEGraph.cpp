@@ -137,7 +137,7 @@ struct AppConfig
         BGIQD::LOG::timer t(loger,"LoadPECahce");
         BGIQD::FREQ::Freq<int> ISFreq;
         std::string line ;
-        {
+        /*{
             auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.read2contig());
             if ( in == NULL )
                 FATAL(" open xxx.read2contig to read failed !!! ");
@@ -212,9 +212,10 @@ struct AppConfig
             loger<<BGIQD::LOG::lstart() << " total_pair "<<total_pair<<BGIQD::LOG::lend();
             loger<<BGIQD::LOG::lstart() << " total_pair_pe_same "<<total_pair_pe_same<<BGIQD::LOG::lend();
             loger<<BGIQD::LOG::lstart() << " insert size freq is "<<ISFreq.ToString()<<BGIQD::LOG::lend();
-        }
+        }*/
 
         {
+            insert_size = 1000 ;
             auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.read2contig());
             if ( in == NULL )
                 FATAL(" open xxx.read2contig to read failed !!! ");
@@ -256,6 +257,8 @@ struct AppConfig
                     if( ! isP_wait )
                         continue ;
                     isP_wait = false ;
+                    if( items[6] == "N" )
+                        continue ;
                     unsigned int match_contig = std::stoul(items[1]);
                     if( contigLen_cache.find( match_contig ) == contigLen_cache.end() )
                         continue ;
