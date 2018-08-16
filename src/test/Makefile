@@ -33,6 +33,7 @@ source_cpp =	../common/files/file_reader.cpp \
 
 test_cpp   =	test.cpp\
 				../algorithm/interval/Interval_test.cpp\
+				../algorithm/distribution/distribution_test.cpp\
 				../algorithm/linear_fitting/Minimum_multiplication_test.cpp\
 				../algorithm/graph/GraphTrunk_test.cpp\
 				../algorithm/graph/MinTree_test.cpp\
