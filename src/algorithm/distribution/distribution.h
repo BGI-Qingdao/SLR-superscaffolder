@@ -1,16 +1,103 @@
 #ifndef __ALGORITHM_DISTRIBUTION_DISTRIBUTION_H__
 #define __ALGORITHM_DISTRIBUTION_DISTRIBUTION_H__
+
 #include <map>
+#include <vector>
+
 #include "algorithm/interval/Interval.h"
 namespace BGIQD {
     namespace DISTRIBUTION {
+
+        template<class T>
+            struct IntervalPercent
+            {
+                typedef BGIQD::INTERVAL::Interval<T>  Item;
+                std::map<Item, float> percents;
+                float GetPercent(const T & t) const 
+                {
+                    for( const auto & pair : percents)
+                    {
+                        if ( pair.first.IsContain(t) )
+                        {
+                            return pair.second ;
+                        }
+                    }
+                    return 0.0f ;
+                }
+
+                std::string ToString() const
+                {
+                    std::string ret ;
+                    for( const auto & pair : percents)
+                    {
+                        ret += pair.first.ToString() ;
+                        ret += '\t';
+                        ret += std::to_string(pair.second);
+                        ret += '\n';
+                    }
+                    return ret ;
+                }
+
+                std::vector<Item> ValidKeys()const 
+                {
+                    std::vector<Item> ret ;
+                    for( const auto & pair : percents)
+                    {
+                        if ( pair.second > 0.0000001f )
+                        {
+                            ret.push_back(pair.first);
+                        }
+                    }
+                    return ret ;
+                }
+
+                IntervalPercent GetSubPercent( const std::vector<Item> & keys )
+                {
+                    IntervalPercent ret ;
+                    std::map<Item,float> tmp;
+                    float total = 0;
+                    for( const auto & i : keys )
+                    {
+                        bool found = false ;
+                        for( const auto & pair : percents )
+                        {
+                            if(  i == pair.first )
+                            {
+                                tmp[i] = pair.second ;
+                                found = true ;
+                                break ;
+                            }
+                        }
+                        if( !found )
+                            tmp[i] = 0 ;
+                        total += tmp[i];
+                    }
+                    for( const auto  & pair : tmp )
+                    {
+                        ret.percents[pair.first] = pair.second / total ;
+                    }
+                    return ret ;
+                }
+            };
 
         template<class T>
             struct IntervalDistribution
             {
                 typedef BGIQD::INTERVAL::Interval<T>  Item;
                 std::map<Item, int> freqs;
-                std::map<Item, float> percents;
+
+                std::string ToString() const
+                {
+                    std::string ret ;
+                    for( const auto & pair : freqs)
+                    {
+                        ret += pair.first.ToString() ;
+                        ret += '\t';
+                        ret += std::to_string(pair.second);
+                        ret += '\n';
+                    }
+                    return ret ;
+                }
 
                 void Init(const T & bin ,const  T &  min ,const T & max )
                 {
@@ -32,41 +119,19 @@ namespace BGIQD {
                     }
                 }
 
-                void CalcPercent()
+
+                IntervalPercent<T> CalcPercent() const 
                 {
+                    IntervalPercent<T> ret ;
                     int total = 0 ;
-                    for( auto & pair : freqs )
+                    for( const auto & pair : freqs )
                     {
                         total += pair.second ;
                     }
 
-                    for( auto & pair : freqs )
+                    for( const auto & pair : freqs )
                     {
-                        percents[pair.first] = (float)pair.second  / (float)total;
-                    }
-                }
-
-                float GetPercent(const T & t)
-                {
-                    for( auto & pair : percents)
-                    {
-                        if ( pair.first.IsContain(t) )
-                        {
-                            return pair.second ;
-                        }
-                    }
-                    return 0.0f ;
-                }
-
-                std::string ToString()
-                {
-                    std::string ret ;
-                    for( auto & pair : percents)
-                    {
-                        ret += pair.first.ToString() ;
-                        ret += '\t';
-                        ret += std::to_string(pair.second);
-                        ret += '\n';
+                        ret.percents[pair.first] = (float)pair.second  / (float)total;
                     }
                     return ret ;
                 }

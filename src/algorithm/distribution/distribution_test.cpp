@@ -16,11 +16,22 @@ TEST(DD)
     d.Count(15);
     d.Count(23);
     d.Count(33);
-    d.CalcPercent();
-    CHECK_FLOAT(float(4)/float(7) ,d.GetPercent(5)); 
-    CHECK_FLOAT(float(2)/float(7) ,d.GetPercent(15)); 
-    CHECK_FLOAT(float(1)/float(7) ,d.GetPercent(25)); 
-    CHECK_FLOAT(float(0)/float(7) ,d.GetPercent(35)); 
-    std::cerr<<d.ToString();
+    auto dd = d.CalcPercent();
+    CHECK_FLOAT(float(4)/float(7) ,dd.GetPercent(5)); 
+    CHECK_FLOAT(float(2)/float(7) ,dd.GetPercent(15)); 
+    CHECK_FLOAT(float(1)/float(7) ,dd.GetPercent(25)); 
+    CHECK_FLOAT(float(0)/float(7) ,dd.GetPercent(35)); 
+    std::cerr<<dd.ToString();
+    DD d1;
+    d1.Init(10,0,30);
+    d1.Count(1);
+    d1.Count(11);
+    auto d11 = d1.CalcPercent() ;
+    auto dk = d11.ValidKeys();
+    auto dt = dd.GetSubPercent(dk);
+    CHECK_FLOAT(float(1)/float(3) ,dt.GetPercent(11));
+    CHECK_FLOAT(float(2)/float(3) ,dt.GetPercent(1));
+    std::cerr<<d11.ToString();
+    std::cerr<<dt.ToString();
 }
 

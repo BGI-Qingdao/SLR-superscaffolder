@@ -25,6 +25,7 @@ struct AppConfig
 
     std::map<unsigned int , int > contigLen_cache ;
     std::map<unsigned int , std::map<unsigned int , std::vector<int> > > pe_cache ;
+    std::map<unsigned int , std::map<unsigned int , std::vector<int[4]> > > pe_gap_cache ;
 
     int dist_bin;
     int insert_size ;
@@ -55,7 +56,18 @@ struct AppConfig
         delete in ;
     };
 
-
+    void SavePECahce(unsigned int a1 , int p1 ,int p2 ,
+                    unsigned int a2 , int p3 , int p4 )
+    {
+        if(a1< a2)
+        {
+            pe_gap_cache[a1][a2].push_back( { p1 ,p2 ,p3 ,p4} );
+        }
+        else
+        {
+            pe_gap_cache[a2][a1].push_back( { p3 ,p4 ,p1 ,p2} );
+        }
+    }
     //
     //
     //    +-
@@ -294,6 +306,10 @@ struct AppConfig
                         std::swap(Econtig , Econtig_1);
                     }
 
+                    SavePECahce( Pcontig, Pleft , Pright , Econtig, Eleft, Eright );
+
+                    SavePECahce( Econtig_1, Eleft, Eright ,  Pcontig_1 , Pleft , Pright );
+
                     if( Pleft < Eleft ) 
                     {
                         int gap = Eleft - Pright ;
@@ -318,6 +334,22 @@ struct AppConfig
 
     void BuildPEGraph()
     {
+
+        for( const auto & pair : pe_gap_cache )
+        {
+            unsigned int PcontigId = pair.first ;
+            for( const auto & pair1 : pair.second )
+            {
+                // R1 R2
+                for( int i = - 100 ; i < 1000 ; i ++ )
+                {
+                    
+                }
+
+                // R2 R1
+            }
+        }
+
         for( const auto & pair : pe_cache )
         {
             unsigned int PcontigId = pair.first ;

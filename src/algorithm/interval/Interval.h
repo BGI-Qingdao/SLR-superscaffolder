@@ -97,7 +97,10 @@ namespace BGIQD{
                 {
                     return min < other.min ;
                 }
-
+                bool operator == ( const Interval & other ) const
+                {
+                    return min == other.min && max == other.max ;
+                }
                 std::string ToString() const 
                 {
                     std::string ret ;
