@@ -207,6 +207,7 @@ struct AppConfig
                         int biggest = pos[3] ;
                         int IS = biggest - smallest +1 ;
                         insert_size_sum += IS ;
+                        dist.Count(IS);
                         ISFreq.Touch(IS);
                     }
                     isP_wait = false ;
@@ -214,11 +215,13 @@ struct AppConfig
             }
 
             delete in ;
+            dist.CalcPercent();
             insert_size = insert_size_sum / insert_size_num ;
             loger<<BGIQD::LOG::lstart() << " average insert_size "<<insert_size<<BGIQD::LOG::lend();
             loger<<BGIQD::LOG::lstart() << " total_pair "<<total_pair<<BGIQD::LOG::lend();
             loger<<BGIQD::LOG::lstart() << " total_pair_pe_same "<<total_pair_pe_same<<BGIQD::LOG::lend();
-            loger<<BGIQD::LOG::lstart() << " insert size freq is "<<ISFreq.ToString()<<BGIQD::LOG::lend();
+            loger<<BGIQD::LOG::lstart() << " insert size freq is \n"<<ISFreq.ToString()<<BGIQD::LOG::lend();
+            loger<<BGIQD::LOG::lstart() << " distribution of IS is \n"<<dist.ToString()<<BGIQD::LOG::lend();
         }
 
         {

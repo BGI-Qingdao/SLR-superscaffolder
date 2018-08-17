@@ -20,13 +20,13 @@ namespace BGIQD {
                     }
                 }
 
-                void Count(const T & t )
+                void Count(const T & t , int count  =1 )
                 {
                     for( auto & pair : freqs )
                     {
                         if ( pair.first.IsContain(t) )
                         {
-                            pair.second ++ ;
+                            pair.second += count ;
                             return ;
                         }
                     }
