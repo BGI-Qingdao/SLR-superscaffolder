@@ -21,5 +21,6 @@ TEST(DD)
     CHECK_FLOAT(float(2)/float(7) ,d.GetPercent(15)); 
     CHECK_FLOAT(float(1)/float(7) ,d.GetPercent(25)); 
     CHECK_FLOAT(float(0)/float(7) ,d.GetPercent(35)); 
+    std::cerr<<d.ToString();
 }
 

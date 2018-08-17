@@ -10,12 +10,15 @@
 
 #include "biocommon/sam_bam/sam_parser.h"
 
+#include "algorithm/distribution/distribution.h"
+
 #include "stLFR/contigPEGraph.h"
 
 #include "soap2/fileName.h"
 
 struct AppConfig
 {
+    typedef BGIQD::DISTRIBUTION::IntervalDistribution<int> Dist;
     BGIQD::LOG::logger loger;
     BGIQD::stLFR::ContigPEGraph pe_graph;
     BGIQD::SOAP2::FileNames fName;
@@ -23,14 +26,16 @@ struct AppConfig
     std::map<unsigned int , int > contigLen_cache ;
     std::map<unsigned int , std::map<unsigned int , std::vector<int> > > pe_cache ;
 
+    int dist_bin;
     int insert_size ;
     int max_is ;
     bool ptest;
-
+    Dist dist;
     void Init(const std::string & prefix)
     {
         fName.Init(prefix);
         BGIQD::LOG::logfilter::singleton().get("PEGraph",BGIQD::LOG::loglevel::INFO, loger);
+        dist.Init(dist_bin,0,1000);
     }
 
     void LoadSeeds()
@@ -361,12 +366,14 @@ int main(int argc , char ** argv)
         DEFINE_ARG_OPTIONAL(bool, test_data ,"print test data","no");
         DEFINE_ARG_OPTIONAL(int, insert_size ,"insert_size ","500");
         DEFINE_ARG_OPTIONAL(int, max_is ,"max valid insert_size","1000");
+        DEFINE_ARG_OPTIONAL(int, dist_bin ,"bin size of insert_size distribution" ,"100");
     END_PARSE_ARGS;
 
     config.Init(prefix.to_string());
     config.ptest = test_data.to_bool();
     config.insert_size = insert_size.to_int();
     config.max_is= max_is.to_int();
+    config.dist_bin = dist_bin.to_int();
     BGIQD::LOG::timer t(config.loger,"PEGraph");
     config.LoadSeeds();
     config.LoadPECahce();

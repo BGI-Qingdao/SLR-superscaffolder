@@ -3,6 +3,8 @@
 
 #include <cassert>
 #include <algorithm>
+#include <string>
+
 namespace BGIQD{
     namespace INTERVAL{
 
@@ -61,6 +63,10 @@ namespace BGIQD{
                 typedef T ValueType;
                 typedef IntervalType Type ;
 
+                static const Type type = t;
+                ValueType min;
+                ValueType max;
+
                 Interval() 
                 {
                 }
@@ -91,9 +97,32 @@ namespace BGIQD{
                 {
                     return min < other.min ;
                 }
-                static const Type type = t;
-                ValueType min;
-                ValueType max;
+
+                std::string ToString() const 
+                {
+                    std::string ret ;
+                    if ( IntervalInfo<type>::LeftOpen )
+                    {
+                        ret += "( ";
+                    }
+                    else
+                    {
+                        ret += "[ ";
+                    }
+                    ret += std::to_string(min);
+                    ret += " , ";
+                    ret += std::to_string(max);
+                    if ( IntervalInfo<type>::RightOpen )
+                    {
+                        ret += " )";
+                    }
+                    else
+                    {
+                        ret += " ]";
+                    }
+
+                    return ret;
+                }
 
                 bool IsContain(const ValueType& x ) const
                 {

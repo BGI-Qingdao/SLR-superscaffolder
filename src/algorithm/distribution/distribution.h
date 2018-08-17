@@ -16,7 +16,7 @@ namespace BGIQD {
                 {
                     for( T m = min ; m < max ; m += bin )
                     {
-                        freqs[Item(m,m+bin)] = 0 ;
+                        freqs[Item(m,m+bin-1)] = 0 ;
                     }
                 }
 
@@ -56,6 +56,19 @@ namespace BGIQD {
                         }
                     }
                     return 0.0f ;
+                }
+
+                std::string ToString()
+                {
+                    std::string ret ;
+                    for( auto & pair : percents)
+                    {
+                        ret += pair.first.ToString() ;
+                        ret += '\t';
+                        ret += std::to_string(pair.second);
+                        ret += '\n';
+                    }
+                    return ret ;
                 }
             };
     }
