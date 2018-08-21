@@ -422,6 +422,7 @@ struct AppConfig
                     <<prev->Rquality<<'\t'
                     <<item.Lquality<<'\t'
                     <<int(prev->simularity * 1000000)
+                    <<'\n'
                     ;
                 prev = & item ;
             }

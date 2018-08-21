@@ -5,6 +5,7 @@
 
 #include "algorithm/linear_fitting/Minimum_multiplication.h"
 #include "algorithm/collection/collection.h"
+#include "algorithm/statistics/common.h"
 
 #include <algorithm>
 #include <iostream>
@@ -39,6 +40,8 @@ struct AppConfig
         float m3;
         float m4;
         float m5;
+        int num ;
+        float sd;
     };
 
     std::map<int , std::vector<float>> xys;
@@ -147,7 +150,9 @@ struct AppConfig
                     item.m5 = x.second[i];
             }
             item.x = x.first * 100 ;
-            item.y = total / x.second.size();
+            BGIQD::Statistics::Average(x.second, item.y) ;//total / x.second.size();
+            item.num = x.second.size() ;
+            BGIQD::Statistics::SD(x.second,item.y,item.sd);
             xydata.push_back( item);
         }
 
@@ -174,6 +179,8 @@ struct AppConfig
                     <<x.m3<<'\t'
                     <<x.m4<<'\t'
                     <<x.m5<<'\t'
+                    <<x.num<<'\t'
+                    <<x.sd<<'\t'
                     <<std::endl;
             }
             std::cout<<"A\n"<<AA.ToString()<<std::endl;

@@ -19,19 +19,21 @@
 struct AppConfig
 {
     typedef BGIQD::DISTRIBUTION::IntervalDistribution<int> Dist;
+    typedef BGIQD::DISTRIBUTION::IntervalPercent<int> Percent;
     BGIQD::LOG::logger loger;
     BGIQD::stLFR::ContigPEGraph pe_graph;
     BGIQD::SOAP2::FileNames fName;
 
     std::map<unsigned int , int > contigLen_cache ;
     std::map<unsigned int , std::map<unsigned int , std::vector<int> > > pe_cache ;
-    std::map<unsigned int , std::map<unsigned int , std::vector<int[4]> > > pe_gap_cache ;
+    std::map<unsigned int , std::map<unsigned int , std::vector<std::vector<int>> > > pe_gap_cache ;
 
     int dist_bin;
     int insert_size ;
     int max_is ;
     bool ptest;
     Dist dist;
+    Percent percert_all;
     void Init(const std::string & prefix)
     {
         fName.Init(prefix);
@@ -51,21 +53,32 @@ struct AppConfig
         {
             auto items = BGIQD::STRING::split(line,"\t");
             contigLen_cache[std::stoul(items[0])] = std::stoul(items[1]);
+            contigLen_cache[std::stoul(items[0])+1] = std::stoul(items[1]);
             pe_graph.AddNode(std::stoul(items[0]) , std::stoul(items[1]));
         }
         delete in ;
     };
 
     void SavePECahce(unsigned int a1 , int p1 ,int p2 ,
-                    unsigned int a2 , int p3 , int p4 )
+            unsigned int a2 , int p3 , int p4 )
     {
         if(a1< a2)
         {
-            pe_gap_cache[a1][a2].push_back( { p1 ,p2 ,p3 ,p4} );
+            std::vector<int> tmp;
+            tmp.push_back(p1);
+            tmp.push_back(p2);
+            tmp.push_back(p3);
+            tmp.push_back(p4);
+            pe_gap_cache[a1][a2].push_back(tmp);
         }
         else
         {
-            pe_gap_cache[a2][a1].push_back( { p3 ,p4 ,p1 ,p2} );
+            std::vector<int> tmp;
+            tmp.push_back(p3);
+            tmp.push_back(p4);
+            tmp.push_back(p1);
+            tmp.push_back(p2);
+            pe_gap_cache[a1][a2].push_back(tmp);
         }
     }
     //
@@ -227,13 +240,13 @@ struct AppConfig
             }
 
             delete in ;
-            dist.CalcPercent();
+            percert_all = dist.CalcPercent();
             insert_size = insert_size_sum / insert_size_num ;
             loger<<BGIQD::LOG::lstart() << " average insert_size "<<insert_size<<BGIQD::LOG::lend();
             loger<<BGIQD::LOG::lstart() << " total_pair "<<total_pair<<BGIQD::LOG::lend();
             loger<<BGIQD::LOG::lstart() << " total_pair_pe_same "<<total_pair_pe_same<<BGIQD::LOG::lend();
             loger<<BGIQD::LOG::lstart() << " insert size freq is \n"<<ISFreq.ToString()<<BGIQD::LOG::lend();
-            loger<<BGIQD::LOG::lstart() << " distribution of IS is \n"<<dist.ToString()<<BGIQD::LOG::lend();
+            loger<<BGIQD::LOG::lstart() << " distribution of IS is \n"<<percert_all.ToString()<<BGIQD::LOG::lend();
         }
 
         {
@@ -340,13 +353,69 @@ struct AppConfig
             unsigned int PcontigId = pair.first ;
             for( const auto & pair1 : pair.second )
             {
-                // R1 R2
-                for( int i = - 100 ; i < 1000 ; i ++ )
+                std::vector<int> pos;
+                if( pair1.second.size() < 10 ) 
+                    continue ;
+                std::vector<std::tuple<float,int,bool>> p2e;
+                unsigned int EcontigId = pair1.first ;
+                // P -> E
+                for( int i = - 100 ; i < 900 ; i ++ )
                 {
-                    
+                    int incrR2 = contigLen_cache[PcontigId] + i ;
+                    Dist tmp ;
+                    tmp.Init(dist_bin,0,1000);
+                    for( const auto & ape : pair1.second) 
+                    {
+                        pos.push_back(ape[0]);
+                        pos.push_back(ape[1]);
+                        pos.push_back(ape[2]+incrR2);
+                        pos.push_back(ape[3]+incrR2);
+                        std::sort(pos.begin() , pos.end());
+                        int IS = pos[3]-pos[0] ;
+                        tmp.Count(IS);
+                    }
+                    auto pet = tmp.CalcPercent();
+                    auto keys = pet.ValidKeys();
+                    auto base = percert_all.GetSubPercent(keys);
+                    float sd ;
+                    if( base.SD( pet , sd ) < 0.20 )
+                    {
+                        p2e.push_back(std::make_tuple(sd,i,true));
+                    }
                 }
 
                 // R2 R1
+                for( int i = - 100 ; i < 900 ; i ++ )
+                {
+                    int incrR1 = contigLen_cache[PcontigId] + i ;
+                    Dist tmp ;
+                    tmp.Init(dist_bin,0,1000);
+                    for( const auto & ape : pair1.second) 
+                    {
+                        pos.push_back(ape[2]);
+                        pos.push_back(ape[3]);
+                        pos.push_back(ape[0]+incrR1);
+                        pos.push_back(ape[1]+incrR1);
+                        std::sort(pos.begin() , pos.end());
+                        int IS = pos[3]-pos[0] ;
+                        tmp.Count(IS);
+                    }
+                    auto pet = tmp.CalcPercent();
+                    auto keys = pet.ValidKeys();
+                    auto base = percert_all.GetSubPercent(keys);
+                    float sd ;
+                    if( base.SD( pet , sd ) > 0.75 )
+                    {
+                        p2e.push_back(std::make_tuple(sd,i,false));
+                    }
+                }
+                std::sort(p2e.rbegin() , p2e.rend() );
+                float sd ; int gap ; bool re;
+                std::tie(sd,gap,re) = p2e[0] ;
+                if( re )
+                    std::cout<< PcontigId << "\t"<<EcontigId<<"\t"<<gap<<'\n';
+                else
+                    std::cout<< EcontigId << "\t"<<PcontigId<<"\t"<<gap<<'\n';
             }
         }
 
@@ -398,10 +467,10 @@ int main(int argc , char ** argv)
 {
     START_PARSE_ARGS
         DEFINE_ARG_REQUIRED(std::string, prefix ,"prefix of files.");
-        DEFINE_ARG_OPTIONAL(bool, test_data ,"print test data","no");
-        DEFINE_ARG_OPTIONAL(int, insert_size ,"insert_size ","500");
-        DEFINE_ARG_OPTIONAL(int, max_is ,"max valid insert_size","1000");
-        DEFINE_ARG_OPTIONAL(int, dist_bin ,"bin size of insert_size distribution" ,"100");
+    DEFINE_ARG_OPTIONAL(bool, test_data ,"print test data","no");
+    DEFINE_ARG_OPTIONAL(int, insert_size ,"insert_size ","500");
+    DEFINE_ARG_OPTIONAL(int, max_is ,"max valid insert_size","1000");
+    DEFINE_ARG_OPTIONAL(int, dist_bin ,"bin size of insert_size distribution" ,"100");
     END_PARSE_ARGS;
 
     config.Init(prefix.to_string());

@@ -78,6 +78,25 @@ namespace BGIQD {
                     }
                     return ret ;
                 }
+
+                float SD(const IntervalPercent & other , float & sd ) const 
+                {
+                    float ret = 0.0f ;
+                    sd = 0.0f ;
+                    for( const auto & pair : other.percents )
+                    {
+                        if( percents.find( pair.first ) != percents.end())
+                        {
+                            float sub =  percents.at(pair.first) - pair.second ;
+                            sd += (sub*sub) ;
+                        }
+                        else
+                        {
+                            ret += pair.second ;
+                        }
+                    }
+                    return ret ;
+                }
             };
 
         template<class T>

@@ -297,7 +297,7 @@ struct AppConfig
     std::map<unsigned int, BGIQD::stLFR::GapFill> pefills;
     BGIQD::SOAP2::ContigFastAMap contigMap;
     std::vector<ContigOrientation> scaffs;
-
+    int K ;
     void LoadGapArea()
     {
         auto in  = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.gap_area());
@@ -331,6 +331,7 @@ struct AppConfig
     {
         fName.Init(prefix);
         BGIQD::LOG::logfilter::singleton().get("Trunk2Scaff ",BGIQD::LOG::loglevel::INFO, loger);
+        contigMap.K = K;
     }
 
     void LoadTrunk()
@@ -671,6 +672,7 @@ int main(int argc, char **argv)
     //step 0 Parse parmeters...
     START_PARSE_ARGS
         DEFINE_ARG_REQUIRED(std::string , prefix, " In xxx.mintree_trunk_linear , xxx.bin_cluster ; xxx.gap_order");
+        DEFINE_ARG_REQUIRED(int, K, " kvalue ");
         DEFINE_ARG_OPTIONAL( int , gap_trunk, "gap in trunk" , "5000");
         DEFINE_ARG_OPTIONAL( int , gap_petrunk, "gap in trunk and has pe conn" , "300");
         DEFINE_ARG_OPTIONAL( int , gap_pe, "gap in pe" , "10");
@@ -681,6 +683,7 @@ int main(int argc, char **argv)
     config.Init(prefix.to_string());
     config.ptest = ptest.to_bool();
     config.ptest1 = ptest1.to_bool();
+    config.K = K.to_int();
     config.gap_trunk = gap_trunk.to_int();
     config.gap_pe = gap_pe.to_int();
     config.gap_petrunk = gap_petrunk.to_int();
