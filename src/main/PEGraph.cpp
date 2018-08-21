@@ -364,7 +364,7 @@ struct AppConfig
                     Dist tmp ;
                     tmp.Init(dist_bin,0,1000);
                     Dist too_big;
-                    too_big.Init(1000,-10000,10000);
+                    too_big.Init(1000,0,100000);
                     for( const auto & ape : pair1.second) 
                     {
                         std::vector<int> pos;
@@ -378,12 +378,9 @@ struct AppConfig
                         too_big.Count(IS);
                     }
                     auto b2 = too_big.CalcPercent() ;
-                    if( b2.GetPercent(900) < 0.5   )
+                    if( b2.GetPercent(900) < 0.7 )
                     {
-                        if( i > 0 )
-                            break ;
-                        else
-                            continue ;
+                        continue ;
                     }
                     auto pet = tmp.CalcPercent();
                     auto keys = pet.ValidKeys();
@@ -416,12 +413,9 @@ struct AppConfig
                         too_big.Count(IS);
                     }
                     auto b2 = too_big.CalcPercent() ;
-                    if( b2.GetPercent(900) < 0.5   )
+                    if( b2.GetPercent(900) < 0.7   )
                     {
-                        if( i > 0 )
-                            break ;
-                        else
-                            continue ;
+                        continue ;
                     }
                     auto pet = tmp.CalcPercent();
                     auto keys = pet.ValidKeys();
@@ -432,13 +426,22 @@ struct AppConfig
                         p2e.push_back(std::make_tuple(sd,i,false));
                     }
                 }
-                std::sort(p2e.rbegin() , p2e.rend() );
-                float sd ; int gap ; bool re;
-                std::tie(sd,gap,re) = p2e[0] ;
-                if( re )
-                    std::cout<< PcontigId << "\t"<<EcontigId<<"\t"<<gap<<'\n';
-                else
-                    std::cout<< EcontigId << "\t"<<PcontigId<<"\t"<<gap<<'\n';
+                if( p2e.size() > 1 )
+                {
+                    std::sort(p2e.rbegin() , p2e.rend() );
+                    float sd ; int gap ; bool re;
+                    std::tie(sd,gap,re) = p2e[0] ;
+                    if( re )
+                        std::cout<< PcontigId << "\t"<<EcontigId<<"\t"<<gap;
+                    else
+                        std::cout<< EcontigId << "\t"<<PcontigId<<"\t"<<gap;
+                    for( int i = 0 ; i < (int)p2e.size() ; i++)
+                    {
+                        std::tie(sd,gap,re) = p2e[0] ;
+                        std::cout<<'\t'<<sd<<':'<<gap<<':'<<re;
+                    }
+                    std::cout<<'\n';
+                }
             }
         }
 
