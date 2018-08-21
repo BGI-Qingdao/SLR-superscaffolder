@@ -353,7 +353,6 @@ struct AppConfig
             unsigned int PcontigId = pair.first ;
             for( const auto & pair1 : pair.second )
             {
-                std::vector<int> pos;
                 if( pair1.second.size() < 10 ) 
                     continue ;
                 std::vector<std::tuple<float,int,bool>> p2e;
@@ -364,8 +363,11 @@ struct AppConfig
                     int incrR2 = contigLen_cache[PcontigId] + i ;
                     Dist tmp ;
                     tmp.Init(dist_bin,0,1000);
+                    Dist too_big;
+                    too_big.Init(1000,-10000,10000);
                     for( const auto & ape : pair1.second) 
                     {
+                        std::vector<int> pos;
                         pos.push_back(ape[0]);
                         pos.push_back(ape[1]);
                         pos.push_back(ape[2]+incrR2);
@@ -373,12 +375,21 @@ struct AppConfig
                         std::sort(pos.begin() , pos.end());
                         int IS = pos[3]-pos[0] ;
                         tmp.Count(IS);
+                        too_big.Count(IS);
+                    }
+                    auto b2 = too_big.CalcPercent() ;
+                    if( b2.GetPercent(900) < 0.5   )
+                    {
+                        if( i > 0 )
+                            break ;
+                        else
+                            continue ;
                     }
                     auto pet = tmp.CalcPercent();
                     auto keys = pet.ValidKeys();
                     auto base = percert_all.GetSubPercent(keys);
                     float sd ;
-                    if( base.SD( pet , sd ) < 0.20 )
+                    base.SD( pet , sd ) ;
                     {
                         p2e.push_back(std::make_tuple(sd,i,true));
                     }
@@ -390,8 +401,11 @@ struct AppConfig
                     int incrR1 = contigLen_cache[PcontigId] + i ;
                     Dist tmp ;
                     tmp.Init(dist_bin,0,1000);
+                    Dist too_big;
+                    too_big.Init(1000,0,100000);
                     for( const auto & ape : pair1.second) 
                     {
+                        std::vector<int> pos;
                         pos.push_back(ape[2]);
                         pos.push_back(ape[3]);
                         pos.push_back(ape[0]+incrR1);
@@ -399,12 +413,21 @@ struct AppConfig
                         std::sort(pos.begin() , pos.end());
                         int IS = pos[3]-pos[0] ;
                         tmp.Count(IS);
+                        too_big.Count(IS);
+                    }
+                    auto b2 = too_big.CalcPercent() ;
+                    if( b2.GetPercent(900) < 0.5   )
+                    {
+                        if( i > 0 )
+                            break ;
+                        else
+                            continue ;
                     }
                     auto pet = tmp.CalcPercent();
                     auto keys = pet.ValidKeys();
                     auto base = percert_all.GetSubPercent(keys);
                     float sd ;
-                    if( base.SD( pet , sd ) > 0.75 )
+                    base.SD( pet , sd ) ;
                     {
                         p2e.push_back(std::make_tuple(sd,i,false));
                     }
@@ -473,11 +496,11 @@ int main(int argc , char ** argv)
     DEFINE_ARG_OPTIONAL(int, dist_bin ,"bin size of insert_size distribution" ,"100");
     END_PARSE_ARGS;
 
+    config.dist_bin = dist_bin.to_int();
     config.Init(prefix.to_string());
     config.ptest = test_data.to_bool();
     config.insert_size = insert_size.to_int();
     config.max_is= max_is.to_int();
-    config.dist_bin = dist_bin.to_int();
     BGIQD::LOG::timer t(config.loger,"PEGraph");
     config.LoadSeeds();
     config.LoadPECahce();
