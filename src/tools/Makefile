@@ -36,6 +36,9 @@ source_o		= ${source_cpp:%.cpp=%.o}
 stLFR_2_10X_cpp 	=	stLFR_2_10X.cpp
 stLFR_2_10X_o   =	${stLFR_2_10X_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
+gapdetector_cpp 	=	gapdetector.cpp
+gapdetector_o   =	${gapdetector_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+
 cpSpeed_cpp 	=	cpSpeed.cpp
 cpSpeed_o   =	${cpSpeed_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
@@ -61,6 +64,7 @@ gap_cluster_check_o   =	${gap_cluster_check_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.
 jobs 	   =	stLFR_2_10X cpSpeed trunk_mark\
 				gap_cluster_check\
 				bin_ref\
+				gapdetector\
 				BinFreq\
 				seedGapFreq
 
@@ -68,6 +72,7 @@ jobs_o 	   =	${stLFR_2_10X_o} ${cpSpeed_o}\
 				${gap_cluster_check_o}\
 				${bin_ref_o}\
 				${BinFreq_o}\
+				${gapdetector_o}\
 				${seedGapFreq_o}
 
 all : ${jobs}
@@ -89,6 +94,9 @@ trunk_mark : clean ${trunk_mark_o}
 
 cpSpeed : clean ${cpSpeed_o}
 	${CXX} ${DEUBG_CXX} ${cpSpeed_o} -o cpSpeed
+
+gapdetector : clean ${gapdetector_o}
+	${CXX} ${DEUBG_CXX} ${gapdetector_o} -o gapdetector
 
 stLFR_2_10X : clean ${stLFR_2_10X_o}
 	${CXX} ${DEUBG_CXX} ${stLFR_2_10X_o} -o stLFR_2_10X
