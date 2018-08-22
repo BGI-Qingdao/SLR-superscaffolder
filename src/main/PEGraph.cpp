@@ -28,17 +28,24 @@ struct AppConfig
     std::map<unsigned int , std::map<unsigned int , std::vector<int> > > pe_cache ;
     std::map<unsigned int , std::map<unsigned int , std::vector<std::vector<int>> > > pe_gap_cache ;
 
-    int dist_bin;
+
+    struct DistData
+    {
+        int dist_bin ;
+        Dist dist ;
+        Percent percert_all ;
+        int max_IS ;
+    };
+
+    DistData dist_data ;
     int insert_size ;
     int max_is ;
     bool ptest;
-    Dist dist;
-    Percent percert_all;
     void Init(const std::string & prefix)
     {
         fName.Init(prefix);
         BGIQD::LOG::logfilter::singleton().get("PEGraph",BGIQD::LOG::loglevel::INFO, loger);
-        dist.Init(dist_bin,0,1000);
+        dist_data.dist.Init(dist_data.dist_bin,0,1000);
     }
 
     void LoadSeeds()
@@ -249,19 +256,29 @@ struct AppConfig
                     int biggest = pos[3] ;
                     int IS = biggest - smallest +1 ;
                     insert_size_sum += IS ;
-                    dist.Count(IS);
+                    dist_data.dist.Count(IS);
                     ISFreq.Touch(IS);
                 }
             }
 
             delete in ;
-            percert_all = dist.CalcPercent();
+            dist_data.percert_all = dist_data.dist.CalcPercent();
+            float t_p = 0;
+            for( const auto & i : dist_data.percert_all.percents )
+            {
+                t_p += i.second ;
+                if( t_p > 0.95 )
+                {
+                    dist_data.max_IS = i.first.max ;
+                    break ;
+                }
+            }
             insert_size = insert_size_sum / insert_size_num ;
             loger<<BGIQD::LOG::lstart() << " average insert_size "<<insert_size<<BGIQD::LOG::lend();
             loger<<BGIQD::LOG::lstart() << " total_pair "<<total_pair<<BGIQD::LOG::lend();
             loger<<BGIQD::LOG::lstart() << " total_pair_pe_same "<<total_pair_pe_same<<BGIQD::LOG::lend();
             loger<<BGIQD::LOG::lstart() << " insert size freq is \n"<<ISFreq.ToString()<<BGIQD::LOG::lend();
-            loger<<BGIQD::LOG::lstart() << " distribution of IS is \n"<<percert_all.ToString()<<BGIQD::LOG::lend();
+            loger<<BGIQD::LOG::lstart() << " distribution of IS is \n"<<dist_data.percert_all.ToString()<<BGIQD::LOG::lend();
         }
 
         {
@@ -275,6 +292,7 @@ struct AppConfig
             int PreadLeft , PreadRight;
             unsigned int  Pcontig , Pcontig_1 ;
 
+            int R1R2 = 0 , R2R1 = 0 ;
             while( ! std::getline( *in , line ).eof() )
             {
                 //0    1         2     3   4   5   6   7
@@ -349,6 +367,7 @@ struct AppConfig
 
                     if( Pleft < Eleft )
                     {
+                        R1R2 ++ ;
                         int gap = Eleft - Pright ;
                         if( ( insert_size - gap ) < max_is )
                         {
@@ -358,6 +377,7 @@ struct AppConfig
                     }
                     else
                     {
+                        R2R1 ++ ;
                         //int gap = Pleft - Eright ;
                         //pe_cache[Econtig][Pcontig].push_back(gap);
                         //pe_cache[Pcontig_1][Econtig_1].push_back(gap);
@@ -366,6 +386,7 @@ struct AppConfig
             }
             delete in ;
             loger<<BGIQD::LOG::lstart() << " total_pair_pe_diff "<<total_pair_pe_diff<<BGIQD::LOG::lend();
+            loger<<BGIQD::LOG::lstart() << " R1R2 : R2R2 = "<<R1R2<<":"<<R2R1<<BGIQD::LOG::lend();
         }
     }
 
@@ -382,13 +403,13 @@ struct AppConfig
                 std::vector<std::tuple<float,int,bool>> p2e;
                 unsigned int EcontigId = pair1.first ;
                 // P -> E
-                for( int i = - 100 ; i < 900 ; i ++ )
+                for( int i = - 100 ; i < dist_data.max_IS; i ++ )
                 {
                     int incrR2 = contigLen_cache[PcontigId] + i ;
                     Dist tmp ;
-                    tmp.Init(dist_bin,0,1000);
+                    tmp.Init(dist_data.dist_bin,0,1000);
                     Dist too_big;
-                    too_big.Init(1000,0,100000);
+                    too_big.Init(dist_data.max_IS,0,100000);
                     for( const auto & ape : pair1.second) 
                     {
                         std::vector<int> pos;
@@ -402,14 +423,14 @@ struct AppConfig
                         too_big.Count(IS);
                     }
                     auto b2 = too_big.CalcPercent() ;
-                    if( b2.GetPercent(900) < 0.7 )
+                    if( b2.GetPercent(1) < 0.8 )
                     {
                         continue ;
                     }
                     auto tmp1 = tmp.ValidPart() ;
                     auto pet = tmp1.CalcPercent();
                     auto keys = pet.ValidKeys();
-                    auto base = percert_all.GetSubPercent(keys);
+                    auto base = dist_data.percert_all.GetSubPercent(keys);
                     float sd = 0 ;
                     base.SD( pet , sd ) ;
                     {
@@ -418,13 +439,13 @@ struct AppConfig
                 }
 
                 // R2 R1
-                for( int i = - 100 ; i < 900 ; i ++ )
+                for( int i = - 100 ; i < dist_data.max_IS ; i ++ )
                 {
                     int incrR1 = contigLen_cache[PcontigId] + i ;
                     Dist tmp ;
-                    tmp.Init(dist_bin,0,1000);
+                    tmp.Init(dist_data.dist_bin,0,1000);
                     Dist too_big;
-                    too_big.Init(1000,0,100000);
+                    too_big.Init(dist_data.max_IS,0,100000);
                     for( const auto & ape : pair1.second) 
                     {
                         std::vector<int> pos;
@@ -438,14 +459,14 @@ struct AppConfig
                         too_big.Count(IS);
                     }
                     auto b2 = too_big.CalcPercent() ;
-                    if( b2.GetPercent(900) < 0.7   )
+                    if( b2.GetPercent(1) < 0.7   )
                     {
                         continue ;
                     }
                     auto tmp1 = tmp.ValidPart() ;
                     auto pet = tmp1.CalcPercent();
                     auto keys = pet.ValidKeys();
-                    auto base = percert_all.GetSubPercent(keys);
+                    auto base = dist_data.percert_all.GetSubPercent(keys);
                     float sd = 0;
                     base.SD( pet , sd ) ;
                     {
@@ -525,7 +546,7 @@ int main(int argc , char ** argv)
     DEFINE_ARG_OPTIONAL(int, dist_bin ,"bin size of insert_size distribution" ,"100");
     END_PARSE_ARGS;
 
-    config.dist_bin = dist_bin.to_int();
+    config.dist_data.dist_bin = dist_bin.to_int();
     config.Init(prefix.to_string());
     config.ptest = test_data.to_bool();
     config.insert_size = insert_size.to_int();
