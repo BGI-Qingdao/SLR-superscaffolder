@@ -182,6 +182,7 @@ struct AppConfig
             std::vector<int> pos;
 
             bool isP_wait = false ;
+            bool prev_f = true ;
             while( ! std::getline( *in , line ).eof() )
             {
                 auto items = BGIQD::STRING::split(line,"\t");
@@ -198,9 +199,15 @@ struct AppConfig
                         pos.push_back(first_1bp);
                         int last_1bp = 0 ;
                         if( items[3] == "+" )
+                        {
                             last_1bp = first_1bp + 100 -1 ;
+                            prev_f = true ;
+                        }
                         else
+                        {
                             last_1bp = first_1bp - 100 +1 ;
+                            prev_f = false ;
+                        }
                         pos.push_back(last_1bp);
                         isP_wait = true ;
                     }
@@ -213,29 +220,36 @@ struct AppConfig
                 }
                 else
                 {
-                    if( items[6] == "Y" && std::stoul(items[1]) == prev && isP_wait )
-                    {
-                        total_pair_pe_same ++ ;
-                        insert_size_num ++ ;
-                        int first_1bp = std::stoul(items[2]);
-                        pos.push_back(first_1bp);
-                        int last_1bp = 0 ;
-                        if( items[3] == "+" )
-                            last_1bp = first_1bp + 100 -1 ;
-                        else
-                            last_1bp = first_1bp - 100 +1 ;
-                        pos.push_back(last_1bp);
-
-                        assert(pos.size() == 4 );
-                        std::sort(pos.begin() ,pos.end());
-                        int smallest = pos[0];
-                        int biggest = pos[3] ;
-                        int IS = biggest - smallest +1 ;
-                        insert_size_sum += IS ;
-                        dist.Count(IS);
-                        ISFreq.Touch(IS);
-                    }
                     isP_wait = false ;
+                    if( items[6] == "N" || std::stoul(items[1]) != prev || !isP_wait )
+                    {
+                        continue ;
+                    }
+                    if( ! (( items[3] == "+") ^ prev_f) )
+                    {//FF or RR
+                        isP_wait = false ;
+                        continue ;
+                    }
+                    total_pair_pe_same ++ ;
+                    insert_size_num ++ ;
+                    int first_1bp = std::stoul(items[2]);
+                    pos.push_back(first_1bp);
+                    int last_1bp = 0 ;
+                    if( items[3] == "+" )
+                        last_1bp = first_1bp + 100 -1 ;
+                    else
+                        last_1bp = first_1bp - 100 +1 ;
+                    pos.push_back(last_1bp);
+
+                    assert(pos.size() == 4 );
+
+                    std::sort(pos.begin() ,pos.end());
+                    int smallest = pos[0];
+                    int biggest = pos[3] ;
+                    int IS = biggest - smallest +1 ;
+                    insert_size_sum += IS ;
+                    dist.Count(IS);
+                    ISFreq.Touch(IS);
                 }
             }
 
@@ -257,6 +271,7 @@ struct AppConfig
             bool isP_wait = false ;
 
             int Pleft , Pright ;
+            int PreadLeft , PreadRight;
             unsigned int  Pcontig , Pcontig_1 ;
 
             while( ! std::getline( *in , line ).eof() )
@@ -275,14 +290,18 @@ struct AppConfig
                             continue ;
                         isP_wait = true ;
                         Pleft = - first_1bp ;
-                        Pright = contigLen_cache[match_contig] - first_1bp ;
+                        Pright = contigLen_cache[match_contig] - first_1bp -1 ;
+                        PreadLeft = first_1bp ;
+                        PreadRight = first_1bp + 99 ;
                         Pcontig = match_contig ;
                         Pcontig_1  =  match_contig + 1 ;
                         if ( items[3] == "-" )
                         {
                             std::swap(Pcontig , Pcontig_1);
-                            Pleft = -(contigLen_cache[match_contig] - first_1bp) ;
-                            Pright = first_1bp;
+                            Pleft = -(contigLen_cache[match_contig] - first_1bp -1 ) ;
+                            Pright = first_1bp ;
+                            PreadRight = first_1bp ;
+                            PreadLeft = first_1bp - 99 ;
                         }
                     }
                 }
@@ -306,24 +325,28 @@ struct AppConfig
                     unsigned int Econtig = 0 ;
                     unsigned int Econtig_1 = 0 ;
                     int Eleft = 0 , Eright  = 0 ;
+                    int EreadLeft = 0 , EreadRight  = 0 ;
 
                     Eleft = insert_size -  first_1bp_of_E ;
                     Eright = insert_size + (contigLen_cache[match_contig] - first_1bp_of_E ) ;;
                     Econtig = match_contig ;
                     Econtig_1  = match_contig + 1 ;
-
+                    EreadLeft = first_1bp_of_E ;
+                    EreadRight = first_1bp_of_E + 99;
                     if ( items[3] == "+" )
                     {
                         Eleft =  insert_size -  (contigLen_cache[match_contig] - first_1bp_of_E ) ;
                         Eright = insert_size + first_1bp_of_E ;
                         std::swap(Econtig , Econtig_1);
+                        EreadLeft = first_1bp_of_E - 99 ;
+                        EreadRight = first_1bp_of_E ; 
                     }
 
-                    SavePECahce( Pcontig, Pleft , Pright , Econtig, Eleft, Eright );
+                    SavePECahce( Pcontig, PreadLeft , PreadRight , Econtig, EreadLeft, EreadRight );
 
-                    SavePECahce( Econtig_1, Eleft, Eright ,  Pcontig_1 , Pleft , Pright );
+                    SavePECahce( Econtig_1, EreadLeft, EreadRight,  Pcontig_1 , PreadLeft, PreadRight);
 
-                    if( Pleft < Eleft ) 
+                    if( Pleft < Eleft )
                     {
                         int gap = Eleft - Pright ;
                         if( ( insert_size - gap ) < max_is )
@@ -382,7 +405,8 @@ struct AppConfig
                     {
                         continue ;
                     }
-                    auto pet = tmp.CalcPercent();
+                    auto tmp1 = tmp.ValidPart() ;
+                    auto pet = tmp1.CalcPercent();
                     auto keys = pet.ValidKeys();
                     auto base = percert_all.GetSubPercent(keys);
                     float sd ;
@@ -417,7 +441,8 @@ struct AppConfig
                     {
                         continue ;
                     }
-                    auto pet = tmp.CalcPercent();
+                    auto tmp1 = tmp.ValidPart() ;
+                    auto pet = tmp1.CalcPercent();
                     auto keys = pet.ValidKeys();
                     auto base = percert_all.GetSubPercent(keys);
                     float sd ;
@@ -428,7 +453,7 @@ struct AppConfig
                 }
                 if( p2e.size() > 1 )
                 {
-                    std::sort(p2e.rbegin() , p2e.rend() );
+                    std::sort(p2e.begin() , p2e.end() );
                     float sd ; int gap ; bool re;
                     std::tie(sd,gap,re) = p2e[0] ;
                     if( re )
@@ -437,7 +462,7 @@ struct AppConfig
                         std::cout<< EcontigId << "\t"<<PcontigId<<"\t"<<gap;
                     for( int i = 0 ; i < (int)p2e.size() ; i++)
                     {
-                        std::tie(sd,gap,re) = p2e[0] ;
+                        std::tie(sd,gap,re) = p2e[i] ;
                         std::cout<<'\t'<<sd<<':'<<gap<<':'<<re;
                     }
                     std::cout<<'\n';

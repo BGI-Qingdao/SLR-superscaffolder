@@ -38,7 +38,7 @@ namespace BGIQD {
                     return ret ;
                 }
 
-                std::vector<Item> ValidKeys()const 
+                std::vector<Item> ValidKeys() const
                 {
                     std::vector<Item> ret ;
                     for( const auto & pair : percents)
@@ -138,6 +138,18 @@ namespace BGIQD {
                     }
                 }
 
+                IntervalDistribution ValidPart() const 
+                {
+                    IntervalDistribution ret ;
+                    for(const auto & pair : freqs )
+                    {
+                        if ( pair.second > 0 )
+                        {
+                            ret.freqs[pair.first] = pair.second ;
+                        }
+                    }
+                    return ret ;
+                }
 
                 IntervalPercent<T> CalcPercent() const 
                 {
