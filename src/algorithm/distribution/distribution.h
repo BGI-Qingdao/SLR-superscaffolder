@@ -43,7 +43,7 @@ namespace BGIQD {
                     std::vector<Item> ret ;
                     for( const auto & pair : percents)
                     {
-                        if ( pair.second > 0.0000001f )
+                        if ( pair.second > 0.0f )
                         {
                             ret.push_back(pair.first);
                         }
@@ -58,23 +58,30 @@ namespace BGIQD {
                     float total = 0;
                     for( const auto & i : keys )
                     {
-                        bool found = false ;
+                        tmp[i] = 0 ;
                         for( const auto & pair : percents )
                         {
-                            if(  i == pair.first )
+                            if(  i == pair.first && pair.second > 0 )
                             {
                                 tmp[i] = pair.second ;
-                                found = true ;
                                 break ;
                             }
                         }
-                        if( !found )
-                            tmp[i] = 0 ;
                         total += tmp[i];
                     }
-                    for( const auto  & pair : tmp )
+                    if ( total > 0 )
                     {
-                        ret.percents[pair.first] = pair.second / total ;
+                        for( const auto  & pair : tmp )
+                        {
+                            ret.percents[pair.first] = pair.second / total ;
+                        }
+                    }
+                    else
+                    {
+                        for( const auto  & pair : tmp )
+                        {
+                            ret.percents[pair.first] = 0;
+                        }
                     }
                     return ret ;
                 }
@@ -95,6 +102,7 @@ namespace BGIQD {
                             ret += pair.second ;
                         }
                     }
+                    sd /= other.percents.size() ;
                     return ret ;
                 }
             };

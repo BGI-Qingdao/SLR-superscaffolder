@@ -220,11 +220,12 @@ struct AppConfig
                 }
                 else
                 {
-                    isP_wait = false ;
                     if( items[6] == "N" || std::stoul(items[1]) != prev || !isP_wait )
                     {
+                        isP_wait = false ;
                         continue ;
                     }
+                    isP_wait = false ;
                     if( ! (( items[3] == "+") ^ prev_f) )
                     {//FF or RR
                         isP_wait = false ;
@@ -409,7 +410,7 @@ struct AppConfig
                     auto pet = tmp1.CalcPercent();
                     auto keys = pet.ValidKeys();
                     auto base = percert_all.GetSubPercent(keys);
-                    float sd ;
+                    float sd = 0 ;
                     base.SD( pet , sd ) ;
                     {
                         p2e.push_back(std::make_tuple(sd,i,true));
@@ -445,7 +446,7 @@ struct AppConfig
                     auto pet = tmp1.CalcPercent();
                     auto keys = pet.ValidKeys();
                     auto base = percert_all.GetSubPercent(keys);
-                    float sd ;
+                    float sd = 0;
                     base.SD( pet , sd ) ;
                     {
                         p2e.push_back(std::make_tuple(sd,i,false));
