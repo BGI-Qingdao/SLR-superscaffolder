@@ -44,21 +44,21 @@ struct AppConfig
             unsigned int p = std::stoi(items[0]);
             unsigned int e = std::stoi(items[1]);
 
-            if(seedArea[p].size() > 1 || seedArea[e].size() >1 )
+            if(seedArea[p].size() != 1 || seedArea[e].size() != 1 )
             {
-                std::cout<<p<<'\t'<<e<<'*'<<'\n';
+                std::cout<<p<<'\t'<<e<<'\t'<<'*'<<'\n';
             }
-            else
+            else 
             {
                 auto & p_area = seedArea[p][0];
                 auto & e_area = seedArea[e][0];
                 if( p_area.min < e_area.min )
                 {
-                    std::cout<<p<<'\t'<<e<<e_area.min - p_area.max<<'\n';
+                    std::cout<<p<<'\t'<<e<<'\t'<<e_area.min - p_area.max<<'\n';
                 }
                 else
                 {
-                    std::cout<<p<<'\t'<<e<<p_area.min - e_area.max<<'\n';
+                    std::cout<<p<<'\t'<<e<<'\t'<<p_area.min - e_area.max<<'\n';
                 }
             }
         }
