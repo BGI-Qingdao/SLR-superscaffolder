@@ -334,6 +334,14 @@ struct AppConfig
         for ( unsigned int i = 1 ; i <= graph_ea.contigTotalNum +new_graph_ea.contigTotalNum; i++ )
         {
             auto & curr = GetEdge(i).second;
+            if( curr.length < 1 )
+            {
+                curr.SetDelete();
+                if(curr.bal_id != curr.id)
+                {
+                    GetEdge(curr.bal_id).second.SetDelete();
+                }
+            }
             if( curr.bal_id != curr.id ) 
             {
                 i ++ ;
@@ -962,16 +970,16 @@ struct AppConfig
             }
             const auto & c = contig_fasta_map.contigs.at(curr.id) ;
             (*out)<<c.ToString(NewId(curr.id),"")<<std::endl;
-            onway_contig++;
             if( c.IsParlindorme() )
             {
-                ContigIndexData[curr.id] = ContigIndex{ c.length , 0 } ;
+                ContigIndexData[NewId(curr.id)] = ContigIndex{ c.length , 0 } ;
             }
             else
             {
-                ContigIndexData[curr.id] = ContigIndex{ c.length , 1 } ;
+                ContigIndexData[NewId(curr.id)] = ContigIndex{ c.length , 1 } ;
                 total_contig ++ ;
             }
+            onway_contig++;
             total_contig++;
             final_num ++ ;
         }
@@ -995,14 +1003,15 @@ struct AppConfig
             (*out)<<c.ToString(NewId(curr.id),ist.str())<<std::endl;
             if( c.IsParlindorme() )
             {
-                ContigIndexData[curr.id] = ContigIndex{ c.length , 0 } ;
+                ContigIndexData[NewId(curr.id)] = ContigIndex{ c.length , 0 } ;
             }
             else
             {
-                ContigIndexData[curr.id] = ContigIndex{ c.length , 1 } ;
+                ContigIndexData[NewId(curr.id)] = ContigIndex{ c.length , 1 } ;
                 total_contig ++ ;
             }
             total_contig++;
+            onway_contig++;
             final_num ++ ;
         }
 
@@ -1028,14 +1037,15 @@ struct AppConfig
             (*out)<<c.ToString(NewId(curr.id),ist.str())<<std::endl;
             if( c.IsParlindorme() )
             {
-                ContigIndexData[curr.id] = ContigIndex{ c.length , 0 } ;
+                ContigIndexData[NewId(curr.id)] = ContigIndex{ c.length , 0 } ;
             }
             else
             {
-                ContigIndexData[curr.id] = ContigIndex{ c.length , 1 } ;
+                ContigIndexData[NewId(curr.id)] = ContigIndex{ c.length , 1 } ;
                 total_contig ++ ;
             }
             total_contig++;
+            onway_contig++;
             final_num ++ ;
         }
         loger<<BGIQD::LOG::lstart()<<" print linear contig "<<final_num-step<<BGIQD::LOG::lend();
@@ -1050,7 +1060,7 @@ struct AppConfig
         (*out1)<<"index\tlength\treverseComplement"<<'\n';
         for(const auto & i : ContigIndexData)
         {
-            (*out1)<<i.first<<'\t'<<i.second.len<<'\t'<<i.second.reverseCompelete<<'\n';
+            (*out1)<<i.first<<'\t'<<i.second.len+K<<'\t'<<i.second.reverseCompelete<<'\n';
         }
         delete out1;
     }
