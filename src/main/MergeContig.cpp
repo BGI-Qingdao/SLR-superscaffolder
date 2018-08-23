@@ -931,8 +931,18 @@ struct AppConfig
         delete out;
     }
 
+
     void ReGenerate_contig( )
     {
+        struct ContigIndex 
+        {
+            int len ;
+            int reverseCompelete;
+        };
+        std::map<unsigned int , ContigIndex> ContigIndexData ;
+        unsigned int total_contig = 0;
+        unsigned int onway_contig = 0;
+
         auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fnames.contig(round+1));
         if( out==NULL )
             FATAL( "open prefix.contig_round_n for write failed !!! " );
@@ -952,6 +962,17 @@ struct AppConfig
             }
             const auto & c = contig_fasta_map.contigs.at(curr.id) ;
             (*out)<<c.ToString(NewId(curr.id),"")<<std::endl;
+            onway_contig++;
+            if( c.IsParlindorme() )
+            {
+                ContigIndexData[curr.id] = ContigIndex{ c.length , 0 } ;
+            }
+            else
+            {
+                ContigIndexData[curr.id] = ContigIndex{ c.length , 1 } ;
+                total_contig ++ ;
+            }
+            total_contig++;
             final_num ++ ;
         }
         int step = final_num;
@@ -972,6 +993,17 @@ struct AppConfig
                 ist<<"\t"<<"no_circle";
             ist<<"\t"<<i/2;
             (*out)<<c.ToString(NewId(curr.id),ist.str())<<std::endl;
+            if( c.IsParlindorme() )
+            {
+                ContigIndexData[curr.id] = ContigIndex{ c.length , 0 } ;
+            }
+            else
+            {
+                ContigIndexData[curr.id] = ContigIndex{ c.length , 1 } ;
+                total_contig ++ ;
+            }
+            total_contig++;
+            final_num ++ ;
         }
 
         loger<<BGIQD::LOG::lstart()<<" print super contig "<<final_num-step<<BGIQD::LOG::lend();
@@ -994,12 +1026,33 @@ struct AppConfig
                 ist<<"\t"<<"no_super";
             final_num ++ ;
             (*out)<<c.ToString(NewId(curr.id),ist.str())<<std::endl;
+            if( c.IsParlindorme() )
+            {
+                ContigIndexData[curr.id] = ContigIndex{ c.length , 0 } ;
+            }
+            else
+            {
+                ContigIndexData[curr.id] = ContigIndex{ c.length , 1 } ;
+                total_contig ++ ;
+            }
+            total_contig++;
+            final_num ++ ;
         }
         loger<<BGIQD::LOG::lstart()<<" print linear contig "<<final_num-step<<BGIQD::LOG::lend();
         loger<<BGIQD::LOG::lstart()<<" print final contig "<<final_num<<BGIQD::LOG::lend();
         loger<<BGIQD::LOG::lstart()<<" final fasta "<<contig_fasta_map.contigs.size()<<BGIQD::LOG::lend();
 
         delete out;
+        auto out1 = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fnames.ContigIndex(round+1));
+        if( out1==NULL )
+            FATAL( "open prefix.ContigIndex_round_n for write failed !!! " );
+        (*out1)<<"Edge_num"<<' '<<total_contig<<' '<<onway_contig<<'\n';
+        (*out1)<<"index\tlength\treverseComplement"<<'\n';
+        for(const auto & i : ContigIndexData)
+        {
+            (*out1)<<i.first<<'\t'<<i.second.len<<'\t'<<i.second.reverseCompelete<<'\n';
+        }
+        delete out1;
     }
 
 } config;
