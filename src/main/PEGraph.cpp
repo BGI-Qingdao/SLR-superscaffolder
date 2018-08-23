@@ -398,12 +398,12 @@ struct AppConfig
             unsigned int PcontigId = pair.first ;
             for( const auto & pair1 : pair.second )
             {
-                if( pair1.second.size() < 10 ) 
+                if( pair1.second.size() < 20 ) 
                     continue ;
                 std::vector<std::tuple<float,int,bool>> p2e;
                 unsigned int EcontigId = pair1.first ;
                 // P -> E
-                for( int i = - 100 ; i < dist_data.max_IS; i ++ )
+                for( int i = -63 ; i < dist_data.max_IS; i += 10  )
                 {
                     int incrR2 = contigLen_cache[PcontigId] + i ;
                     Dist tmp ;
@@ -423,7 +423,7 @@ struct AppConfig
                         too_big.Count(IS);
                     }
                     auto b2 = too_big.CalcPercent() ;
-                    if( b2.GetPercent(1) < 0.8 )
+                    if( b2.GetPercent(1) < 0.9 )
                     {
                         continue ;
                     }
@@ -439,7 +439,7 @@ struct AppConfig
                 }
 
                 // R2 R1
-                for( int i = - 100 ; i < dist_data.max_IS ; i ++ )
+                for( int i = -63 ; i < dist_data.max_IS ; i +=10 )
                 {
                     int incrR1 = contigLen_cache[PcontigId] + i ;
                     Dist tmp ;
@@ -459,7 +459,7 @@ struct AppConfig
                         too_big.Count(IS);
                     }
                     auto b2 = too_big.CalcPercent() ;
-                    if( b2.GetPercent(1) < 0.7   )
+                    if( b2.GetPercent(1) < 0.9   )
                     {
                         continue ;
                     }
