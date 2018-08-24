@@ -107,7 +107,6 @@ struct AppConfig
 
 int main(int argc , char ** argv)
 {
-
     // parse args
     START_PARSE_ARGS
     //DEFINE_ARG_OPTIONAL(bool ,no_stLFR , "no barcode in read name -- if the sam file was no barcode info , open this.","");

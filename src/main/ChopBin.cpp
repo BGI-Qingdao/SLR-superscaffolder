@@ -150,7 +150,7 @@ struct AppConfig
             char dir;
             std::istringstream ist(line);
             ist>>readId>>contigId>>pos>>dir>>barcode;
-            if( boc.find( contigId ) == boc.end() )
+            if( boc.find( contigId ) == boc.end() || barcode == 0 )
             {
                 continue;
             }

@@ -50,7 +50,7 @@ namespace stLFR{
     {
         for( const auto & i : m_tag2num )
         {
-            out<<i.first<<'\t'<<i.second<<std::endl;
+            out<<i.first<<'\t'<<i.second<<'\n';
         }
     }
 
@@ -58,6 +58,8 @@ namespace stLFR{
     bool BarcodeIdHelper::preload = false ;
     int BarcodeIdHelper::Id(const std::string & tag)
     {
+        if( tag == "0_0_0")
+            return 0;
         if( preload )
             return BarcodeId::Singleton().Id(tag);
         else
@@ -87,6 +89,7 @@ namespace stLFR{
         auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(file);
         if( out == NULL )
             FATAL( " open (barcodeList) file for write failed !!!");
+        (*out)<<"0_0_0"<<'\t'<<0<<'\n';
         BarcodeId::Singleton().Print(*out);
         delete out;
     }

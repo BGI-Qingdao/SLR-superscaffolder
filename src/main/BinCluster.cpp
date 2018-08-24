@@ -83,7 +83,7 @@ struct AppConfig
         }
         if( del )
         {
-            
+
         }
     }
 
@@ -100,6 +100,10 @@ struct AppConfig
         for(auto pair : bin.collections)
         {
             int barcode = pair.first ;
+            if( binOnBarcode[barcode].size() > 10000 )
+            {
+                continue ;
+            }
             for( auto index : binOnBarcode[barcode] )
             {
                 if(! calc_same_contig && barcodeOnBin[index].contigId == bin.contigId )
