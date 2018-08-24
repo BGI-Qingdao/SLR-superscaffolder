@@ -12,6 +12,7 @@
 
 #include "stLFR/barcodeId.h"
 #include "stLFR/readName2Barcode.h"
+#include "stLFR/EasySam.h"
 
 #include <iostream>
 #include <string>
@@ -49,26 +50,22 @@ struct AppConfig
 
     void ParseSam2ReadOnContig()
     {
+        std::vector<BGIQD::EASY_SAM::EasySam> easy_cache;
         auto sam_in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.read2contig_sam());
-        auto b2r_out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.read2contig());
         // basic function
         long long readId = 1 ;
         auto print1read= [&](const BGIQD::SAM::MatchData &d)
         {
-            //readId\tcontigId\treadInContigPos\torigin\tbarcodeId\n
-            (*b2r_out)<<readId++<<'\t'
-                <<d.ref_name<<'\t'
-                <<d.CalcRead1Position()<<'\t'
-                <<(d.IsReverseComplete() ? '-':'+')<<'\t';
-            if( has_barcode_in_read_name )
-                (*b2r_out)<<BGIQD::stLFR::BarcodeIdHelper::Id( 
-                        BGIQD::stLFR::readName2Barcode(d.read_name))<<'\t';
-            (*b2r_out)<<(d.IsP() ? 'P' : 'E')<<'\t'
-                <<((d.IsPEBothMatch() && ! d.XA ) ? 'Y' : 'N')<<'\t'
-                <<d.insert_size;
-            (*b2r_out)<<"\n";
+            BGIQD::EASY_SAM::EasySam tmp;
+            tmp.read_id = readId++;
+            tmp.contig_name = std::stoul(d.ref_name);
+            tmp.pos_1bp = d.CalcRead1Position();
+            tmp.barcode = BGIQD::stLFR::BarcodeIdHelper::Id(BGIQD::stLFR::readName2Barcode(d.read_name));
+            tmp.is_p = d.IsP();
+            tmp.pe_match = (d.IsPEBothMatch() && ! d.XA);
+            tmp.insert_size = d.insert_size ;
+            easy_cache.push_back(tmp);
         };
-
         // parse sam and print
         //BGIQD::SAM::PairedSAMParser parser(sam_in);
         long long count = 0 ;
@@ -90,6 +87,14 @@ struct AppConfig
                 loger<<BGIQD::LOG::lstart()<<count<<"   pair maped reads processed ..."<<BGIQD::LOG::lend();
         };
         BGIQD::FILES::FileReaderFactory::EachLine(*sam_in , parseline);
+        delete sam_in ;
+
+        auto b2r_out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.read2contig());
+        for( const auto & item : easy_cache)
+        {
+            (*b2r_out)<<item.ToString()<<'\n';
+        }
+        delete b2r_out;
     }
 
     void PrintBarcodeList()
@@ -116,7 +121,6 @@ int main(int argc , char ** argv)
     END_PARSE_ARGS
 
     config.Init(prefix.to_string() , barcodeList.to_string() ,false );// no_stLFR.to_bool());
-
     BGIQD::LOG::timer t(config.loger,"Same2ReadOnContig");
     config.TryLoadBarcode2Num() ;
     config.ParseSam2ReadOnContig();

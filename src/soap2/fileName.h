@@ -44,12 +44,21 @@ namespace BGIQD {
             DEFINE_SUFFIX(read2contig, ".read2contig");
             // PEGraph 
             DEFINE_SUFFIX(pe_graph , ".pe_graph");
+
+            DEFINE_SUFFIX(pe_info,".pe_info");
+
+            DEFINE_SUFFIX(pe_pairs,".pe_pair");
+
             // ChopBin
             DEFINE_SUFFIX(barcodeList, ".barcodeList");
+
+            DEFINE_SUFFIX(barcodeFreq, ".barcodeFreq");
 
             DEFINE_SUFFIX(BarcodeOnBin, ".barcodeOnBin");
 
             DEFINE_SUFFIX(BarcodeOnContig, ".barcodeOnContig");
+
+            DEFINE_SUFFIX(contigOnBarcode,".contigOnBarcode");
             // Bin Cluster
             DEFINE_SUFFIX(cluster, ".cluster");
 
@@ -82,6 +91,7 @@ namespace BGIQD {
             DEFINE_SUFFIX(scaff_seqs,".scaff_seqs");
 
             DEFINE_SUFFIX(trunk_fill,".trunk_fill");
+
             private:
                 std::string m_prefix;
         };

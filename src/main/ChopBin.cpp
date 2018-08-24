@@ -19,35 +19,7 @@
 
 struct AppConfig
 {
-    struct ConfigBarcodeInfo
-    {
-        int length;
-
-        std::map<int , std::set<unsigned int > > barcodesOnPos;
-
-        std::string format(unsigned int id) const 
-        {
-            std::ostringstream ost;
-            ost<<id<<':'<<length<<'\t';
-            for( const auto & i : barcodesOnPos)
-            {
-                bool first = true ;
-                ost<<i.first<<":";
-                for( unsigned int barcode : i.second )
-                {
-                    if( first )
-                        first = false ;
-                    else
-                        ost<<'|';
-                    ost<<barcode;
-                }
-                ost<<'\t';
-            }
-            return ost.str();
-        }
-    };
-
-    typedef std::map<unsigned int, ConfigBarcodeInfo>  BarcodeOnContig;
+    typedef std::map<unsigned int, BGIQD::stLFR::ContigBarcodeInfo>  BarcodeOnContig;
     typedef BGIQD::INTERVAL::Interval<int,
                 BGIQD::INTERVAL::Left_Close_Right_Close > BinInterval;
 
@@ -62,6 +34,8 @@ struct AppConfig
     bool head_tail_only;
 
     BarcodeOnContig boc;
+
+    std::map<unsigned int ,BGIQD::stLFR::ContigIndex> seeds;
 
     BGIQD::SOAP2::FileNames fName;
 
@@ -117,8 +91,10 @@ struct AppConfig
         std::string line ;
         while( in && !std::getline(*in, line).eof() )
         {
-            auto items = BGIQD::STRING::split(line,"\t");
-            boc[std::stoul(items[0])].length = std::stoul(items[1]);
+            BGIQD::stLFR::ContigIndex tmp;
+            tmp.InitFromString(line);
+            seeds[tmp.contig] = tmp;
+            boc[tmp.contig].contig_id= tmp.contig;
         }
         delete in ;
     }
@@ -139,22 +115,20 @@ struct AppConfig
 
     void LoadBarcodeOnContig()
     {
-        auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.read2contig());
+        auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.BarcodeOnContig());
+        if(! in )
+            FATAL( "failed to open xxx.barcodeOnContig to read !");
         BGIQD::LOG::timer t(log,"parse all input");
         std::string line;
         while(!std::getline(*in,line).eof())
         {
-            long readId ;
-            int pos ;
-            unsigned int contigId, barcode;
-            char dir;
-            std::istringstream ist(line);
-            ist>>readId>>contigId>>pos>>dir>>barcode;
-            if( boc.find( contigId ) == boc.end() || barcode == 0 )
+            BGIQD::stLFR::ContigBarcodeInfo tmp ;
+            tmp.InitFromString(line);
+            if( boc.find( tmp.contig_id) == boc.end() )
             {
                 continue;
             }
-            boc[contigId].barcodesOnPos[pos].insert(barcode);
+            boc[tmp.contig_id] = tmp ;
         }
         delete in;
     }
@@ -167,7 +141,7 @@ struct AppConfig
 
         for( const auto & i : boc )
         {
-            (*out)<<i.second.format(i.first)<<std::endl;
+            (*out)<<i.second.ToString()<<std::endl;
         }
         delete out;
     }
@@ -178,7 +152,7 @@ struct AppConfig
         for(const auto & contig :boc )
         {
             unsigned int contigId = contig.first;
-            int len = contig.second.length ;
+            int len = seeds[contigId].length ;
             auto bin_intervals = MakeBin(len);
             std::map<int,BGIQD::stLFR::BarcodeOnBin> b2b;
             for( const auto & posData : contig.second.barcodesOnPos )
@@ -236,8 +210,8 @@ int main(int argc , char ** argv)
 
     config.LoadBarcodeOnContig();
 
-    if( p_b2c.to_bool() )
-        config.PrintBarcodeOnContig();
+    //if( p_b2c.to_bool() )
+    //    config.PrintBarcodeOnContig();
 
     config.ChopBin();
 

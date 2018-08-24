@@ -144,6 +144,69 @@ namespace BGIQD{
             }
         }
 
+        std::string ContigBarcodeInfo::ToString() const 
+        {
+            std::ostringstream ost;
+            ost<<contig_id<<'\t';
+            for( const auto & i : barcodesOnPos)
+            {
+                bool first = true ;
+                ost<<i.first<<":";
+                for( unsigned int barcode : i.second )
+                {
+                    if( first )
+                        first = false ;
+                    else
+                        ost<<'|';
+                    ost<<barcode;
+                }
+                ost<<'\t';
+            }
+            return ost.str();
+        }
+
+        void ContigBarcodeInfo::InitFromString(const std::string & line)
+        {
+            std::istringstream ist(line);
+            ist>>contig_id;
+            std::string tmp;
+            while(!ist.eof())
+            {
+                ist>>tmp;
+                auto item1 = BGIQD::STRING::split(tmp,":");
+                int pos = std::stoi(item1[0]);
+                auto item2 = BGIQD::STRING::split(item1[1],"|");
+                for(int i = 0 ; i < (int)item2.size() ; i++ )
+                {
+                    barcodesOnPos[pos].insert(std::stoi(item2[i]));
+                }
+            }
+        }
+
+        std::string ContigOnBarcode::ToString() const 
+        {
+            std::ostringstream ost ;
+            ost<<barcode_id;
+            for(const auto & pair : contig_data )
+            {
+                ost<<'\t'<<pair.first<<'\t'<<pair.second ;
+            }
+            return ost.str();
+        }
+
+        void ContigOnBarcode::InitFromString(const std::string & line)
+        {
+            std::istringstream ist(line);
+            ist>>barcode_id;
+            while(!ist.eof())
+            {
+                unsigned int contig;
+                int num ;
+                ist>>contig>>num ;
+                contig_data[contig] = num ;
+            }
+        }
+
         std::string ContigRelation::ToString() const 
         {
             std::ostringstream ost ;
@@ -155,6 +218,21 @@ namespace BGIQD{
             return ost.str();
         }
 
+        std::string ContigIndex::ToString() const 
+        {
+            std::ostringstream ist;
+            ist<<contig<<'\t'<<length<<'\t'<<reverse_add;
+            return ist.str();
+        }
+        void ContigIndex::InitFromString(const std::string &line )
+        {
+            std::istringstream ist(line);
+            ist>>contig>>length;
+            if( ! ist.eof() )
+                ist>>reverse_add;
+            else
+                reverse_add = 1 ;
+        }
         void LoadContigRelationArray(const std::string & file ,ContigRelationArray & data)
         {
             auto parseline = [&data](const std::string &line)

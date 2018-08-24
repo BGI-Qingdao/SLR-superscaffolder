@@ -17,7 +17,51 @@
 namespace BGIQD{
     namespace stLFR {
 
+        struct ContigIndex
+        {
+            static int K ;
+            unsigned int contig;
+            int length ;
+            bool reverse_add;
+
+            void InitFromString(const std::string & line);
+            std::string ToString() const;
+        };
+
         typedef BGIQD::Collection::Collection<int> BarcodeCollection;
+
+        struct ContigBarcodeInfo
+        {
+            unsigned int contig_id ;
+
+            std::map<int , std::set<unsigned int > > barcodesOnPos;
+
+            std::string ToString() const ;
+            void Touch( int pos , unsigned int contig)
+            {
+                barcodesOnPos[pos].insert(contig);
+            }
+            void InitFromString(const std::string & line ) ;
+        };
+
+        struct ContigOnBarcode
+        {
+            int barcode_id ;
+
+            std::map<unsigned int , int > contig_data;
+
+            void InitFromString(const std::string & line) ;
+
+            std::string ToString() const ;
+            
+            void Touch(unsigned int contig )
+            {
+                if( contig_data.find(contig) == contig_data.end())
+                    contig_data[contig] =1 ;
+                else
+                    contig_data[contig]++ ;
+            }
+        };
 
         struct BarcodeOnBin
         {

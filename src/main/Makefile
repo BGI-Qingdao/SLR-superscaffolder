@@ -33,6 +33,9 @@ source_cpp =	../common/files/file_reader.cpp \
 
 source_o		= ${source_cpp:%.cpp=%.o}
 
+SplitInfo_cpp 	=	SplitInfo.cpp
+SplitInfo_o   =	${SplitInfo_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+
 ChopBin_cpp 	=	ChopBin.cpp
 ChopBin_o   =	${ChopBin_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
@@ -82,6 +85,7 @@ FCRFByTF_o				= ${FCRFByTF_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
 jobs 	   =	ChopBin\
+				SplitInfo\
 				BinCluster \
 				StaticsticUnique  \
 				Sam2ReadOnContig \
@@ -98,6 +102,7 @@ jobs 	   =	ChopBin\
 				SeedCluster\
 
 jobs_o 	   =	${ChopBin_o} \
+				${SplitInfo_o}\
 				${BinCluster_o} \
 				${StaticsticUnique_o}\
 				${Sam2ReadOnContig_o}\
@@ -115,6 +120,9 @@ jobs_o 	   =	${ChopBin_o} \
 
 
 all : ${jobs}
+
+SplitInfo : clean ${SplitInfo_o}
+	${CXX} ${DEUBG_CXX} ${SplitInfo_o} -o SplitInfo
 
 ChopBin : clean ${ChopBin_o}
 	${CXX} ${DEUBG_CXX} ${ChopBin_o} -o ChopBin
