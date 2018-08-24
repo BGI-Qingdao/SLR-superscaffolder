@@ -58,6 +58,9 @@ seedGapFreq_o   =	${seedGapFreq_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 gap_cluster_check_cpp 	=	gap_cluster_check.cpp
 gap_cluster_check_o   =	${gap_cluster_check_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
+FakeSOAPContig:
+	g++ -g -o FakeSOAPContig -std=c++11 FakeSOAPContig.cpp
+
 .cpp.o:
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
@@ -66,6 +69,7 @@ jobs 	   =	stLFR_2_10X cpSpeed trunk_mark\
 				bin_ref\
 				gapdetector\
 				BinFreq\
+				FakeSOAPContig\
 				seedGapFreq
 
 jobs_o 	   =	${stLFR_2_10X_o} ${cpSpeed_o}\

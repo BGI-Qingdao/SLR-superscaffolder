@@ -277,7 +277,7 @@ struct AppConfig
             loger<<BGIQD::LOG::lstart() << " average insert_size "<<insert_size<<BGIQD::LOG::lend();
             loger<<BGIQD::LOG::lstart() << " total_pair "<<total_pair<<BGIQD::LOG::lend();
             loger<<BGIQD::LOG::lstart() << " total_pair_pe_same "<<total_pair_pe_same<<BGIQD::LOG::lend();
-            loger<<BGIQD::LOG::lstart() << " insert size freq is \n"<<ISFreq.ToString()<<BGIQD::LOG::lend();
+            //loger<<BGIQD::LOG::lstart() << " insert size freq is \n"<<ISFreq.ToString()<<BGIQD::LOG::lend();
             loger<<BGIQD::LOG::lstart() << " distribution of IS is \n"<<dist_data.percert_all.ToString()<<BGIQD::LOG::lend();
         }
 
@@ -352,6 +352,7 @@ struct AppConfig
                     Econtig_1  = match_contig + 1 ;
                     EreadLeft = first_1bp_of_E ;
                     EreadRight = first_1bp_of_E + 99;
+
                     if ( items[3] == "+" )
                     {
                         Eleft =  insert_size -  (contigLen_cache[match_contig] - first_1bp_of_E ) ;
@@ -361,9 +362,9 @@ struct AppConfig
                         EreadRight = first_1bp_of_E ; 
                     }
 
-                    SavePECahce( Pcontig, PreadLeft , PreadRight , Econtig, EreadLeft, EreadRight );
+                    //SavePECahce( Pcontig, PreadLeft , PreadRight , Econtig, EreadLeft, EreadRight );
 
-                    SavePECahce( Econtig_1, EreadLeft, EreadRight,  Pcontig_1 , PreadLeft, PreadRight);
+                    //SavePECahce( Econtig_1, EreadLeft, EreadRight,  Pcontig_1 , PreadLeft, PreadRight);
 
                     if( Pleft < Eleft )
                     {
@@ -392,7 +393,7 @@ struct AppConfig
 
     void BuildPEGraph()
     {
-
+        /*
         for( const auto & pair : pe_gap_cache )
         {
             unsigned int PcontigId = pair.first ;
@@ -491,7 +492,7 @@ struct AppConfig
                 }
             }
         }
-
+    */
         for( const auto & pair : pe_cache )
         {
             unsigned int PcontigId = pair.first ;

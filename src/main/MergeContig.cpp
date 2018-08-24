@@ -970,7 +970,7 @@ struct AppConfig
             }
             const auto & c = contig_fasta_map.contigs.at(curr.id) ;
             (*out)<<c.ToString(NewId(curr.id),"")<<std::endl;
-            if( c.IsParlindorme() )
+            if( curr.id == curr.bal_id )
             {
                 ContigIndexData[NewId(curr.id)] = ContigIndex{ c.length , 0 } ;
             }
