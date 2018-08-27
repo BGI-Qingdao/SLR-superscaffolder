@@ -126,6 +126,20 @@ struct AppConfig
         // init extra graph
         new_graph_ea.contigTotalNum = 0;
         linear_graph_ea.contigTotalNum = 0;
+
+        
+        for ( unsigned int i = 1 ; i <= graph_ea.contigTotalNum ; i++ )
+        {
+            auto & curr = GetEdge(i).second;
+            if( curr.length < 1 )
+            {
+                curr.SetDelete();
+                if(curr.bal_id != curr.id)
+                {
+                    GetEdge(curr.bal_id).second.SetDelete();
+                }
+            }
+        }
     }
 
     void DeleteUniqueContigInSuperContig()
@@ -334,14 +348,6 @@ struct AppConfig
         for ( unsigned int i = 1 ; i <= graph_ea.contigTotalNum +new_graph_ea.contigTotalNum; i++ )
         {
             auto & curr = GetEdge(i).second;
-            if( curr.length < 1 )
-            {
-                curr.SetDelete();
-                if(curr.bal_id != curr.id)
-                {
-                    GetEdge(curr.bal_id).second.SetDelete();
-                }
-            }
             if( curr.bal_id != curr.id ) 
             {
                 i ++ ;
