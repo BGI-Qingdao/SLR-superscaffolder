@@ -459,6 +459,8 @@ struct AppConfig
             {
                 continue;
             }
+            if( curr.length < 1 )
+                continue ;
             use_count++ ;
             const auto & c = contig_fasta_map.contigs.at(curr.id) ;
             (*out)<<c.ToString(curr.id,"")<<std::endl;
