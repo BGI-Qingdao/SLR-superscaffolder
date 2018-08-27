@@ -60,6 +60,7 @@ struct AppConfig
             tmp.read_id = readId++;
             tmp.contig_name = std::stoul(d.ref_name);
             tmp.pos_1bp = d.CalcRead1Position();
+            tmp.match_reverse = d.IsReverseComplete() ;
             tmp.barcode = BGIQD::stLFR::BarcodeIdHelper::Id(BGIQD::stLFR::readName2Barcode(d.read_name));
             tmp.is_p = d.IsP();
             tmp.pe_match = (d.IsPEBothMatch() && ! d.XA);

@@ -47,7 +47,7 @@ struct AppConfig
         BGIQD::LOG::timer t(loger,"LoadContigIndex");
         auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.ContigIndex()) ;
         if( in == NULL )
-            FATAL( "open .seeds file to read failed !!! " );
+            FATAL( "open .ContigIndex file to read failed !!! " );
 
         std::string line ;
         while( in && !std::getline(*in, line).eof() )
