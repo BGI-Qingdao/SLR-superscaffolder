@@ -344,6 +344,11 @@ namespace BGIQD{
                     edge_array[index].SetPalindrome();
                 if( bal == 1 )
                     edge_array[index].SetBase();
+
+                if( edge_array[index].length == 0)
+                {
+                    edge_array[index].SetDelete();
+                }
                 index ++ ;
             }
             assert( index == contigTotalNum +1 );
@@ -388,6 +393,12 @@ namespace BGIQD{
                     arc_array[index].to = to;
                     arc_array[index].cov = cov;
 
+                    const auto & to_node = edge_array[to];
+                    if( to_node.IsDelete() && to_node.length < 1 )
+                    {
+                        index++ ;
+                        continue ;
+                    }
                     auto & node = edge_array[contigId] ;
 
                     if (node.arc == NULL ||  to <=  node.arc->to )
