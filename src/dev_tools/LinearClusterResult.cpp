@@ -66,6 +66,8 @@ void loadContigRef( const std::string & file , contigRef & data )
         auto d0 = p.ParseAsMatchData();
         int read = std::stoi(d0.read_name);
         int end_pos = 0;
+        if( d0.IsSupplementaryMatch() )
+            continue;
         for( size_t i = 0 ; i< d0.detail.infos.size() ; i++ )
         {
             auto info = d0.detail.infos[i];

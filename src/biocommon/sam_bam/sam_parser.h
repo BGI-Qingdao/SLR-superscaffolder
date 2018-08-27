@@ -116,7 +116,7 @@ struct MatchData
     bool IsPEInSameRef() const ;
     bool IsPEBothMatch() const ;
     bool IsPEBothProperlyMatch() const ;
-
+    bool IsSupplementaryMatch() const ;
     bool Valid() const { return ! detail.infos.empty() ; }
     bool UnMap() const ;
     bool OtherUnMap() const ;

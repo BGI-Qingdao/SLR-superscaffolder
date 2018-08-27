@@ -39,6 +39,12 @@ bool MatchData::IsPrimaryMatch() const
 {
     return ((flags.flags.ox800 & 0x1) == 0 ) &&( (flags.flags.ox100 & 0x1 ) == 0 ) ;
 }
+
+bool MatchData::IsSupplementaryMatch() const 
+{
+    return ((flags.flags.ox800 & 0x1) == 1 );
+}
+
 bool MatchData::IsPCRduplicae() const
 {
     return ((flags.flags.ox400 & 0x1) == 1 ) ;
