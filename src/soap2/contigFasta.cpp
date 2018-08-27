@@ -129,6 +129,11 @@ namespace BGIQD {
             for( int i = 1 ; i < (int)line.size() ; i++ )
             {
                 unsigned int next_id = std::stoul(line[i]);
+                if( contigs.find( next_id ) == contigs.end() )
+                {
+                    std::cerr<<"WARN : invalid contig id : "<<next_id<<std::endl;
+                    continue;
+                }
                 auto & next = contigs.at(next_id) ;
                 ret.linear += next.linear ;
                 ret.length += next.length ;
@@ -163,6 +168,11 @@ namespace BGIQD {
             for( int i = 1 ; i < (int)line.size() ; i++ )
             {
                 unsigned int next_id = line[i];
+                if( contigs.find( next_id ) == contigs.end() )
+                {
+                    std::cerr<<"WARN : invalid contig id : "<<next_id<<std::endl;
+                    continue;
+                }
                 auto & next = contigs.at(next_id) ;
                 ret.linear += next.linear ;
                 ret.length += next.length ;
