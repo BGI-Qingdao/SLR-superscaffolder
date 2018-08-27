@@ -82,7 +82,7 @@ struct AppConfig
 
             if( curr_line.pe_match && parse_pe )
             {
-                if(  curr_line.is_p || curr_line.pe_match )
+                if( (curr_line.is_p ||  (! curr_line.pe_match) ))
                 {
                     prev_line = curr_line ;
                     continue;
@@ -125,6 +125,14 @@ struct AppConfig
                 }
             }
             prev_line = curr_line ;
+        }
+        for( auto & pair : cbs )
+        {
+            pair.second.contig_id = pair.first ;
+        }
+        for( auto & pair : c2bs )
+        {
+            pair.second.barcode_id = pair.first ;
         }
     }
 
