@@ -156,16 +156,38 @@ namespace BGIQD{
             static KeyConn i ;
             return i;
         }
+
+        std::string KeyConn::ToString() const 
+        {
+            std::ostringstream ost ;
+            ost<<to
+                <<':'<<length
+                <<':'<<sim
+                <<':'<<(IsPositive() ? '+' :'-')
+                <<':'<<path.size();
+            for( auto i : path )
+            {
+                ost<<','<<i;
+            }
+            return ost.str();
+        }
         void KeyConn::InitFromString( const std::string & str )
         {
             auto items = BGIQD::STRING::split(str,":");
-            assert( items.size() == 4 ) ;
+            assert( items.size() == 5 ) ;
             to = std::stoul( items[0] );
             length = std::stoul( items[1] );
             sim = std::stof( items[2] );
             flag = 0 ;
             if( items[3] == "+" )
                 SetPostive() ;
+            auto s_paths = BGIQD::STRING::split(items[4],",");
+            int path_size = std::stoi(s_paths[0]);
+            assert(s_paths.size() == path_size + 1 );
+            for( int i = 0 ; i < path_size ; i++ )
+            {
+                path.push_back( std::stoul( s_paths[i+1] ) ) ;
+            }
         }
 
         std::tuple<bool,bool,bool> KeyEdge::Relationship(unsigned int id) const 

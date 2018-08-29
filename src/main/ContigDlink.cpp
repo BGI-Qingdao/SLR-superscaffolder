@@ -167,6 +167,38 @@ struct AppConfig
             EdgeItr,
             BGIQD::SOAP2::SFPEnder
                 > Searcher;
+        auto extractShortestPath = [] (const Searcher & searcher , unsigned int from , unsigned int to)
+        {
+            unsigned int curr = to ;
+            std::vector<unsigned int> path;
+            while( curr != from )
+            {
+                if( curr != to )
+                    path.push_back(curr);
+                try {
+                    const auto & node = searcher.fib_nodes.at(curr);
+                    curr = node.prev ;
+                }
+                catch ( ... ) 
+                {
+                    assert(0);
+                }
+            };
+            std::vector<unsigned int> ret ;
+            ret.insert( ret.end() , path.rbegin() , path.rend() );
+            return  ret ;
+        };
+
+        auto make_reverse_path = [this] ( const std::vector<unsigned int> & path)
+        {
+            std::vector<unsigned int> ret ;
+            for( auto i = path.rbegin() ; i != path.rend() ;  i ++ )
+            {
+                const auto & contig = edge_array[*i];
+                ret.push_back(contig.bal_id);
+            }
+            return ret ;
+        };
         Searcher searcher;
         searcher.accesser.base = &graph_ea ;
         searcher.accesser.K = K ;
@@ -174,6 +206,7 @@ struct AppConfig
 
         searcher.DoSPFSearch(real_from);
         index ++ ;
+
 
         for ( auto & j : searcher.ender.founder )
         {
@@ -195,19 +228,25 @@ struct AppConfig
 
                 unsigned int real_to = key_to ;
 
+                auto path = extractShortestPath(searcher , real_from , real_to);
+
                 int length  = searcher.fib_nodes.at(real_to).Base.key + K 
                     - searcher.accesser.AccessNode(real_to).length;
 
                 {
                     std::lock_guard<std::mutex> lm(key_mutex[key_map[key_from]]);
-                    BGIQD::SOAP2::KeyConn conn{key_to,length,0,sim};
+                    BGIQD::SOAP2::KeyConn conn;
+                    conn.Init(key_to,length,0,sim);
                     conn.SetPostive();
+                    conn.path = path;
                     curr_from.to[key_to]= conn;
                 }
                 {
                     std::lock_guard<std::mutex> lm(key_mutex[key_map[key_to]]);
-                    BGIQD::SOAP2::KeyConn conn{key_from,length,0,sim};
+                    BGIQD::SOAP2::KeyConn conn;
+                    conn.Init(key_from,length,0,sim);
                     conn.SetPostive();
+                    conn.path = make_reverse_path(path);
                     curr_to.from[key_from] = conn;
                 }
             }
@@ -220,17 +259,22 @@ struct AppConfig
             if( ! is_bal && j.second.bal)
             {
                 unsigned int real_to =curr_to.bal_id;
+                auto ret = extractShortestPath(searcher , real_from , real_to);
                 unsigned int B1_to = curr_from.bal_id ;
                 int length  = searcher.fib_nodes.at(real_to).Base.key + K // nodes.at(curr_to.bal_id).path_length
                     - searcher.accesser.AccessNode(real_to).length;
                 {
                     std::lock_guard<std::mutex> lm(key_mutex[key_map[key_from]]);
-                    BGIQD::SOAP2::KeyConn conn{key_to,length,0, sim};
+                    BGIQD::SOAP2::KeyConn conn;
+                    conn.Init(key_to,length,0,sim);
+                    conn.path = ret;
                     curr_from.to[real_to]= conn;
                 }
                 {
                     std::lock_guard<std::mutex> lm(key_mutex[key_map[key_to]]);
-                    BGIQD::SOAP2::KeyConn conn{key_from,length,0, sim};
+                    BGIQD::SOAP2::KeyConn conn;
+                    conn.Init(key_from,length,0,sim);
+                    conn.path = make_reverse_path(ret);
                     curr_to.to[B1_to] = conn;
                 }
             }
@@ -241,17 +285,22 @@ struct AppConfig
             if ( is_bal && j.second.base )
             {
                 unsigned int real_to = key_to ;
+                auto ret = extractShortestPath(searcher , real_from , real_to);
                 unsigned int A1_to = curr_to.bal_id;
                 int length  = searcher.fib_nodes.at(real_to).Base.key + K
                     - searcher.accesser.AccessNode(real_to).length;
                 {
                     std::lock_guard<std::mutex> lm(key_mutex[key_map[key_from]]);
-                    BGIQD::SOAP2::KeyConn conn{key_to,length,0, sim};
+                    BGIQD::SOAP2::KeyConn conn;
+                    conn.Init(key_to,length,0,sim);
+                    conn.path = ret;
                     curr_from.from[A1_to]= conn;
                 }
                 {
                     std::lock_guard<std::mutex> lm(key_mutex[key_map[key_to]]);
-                    BGIQD::SOAP2::KeyConn conn{key_from,length,0, sim};
+                    BGIQD::SOAP2::KeyConn conn;
+                    conn.Init(key_from,length,0,sim);
+                    conn.path = make_reverse_path(ret);
                     curr_to.from[real_from] = conn;
                 }
             }
@@ -262,19 +311,24 @@ struct AppConfig
             if ( is_bal && j.second.bal )
             {
                 int real_to =curr_to.bal_id;
+                auto ret = extractShortestPath(searcher , real_from , real_to);
 
                 int length  = searcher.fib_nodes.at(real_to).Base.key + K 
                     - searcher.accesser.AccessNode(real_to).length;
                 {
                     std::lock_guard<std::mutex> lm(key_mutex[key_map[key_from]]);
-                    BGIQD::SOAP2::KeyConn conn{key_to,length,0, sim};
+                    BGIQD::SOAP2::KeyConn conn;
+                    conn.Init(key_to,length,0,sim);
                     conn.SetPostive();
+                    conn.path = ret;
                     curr_from.from[key_to]= conn;
                 }
                 {
                     std::lock_guard<std::mutex> lm(key_mutex[key_map[key_to]]);
-                    BGIQD::SOAP2::KeyConn conn{key_from,length,0 , sim};
+                    BGIQD::SOAP2::KeyConn conn;
+                    conn.Init(key_from,length,0,sim);
                     conn.SetPostive();
+                    conn.path = make_reverse_path(ret);
                     curr_to.to[key_from] = conn;
                 }
             }
@@ -371,29 +425,50 @@ struct AppConfig
                 (*deg)<<curr.edge_id<<"\t-\t";
                 for( auto i: curr.from )
                 {
-                    (*deg)<<i.second.to
-                        <<":"<<i.second.length
-                        <<":"<<i.second.sim
-                        <<":"<<(i.second.IsPositive() ? '+' :'-')<<"\t";
+                    (*deg)<<i.second.ToString()<<'\t';
                 }
-                *(deg)<<std::endl;
+                *(deg)<<'\n';
             }
             if( curr.to.size() > 0 )
             {
                 (*deg)<<curr.edge_id<<"\t+\t";
                 for( auto i: curr.to)
                 {
-                    (*deg)<<i.second.to
-                        <<":"<<i.second.length
-                        <<":"<<i.second.sim
-                        <<":"<<(i.second.IsPositive() ? '+' :'-')<<"\t";
+                    (*deg)<<i.second.ToString()<<'\n';
                 }
-                *(deg)<<std::endl;
+                *(deg)<<'\n';
             }
         }
         delete deg;
     }
 
+    int thread;
+    int searchDepth ;
+    void RunAllJobs()
+    {
+        lger<<BGIQD::LOG::lstart()<<"buildConnection start ... "<<BGIQD::LOG::lend();
+        BGIQD::MultiThread::MultiThread t_jobs;
+        t_jobs.Start(thread);
+        int searchDepth_value = searchDepth;
+        for( auto j : keys )
+        {
+            t_jobs.AddJob([this,j, searchDepth_value](){
+                    findConnection(j ,false  , searchDepth_value, K);
+                    }
+                    );
+
+            if( edge_array[j].id != edge_array[j].bal_id )
+            {
+                unsigned int k = edge_array[j].bal_id;
+                t_jobs.AddJob([this, k, searchDepth_value](){
+                        findConnection(k ,true , searchDepth_value, K);
+                        }
+                        );
+            }
+        }
+        t_jobs.End();
+        t_jobs.WaitingStop();
+    }
 } config;
 
 
@@ -404,40 +479,17 @@ int main(int argc , char **argv)
     DEFINE_ARG_REQUIRED(std::string , prefix, "prefix. Input xxx.cluster && xxx.Arc && xxx.updated.edge ; Ouput xxx.connInfo" );
     DEFINE_ARG_REQUIRED(int , kvalue,"K value");
     DEFINE_ARG_OPTIONAL(int , thread, "thread num .","8");
-    DEFINE_ARG_OPTIONAL(int, searchDepth,"search depth (bp) ","10000");
+    DEFINE_ARG_OPTIONAL(int, searchDepth,"search depth (bp) ","300");
     END_PARSE_ARGS;
 
-
     config.Init(prefix.to_string() , kvalue.to_int());
+    config.thread = thread.to_int() ;
+    config.searchDepth = searchDepth.to_int() ;
 
     config.lger<<BGIQD::LOG::lstart()<<"parse args end ... "<<BGIQD::LOG::lend();
 
     BGIQD::LOG::timer t(config.lger,"ContigDlink");
-
-    config.lger<<BGIQD::LOG::lstart()<<"buildConnection start ... "<<BGIQD::LOG::lend();
-    {
-        BGIQD::MultiThread::MultiThread t_jobs;
-        t_jobs.Start(thread.to_int());
-        int searchDepth_value = searchDepth.to_int();
-        for( auto j : config.keys )
-        {
-            t_jobs.AddJob([j, searchDepth_value](){
-                    config.findConnection(j ,false  , searchDepth_value, config.K);
-                    }
-                    );
-            if( config.edge_array[j].id != config.edge_array[j].bal_id )
-            {
-                unsigned int k = config.edge_array[j].bal_id;
-                t_jobs.AddJob([ k, searchDepth_value](){
-                        config.findConnection(k ,true , searchDepth_value, config.K);
-                        }
-                        );
-            }
-        }
-        t_jobs.End();
-        t_jobs.WaitingStop();
-    }
-
+    config.RunAllJobs();
     config.PrintContigDlinkGraph();
 
     config.LogFreq();

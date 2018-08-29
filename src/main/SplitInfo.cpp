@@ -144,7 +144,7 @@ struct AppConfig
         return parse_pe || parse_barcode ;
     }
 
-    void Print()
+    void PrintResult()
     {
         if( parse_pe) 
         {
@@ -188,9 +188,9 @@ struct AppConfig
 int main(int argc , char ** argv)
 {
     START_PARSE_ARGS
-        DEFINE_ARG_REQUIRED(std::string, prefix ,"prefix of files.");
-        DEFINE_ARG_OPTIONAL(bool, parse_pe,"parse pe data", "false");
-        DEFINE_ARG_OPTIONAL(bool, parse_barcode,"parse barcode data", "false");
+        DEFINE_ARG_REQUIRED(std::string, prefix ,"prefix of files. Input xxx.read2contig , Output depends on below options. Please at least choose one of below options.");
+        DEFINE_ARG_OPTIONAL(bool, parse_pe,"parse pe data. will output xxx.pe_info && xxx.pe_pairs", "false");
+        DEFINE_ARG_OPTIONAL(bool, parse_barcode,"parse barcode data . will output xxx.barcodeOnContig && xxx.contigOnBarcode", "false");
     END_PARSE_ARGS;
 
     config.parse_pe = parse_pe.to_bool() ;
@@ -205,6 +205,6 @@ int main(int argc , char ** argv)
     BGIQD::LOG::timer t(config.loger,"SplitInfo");
     config.LoadContigIndex();
     config.ParseRead2Contig();
-    config.Print();
+    config.PrintResult();
     return 0 ;
 }

@@ -76,6 +76,7 @@ namespace BGIQD {
             DEFINE_SUFFIX(bin_cluster, ".bin_cluster");
             // ContigDLink
             DEFINE_SUFFIX(connInfo, ".connInfo");
+            DEFINE_SUFFIX(connPath, ".connPath");
             // LinearCDG
             DEFINE_SUFFIX(contigroad , ".contigroad");
             // FillContigRoad

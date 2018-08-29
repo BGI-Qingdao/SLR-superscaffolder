@@ -113,6 +113,16 @@ namespace BGIQD {
             int length;
             int flag ;
             float sim ;
+
+            void Init( unsigned int ato , int alength , int aflag , float asim )
+            {
+                to = ato;
+                length = alength;
+                flag = aflag ;
+                sim = asim ;
+                path.clear();
+            }
+
             bool IsPositive() const { return flag & 0x2 ; }
             void SetPostive() { flag |= 0x2 ;}
 
@@ -123,9 +133,11 @@ namespace BGIQD {
             void SetBiNotSuppert() { flag |= 0x4 ; }
             bool IsBiNotSupport() const { return flag & 0x4 ;}
 
+            std::string ToString() const ;
             void InitFromString( const std::string & str ) ;
 
             bool IsValid() const { return  ! ( IsBiNotSupport() ||  IsJumpConn() ); }
+            std::vector<unsigned int> path ;
         };
 
         struct KeyEdge
