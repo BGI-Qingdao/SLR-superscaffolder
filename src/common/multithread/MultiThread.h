@@ -10,7 +10,6 @@ struct Thread
 {
     static void run(JobQueue & queue)
     {
-        std::cerr<<"thread starting ... "<<std::endl;
         while(true)
         {
             auto top = queue.Get();
@@ -21,7 +20,6 @@ struct Thread
                 top.second();
             }
         }
-        std::cerr<<"thread end ... "<<std::endl;
     }
 };
 

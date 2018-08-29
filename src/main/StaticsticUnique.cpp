@@ -92,7 +92,7 @@ struct AppConfig
             if( pass.find(contig.id) == pass.end() && contig.cov > UniqueLow && contig.cov < UniqueHigh && contig.length >=min )
             {
                 index ++ ;
-                (*out)<<contig.id<<'\t'<<contig.length<<std::endl;
+                (*out)<<contig.id<<'\t'<<contig.length<<'\t'<<1<<std::endl;
             }
         }
         log<<BGIQD::LOG::lstart()<<index << " seed in "<<index1<<" candidate contigs"<< BGIQD::LOG::lend();

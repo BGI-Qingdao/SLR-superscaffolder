@@ -91,7 +91,9 @@ class timer
         timer( logger & a_logger , const std::string &job_description)
             : start(TIME::timepoint::now())
             , l(a_logger)
-            , jobdec(job_description) {}
+            , jobdec(job_description) {
+                (l)<<lstart()<<jobdec<< "start now ... "<<lend();
+            }
 
         ~timer()
         {

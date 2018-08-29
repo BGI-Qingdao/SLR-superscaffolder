@@ -38,6 +38,10 @@ namespace BGIQD {
             DEFINE_SUFFIX(ContigIndex, ".ContigIndex");
             // StaticUnique
             DEFINE_SUFFIX(seeds, ".seeds");
+            DEFINE_SUFFIX(mst_seeds, ".mst_seeds");
+            DEFINE_SUFFIX(mst_pe_seeds, ".mst_pe_seeds");
+            DEFINE_SUFFIX(cdg_seeds, ".cdg_seeds");
+            DEFINE_SUFFIX(pe_seeds, ".pe_seeds");
             // Same2ReadOnContig
             DEFINE_SUFFIX(read2contig_sam, ".read2contig.sam");
 

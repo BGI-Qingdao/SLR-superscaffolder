@@ -94,6 +94,7 @@ struct AppConfig
         for( int i = start ; i <= max - step_max ; i ++ )
         {
             int A = bin_data[i].size() ;
+            AA.Touch(A);
             if ( A <= scs || A>= bcs)
                 continue ;
             for( int j = i + bin ; j <= max && j <= i+step_max ; j++ )
@@ -104,7 +105,6 @@ struct AppConfig
                 int ABI = Bin::Intersection(bin_data[i],bin_data[j]).size() ;
                 int ABU = Bin::Union(bin_data[i],bin_data[j]).size();
                 float fac = float(ABI) / float(ABU);
-                AA.Touch(A);
                 AB.Touch(ABI);
                 ABUF.Touch(ABU);
                 if( fac > 0.05 && fac < 0.5)
