@@ -72,6 +72,9 @@ Trunk2Scaff_o				= ${Trunk2Scaff_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 Gap_OAO_cpp 			= Gap_OAO.cpp
 Gap_OAO_o				= ${Gap_OAO_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
+ExternContigByPE_cpp 			= ExternContigByPE.cpp
+ExternContigByPE_o				= ${ExternContigByPE_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+
 SeedCluster_cpp 			= SeedCluster.cpp
 SeedCluster_o				= ${SeedCluster_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
@@ -97,6 +100,7 @@ jobs 	   =	ChopBin\
 				PEGraph\
 				Trunk2Scaff\
 				Gap_OAO\
+				ExternContigByPE\
 				FCRFByTF\
 				FillTrunkByPE\
 				SeedCluster\
@@ -114,6 +118,7 @@ jobs_o 	   =	${ChopBin_o} \
 				${PEGraph_o}\
 				${Trunk2Scaff_o}\
 				${Gap_OAO_o}\
+				${ExternContigByPE_o}\
 				${FCRFByTF_o}\
 				${FillTrunkByPE_o}\
 				${SeedCluster_o}\
@@ -164,6 +169,8 @@ FillTrunkByPE: clean ${FillTrunkByPE_o}
 FCRFByTF: clean ${FCRFByTF_o}
 	${CXX} ${DEUBG_CXX} ${FCRFByTF_o} -o FCRFByTF 
 
+ExternContigByPE: clean ${ExternContigByPE_o}
+	${CXX} ${DEUBG_CXX} ${ExternContigByPE_o} -o ExternContigByPE 
 Gap_OAO: clean ${Gap_OAO_o}
 	${CXX} ${DEUBG_CXX} ${Gap_OAO_o} -o Gap_OAO 
 PEGraph: clean ${PEGraph_o}

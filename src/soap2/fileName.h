@@ -97,6 +97,8 @@ namespace BGIQD {
 
             DEFINE_SUFFIX(trunk_fill,".trunk_fill");
 
+            DEFINE_SUFFIX(seed_extern_fill ,".seed_extern_fill");
+
             private:
                 std::string m_prefix;
         };

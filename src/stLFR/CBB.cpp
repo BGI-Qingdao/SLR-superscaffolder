@@ -7,7 +7,7 @@
 
 namespace BGIQD{
     namespace stLFR {
-
+        int ContigIndex::K  ;
         bool BarcodeOnBin::empty() const 
         {
             return collections.size() == 0 ;

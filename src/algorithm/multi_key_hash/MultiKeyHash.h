@@ -51,7 +51,7 @@ namespace BGIQD {
                 ValueType & At(const KeyType & k1 , const KeyType & k2)
                 {
                     static ValueType invalid ;
-                    auto & itr = data.find( MakeDouleKey(k1,k2) ) ;
+                    auto  itr = data.find( MakeDouleKey(k1,k2) ) ;
                     if( itr == data.end ()) 
                     {
                         assert(0);
@@ -59,7 +59,7 @@ namespace BGIQD {
                     }
                     else
                     {
-                        return itr.second ;
+                        return itr->second ;
                     }
                 }
 
