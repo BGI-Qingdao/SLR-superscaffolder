@@ -92,7 +92,7 @@ class timer
             : start(TIME::timepoint::now())
             , l(a_logger)
             , jobdec(job_description) {
-                (l)<<lstart()<<jobdec<< "start now ... "<<lend();
+                (l)<<lstart()<<jobdec<< " start now ... "<<lend();
             }
 
         ~timer()

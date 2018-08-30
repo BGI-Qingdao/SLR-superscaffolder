@@ -12,7 +12,7 @@
 #include "stLFR/EasySam.h"
 #include "stLFR/CBB.h"
 
-#include "soap2/graphEA.h"
+#include "soap2/contigGraph.h"
 #include "soap2/fileName.h"
 
 #include <algorithm>
@@ -51,22 +51,29 @@ struct AppConfig {
         std::set<unsigned int> l_group ;
         std::set<unsigned int> r_group ;
 
-        
-        void AddRightPath( unsigned int c , unsigned int c1 )
+        bool AddRightPath( unsigned int c , unsigned int c1 )
         {
+            if( r_group.find( c ) != r_group.end()
+                    || r_group.find(c1) != r_group.end()) 
+                return false ;
             right_extern_path.push_back(c);
             r_group.insert(c);
             l_group.insert(c1);
+            return true ;
         }
 
-        void AddLeftPath( unsigned int c , unsigned int c1)
+        bool AddLeftPath( unsigned int c , unsigned int c1)
         {
+            if( l_group.find( c ) != l_group.end()
+                    || l_group.find(c1) != l_group.end()) 
+                return false ;
             left_extern_path.push_back(c);
             l_group.insert(c);
             r_group.insert(c1);
+            return true ;
         }
 
-        bool operator < ( const SeedExternInfo & a )
+        bool operator < ( const SeedExternInfo & a ) const 
         {
             return c_info.length < a.c_info.length ;
         }
@@ -77,12 +84,14 @@ struct AppConfig {
         ADD_A_FLAG(4,LEndByNoMoreArc);
         ADD_A_FLAG(5,LEndBy1ArcFork);
         ADD_A_FLAG(6,LEndByNo1Arc);
+        ADD_A_FLAG(7,LEndByCircle);
 
         ADD_A_FLAG(12,REndByNoInfo);
         ADD_A_FLAG(13,REndByConfuse);
         ADD_A_FLAG(14,REndByNoMoreArc);
         ADD_A_FLAG(15,REndBy1ArcFork);
         ADD_A_FLAG(16,REndByNo1Arc);
+        ADD_A_FLAG(17,REndByCircle);
 
         ADD_A_FLAG(1,UsedAsFill);
         ADD_A_FLAG(21,UsedAsCenter);
@@ -200,14 +209,23 @@ struct AppConfig {
             unsigned int next = next_cross->to ;
             CheckSeeds(next);
             auto & next_edge = graph_ea.edge_array[next] ;
-            seed.AddRightPath(next_edge.id , next_edge.bal_id);
+            if( ! seed.AddRightPath(next_edge.id , next_edge.bal_id) )
+            {
+                seed.Set_REndByCircle() ;
+                break ;
+            }
             next_cross = next_edge.arc ;
             while( next_cross != NULL )
             {
                 if( next_cross->next == NULL )
                 {
+                    unsigned int next = next_cross->to ;
                     auto & next_edge = graph_ea.edge_array[next] ;
-                    seed.AddRightPath(next_edge.id , next_edge.bal_id);
+                    if(! seed.AddRightPath(next_edge.id , next_edge.bal_id) )
+                    {
+                        seed.Set_REndByCircle() ;
+                        break ;
+                    }
                     CheckSeeds(next);
                     next_cross = next_edge.arc ;
                 }
@@ -246,7 +264,11 @@ struct AppConfig {
                     }
                     auto & next_edge = graph_ea.edge_array[a->to] ;
                     CheckSeeds(a->to);
-                    seed.AddRightPath(next_edge.id , next_edge.bal_id);
+                    if(! seed.AddRightPath(next_edge.id , next_edge.bal_id) )
+                    {
+                        seed.Set_REndByCircle() ;
+                        break ;
+                    }
                     next_cross = next_edge.arc ;
                 }
             }
@@ -271,16 +293,25 @@ struct AppConfig {
                 break;
             }
             unsigned int next = next_cross->to ;
-            CheckSeeds(next);
             auto & next_edge = graph_ea.edge_array[next] ;
-            seed.AddLeftPath(next_edge.id , next_edge.bal_id);
+            if( ! seed.AddLeftPath(next_edge.id , next_edge.bal_id) )
+            {
+                seed.Set_LEndByCircle() ;
+                break ;
+            }
+            CheckSeeds(next);
             next_cross = next_edge.arc ;
             while( next_cross != NULL )
             {
                 if( next_cross->next == NULL )
                 {
+                    unsigned int next = next_cross->to ;
                     auto & next_edge = graph_ea.edge_array[next] ;
-                    seed.AddLeftPath(next_edge.id , next_edge.bal_id);
+                    if( ! seed.AddLeftPath(next_edge.id , next_edge.bal_id) )
+                    {
+                        seed.Set_LEndByCircle() ;
+                        break ;
+                    }
                     CheckSeeds(next);
                     next_cross = next_edge.arc ;
                 }
@@ -318,8 +349,12 @@ struct AppConfig {
                         break;
                     }
                     auto & next_edge = graph_ea.edge_array[a->to] ;
+                    if( ! seed.AddLeftPath(next_edge.id , next_edge.bal_id)) 
+                    {
+                        seed.Set_LEndByCircle() ;
+                        break ;
+                    }
                     CheckSeeds(a->to);
-                    seed.AddLeftPath(next_edge.id , next_edge.bal_id);
                     next_cross = next_edge.arc ;
                 }
             }
@@ -334,11 +369,20 @@ struct AppConfig {
 
     void ExternAll()
     {
+        int count = 0 ;
         for( auto & a_seed : seeds )
         {
+            count ++ ;
+            if( count > 1000 && count % 1000 == 1 )
+            {
+                loger<<BGIQD::LOG::lstart()
+                    <<"Process "<<count<<" seeds now ... "
+                    <<BGIQD::LOG::lend();
+            }
             if( a_seed.Is_UsedAsFill() )
                 continue ;
             ExternSeeds(a_seed);
+
         }
     }
 
