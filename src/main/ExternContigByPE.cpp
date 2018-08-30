@@ -456,7 +456,9 @@ struct AppConfig {
                     seedLEnd.Touch("LEndByNoInfo");
                 else if ( a_seed.Is_LEndBy1ArcFork() )
                     seedLEnd.Touch("LEndBy1ArcFork");
-                else 
+                else if ( a_seed.Is_LEndByCircle() )
+                    seedLEnd.Touch("LEndByCircle");
+                else
                     assert(0);
                 if( a_seed.Is_REndByConfuse() )
                     seedREnd.Touch("REndByConfuse");
@@ -468,6 +470,8 @@ struct AppConfig {
                     seedREnd.Touch("REndByNoInfo");
                 else if ( a_seed.Is_REndBy1ArcFork() )
                     seedREnd.Touch("REndBy1ArcFork");
+                else if ( a_seed.Is_REndByCircle() )
+                    seedREnd.Touch("REndByCircle");
                 else 
                     assert(0);
             }
