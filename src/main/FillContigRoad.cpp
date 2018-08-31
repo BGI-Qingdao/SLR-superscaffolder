@@ -74,6 +74,7 @@ struct GlobalConfig
     }
 
     std::map<unsigned int , BGIQD::SOAP2::KeyEdge> edges;
+
     void LoadShortestPath()
     {
         std::string line ;
@@ -125,17 +126,35 @@ struct GlobalConfig
                 if( i == 1 )
                     a_road.contig_path.push_back(start.first) ;
                 if( edges.find( start.first ) == edges.end() )
-                {
-                    assert(0);
+                {  // A' -->  X . but log as  X'-->A in from map of A
+                    assert( edges.find( start.first -1 ) != edges.end() );
+
+                    const auto & start_edge = edges.at(start.first - 1);
+
+                    if( start_edge.from.find( start.second ) != start_edge.from.end() )
+                    {
+                        a_road.contig_path.insert( a_road.contig_path.end()
+                                , start_edge.from.at(start.second).path.begin()
+                                , start_edge.from.at(start.second).path.end() );
+                    }
+                    else
+                    {
+                        assert(0);
+                    }
                 }
-                if( edges[start.first].to.find( start.second ) == edges[start.first].to.end() )
-                {
-                    assert(0);
+                else 
+                { // A -- > X . log as A -- > X in to map of A 
+                    const auto & start_edge = edges.at(start.first);
+                    if ( start_edge.to.find( start.second ) 
+                            == start_edge.to.end() )
+                    {
+                        assert(0);
+                    }
+                    if ( ! start_edge.to.at(start.second).path.empty() )
+                        a_road.contig_path.insert( a_road.contig_path.end()
+                                , start_edge.to.at(start.second).path.begin()
+                                , start_edge.to.at(start.second).path.end() );
                 }
-                if ( ! edges[start.first].to[start.second].path.empty() )
-                    a_road.contig_path.insert( a_road.contig_path.end() 
-                            , edges[start.first].to[start.second].path.begin() 
-                            , edges[start.first].to[start.second].path.end() );
 
                 a_road.contig_path.push_back(start.second) ;
                 a_road.fill_num ++ ;
@@ -148,7 +167,7 @@ struct GlobalConfig
     {
         if( strategy == GlobalConfig::FillStrategy::ShortestPath )
         {
-            LoadShortestPath();
+            //LoadShortestPath();
             ConstructRoadFill();
         }
         else
@@ -163,6 +182,7 @@ struct GlobalConfig
             t_jobs.End();
             t_jobs.WaitingStop();
         }
+        lger<<BGIQD::LOG::lstart()<<"fill contig road end ... "<<BGIQD::LOG::lend();
     }
 
     void FillContigRoad1( BGIQD::stLFR::ContigRoad & road )
@@ -341,20 +361,28 @@ struct GlobalConfig
 
     void LoadDatas()
     {
-        lger<<BGIQD::LOG::lstart()<<"parse args end ... "<<BGIQD::LOG::lend();
-        //step1 .Loading files...
-        graph_eab.graph_ea.LoadEdge(fNames.updatedEdge(),K);
-        lger<<BGIQD::LOG::lstart()<<"load updateEdg end ... "<<BGIQD::LOG::lend();
-        graph_eab.graph_ea.LoadArc(fNames.Arc());
-        lger<<BGIQD::LOG::lstart()<<"load arc  end ... "<<BGIQD::LOG::lend();
-        graph_eab.LoadBarcodeOnConfig(fNames.read2contig());
-        lger<<BGIQD::LOG::lstart()<<"load read2contig end ... "<<BGIQD::LOG::lend();
-        clusters.loadCluster(fNames.cluster());
-        lger<<BGIQD::LOG::lstart()<<"load cluster end ... "<<BGIQD::LOG::lend();
         roads.LoadRoads(fNames.contigroad());
         lger<<BGIQD::LOG::lstart()<<"load road end ... "<<BGIQD::LOG::lend();
-        LoadKeyInfo();
-        lger<<BGIQD::LOG::lstart()<<"load key end ... "<<BGIQD::LOG::lend();
+
+        if( strategy == GlobalConfig::FillStrategy::ShortestPath )
+        {
+            LoadShortestPath();
+            lger<<BGIQD::LOG::lstart()<<"load connInfo end ... "<<BGIQD::LOG::lend();
+        }
+        else
+        {
+            //step1 .Loading files...
+            graph_eab.graph_ea.LoadEdge(fNames.updatedEdge(),K);
+            lger<<BGIQD::LOG::lstart()<<"load updateEdg end ... "<<BGIQD::LOG::lend();
+            graph_eab.graph_ea.LoadArc(fNames.Arc());
+            lger<<BGIQD::LOG::lstart()<<"load arc  end ... "<<BGIQD::LOG::lend();
+            graph_eab.LoadBarcodeOnConfig(fNames.BarcodeOnContig());
+            lger<<BGIQD::LOG::lstart()<<"load read2contig end ... "<<BGIQD::LOG::lend();
+            clusters.loadCluster(fNames.cluster());
+            lger<<BGIQD::LOG::lstart()<<"load cluster end ... "<<BGIQD::LOG::lend();
+            LoadKeyInfo();
+            lger<<BGIQD::LOG::lstart()<<"load key end ... "<<BGIQD::LOG::lend();
+        }
     }
     void PrintRoadFill()
     {
@@ -580,7 +608,7 @@ int  main(int argc, char **argv)
                                                         xxx.updated.edge\n\
                                                         xxx.cluster\n\
                                                         xxx.contigroad\n\
-                                                        xxx.read2contig;\n\
+                                                        xxx.barcodeOnContig;\n\
                                                  Output xxx.contigroadfill");
     DEFINE_ARG_REQUIRED(int , kvalue, "K value");
     DEFINE_ARG_OPTIONAL(int , thread,"thread num ","8");
@@ -602,12 +630,12 @@ int  main(int argc, char **argv)
     config.Ecov = Ecov.to_float();
     config.strategy = static_cast<GlobalConfig::FillStrategy>(fill_strategy.to_int());
     config.thread = thread.to_int();
+    config.lger<<BGIQD::LOG::lstart()<<"parse args end ... "<<BGIQD::LOG::lend();
 
     //step1 Load data from disk...
     config.LoadDatas() ;
     //step2 Fill roads ...
     config.RunAllJobs();
-    config.lger<<BGIQD::LOG::lstart()<<"fill contig road end ... "<<BGIQD::LOG::lend();
     //step3 Print ...
     config.PrintRoadFill();
     //step4 Print log

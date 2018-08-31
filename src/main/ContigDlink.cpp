@@ -250,12 +250,10 @@ struct AppConfig
                     curr_to.from[key_from] = conn;
                 }
             }
-
             //
             // A1->B2 * +
             // A2<-B1 +
             //
-
             if( ! is_bal && j.second.bal)
             {
                 unsigned int real_to =curr_to.bal_id;
@@ -418,7 +416,6 @@ struct AppConfig
             FATAL( "open prefix.connInfo for write failed !!! ");
         for( const auto & m : keys )
         {
-
             auto & curr = key_array[key_map[m]];
             if( curr.from.size() > 0 )
             {
@@ -434,7 +431,7 @@ struct AppConfig
                 (*deg)<<curr.edge_id<<"\t+\t";
                 for( auto i: curr.to)
                 {
-                    (*deg)<<i.second.ToString()<<'\n';
+                    (*deg)<<i.second.ToString()<<'\t';
                 }
                 *(deg)<<'\n';
             }

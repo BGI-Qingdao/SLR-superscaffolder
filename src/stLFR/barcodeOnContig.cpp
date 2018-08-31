@@ -4,7 +4,7 @@
 
 #include "common/files/file_reader.h"
 #include "common/error/Error.h"
-
+#include "stLFR/CBB.h"
 #include "stLFR/barcodeOnContig.h"
 namespace BGIQD {
     namespace stLFR {
@@ -305,16 +305,20 @@ namespace BGIQD {
             std::string line;
             while(!std::getline(*in,line).eof())
             {
-                long readId ;
-                unsigned int contigId, pos , barcode;
-                char dir;
-                std::istringstream ist(line);
-                ist>>readId>>contigId>>pos>>dir>>barcode;
-                if( barcode_on_contig[contigId].find(barcode)
-                        == barcode_on_contig[contigId].end())
-                    barcode_on_contig[contigId][barcode] =1 ;
-                else
-                    barcode_on_contig[contigId][barcode] ++ ;
+                BGIQD::stLFR::ContigBarcodeInfo tmp ;
+                tmp.InitFromString(line);
+                unsigned int contigId = tmp.contig_id ;
+                for(const auto pair : tmp.barcodesOnPos)
+                {
+                    for( unsigned int barcode: pair.second)
+                    {
+                        if( barcode_on_contig[contigId].find(barcode)
+                                == barcode_on_contig[contigId].end())
+                            barcode_on_contig[contigId][barcode] =1 ;
+                        else
+                            barcode_on_contig[contigId][barcode] ++ ;
+                    }
+                }
             }
             delete in;
         }

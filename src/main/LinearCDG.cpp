@@ -145,7 +145,7 @@ struct  AppConfig
     void CalculateThreshold()
     {
         // report before action
-        for( auto & m :edges )
+        for( auto & m : edges )
         {
             m.second.SetType();
         }
@@ -157,6 +157,7 @@ struct  AppConfig
         std::vector<float> linear_sim;
 
         int index = 0 ;
+
         for( auto & m : edges )
         {
             auto & curr = m.second;
