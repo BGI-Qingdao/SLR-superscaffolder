@@ -13,6 +13,7 @@
 #include "stLFR/TrunkGap.h"
 
 #include "algorithm/linear_fitting/Minimum_multiplication.h"
+#include "algorithm/statistics/common.h"
 
 #include <map>
 #include <vector>
@@ -63,17 +64,17 @@ struct AppConfig
             }
         }
 
-        std::vector<item> data;
         for(const auto & pair : BinPos)
         {
             int gap = pair.second.s2 - pair.second.e1 ;
             float sim = pair.second.sim ;
             if(ptest1 )
                 std::cout<<gap<<'\t'<<sim<<'\n';
-            data.push_back( item { gap , sim } );
+            gap_real_data.push_back( item { gap , sim } );
         }
-        lc = BGIQD::LINEARFITTING::lineFit(data);
+        lc = BGIQD::LINEARFITTING::lineFit(gap_real_data);
     }
+    std::vector<item> gap_real_data;
     bool ptest1 ;
     struct ScaffItem
     {
@@ -430,6 +431,40 @@ struct AppConfig
         delete out ;
     }
 
+    void ReLiner()
+    {
+        std::map<float,std::set<int>> clean_gap_sim ;
+
+        for( const auto & i : gap_real_data)
+        {
+            // Not a error point
+            if( i.x >= lc.getX(i.y) - 10000 )
+            {
+                clean_gap_sim[i.y].insert(i.x);
+            }
+        }
+
+        //std::vector<item> new_data;
+        std::map<int,float> new_data;
+        for( const auto & i : clean_gap_sim )
+        {
+            float average ;
+            BGIQD::Statistics::Average(i.second,average);
+            new_data[i.first] =  average ;
+        }
+
+        auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.gap_area());
+        if( out == NULL )
+            FATAL( "failed to open xxx.gap_area to write ");
+        for( const auto & i : new_data )
+        {
+            (*out)<<i.first <<'\t'<< i.second <<'\n';
+        }
+
+        delete out ;
+        return ;
+    }
+
     void PrintGapArea()
     {
         auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.gap_area());
@@ -473,6 +508,7 @@ int main(int argc, char **argv)
     DEFINE_ARG_OPTIONAL( bool , ptest , " print test data into STDOUT " , "false");
     DEFINE_ARG_OPTIONAL( bool , ptest1, " print gap_sim into STDOUT " , "false");
     DEFINE_ARG_OPTIONAL( bool , calc_linear , "calc linear relationsship between simularity and gap length " , "false");
+    DEFINE_ARG_OPTIONAL( bool , calc_linear_filter , "calc linear relationsship between simularity and gap length " , "false");
     END_PARSE_ARGS;
 
     config.Init( prefix.to_string());
@@ -488,10 +524,13 @@ int main(int argc, char **argv)
     config.CalcAll1();
     //config.PrintGapOO() ;
     config.PrintGapOO1() ;
-    if( calc_linear.to_bool() )
+    if( calc_linear.to_bool() || calc_linear_filter.to_bool())
     {
         config.LoadLinearCachce();
-        config.PrintGapArea();
+        if( calc_linear_filter.to_bool() )
+            config.ReLiner();
+        else
+            config.PrintGapArea();
     }
     return 0;
 }
