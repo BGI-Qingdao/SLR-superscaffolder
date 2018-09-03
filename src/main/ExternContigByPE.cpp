@@ -85,6 +85,7 @@ struct AppConfig {
         ADD_A_FLAG(5,LEndBy1ArcFork);
         ADD_A_FLAG(6,LEndByNo1Arc);
         ADD_A_FLAG(7,LEndByCircle);
+        //ADD_A_FLAG(8,LEndBy
 
         ADD_A_FLAG(12,REndByNoInfo);
         ADD_A_FLAG(13,REndByConfuse);
@@ -201,6 +202,7 @@ struct AppConfig {
                 seed.Set_REndByNo1Arc();
                 break;
             }
+            /*
             if( next_cross->next != NULL )
             {
                 seed.Set_REndBy1ArcFork();
@@ -215,6 +217,7 @@ struct AppConfig {
                 break ;
             }
             next_cross = next_edge.arc ;
+            */
             while( next_cross != NULL )
             {
                 if( next_cross->next == NULL )
@@ -244,7 +247,7 @@ struct AppConfig {
                             }
                         }
                         data.push_back( std::make_tuple( count , arc ) );
-                        assert(data.size() < 5);
+                        //assert(data.size() < 5);
                         arc = arc->next ;
                     }while(arc != NULL );
                     assert(data.size() >1);
@@ -252,7 +255,7 @@ struct AppConfig {
                     int c , c1 ; BGIQD::SOAP2::Arc * a, *a1;
                     std::tie(c,a) = data[0];
                     std::tie(c1,a1) = data[1];
-                    if( c == 0 ) 
+                    if( c <= 2 )
                     {
                         seed.Set_REndByNoInfo();
                         break;
@@ -287,6 +290,7 @@ struct AppConfig {
                 seed.Set_LEndByNo1Arc();
                 break;
             }
+            /*
             if( next_cross->next != NULL )
             {
                 seed.Set_LEndBy1ArcFork();
@@ -301,6 +305,7 @@ struct AppConfig {
             }
             CheckSeeds(next);
             next_cross = next_edge.arc ;
+            */
             while( next_cross != NULL )
             {
                 if( next_cross->next == NULL )
@@ -330,7 +335,7 @@ struct AppConfig {
                             }
                         }
                         data.push_back( std::make_tuple( count , arc ) );
-                        assert(data.size() < 5);
+                        //assert(data.size() < 5);
                         arc = arc->next ;
                     }while(arc != NULL );
                     assert(data.size() >1);
@@ -338,7 +343,7 @@ struct AppConfig {
                     int c , c1 ; BGIQD::SOAP2::Arc * a,*a1;
                     std::tie(c,a) = data[0];
                     std::tie(c1,a1) = data[1];
-                    if( c == 0 ) 
+                    if( c <= 2 ) 
                     {
                         seed.Set_LEndByNoInfo();
                         break;
