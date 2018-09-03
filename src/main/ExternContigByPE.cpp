@@ -97,6 +97,7 @@ struct AppConfig {
         ADD_A_FLAG(1,UsedAsFill);
         ADD_A_FLAG(21,UsedAsCenter);
         ADD_A_FLAG(22, Has_Extern);
+        ADD_A_FLAG(23, Has_Extern_Unless);
 
         void Init()
         {
@@ -414,8 +415,14 @@ struct AppConfig {
         {
             if(!  a_seed.Is_UsedAsCenter() || ! a_seed.Is_Has_Extern())
                 continue ;
+            if( a_seed.left_extern_path.size() < 2 
+                    && a_seed.right_extern_path.size() < 2 )
+            {
+                a_seed.Set_Has_Extern_Unless() ;
+                continue ;
+            }
             auto ret = seed2line(a_seed);
-            *out<<ret.size();
+            *out<<"l";//ret.size();
             for( unsigned int i : ret )
             {
                 *out<<'\t'<<i;
@@ -448,7 +455,10 @@ struct AppConfig {
                 }
                 else
                 {
-                    seedExtType.Touch("Fill");
+                    if( a_seed.Is_Has_Extern_Unless() )
+                        seedExtType.Touch("Unless");
+                    else
+                        seedExtType.Touch("Fill");
                 }
 
                 if( a_seed.Is_LEndByConfuse() )
