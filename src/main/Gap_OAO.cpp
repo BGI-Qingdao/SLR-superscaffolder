@@ -445,18 +445,26 @@ struct AppConfig
         }
 
         //std::vector<item> new_data;
-        std::map<int,float> new_data;
+        std::map<int,std::set<float> > new_data;
         for( const auto & i : clean_gap_sim )
+        {
+            for( auto x : i.second )
+            {
+                new_data[x].insert(i.first);
+            }
+        }
+        std::map<int,float> final_data;
+        for( const auto & i : new_data )
         {
             float average ;
             BGIQD::Statistics::Average(i.second,average);
-            new_data[i.first] =  average ;
+            final_data[i.first] =  average ;
         }
 
         auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.gap_area());
         if( out == NULL )
             FATAL( "failed to open xxx.gap_area to write ");
-        for( const auto & i : new_data )
+        for( const auto & i : final_data)
         {
             (*out)<<i.first <<'\t'<< i.second <<'\n';
         }
