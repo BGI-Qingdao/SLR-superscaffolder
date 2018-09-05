@@ -16,7 +16,7 @@ namespace BGIQD {
 
             void ToLower() ;
 
-            int Len() const ;
+            int Len() const { return atcgs.size() ; }
 
             int ValidLen() const ;
 
@@ -24,10 +24,10 @@ namespace BGIQD {
 
             int GCLen() const ;
 
-            void AddPartSeq( const std::string & line ) ;
+            void AddPartSeq( const std::string & line ) { atcgs += line ; }
 
+            void Reset() { atcgs.clear() ; }
         };
-
     }
 }
 

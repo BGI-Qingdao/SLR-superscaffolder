@@ -12,14 +12,15 @@ DEUBG_CXX  =	${CXXFLAGS} -g
 RELEASE_CXX=	${CXXFLAGS}
 
 source_cpp =	../common/files/file_reader.cpp \
+		   		../biocommon/sam_bam/sam_parser.cpp\
+		   		../biocommon/pair/pair_sam_parser.cpp\
+				../biocommon/fasta/fasta.cpp\
 		   		../common/files/file_writer.cpp \
 		   		../common/files/gzstream.cpp \
 				../common/log/log.cpp\
 				../common/log/logfilter.cpp\
 				../common/time/timetools.cpp\
 				../common/string/stringtools.cpp\
-		   		../biocommon/sam_bam/sam_parser.cpp\
-		   		../biocommon/pair/pair_sam_parser.cpp\
 				../stLFR/barcodeId.cpp\
 				../stLFR/readName2Barcode.cpp\
 				../stLFR/barcodeOnContig.cpp\

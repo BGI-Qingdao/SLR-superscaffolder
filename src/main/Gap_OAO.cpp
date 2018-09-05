@@ -206,6 +206,7 @@ struct AppConfig
                 scaffs[pairs.first].push_back(item);
             }
         }
+
         // fill scaffs 
         for(auto & pair : scaffs)
         {
@@ -217,6 +218,7 @@ struct AppConfig
                 unsigned int contig = item.base ;
                 std::map<unsigned int , int > lindex;
                 std::map<unsigned int , int > rindex;
+                item.simularity = 0;
                 for ( int j = l ; j < i ; j ++ )
                 {
                     lindex[pair.second[j].base]=item.LLeft.size();
@@ -224,8 +226,8 @@ struct AppConfig
                     item.LLeft.push_back(0);
                     item.LRight.push_back(0);
                     item.LRight.push_back(0);
-                    item.simularity = 0;
                 }
+
                 for( int j = i+1 ; j <= r ; j ++ )
                 {
                     rindex[pair.second[j].base]=item.RLeft.size();
@@ -236,6 +238,7 @@ struct AppConfig
                 }
 
                 const auto & binLeft = bra[contigIndex[contig][0]];
+
                 for( const auto & pair : binLeft.sims)
                 {
                     const auto & sim = pair.second ;
