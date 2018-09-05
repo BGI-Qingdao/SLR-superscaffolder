@@ -15,6 +15,7 @@ source_cpp =	../common/files/file_reader.cpp \
 		   		../biocommon/sam_bam/sam_parser.cpp\
 		   		../biocommon/pair/pair_sam_parser.cpp\
 				../biocommon/fasta/fasta.cpp\
+				../biocommon/seq/seq.cpp\
 		   		../common/files/file_writer.cpp \
 		   		../common/files/gzstream.cpp \
 				../common/log/log.cpp\
@@ -33,6 +34,9 @@ source_cpp =	../common/files/file_reader.cpp \
 				../soap2/contigType.cpp\
 
 source_o		= ${source_cpp:%.cpp=%.o}
+
+SplitContig_cpp 	=	SplitContig.cpp
+SplitContig_o   =	${SplitContig_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
 SplitInfo_cpp 	=	SplitInfo.cpp
 SplitInfo_o   =	${SplitInfo_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
@@ -85,11 +89,13 @@ FillTrunkByPE_o				= ${FillTrunkByPE_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 FCRFByTF_cpp 			= FCRFByTF.cpp
 FCRFByTF_o				= ${FCRFByTF_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
+
 .cpp.o:
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
 jobs 	   =	ChopBin\
 				SplitInfo\
+				SplitContig\
 				BinCluster \
 				StaticsticUnique  \
 				Sam2ReadOnContig \
@@ -108,6 +114,7 @@ jobs 	   =	ChopBin\
 
 jobs_o 	   =	${ChopBin_o} \
 				${SplitInfo_o}\
+				${SplitContig_o}\
 				${BinCluster_o} \
 				${StaticsticUnique_o}\
 				${Sam2ReadOnContig_o}\
@@ -126,6 +133,9 @@ jobs_o 	   =	${ChopBin_o} \
 
 
 all : ${jobs}
+
+SplitContig : clean ${SplitContig_o}
+	${CXX} ${DEUBG_CXX} ${SplitContig_o} -o SplitContig
 
 SplitInfo : clean ${SplitInfo_o}
 	${CXX} ${DEUBG_CXX} ${SplitInfo_o} -o SplitInfo

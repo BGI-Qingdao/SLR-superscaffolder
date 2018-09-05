@@ -34,6 +34,8 @@ namespace BGIQD {
             DEFINE_SUFFIX(updatedEdge,".updated.edge");
 
             DEFINE_SUFFIX(contig, ".contig");
+            DEFINE_SUFFIX(contig_short, ".contig_short");
+            DEFINE_SUFFIX(contig_long, ".contig_long");
 
             DEFINE_SUFFIX(ContigIndex, ".ContigIndex");
             // StaticUnique
