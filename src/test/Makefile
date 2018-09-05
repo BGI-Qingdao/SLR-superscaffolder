@@ -20,6 +20,7 @@ source_cpp =	../common/files/file_reader.cpp \
 				../common/string/stringtools.cpp\
 		   		../biocommon/sam_bam/sam_parser.cpp\
 		   		../biocommon/pair/pair_sam_parser.cpp\
+				../biocommon/fasta/fasta.cpp\
 				../stLFR/barcodeId.cpp\
 				../stLFR/readName2Barcode.cpp\
 				../stLFR/barcodeOnContig.cpp\
@@ -32,6 +33,7 @@ source_cpp =	../common/files/file_reader.cpp \
 				../soap2/contigType.cpp\
 
 test_cpp   =	test.cpp\
+				../biocommon/fasta/fasta_test.cpp\
 				../algorithm/interval/Interval_test.cpp\
 				../algorithm/distribution/distribution_test.cpp\
 				../algorithm/linear_fitting/Minimum_multiplication_test.cpp\

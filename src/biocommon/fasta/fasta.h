@@ -118,7 +118,7 @@ namespace BGIQD {
 
                 static bool IsHead(const std::string & line)
                 {
-                    return (! line.empty()) && line[0] == '<' ;
+                    return ( ! line.empty()) && line[0] == '>' ;
                 }
 
                 static void LoadAllFasta( std::istream & ist , std::vector<Fasta> & buffer )
@@ -152,39 +152,40 @@ namespace BGIQD {
                 static bool LoadNextFasta(std::istream & ist , Fasta & fa)
                 {
                     std::string line ;
-
+                    fa.Reset();
                     while( ! std::getline(ist,line).eof() )
                     {
                         if( IsHead(line) )
                         {
-                            fa.head.Init(line);
+                            fa.AddHead(line);
                             break ;
                         }
                     }
-                    if( ist.eof() )
+                    if( ist.eof() || ! fa.Is_Set_head() )
                         return false ;
-
-                    bool seq_set = false ;
 
                     while( ! std::getline(ist,line).eof() )
                     {
                         if( IsHead(line) )
                         {
-                            fa.head.Init(line);
                             break ;
                         }
                         else
                         {
-                            seq_set = true ;
-                            fa.seq.AddSeq(line);
+                            fa.AddSeq(line);
                         }
                     }
-                    if (! ist.eof() )
+                    // Put the head line back into istream
+                    if ( ! ist.eof() )
                     {
-                        ist.rdbuf()->sputc('\n');
-                        ist.rdbuf()->sputn(line.c_str(),line.size());
+                        ist.rdbuf()->sputbackc('\n');
+                        for( auto  i = line.rbegin() ; i!= line.rend() ; i++ )
+                        {
+                            ist.rdbuf()->sputbackc(*i);
+                        }
                     }
-                    return  seq_set ;
+
+                    return  fa.Is_Setted();
                 }
             };
     }
