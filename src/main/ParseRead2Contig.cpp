@@ -42,7 +42,7 @@ struct AppConfig
     void Init(const std::string & prefix)
     {
         // init loger
-        BGIQD::LOG::logfilter::singleton().get("Sam2ReadInContig",BGIQD::LOG::DEBUG,loger);
+        BGIQD::LOG::logfilter::singleton().get("ParseRead2Contig",BGIQD::LOG::DEBUG,loger);
         fName.Init(prefix);
         print_buffer.Init(10000);
     }
@@ -61,14 +61,27 @@ struct AppConfig
         readNameIds.Load(fName.readNameList());
     }
 
-    void ParseSam2ReadOnContig()
+    void ParseContig2Read_Sam()
     {
-        int cache_size = 30000 ;
-        EasySamCache easy_cache;
-        easy_cache.resize(30000);
-        auto sam_in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.read2contig_sam());
-        // basic function
         int buffer_index = 0 ;
+        int cache_size = 30000 ;
+        long long count = 0 ;
+        EasySamCache easy_cache;
+
+        // basic function 1 : save data to print buffer
+        auto save_buffer = [&] () {
+            auto & buffer = print_buffer[buffer_index];
+            std::swap( buffer , easy_cache);
+            std::function<void()> job = std::bind(
+                    &AppConfig::PrintEasySam 
+                    , this
+                    , buffer_index);
+            buffer_index ++ ;
+            mt.AddJob(job);
+            easy_cache.resize(cache_size);
+        };
+
+        // basic function 2 : make a MatchData to EasySam
         auto print1read= [&](const BGIQD::SAM::MatchData &d)
         {
             BGIQD::EASY_SAM::EasySam_V1 tmp;
@@ -101,20 +114,10 @@ struct AppConfig
 
             if( int(easy_cache.size()) == cache_size)
             {
-                auto & buffer = print_buffer[buffer_index];
-                std::swap( buffer , easy_cache);
-                std::function<void()> job = std::bind(
-                        &AppConfig::PrintEasySam 
-                        , this
-                        , buffer_index);
-                buffer_index ++ ;
-                mt.AddJob(job);
-                easy_cache.resize(cache_size);
+                save_buffer();
             }
         };
-        // parse sam and print
-        //BGIQD::SAM::PairedSAMParser parser(sam_in);
-        long long count = 0 ;
+        // basic function 3 : parse sam to MatchData
         auto parseline = [&](const std::string & line)
         {
             BGIQD::SAM::LineParser l(line);
@@ -132,15 +135,15 @@ struct AppConfig
             if( count % 1000000 == 0 )
                 loger<<BGIQD::LOG::lstart()<<count<<"   pair maped reads processed ..."<<BGIQD::LOG::lend();
         };
+        // function logic :
+        easy_cache.resize(cache_size);
+        auto sam_in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.read2contig_sam());
         BGIQD::FILES::FileReaderFactory::EachLine(*sam_in , parseline);
         delete sam_in ;
-
-        auto b2r_out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.read2contig());
-        for( const auto & item : easy_cache)
+        if( easy_cache.size() > 0 )
         {
-            (*b2r_out)<<item.ToString()<<'\n';
+            save_buffer();
         }
-        delete b2r_out;
     }
 
     std::ostream * out ;
@@ -188,13 +191,13 @@ int main(int argc , char ** argv)
 
     config.Init(prefix.to_string());
 
-    BGIQD::LOG::timer t(config.loger,"Same2ReadOnContig");
+    BGIQD::LOG::timer t(config.loger,"ParseRead2Contig");
 
     config.LoadBarcode2Num() ;
     config.LoadRead2Num();
 
     config.StartWriteThread();
-    config.ParseSam2ReadOnContig();
+    config.ParseContig2Read_Sam();
     config.EndWriteThread();
     return 0;
 }

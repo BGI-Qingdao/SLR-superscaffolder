@@ -135,12 +135,6 @@ struct AppConfig
         BGIQD::FILES::FileReaderFactory::EachLine(*sam_in , parseline);
         delete sam_in ;
 
-        auto b2r_out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.read2contig());
-        for( const auto & item : easy_cache)
-        {
-            (*b2r_out)<<item.ToString()<<'\n';
-        }
-        delete b2r_out;
     }
 
     std::ostream * out ;
@@ -180,7 +174,8 @@ int main(int argc , char ** argv)
     START_PARSE_ARGS
         DEFINE_ARG_REQUIRED(std::string,prefix, "prefix. \n\
                                                 Input\n\
-                                                    xxx.read2contig.sam\n\
+                                                    xxx.contig2r1.sam\
+                                                    xxx.contig2r2.sam\
                                                     xxx.barcodeList\n\
                                                     xxx.readNameList\n\
                                                 Output xxx.read2contig_v1");
@@ -194,7 +189,8 @@ int main(int argc , char ** argv)
     config.LoadRead2Num();
 
     config.StartWriteThread();
-    config.ParseSam2ReadOnContig();
+    config.ParseContig2r1();
+    config.ParseContig2r2();
     config.EndWriteThread();
     return 0;
 }
