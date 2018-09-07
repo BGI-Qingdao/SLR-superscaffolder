@@ -161,11 +161,13 @@ namespace BGIQD {
                     std::string line ;
                     Fastq fq;
                     fq.Reset();
-                    bool seq = true ;
+                    long index = 0 ;
                     while ( ! std::getline(ist,line).eof() )
                     {
-                        if( IsHead(line) )
+                        index ++ ;
+                        if( index % 4 == 1 )
                         {
+                            assert(IsHead(line) && "fastq format invalid!!!");
                             if(fq.Is_Setted())
                             {
                                 buffer.push_back(fq);
@@ -173,17 +175,18 @@ namespace BGIQD {
                             fq.Reset();
                             fq.AddHead(line);
                         }
-                        else if ( Is_3(line) )
+                        else if ( index % 4 == 2 )
                         {
-                            fq.Add3(line);
-                            seq = !seq ;
+                            fq.AddSeq(line);
                         }
-                        else
+                        else if ( index % 4 == 3 )
                         {
-                            if( seq )
-                                fq.AddSeq(line);
-                            else
-                                fq.AddQuality(line);
+                            assert( Is_3(line) && "fastq format invalid!!!" );
+                            fq.Add3(line);
+                        }
+                        else 
+                        {
+                            fq.AddQuality(line);
                         }
                     }
                     if(fq.Is_Setted())
@@ -193,59 +196,36 @@ namespace BGIQD {
                     fq.Reset();
                 }
 
-                static bool LoadNextFasta(std::istream & ist , Fastq & fq)
+                static bool LoadNextFastq(std::istream & ist , Fastq & fq)
                 {
                     std::string line ;
+                    int index = 0;
                     fq.Reset();
-                    while( ! std::getline(ist,line).eof() )
+                    while ( ! std::getline(ist,line).eof() )
                     {
-                        if( IsHead(line) )
+                        index ++ ;
+                        if( index % 4 == 1 )
                         {
+                            assert(IsHead(line) && "fastq format invalid!!!");
                             fq.AddHead(line);
-                            break ;
                         }
-                    }
-                    if( ist.eof() || ! fq.Is_Set_head() )
-                        return false ;
-
-                    bool seq = true ;
-                    bool next_head = false;
-                    while( ! std::getline(ist,line).eof() )
-                    {
-                        if( IsHead(line) )
+                        else if ( index % 4 == 2 )
                         {
-                            next_head = true ;
-                            break ;
+                            fq.AddSeq(line);
                         }
-                        else if ( Is_3(line) )
+                        else if ( index % 4 == 3 )
                         {
+                            assert( Is_3(line) && "fastq format invalid!!!" );
                             fq.Add3(line);
-                            seq = !seq ;
                         }
-                        else
+                        else 
                         {
-                            if( seq )
-                                fq.AddSeq(line);
-                            else
-                            {
-                                fq.AddQuality(line);
-                                if( fq.QualityFilled() )
-                                {
-                                    break ;
-                                }
-                            }
+                            fq.AddQuality(line);
                         }
+                        if( index == 4 )
+                            break ;
                     }
-                    if ( (! ist.eof()) && next_head )
-                    {
-                        // Put the head line back into istream
-                        ist.rdbuf()->sputbackc('\n');
-                        for( auto  i = line.rbegin() ; i!= line.rend() ; i++ )
-                        {
-                            ist.rdbuf()->sputbackc(*i);
-                        }
-                    }
-                    return  fq.Is_Setted();
+                    return fq.Is_Setted();
                 }
             };
     }

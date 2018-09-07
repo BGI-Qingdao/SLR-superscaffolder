@@ -42,7 +42,7 @@ struct AppConfig
         if ( in == NULL )
             FATAL( " failed to open read1 for read !!! ");
         Fastq data;
-        while( Reader::LoadNextFasta(*in , data))
+        while( Reader::LoadNextFastq(*in , data))
         {
             (*out)<<data.head.readName<<'\t'<<index<<'\n';
             index ++ ;
