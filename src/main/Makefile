@@ -47,6 +47,9 @@ SplitInfo_o   =	${SplitInfo_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 ParseReadName_cpp 	=	ParseReadName.cpp
 ParseReadName_o   =	${ParseReadName_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
+ParseReadName_cpp 	=	ParseReadName.cpp
+ParseReadName_o   =	${ParseReadName_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+
 ChopBin_cpp 	=	ChopBin.cpp
 ChopBin_o   =	${ChopBin_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 

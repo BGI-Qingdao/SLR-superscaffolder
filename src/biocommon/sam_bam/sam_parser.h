@@ -109,6 +109,7 @@ struct MatchData
                   , quality(0) , read_len(-1){}
 
     int CalcRead1Position() const;
+    int CalcLeft1Position() const;
     bool IsP() const ;
     bool IsE() const ;
     bool IsPrimaryMatch() const ;
@@ -117,6 +118,7 @@ struct MatchData
     bool IsPEBothMatch() const ;
     bool IsPEBothProperlyMatch() const ;
     bool IsSupplementaryMatch() const ;
+    bool IsSecondaryMatch() const ;
     bool Valid() const { return ! detail.infos.empty() ; }
     bool UnMap() const ;
     bool OtherUnMap() const ;
