@@ -15,6 +15,7 @@ source_cpp =	../common/files/file_reader.cpp \
 		   		../biocommon/sam_bam/sam_parser.cpp\
 		   		../biocommon/pair/pair_sam_parser.cpp\
 				../biocommon/fasta/fasta.cpp\
+				../biocommon/fastq/fastq.cpp\
 				../biocommon/seq/seq.cpp\
 		   		../common/files/file_writer.cpp \
 		   		../common/files/gzstream.cpp \
@@ -28,6 +29,8 @@ source_cpp =	../common/files/file_reader.cpp \
 				../stLFR/ContigCluster.cpp\
 				../stLFR/LineGroup.cpp\
 				../stLFR/CBB.cpp\
+				../stLFR/TagId.cpp\
+				../stLFR/StringIdCache.cpp\
 				../common/args/argsparser.cpp\
 				../soap2/contigGraph.cpp\
 				../soap2/contigFasta.cpp\
@@ -40,6 +43,9 @@ SplitContig_o   =	${SplitContig_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
 SplitInfo_cpp 	=	SplitInfo.cpp
 SplitInfo_o   =	${SplitInfo_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+
+ParseReadName_cpp 	=	ParseReadName.cpp
+ParseReadName_o   =	${ParseReadName_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
 ChopBin_cpp 	=	ChopBin.cpp
 ChopBin_o   =	${ChopBin_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
@@ -94,6 +100,7 @@ FCRFByTF_o				= ${FCRFByTF_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
 jobs 	   =	ChopBin\
+				ParseReadName\
 				SplitInfo\
 				SplitContig\
 				BinCluster \
@@ -113,6 +120,7 @@ jobs 	   =	ChopBin\
 				SeedCluster\
 
 jobs_o 	   =	${ChopBin_o} \
+				${ParseReadName_o}\
 				${SplitInfo_o}\
 				${SplitContig_o}\
 				${BinCluster_o} \
@@ -143,6 +151,8 @@ SplitInfo : clean ${SplitInfo_o}
 ChopBin : clean ${ChopBin_o}
 	${CXX} ${DEUBG_CXX} ${ChopBin_o} -o ChopBin
 
+ParseReadName : clean ${ParseReadName_o}
+	${CXX} ${DEUBG_CXX} ${ParseReadName_o} -o ParseReadName
 
 BinCluster : clean ${BinCluster_o}
 	${CXX} ${DEUBG_CXX} ${BinCluster_o} -o BinCluster

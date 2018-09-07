@@ -13,29 +13,29 @@ namespace BGIQD {
 
     namespace FASTA {
 
-        struct IFastaHeader
-        {
-            virtual void Init( const std::string & line ) = 0;
+        //struct IFastaHeader
+        //{
+        //    virtual void Init( const std::string & line ) = 0;
 
-            virtual std::string Head() const = 0;
+        //    virtual std::string Head() const = 0;
 
-            virtual void Reset() = 0 ;
-        };
+        //    virtual void Reset() = 0 ;
+        //};
 
-        struct NormalHead : public IFastaHeader
+        struct NormalHead
         {
             std::string head;
 
-            virtual void Init( const std::string & line ) final
+            void Init( const std::string & line )
             {
                 head = line ;
             }
-            virtual std::string Head() const { return head ; }
+            std::string Head() const { return head ; }
 
-            virtual void Reset() final { head.clear() ;} 
+            void Reset() { head.clear() ;} 
         };
 
-        struct SOAP2ContigHead : public IFastaHeader
+        struct SOAP2ContigHead 
         {
             unsigned int contigId ;
 
@@ -45,26 +45,13 @@ namespace BGIQD {
 
             int is_tip ;
 
-            virtual void Init( const std::string & line ) final;
+            void Init( const std::string & line ) ;
 
-            virtual std::string Head() const final ;
+            std::string Head() const ;
 
-            virtual void Reset() final { contigId = 0 ; is_tip = 0 ; cov = 0 ; len = 0;  } ;
+            void Reset(){ contigId = 0 ; is_tip = 0 ; cov = 0 ; len = 0;  } ;
         };
 
-        struct SOAP2ScaffHead : public IFastaHeader 
-        {
-            std::string head;
-
-            virtual void Init( const std::string & line ) final
-            {
-                head = line ;
-            }
-            virtual std::string Head() const { return head ; }
-
-            virtual void Reset() final { head.clear() ;} 
-
-        };
 
         template<class T>
             struct Fasta

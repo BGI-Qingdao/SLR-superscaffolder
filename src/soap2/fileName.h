@@ -47,6 +47,9 @@ namespace BGIQD {
             // Same2ReadOnContig
             DEFINE_SUFFIX(read2contig_sam, ".read2contig.sam");
 
+            DEFINE_SUFFIX(contig2r1_sam,"contig2r1.sam");
+            DEFINE_SUFFIX(contig2r2_sam,"contig2r2.sam");
+
             DEFINE_SUFFIX(read2contig, ".read2contig");
             // PEGraph 
             DEFINE_SUFFIX(pe_graph , ".pe_graph");
@@ -57,6 +60,7 @@ namespace BGIQD {
 
             // ChopBin
             DEFINE_SUFFIX(barcodeList, ".barcodeList");
+            DEFINE_SUFFIX(readNameList, ".readNameList");
 
             DEFINE_SUFFIX(barcodeFreq, ".barcodeFreq");
 

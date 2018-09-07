@@ -18,7 +18,9 @@ namespace STRING{
         std::string::size_type pos2 = str.find(spliter);
         while( pos2 != str.npos )
         {
-            ret.push_back( str.substr( pos1 , pos2-pos1 ) );
+            auto item = str.substr( pos1 , pos2-pos1 ) ;
+            if( ! item.empty() )
+                ret.push_back( item );
             pos1 = pos2 + spliter.length() ;
             pos2 = str.find( spliter , pos1 ) ;
         }
@@ -29,6 +31,25 @@ namespace STRING{
         return ret ;
     }
 
+    std::vector<std::string>  split( const std::string & str , const char& spliter ) 
+    {
+        std::vector<std::string> ret;
+        std::string::size_type pos1 = 0;
+        std::string::size_type pos2 = str.find(spliter);
+        while( pos2 != str.npos )
+        {
+            auto item = str.substr( pos1 , pos2-pos1 ) ;
+            if( ! item.empty() )
+                ret.push_back( item );
+            pos1 = pos2 + 1 ;
+            pos2 = str.find( spliter , pos1 ) ;
+        }
+        if( pos1 != str.length() )
+        {
+            ret.push_back(str.substr(pos1));
+        }
+        return ret ;
+    }
     std::string ltrim(const std::string & str)
     {
         return str.substr(str.find_first_not_of(" \n\t\r"));
@@ -66,6 +87,11 @@ namespace STRING{
                 }
             }
         }
+        if(nb)
+        {
+            ret.push_back(str.substr(nb_index,str.size() - nb_index));
+            nb = false ;
+        }
         return ret ;
     }
 
@@ -82,6 +108,15 @@ namespace STRING{
             strBig.replace( pos, srclen, strdst );
             pos += dstlen;
         }
+    }
+    bool IsNum(const std::string & str)
+    {
+        for( char i : str )
+        {
+            if( ! std::isdigit(i) )
+                return false ;
+        }
+        return true ;
     }
 }
 }
