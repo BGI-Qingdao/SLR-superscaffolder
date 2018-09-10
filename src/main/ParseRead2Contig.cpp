@@ -80,7 +80,6 @@ struct AppConfig
                     , buffer_index);
             buffer_index ++ ;
             mt.AddJob(job);
-            easy_cache.resize(cache_size);
         };
 
         // basic function 2 : make a MatchData to EasySam
@@ -138,7 +137,6 @@ struct AppConfig
                 loger<<BGIQD::LOG::lstart()<<count<<"   pair maped reads processed ..."<<BGIQD::LOG::lend();
         };
         // function logic :
-        easy_cache.resize(cache_size);
         auto sam_in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.read2contig_sam());
         BGIQD::FILES::FileReaderFactory::EachLine(*sam_in , parseline);
         delete sam_in ;
