@@ -49,14 +49,14 @@ struct AppConfig
 
     void LoadBarcode2Num()
     {
-        BGIQD::LOG::timer(loger,"LoadBarcode2Num");
+        BGIQD::LOG::timer t (loger,"LoadBarcode2Num");
         barcodeIds.preload = true ;
         barcodeIds.Load(fName.barcodeList());
     }
 
     void LoadRead2Num()
     {
-        BGIQD::LOG::timer(loger,"LoadRead2Num");
+        BGIQD::LOG::timer t(loger,"LoadRead2Num");
         readNameIds.preload = true ;
         readNameIds.Load(fName.readNameList());
     }
@@ -70,6 +70,8 @@ struct AppConfig
 
         // basic function 1 : save data to print buffer
         auto save_buffer = [&] () {
+            EasySamCache tmp;
+            print_buffer.push_back(tmp);
             auto & buffer = print_buffer[buffer_index];
             std::swap( buffer , easy_cache);
             std::function<void()> job = std::bind(
