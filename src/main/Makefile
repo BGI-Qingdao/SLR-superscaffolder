@@ -50,6 +50,9 @@ ParseReadName_o   =	${ParseReadName_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 ParseRead2Contig_cpp 	=	ParseRead2Contig.cpp
 ParseRead2Contig_o   =	${ParseRead2Contig_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
+ParseContig2Read_cpp 	=	ParseContig2Read.cpp
+ParseContig2Read_o   =	${ParseContig2Read_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+
 ChopBin_cpp 	=	ChopBin.cpp
 ChopBin_o   =	${ChopBin_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
@@ -105,6 +108,7 @@ FCRFByTF_o				= ${FCRFByTF_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 jobs 	   =	ChopBin\
 				ParseReadName\
 				ParseRead2Contig\
+				ParseContig2Read\
 				SplitInfo\
 				SplitContig\
 				BinCluster \
@@ -126,6 +130,7 @@ jobs 	   =	ChopBin\
 jobs_o 	   =	${ChopBin_o} \
 				${ParseReadName_o}\
 				${ParseRead2Contig_o}\
+				${ParseContig2Read_o}\
 				${SplitInfo_o}\
 				${SplitContig_o}\
 				${BinCluster_o} \
@@ -155,6 +160,9 @@ SplitInfo : clean ${SplitInfo_o}
 
 ChopBin : clean ${ChopBin_o}
 	${CXX} ${DEUBG_CXX} ${ChopBin_o} -o ChopBin
+
+ParseContig2Read : clean ${ParseContig2Read_o}
+	${CXX} ${DEUBG_CXX} ${ParseContig2Read_o} -o ParseContig2Read
 
 ParseRead2Contig : clean ${ParseRead2Contig_o}
 	${CXX} ${DEUBG_CXX} ${ParseRead2Contig_o} -o ParseRead2Contig

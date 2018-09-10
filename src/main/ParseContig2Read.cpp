@@ -61,21 +61,35 @@ struct AppConfig
         readNameIds.Load(fName.readNameList());
     }
 
-    void ParseSam2ReadOnContig()
+    void ParseContig2read_Sam(const std::string & file )
     {
-        int cache_size = 30000 ;
-        EasySamCache easy_cache;
-        easy_cache.resize(30000);
-        auto sam_in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.read2contig_sam());
-        // basic function
         int buffer_index = 0 ;
+        int cache_size = 30000 ;
+        long long count = 0 ;
+        EasySamCache easy_cache;
+
+        // basic function 1 : save data to print buffer
+        auto save_buffer = [&] () {
+            auto & buffer = print_buffer[buffer_index];
+            std::swap( buffer , easy_cache);
+            std::function<void()> job = std::bind(
+                    &AppConfig::PrintEasySam 
+                    , this
+                    , buffer_index);
+            buffer_index ++ ;
+            mt.AddJob(job);
+            easy_cache.resize(cache_size);
+        };
+
+        // basic function 2 : make a MatchData to EasySam
         auto print1read= [&](const BGIQD::SAM::MatchData &d)
         {
             BGIQD::EASY_SAM::EasySam_V1 tmp;
 
             BGIQD::FASTQ::stLFRHeader header;
 
-            header.Init(d.read_name);
+            //header.Init(d.read_name);
+            header.Init(d.ref_name);
 
             tmp.read_id = readNameIds.Id(header.readName);
             if( header.type == 
@@ -92,7 +106,8 @@ struct AppConfig
             {
                 tmp.read_index = d.IsP() ? 1 : 2 ;
             }
-            tmp.contig_name = std::stoul(d.ref_name);
+            tmp.contig_name = std::stoul(d.read_name);
+            // TODO : this is the contig's left most position in read !!!
             tmp.left_1bp= d.CalcLeft1Position();
             tmp.match_reverse = d.IsReverseComplete() ;
             tmp.barcode = barcodeIds.Id(header.barcode_str);
@@ -101,20 +116,10 @@ struct AppConfig
 
             if( int(easy_cache.size()) == cache_size)
             {
-                auto & buffer = print_buffer[buffer_index];
-                std::swap( buffer , easy_cache);
-                std::function<void()> job = std::bind(
-                        &AppConfig::PrintEasySam 
-                        , this
-                        , buffer_index);
-                buffer_index ++ ;
-                mt.AddJob(job);
-                easy_cache.resize(cache_size);
+                save_buffer();
             }
         };
-        // parse sam and print
-        //BGIQD::SAM::PairedSAMParser parser(sam_in);
-        long long count = 0 ;
+        // basic function 3 : parse sam to MatchData
         auto parseline = [&](const std::string & line)
         {
             BGIQD::SAM::LineParser l(line);
@@ -132,9 +137,28 @@ struct AppConfig
             if( count % 1000000 == 0 )
                 loger<<BGIQD::LOG::lstart()<<count<<"   pair maped reads processed ..."<<BGIQD::LOG::lend();
         };
+        // function logic :
+        easy_cache.resize(cache_size);
+        auto sam_in = BGIQD::FILES::FileReaderFactory
+            ::GenerateReaderFromFileName(file);
         BGIQD::FILES::FileReaderFactory::EachLine(*sam_in , parseline);
         delete sam_in ;
+        if( easy_cache.size() > 0 )
+        {
+            save_buffer();
+        }
+    }
 
+    void ParseContig2r1_Sam()
+    {
+        BGIQD::LOG::timer t(loger,"Contig2r1");
+        ParseContig2read_Sam(fName.contig2r1_sam());
+    }
+
+    void ParseContig2r2_Sam()
+    {
+        BGIQD::LOG::timer t(loger,"Contig2r2");
+        ParseContig2read_Sam(fName.contig2r2_sam());
     }
 
     std::ostream * out ;
@@ -143,7 +167,7 @@ struct AppConfig
         out = NULL ;
         out = BGIQD::FILES::
               FileWriterFactory::GenerateWriterFromFileName(
-                      fName.read2contig_v1());
+                      fName.contig2read_v1());
         if( out == NULL )
             FATAL("failed to open xxx.read2contig_v1 to write");
         mt.Start(1);
@@ -154,6 +178,7 @@ struct AppConfig
         mt.End();
         mt.WaitingStop();
         delete out ;
+        out = NULL ;
     }
 
     void PrintEasySam( int i )
@@ -166,6 +191,7 @@ struct AppConfig
         buffer.clear() ;
         buffer.shrink_to_fit();
     }
+
 }config;
 
 int main(int argc , char ** argv)
@@ -178,19 +204,19 @@ int main(int argc , char ** argv)
                                                     xxx.contig2r2.sam\
                                                     xxx.barcodeList\n\
                                                     xxx.readNameList\n\
-                                                Output xxx.read2contig_v1");
+                                                Output xxx.contig2read_v1");
     END_PARSE_ARGS
 
     config.Init(prefix.to_string());
 
-    BGIQD::LOG::timer t(config.loger,"Same2ReadOnContig");
+    BGIQD::LOG::timer t(config.loger,"ParseContig2eRead");
 
     config.LoadBarcode2Num() ;
     config.LoadRead2Num();
 
     config.StartWriteThread();
-    config.ParseContig2r1();
-    config.ParseContig2r2();
+    config.ParseContig2r1_Sam();
+    config.ParseContig2r2_Sam();
     config.EndWriteThread();
     return 0;
 }
