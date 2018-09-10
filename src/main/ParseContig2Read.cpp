@@ -49,7 +49,7 @@ struct AppConfig
 
     void LoadBarcode2Num()
     {
-        BGIQD::LOG::timer(loger,"LoadRead2Num");
+        BGIQD::LOG::timer(loger,"LoadBarcode2Num");
         barcodeIds.preload = true ;
         barcodeIds.Load(fName.barcodeList());
     }
@@ -141,6 +141,8 @@ struct AppConfig
         easy_cache.resize(cache_size);
         auto sam_in = BGIQD::FILES::FileReaderFactory
             ::GenerateReaderFromFileName(file);
+        if( sam_in == NULL )
+            FATAL(" failed to open xxx.contig2rx.sam to read !!!");
         BGIQD::FILES::FileReaderFactory::EachLine(*sam_in , parseline);
         delete sam_in ;
         if( easy_cache.size() > 0 )
@@ -200,8 +202,8 @@ int main(int argc , char ** argv)
     START_PARSE_ARGS
         DEFINE_ARG_REQUIRED(std::string,prefix, "prefix. \n\
                                                 Input\n\
-                                                    xxx.contig2r1.sam\
-                                                    xxx.contig2r2.sam\
+                                                    xxx.contig2r1.sam\n\
+                                                    xxx.contig2r2.sam\n\
                                                     xxx.barcodeList\n\
                                                     xxx.readNameList\n\
                                                 Output xxx.contig2read_v1");

@@ -49,7 +49,7 @@ struct AppConfig
 
     void LoadBarcode2Num()
     {
-        BGIQD::LOG::timer(loger,"LoadRead2Num");
+        BGIQD::LOG::timer(loger,"LoadBarcode2Num");
         barcodeIds.preload = true ;
         barcodeIds.Load(fName.barcodeList());
     }

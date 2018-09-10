@@ -47,14 +47,14 @@ namespace BGIQD {
             // Same2ReadOnContig
             DEFINE_SUFFIX(read2contig_sam, ".read2contig.sam");
 
-            DEFINE_SUFFIX(contig2r1_sam,"contig2r1.sam");
-            DEFINE_SUFFIX(contig2r2_sam,"contig2r2.sam");
+            DEFINE_SUFFIX(contig2r1_sam,".contig2r1.sam");
+            DEFINE_SUFFIX(contig2r2_sam,".contig2r2.sam");
 
             DEFINE_SUFFIX(read2contig, ".read2contig");
             DEFINE_SUFFIX(read2contig_v1, ".read2contig_v1");
-            DEFINE_SUFFIX(contig2read_v1,"contig2read_v1");
-            DEFINE_SUFFIX(contig2r1_v1,"contig2r1_v1");
-            DEFINE_SUFFIX(contig2r2_v1,"contig2r2_v1");
+            DEFINE_SUFFIX(contig2read_v1,".contig2read_v1");
+            DEFINE_SUFFIX(contig2r1_v1,".contig2r1_v1");
+            DEFINE_SUFFIX(contig2r2_v1,".contig2r2_v1");
             // PEGraph 
             DEFINE_SUFFIX(pe_graph , ".pe_graph");
 
