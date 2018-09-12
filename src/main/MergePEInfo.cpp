@@ -62,6 +62,7 @@ struct AppConfig
 
     void LoadRead2Contig()
     {
+        BGIQD::LOG::timer t(loger,"LoadRead2Contig");
         auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(
                 fName.read2contig_v1()
                 );
@@ -76,6 +77,7 @@ struct AppConfig
 
     void LoadContig2Read()
     {
+        BGIQD::LOG::timer t(loger,"LoadContig2Read");
         auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(
                 fName.contig2read_v1()
                 );

@@ -39,6 +39,11 @@ struct AppConfig {
         }
     }
 
+    void TouchPECahce(unsigned int c1 , unsigned int c2, int i)
+    {
+            pe_cache.Set(c1 , c2 , i);
+    }
+
     BGIQD::SOAP2::GraphEA graph_ea ;
     BGIQD::SOAP2::FileNames fNames;
 
@@ -111,6 +116,7 @@ struct AppConfig {
     std::map<unsigned int, unsigned int> seed_ids ;
     std::map<unsigned int, int> seed_index;
     //PE
+
     void LoadPECache()
     {
         BGIQD::LOG::timer t(loger,"LoadPECache");
@@ -135,6 +141,38 @@ struct AppConfig {
             {
                 TouchPECahce(c1.id , c2.bal_id ) ;  
                 TouchPECahce(c1.bal_id , c2.id ) ;  
+            }
+        };
+        BGIQD::FILES::FileReaderFactory::EachLine(*in,eachline);
+        delete in ;
+    }
+
+    void LoadPECache_1()
+    {
+        BGIQD::LOG::timer t(loger,"LoadPECache");
+        auto in = BGIQD::FILES::FileReaderFactory
+            ::GenerateReaderFromFileName(fNames.contig_pe_conns()) ;
+        if( in == NULL )
+            FATAL( "open .contig_pe_conns file to read failed !!! " );
+
+        auto eachline = [this](const std::string & line) ->void 
+        {
+            unsigned int cc1 ,cc2;
+            int count ;
+            char pos ;
+            std::istringstream ist(line);
+            ist>>cc1>>cc2>>count>>pos;
+            const auto & c1 = graph_ea.edge_array[cc1];
+            const auto & c2 = graph_ea.edge_array[cc2];
+            if( pos == '+')
+            {
+                TouchPECahce(cc1,cc2,count);
+                TouchPECahce(c1.bal_id,c2.bal_id,count);
+            }
+            else
+            {
+                TouchPECahce(c1.bal_id,cc2,count);
+                TouchPECahce(cc1,c2.bal_id,count);
             }
         };
         BGIQD::FILES::FileReaderFactory::EachLine(*in,eachline);
@@ -530,7 +568,7 @@ int main(int argc , char **argv )
 
     config.LoadSeeds();
     config.LoadGraphEA();
-    config.LoadPECache();
+    config.LoadPECache_1();
     config.ExternAll();
     config.PrintResult();
     config.PrintStatistics();
