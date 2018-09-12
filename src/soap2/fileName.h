@@ -55,6 +55,7 @@ namespace BGIQD {
             DEFINE_SUFFIX(contig2read_v1,".contig2read_v1");
             DEFINE_SUFFIX(contig2r1_v1,".contig2r1_v1");
             DEFINE_SUFFIX(contig2r2_v1,".contig2r2_v1");
+            DEFINE_SUFFIX(contig_pe_conns,".contig_pe_conns");
             // PEGraph 
             DEFINE_SUFFIX(pe_graph , ".pe_graph");
 

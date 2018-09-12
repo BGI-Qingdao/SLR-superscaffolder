@@ -41,6 +41,9 @@ source_o		= ${source_cpp:%.cpp=%.o}
 SplitContig_cpp 	=	SplitContig.cpp
 SplitContig_o   =	${SplitContig_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
+MergePEInfo_cpp 	=	MergePEInfo.cpp
+MergePEInfo_o   =	${MergePEInfo_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+
 SplitInfo_cpp 	=	SplitInfo.cpp
 SplitInfo_o   =	${SplitInfo_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
@@ -111,6 +114,7 @@ jobs 	   =	ChopBin\
 				ParseContig2Read\
 				SplitInfo\
 				SplitContig\
+				MergePEInfo\
 				BinCluster \
 				StaticsticUnique  \
 				Sam2ReadOnContig \
@@ -132,7 +136,7 @@ jobs_o 	   =	${ChopBin_o} \
 				${ParseRead2Contig_o}\
 				${ParseContig2Read_o}\
 				${SplitInfo_o}\
-				${SplitContig_o}\
+				${MergePEInfo_o}\
 				${BinCluster_o} \
 				${StaticsticUnique_o}\
 				${Sam2ReadOnContig_o}\
@@ -151,6 +155,9 @@ jobs_o 	   =	${ChopBin_o} \
 
 
 all : ${jobs}
+
+MergePEInfo : clean ${MergePEInfo_o}
+	${CXX} ${DEUBG_CXX} ${MergePEInfo_o} -o MergePEInfo
 
 SplitContig : clean ${SplitContig_o}
 	${CXX} ${DEUBG_CXX} ${SplitContig_o} -o SplitContig
