@@ -596,6 +596,17 @@ struct AppConfig
             FATAL(" failed to open xxx.scaff_seqs to write ");
 
         int id = 0 ;
+        auto print_seq = [&] ( const std::string & line)
+        {
+            for( int i = 0 ; i < (int)line.size() ; i++ )
+            {
+                (*out)<<line[i];
+                if( i != 0 && ( i % 100 == 0 || i ==(int) line.size() -1 ))
+                {
+                    (*out)<<'\n';
+                }
+            }
+        };
         for( const auto & a_scaff : scaffs )
         {
             id++ ;
@@ -607,6 +618,7 @@ struct AppConfig
             {
                 const auto & tc = a_scaff[i];
                 unsigned int contig = tc.Value() ;
+                contigMap.contigs[contig].MarkMerge();
                 if(ptest)
                     std::cout<<tc.ToString()<<'\n';
                 line+=contigMap.contigs[contig].K;
@@ -650,14 +662,28 @@ struct AppConfig
                     }
                 }
             }
-            for( int i = 0 ; i < (int)line.size() ; i++ )
+            print_seq(line);
+        }
+
+        for( auto & item : contigMap.contigs )
+        {
+            if( item.second.IsBase() )
+                continue ;
+            if( item.second.IsMerge() )
             {
-                (*out)<<line[i];
-                if( i != 0 && ( i % 100 == 0 || i ==(int) line.size() -1 ))
-                {
-                    (*out)<<'\n';
-                }
+                contigMap.contigs[item.second.id - 1].MarkMerge();
             }
+        }
+
+        for( auto & item : contigMap.contigs )
+        {
+            if(! item.second.IsBase() )
+                continue ;
+            if( item.second.IsMerge() )
+                continue ;
+            (*out)<<">contig"<<item.second.id<<'\t'<<item.second.cov<<'\n';
+            std::string line= item.second.K + item.second.linear ;
+            print_seq(line);
         }
         delete out;
         loger<<BGIQD::LOG::lstart() << "Build scaff done "<<BGIQD::LOG::lend() ;

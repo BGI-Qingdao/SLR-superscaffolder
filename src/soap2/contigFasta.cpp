@@ -241,11 +241,15 @@ namespace BGIQD {
                 auto itr = contigs.find( i ) ;
                 if( itr == contigs.end() || ! itr->second.IsBase())
                     continue;
-                const auto & base = itr->second ;
-                if( BGIQD::SEQ::isSeqPalindrome(base.K + base.linear) 
-                        ||
-                    contigs.find(i+1) != contigs.end() )
+                auto & base = itr->second ;
+                if( BGIQD::SEQ::isSeqPalindrome(base.K + base.linear) )
+                {
+                    base.MarkParlindorme();
                     continue;
+                }
+                if(contigs.find(i+1) != contigs.end() )
+                    continue;
+
                 contigs[i+1] = base.ReverseCompelete();
                 if( i == maxContig )
                     maxContig ++ ;

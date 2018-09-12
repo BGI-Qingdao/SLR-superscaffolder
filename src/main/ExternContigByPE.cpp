@@ -23,6 +23,9 @@ struct AppConfig {
 
     int K;
 
+    int min_cout ;
+    int min_factor;
+
     typedef BGIQD::MultiKeyMap::BiKeyHash<unsigned int , int> PECache;
 
     PECache pe_cache ;
@@ -294,12 +297,12 @@ struct AppConfig {
                     int c , c1 ; BGIQD::SOAP2::Arc * a, *a1;
                     std::tie(c,a) = data[0];
                     std::tie(c1,a1) = data[1];
-                    if( c <= 2 )
+                    if( c < min_cout -1 )
                     {
                         seed.Set_REndByNoInfo();
                         break;
                     }
-                    if( float(c)/float(c1) < 1.2 ) 
+                    if( float(c)/float(c1) < min_factor ) 
                     {
                         seed.Set_REndByConfuse();
                         break;
@@ -559,11 +562,15 @@ struct AppConfig {
 int main(int argc , char **argv )
 {
     START_PARSE_ARGS
-    DEFINE_ARG_REQUIRED(std::string , prefix , "prefix , Input xxx.pe_pairs . Output xxx.pe_contig ");
+    DEFINE_ARG_REQUIRED(std::string , prefix , "prefix , Input xxx.pe_pairs . Output xxx.seed_extern_fill");
     DEFINE_ARG_REQUIRED(int , kvalue , "kvalue used by SOAP");
+    DEFINE_ARG_OPTIONAL(int , min_count, "min PE conn count", "20");
+    DEFINE_ARG_OPTIONAL(float ,min_factor, "min factor that biggest conn count / second biggest","3");
     END_PARSE_ARGS
 
     config.K = kvalue.to_int();
+    config.min_cout = min_count.to_int();
+    config.min_factor = min_factor.to_int();
     config.Init(prefix.to_string());
 
     config.LoadSeeds();
