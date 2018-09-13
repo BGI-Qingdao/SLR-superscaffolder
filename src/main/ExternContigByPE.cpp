@@ -562,7 +562,13 @@ struct AppConfig {
 int main(int argc , char **argv )
 {
     START_PARSE_ARGS
-    DEFINE_ARG_REQUIRED(std::string , prefix , "prefix , Input xxx.pe_pairs . Output xxx.seed_extern_fill");
+    DEFINE_ARG_REQUIRED(std::string , prefix , "prefix of file name \n\
+                                                    Input \n\
+                                                            xxx.seed_extern_fill ;\n\
+                                                            xxx.updated.edge\n\
+                                                            xxx.Arc\n\
+                                                    Output \n\
+                                                            xxx.seed_extern_fill");
     DEFINE_ARG_REQUIRED(int , kvalue , "kvalue used by SOAP");
     DEFINE_ARG_OPTIONAL(int , min_count, "min PE conn count", "20");
     DEFINE_ARG_OPTIONAL(float ,min_factor, "min factor that biggest conn count / second biggest","3");

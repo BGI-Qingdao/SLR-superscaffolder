@@ -173,7 +173,7 @@ int main(int argc , char ** argv)
                                                 Input\n\
                                                     xxx.read2contig_v1\n\
                                                     xxx.contig2read_v1\n\
-                                                Output xxx.pe_pair_v1");
+                                                Output xxx.contig_pe_conns");
     END_PARSE_ARGS
 
     config.Init(prefix.to_string());
