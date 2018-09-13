@@ -109,12 +109,16 @@ struct AppConfig
             if( R1CLeft < R2CLeft && R1CRight < R2CRight ) 
             { // R1C -> R2C
                 int  gap = R2CLeft - R1CRight ;
+                if( insert_size - gap > max_is ) 
+                    continue ;
                 pe_cache[R1Contig][R2Contig].push_back(gap);
                 pe_cache[R2Contig1][R1Contig1].push_back(gap);
             }
             else if ( R1CLeft > R2CLeft && R1CRight > R2CRight )
             { // R2C -> R1C
                 int  gap = R1CLeft - R2CRight ;
+                if( insert_size - gap > max_is ) 
+                    continue ;
                 pe_cache[R2Contig][R1Contig].push_back(gap);
                 pe_cache[R1Contig1][R2Contig1].push_back(gap);
             }
@@ -161,12 +165,12 @@ int main(int argc , char ** argv)
 {
     START_PARSE_ARGS
         DEFINE_ARG_REQUIRED(std::string, prefix ,"prefix of read name \n\
-                Input \n\
-                xxx.seeds\n\
-                xxx.pe_info\n\
-                xxx.pe_pairs\n\
-                Output \n\
-                xxx.pe_graph");
+                                                    Input \n\
+                                                        xxx.seeds\n\
+                                                        xxx.pe_info\n\
+                                                        xxx.pe_pairs\n\
+                                                    Output \n\
+                                                        xxx.pe_graph");
     DEFINE_ARG_OPTIONAL(int, max_is ,"max valid insert_size","1000");
     END_PARSE_ARGS;
 
