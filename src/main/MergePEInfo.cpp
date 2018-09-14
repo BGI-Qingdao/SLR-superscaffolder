@@ -98,14 +98,18 @@ struct AppConfig
 
     void BuildConns()
     {
-        for(const SAMInfo & item : load_buffer )
+        BGIQD::LOG::timer t(loger,"BuildConns");
+        for( const SAMInfo & item : load_buffer )
         {
             auto r = item.read_id ;
             if( item.read_index == 1 )
             {
                 (read_pair_buffer[r].r1).insert(&item) ;
-                cbs[item.contig_name].Touch(item.left_1bp,item.barcode);
-                c2bs[item.barcode].Touch(item.contig_name);
+                if(  item.barcode > 0 )
+                {
+                    cbs[item.contig_name].Touch(item.left_1bp,item.barcode);
+                    c2bs[item.barcode].Touch(item.contig_name);
+                }
             }
             else
                 (read_pair_buffer[r].r2).insert(&item);
