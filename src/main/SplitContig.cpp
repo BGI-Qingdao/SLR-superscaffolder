@@ -69,7 +69,6 @@ struct AppConfig {
         }
         delete out ;
     }
-
 } config;
 
 
@@ -84,4 +83,6 @@ int main(int argc , char ** argv)
     config.LoadConfig();
     config.PrintShort();
     config.PrintLong();
+
+    return 0;
 }

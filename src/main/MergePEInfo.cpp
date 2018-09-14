@@ -11,6 +11,8 @@
 #include "algorithm/incr_array/incr_array.h"
 #include "algorithm/multi_key_hash/MultiKeyHash.h"
 
+#include "stLFR/CBB.h"
+
 #include <iostream>
 #include <set>
 #include <string>
@@ -34,6 +36,10 @@ struct AppConfig
     };
 
     std::map< long , ReadPair > read_pair_buffer;
+
+    std::map<unsigned int , BGIQD::stLFR::ContigBarcodeInfo> cbs;
+
+    std::map<int , BGIQD::stLFR::ContigOnBarcode> c2bs ;
 
 
     ConnMap FRConn;
@@ -96,7 +102,11 @@ struct AppConfig
         {
             auto r = item.read_id ;
             if( item.read_index == 1 )
-                (read_pair_buffer[r].r1).insert(&item);
+            {
+                (read_pair_buffer[r].r1).insert(&item) ;
+                cbs[item.contig_name].Touch(item.left_1bp,item.barcode);
+                c2bs[item.barcode].Touch(item.contig_name);
+            }
             else
                 (read_pair_buffer[r].r2).insert(&item);
         }
@@ -163,6 +173,24 @@ struct AppConfig
         }
         delete out;
     }
+
+
+    void PrintBarcodeInfos()
+    {
+        auto in1 = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.barcode_at_contig_v1());
+        for( const auto & pair : cbs)
+        {
+            (*in1)<<pair.second.ToString()<<'\n';
+        }
+        delete in1 ;
+        auto in2 = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.contig_at_barcode_v1());
+        for( const auto & pair : c2bs)
+        {
+            (*in2)<<pair.second.ToString()<<'\n';
+        }
+        delete in2 ;
+    }
+
 } config;
 
 int main(int argc , char ** argv)
@@ -173,7 +201,12 @@ int main(int argc , char ** argv)
                                                 Input\n\
                                                     xxx.read2contig_v1\n\
                                                     xxx.contig2read_v1\n\
-                                                Output xxx.contig_pe_conns");
+                                                Output\n\
+                                                    xxx.contig_pe_conns\n\
+                                                    xxx.barcode_at_contig_v1\n\
+                                                    xxx.contig_at_barcode_v1\n\
+                                                    ");
+
     END_PARSE_ARGS
 
     config.Init(prefix.to_string());
@@ -183,5 +216,6 @@ int main(int argc , char ** argv)
     config.LoadContig2Read();
     config.BuildConns();
     config.PrintConns();
+    config.PrintBarcodeInfos();
     return 0;
 }

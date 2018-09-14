@@ -681,6 +681,8 @@ struct AppConfig
                 continue ;
             if( item.second.IsMerge() )
                 continue ;
+            if( item.second.length < min )
+                continue ;
             (*out)<<">contig"<<item.second.id<<'\t'<<item.second.cov<<'\n';
             std::string line= item.second.K + item.second.linear ;
             print_seq(line);
@@ -691,6 +693,7 @@ struct AppConfig
             <<gapFreq.ToString()
             <<BGIQD::LOG::lend() ;
     }
+    int min ;
 } config ;
 
 int main(int argc, char **argv)
@@ -702,6 +705,7 @@ int main(int argc, char **argv)
         DEFINE_ARG_OPTIONAL( int , gap_trunk, "gap in trunk" , "5000");
         DEFINE_ARG_OPTIONAL( int , gap_petrunk, "gap in trunk and has pe conn" , "300");
         DEFINE_ARG_OPTIONAL( int , gap_pe, "gap in pe" , "10");
+        DEFINE_ARG_OPTIONAL( int , min_scontig, "min signle contig that print out" , "300");
         DEFINE_ARG_OPTIONAL( bool, ptest, "print test data ( Orientation) " , "no");
         DEFINE_ARG_OPTIONAL( bool, ptest1, "print test data ( Gap )" , "no");
     END_PARSE_ARGS;
@@ -709,6 +713,7 @@ int main(int argc, char **argv)
     config.Init(prefix.to_string());
     config.ptest = ptest.to_bool();
     config.ptest1 = ptest1.to_bool();
+    config.min = min_scontig.to_int();
     config.K = K.to_int();
     config.gap_trunk = gap_trunk.to_int();
     config.gap_pe = gap_pe.to_int();

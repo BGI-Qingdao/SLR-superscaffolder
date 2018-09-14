@@ -74,6 +74,11 @@ namespace BGIQD {
             DEFINE_SUFFIX(BarcodeOnContig, ".barcodeOnContig");
 
             DEFINE_SUFFIX(contigOnBarcode,".contigOnBarcode");
+
+            DEFINE_SUFFIX(contig_at_barcode_v1,".contig_at_barcode_v1");
+
+            DEFINE_SUFFIX(barcode_at_contig_v1 , ".barcode_at_contig_v1");
+
             // Bin Cluster
             DEFINE_SUFFIX(cluster, ".cluster");
 

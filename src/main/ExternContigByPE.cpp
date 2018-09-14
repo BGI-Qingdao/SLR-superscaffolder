@@ -564,7 +564,8 @@ int main(int argc , char **argv )
     START_PARSE_ARGS
     DEFINE_ARG_REQUIRED(std::string , prefix , "prefix of file name \n\
                                                     Input \n\
-                                                            xxx.seed_extern_fill ;\n\
+                                                            xxx.pe_seeds\n\
+                                                            xxx.seed_extern_fill\n\
                                                             xxx.updated.edge\n\
                                                             xxx.Arc\n\
                                                     Output \n\
