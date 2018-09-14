@@ -541,6 +541,8 @@ struct AppConfig {
                     seedLEnd.Touch("LEndBy1ArcFork");
                 else if ( a_seed.Is_LEndByCircle() )
                     seedLEnd.Touch("LEndByCircle");
+                else if ( a_seed.Is_LEndByBarcodeFailed() )
+                    seedLEnd.Touch("LEndByBarcodeFailed");
                 else
                     assert(0);
                 if( a_seed.Is_REndByConfuse() )
@@ -555,6 +557,8 @@ struct AppConfig {
                     seedREnd.Touch("REndBy1ArcFork");
                 else if ( a_seed.Is_REndByCircle() )
                     seedREnd.Touch("REndByCircle");
+                else if ( a_seed.Is_REndByBarcodeFailed() )
+                    seedLEnd.Touch("REndByBarcodeFailed");
                 else 
                     assert(0);
             }
