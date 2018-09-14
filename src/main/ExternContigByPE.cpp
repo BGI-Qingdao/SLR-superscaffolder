@@ -268,13 +268,13 @@ struct AppConfig {
                     return cbs[s-1] ;
             };
 
-        auto extractPEData = [&](BGIQD::SOAP2::Arc * arc ) 
+        auto extractPEData = [&]( const std::set<unsigned int> & g, BGIQD::SOAP2::Arc * arc ) 
         {
             std::vector<std::tuple<int, BGIQD::SOAP2::Arc *> > data;
             do{
                 unsigned int to = arc->to ;
                 int count = 0 ;
-                for( const auto i : seed.r_group )
+                for( const auto i : g )
                 {
                     if( pe_cache.Contain( i , to ) )
                     {
@@ -356,7 +356,7 @@ struct AppConfig {
                 else
                 {
                     BGIQD::SOAP2::Arc * arc = next_cross ;
-                    auto ret = extractPEData(arc); 
+                    auto ret = extractPEData(seed.r_group,arc); 
                     if( ret.c < min_cout -1 || float(ret.c)/float(ret.c1) < min_factor )
                     {
                         auto ret1 = extractBarcodeData(arc);
@@ -411,7 +411,7 @@ struct AppConfig {
                 else
                 {
                     BGIQD::SOAP2::Arc * arc = next_cross ;
-                    auto ret = extractPEData(arc); 
+                    auto ret = extractPEData(seed.l_group,arc); 
                     if( ret.c < min_cout -1 || float(ret.c)/float(ret.c1) < min_factor )
                     {
                         auto ret1 = extractBarcodeData(arc);
@@ -558,7 +558,7 @@ struct AppConfig {
                 else if ( a_seed.Is_REndByCircle() )
                     seedREnd.Touch("REndByCircle");
                 else if ( a_seed.Is_REndByBarcodeFailed() )
-                    seedLEnd.Touch("REndByBarcodeFailed");
+                    seedREnd.Touch("REndByBarcodeFailed");
                 else 
                     assert(0);
             }
