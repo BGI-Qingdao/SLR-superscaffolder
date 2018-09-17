@@ -108,7 +108,9 @@ struct AppConfig
                 if(  item.barcode > 0 )
                 {
                     cbs[item.contig_name].Touch(item.left_1bp,item.barcode);
+                    cbs[item.contig_name].contig_id = item.contig_name ;
                     c2bs[item.barcode].Touch(item.contig_name);
+                    c2bs[item.barcode].barcode_id = item.barcode ;
                 }
             }
             else

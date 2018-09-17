@@ -357,7 +357,7 @@ struct AppConfig {
                 {
                     BGIQD::SOAP2::Arc * arc = next_cross ;
                     auto ret = extractPEData(seed.r_group,arc); 
-                    if( ret.c < min_cout -1 || float(ret.c)/float(ret.c1) < min_factor )
+                    if( ret.c < min_cout || float(ret.c)/float(ret.c1) < min_factor )
                     {
                         auto ret1 = extractBarcodeData(arc);
                         if( ret1.c < bmin || float(ret1.c)/float(ret1.c1) < bfac )
@@ -412,7 +412,7 @@ struct AppConfig {
                 {
                     BGIQD::SOAP2::Arc * arc = next_cross ;
                     auto ret = extractPEData(seed.l_group,arc); 
-                    if( ret.c < min_cout -1 || float(ret.c)/float(ret.c1) < min_factor )
+                    if( ret.c < min_cout  || float(ret.c)/float(ret.c1) < min_factor )
                     {
                         auto ret1 = extractBarcodeData(arc);
                         if( ret1.c < bmin || float(ret1.c)/float(ret1.c1) < bfac )
