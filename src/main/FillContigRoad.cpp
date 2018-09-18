@@ -130,12 +130,13 @@ struct GlobalConfig
                     assert( edges.find( start.first -1 ) != edges.end() );
 
                     const auto & start_edge = edges.at(start.first - 1);
+                    unsigned int  X1 = graph_eab.graph_ea.edge_array[start.second].bal_id ;
 
-                    if( start_edge.from.find( start.second ) != start_edge.from.end() )
+                    if( start_edge.from.find( X1 ) != start_edge.from.end() )
                     {
                         a_road.contig_path.insert( a_road.contig_path.end()
-                                , start_edge.from.at(start.second).path.begin()
-                                , start_edge.from.at(start.second).path.end() );
+                                , start_edge.from.at(X1).path.begin()
+                                , start_edge.from.at(X1).path.end() );
                     }
                     else
                     {
@@ -366,6 +367,7 @@ struct GlobalConfig
 
         if( strategy == GlobalConfig::FillStrategy::ShortestPath )
         {
+            graph_eab.graph_ea.LoadEdge(fNames.updatedEdge(),K);
             LoadShortestPath();
             lger<<BGIQD::LOG::lstart()<<"load connInfo end ... "<<BGIQD::LOG::lend();
         }
