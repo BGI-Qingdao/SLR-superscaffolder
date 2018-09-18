@@ -308,7 +308,7 @@ int main(int argc , char ** argv)
         DEFINE_ARG_OPTIONAL(int, insert_max,"max insert_size avaliable." ,"1000");
         DEFINE_ARG_OPTIONAL(int, min_count ,"min valid count ." ,"2");
         DEFINE_ARG_OPTIONAL(bool,use_all_pe_graph,"use all pe_graph instead of cluster sub graph." ,"false");
-        DEFINE_ARG_OPTIONAL(bool,ptest,"print date for test." ,"false");
+        //DEFINE_ARG_OPTIONAL(bool,ptest,"print date for test." ,"false");
     END_PARSE_ARGS;
     config.Init(prefix.to_string() , searchMax.to_int(),insert_max.to_int(),use_all_pe_graph.to_bool());
     config.min_count = min_count.to_int();
@@ -318,7 +318,7 @@ int main(int argc , char ** argv)
     config.LoadPEGraph();
     config.CalcAll();
     config.PrintFillResult();
-    if( ptest.to_bool() )
-        config.PrintTest();
+    //if( ptest.to_bool() )
+    //    config.PrintTest();
     return 0;
 }

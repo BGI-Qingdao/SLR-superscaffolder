@@ -514,18 +514,22 @@ int main(int argc, char **argv)
 {
     //step 0 Parse parmeters...
     START_PARSE_ARGS
-    DEFINE_ARG_REQUIRED(std::string , prefix, " In xxx.mintree_trunk_linear , xxx.bin_cluster ; xxx.gap_order");
+    DEFINE_ARG_REQUIRED(std::string , prefix, "prefix of read names.\n\
+                                                    In \n\
+                                                        xxx.mintree_trunk_linear; xxx.bin_cluster ;\n\
+                                                    Out\n\
+                                                        xxx.gap_oo ; xxx.gap_area");
     DEFINE_ARG_OPTIONAL( int , rank , " rank to detect gap ","3");
-    DEFINE_ARG_OPTIONAL( bool , ptest , " print test data into STDOUT " , "false");
-    DEFINE_ARG_OPTIONAL( bool , ptest1, " print gap_sim into STDOUT " , "false");
+    //DEFINE_ARG_OPTIONAL( bool , ptest , " print test data into STDOUT " , "false");
+    //DEFINE_ARG_OPTIONAL( bool , ptest1, " print gap_sim into STDOUT " , "false");
     DEFINE_ARG_OPTIONAL( bool , calc_linear , "calc linear relationsship between simularity and gap length " , "false");
-    DEFINE_ARG_OPTIONAL( bool , calc_linear_filter , "calc linear relationsship between simularity and gap length " , "false");
+    //DEFINE_ARG_OPTIONAL( bool , calc_linear_filter , "calc linear relationsship between simularity and gap length " , "false");
     END_PARSE_ARGS;
 
     config.Init( prefix.to_string());
     config.rank = rank.to_int() ;
-    config.ptest = ptest.to_bool() ;
-    config.ptest1 = ptest1.to_bool() ;
+    config.ptest =false ;// ptest.to_bool() ;
+    config.ptest1 =false ;// ptest1.to_bool() ;
     config.LoadTrunk();
     config.LoadBinRelationArrayFromFile();
 
@@ -535,12 +539,12 @@ int main(int argc, char **argv)
     config.CalcAll1();
     //config.PrintGapOO() ;
     config.PrintGapOO1() ;
-    if( calc_linear.to_bool() || calc_linear_filter.to_bool())
+    if( calc_linear.to_bool() )//|| calc_linear_filter.to_bool())
     {
         config.LoadLinearCachce();
-        if( calc_linear_filter.to_bool() )
-            config.ReLiner();
-        else
+        //if( calc_linear_filter.to_bool() )
+        //    config.ReLiner();
+        //else
             config.PrintGapArea();
     }
     return 0;

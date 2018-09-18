@@ -700,19 +700,27 @@ int main(int argc, char **argv)
 {
     //step 0 Parse parmeters...
     START_PARSE_ARGS
-        DEFINE_ARG_REQUIRED(std::string , prefix, " In xxx.mintree_trunk_linear , xxx.bin_cluster ; xxx.gap_order");
+        DEFINE_ARG_REQUIRED(std::string , prefix, "prefix of file name\n\
+                                                        In\n\
+                                                            xxx.mintree_trunk_linear ;\n\
+                                                            xxx.gap_oo ;\n\
+                                                            xxx.gap_area;(optional)\n\
+                                                            xxx.trunk_fill;(optional)\n\
+                                                        Out\n\
+                                                            xxx.scaff_seqs\n\
+                                                        ");
         DEFINE_ARG_REQUIRED(int, K, " kvalue ");
         DEFINE_ARG_OPTIONAL( int , gap_trunk, "gap in trunk" , "5000");
         DEFINE_ARG_OPTIONAL( int , gap_petrunk, "gap in trunk and has pe conn" , "300");
         DEFINE_ARG_OPTIONAL( int , gap_pe, "gap in pe" , "10");
         DEFINE_ARG_OPTIONAL( int , min_scontig, "min signle contig that print out" , "300");
-        DEFINE_ARG_OPTIONAL( bool, ptest, "print test data ( Orientation) " , "no");
-        DEFINE_ARG_OPTIONAL( bool, ptest1, "print test data ( Gap )" , "no");
+        //DEFINE_ARG_OPTIONAL( bool, ptest, "print test data ( Orientation) " , "no");
+        //DEFINE_ARG_OPTIONAL( bool, ptest1, "print test data ( Gap )" , "no");
     END_PARSE_ARGS;
 
     config.Init(prefix.to_string());
-    config.ptest = ptest.to_bool();
-    config.ptest1 = ptest1.to_bool();
+    config.ptest = false ;//ptest.to_bool();
+    config.ptest1 = false ; //ptest1.to_bool();
     config.min = min_scontig.to_int();
     config.K = K.to_int();
     config.gap_trunk = gap_trunk.to_int();
