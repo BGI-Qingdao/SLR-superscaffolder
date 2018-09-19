@@ -703,6 +703,7 @@ int main(int argc, char **argv)
         DEFINE_ARG_REQUIRED(std::string , prefix, "prefix of file name\n\
                                                         In\n\
                                                             xxx.mintree_trunk_linear ;\n\
+                                                            xxx.contig ;\n\
                                                             xxx.gap_oo ;\n\
                                                             xxx.gap_area;(optional)\n\
                                                             xxx.trunk_fill;(optional)\n\
