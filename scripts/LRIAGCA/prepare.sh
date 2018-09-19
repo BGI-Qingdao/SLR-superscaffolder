@@ -15,6 +15,7 @@ else
 fi
 
 # check SOAP diectory
+SOAP=$SOAP_DIR
 Contig=$SOAP/$PREFIX".contig"
 Edge=$SOAP/$PREFIX".updated.edge"
 Arc=$SOAP/$PREFIX".Arc"
@@ -44,12 +45,12 @@ echo "ln -s $Index"
 ln -s $Index
 echo "ln -s $Arc"
 ln -s $Arc
-
 # prepare scripts
 
 MACRO=" -D xxx=$PREFIX \
    -D BIN=$EXEC_DIR \
    -D BIN_SIZE=$BIN_SIZE \
+   -D BWA=$BWA_DIR/bwa \
    -D KVALUE=$SOAP_K \
    -D R1=$R1 \
    -D R2=$R2 \
