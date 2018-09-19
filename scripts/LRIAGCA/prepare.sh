@@ -75,7 +75,6 @@ m4 $MACRO $DATA/step_6_merge_contig.m4 >step_6_merge_contig.sh
 m4 $MACRO $DATA/run.m4 >run.sh
 m4 $MACRO $DATA/clean_prepare.m4 >clean_prepare.sh
 
-chmod u+x step_*.sh 
-chmod u+x run.sh
+chmod u+x *.sh 
 
 echo "prepare.sh done"
