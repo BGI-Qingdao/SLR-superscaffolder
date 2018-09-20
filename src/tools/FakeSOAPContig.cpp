@@ -49,6 +49,7 @@ int main()
         if( curr_size > 0)
         {
             std::cout<<">"<<count<<" length "<<curr_size<<" cvg_18.0_tip_0\n";
+            std::cerr<<count<<'\t'<<curr_size<<"\t1\n";
             for(int i = 0 ; i <(int) cache.size() ;)
             {
                 std::cout<<cache[i];
