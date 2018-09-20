@@ -54,7 +54,7 @@ int main()
             {
                 std::cout<<cache[i];
                 i++;
-                if( i %100 == 0 && i != (int)cache.size() )
+                if( i %100 == 0 || i == (int)cache.size() )
                 {
                     std::cout<<'\n';
                 }

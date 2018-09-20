@@ -14,5 +14,5 @@ check_output xxx.cluster xxx.bin_cluster
 
 check_input xxx.mintree_trunk_linear xxx.bin_cluster
 try_backup_list xxx.gap_oo xxx.gap_area
-BIN/Gap_OO --prefix xxx --rank RANK  --calc_linear 2>>log_gap_oo
+BIN/Gap_OAO --prefix xxx --rank RANK  --calc_linear 2>>log_gap_oo
 check_output xxx.gap_oo xxx.gap_area
