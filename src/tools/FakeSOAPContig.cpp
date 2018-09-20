@@ -8,6 +8,9 @@ int main()
     int curr_size = 0 ;
     int count = 1 ;
     std::string line , cache ;
+    std::cerr<<"Edge_num n n"<<'\n';
+    std::cerr<<"index   length  reverseComplement"<<'\n';
+
     while(! std::getline(std::cin,line).eof() )
     {
         if( line.empty() )
@@ -17,6 +20,7 @@ int main()
             if( curr_size > 0)
             {
                 std::cout<<">"<<count<<" length "<<curr_size<<" cvg_18.0_tip_0\n";
+                std::cerr<<count<<'\t'<<curr_size<<"\t1\n";
                 count+=2 ;
                 for(int i = 0 ; i < (int)cache.size() ;)
                 {
