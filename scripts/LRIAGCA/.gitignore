@@ -1,4 +1,5 @@
 step*.sh
 clean*.sh
-run.sh
 log_*
+__s*
+__e*
