@@ -321,7 +321,7 @@ struct AppConfig
             gap_prev = gap ;
             gapArea[tmp] = gap ;
         }
-        SimArea tmp(0,prev);
+        SimArea tmp(-0.1,prev);
         gapArea[tmp] =  gap_prev;
         delete in ;
         loger<<BGIQD::LOG::lstart() << "Load gap_area done "<<BGIQD::LOG::lend() ;
