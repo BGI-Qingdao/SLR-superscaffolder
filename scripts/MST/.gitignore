@@ -1,0 +1,4 @@
+step*.sh
+clean*.sh
+run.sh
+log_*

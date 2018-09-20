@@ -2,10 +2,22 @@ BinCluster
 ChopBin
 ContigDlink
 FillContigRoad
+ParseContig2Read
+ParseRead2Contig
+ParseReadName
 LinearCDG
 MergeContig
 MinTree
 Sam2ReadOnContig
 StaticsticUnique
-
+ExternContigByPE
+FCRFByTF
+FillTrunkByPE
+Gap_OAO
+MergePEInfo
+PEGraph
+SeedCluster
+SplitContig
+SplitInfo
+Trunk2Scaff
 
