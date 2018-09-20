@@ -65,7 +65,7 @@ MACRO=" -D xxx=$PREFIX \
 
 echo "Generate all scripts ..."
 cp $DATA/__common_function.sh ./
-cp $DATA/run.sh >run.sh
+cp $DATA/run.sh run.sh
 
 m4 $MACRO $DATA/step_0_prepare_info.m4 >step_0_prepare_info.sh
 m4 $MACRO $DATA/step_1_calc_seeds.m4 >step_1_calc_seeds.sh

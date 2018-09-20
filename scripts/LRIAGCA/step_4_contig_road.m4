@@ -1,5 +1,7 @@
 #!/bin/bash
 
+STEP="step_4 "
+
 source ./__common_function.sh || exit 1
 
 check_input xxx.connInfo

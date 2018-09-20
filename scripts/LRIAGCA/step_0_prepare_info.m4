@@ -1,5 +1,7 @@
 #!/bin/bash
 
+STEP="step_0 "
+
 source ./__common_function.sh || exit 1
 
 check_input xxx.contig R1 R2

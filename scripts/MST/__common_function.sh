@@ -28,7 +28,7 @@ function try_backup_list()
     do
         if [[ -e $1 ]] ; then
             to=`get_backup_name $1`
-            echo "info      : mv $1 to $to"
+            echo "info      : $STEP mv $1 to $to"
             mv $1 $to
         fi
         shift
@@ -59,9 +59,9 @@ function check_input()
 {
     check_file=`check_file_read_list $@`
     if test $check_file = 'no' ; then
-        echo 'check input file failed !!! exit ...'
-        echo "$@"
-        echo 'please double check above files exist and readable !!!'
+        echo "ERROR : $STEP check input file failed !!! exit ..."
+        echo "ERROR : $STEP $@"
+        echo "ERROR : $STEP please double check above files exist and readable !!!"
         exit 1
     fi
 }
@@ -70,9 +70,9 @@ function check_output()
 {
     check_file=`check_file_read_list $@`
     if test $check_file = 'no' ; then
-        echo 'check output file failed !!! exit ...'
-        echo "$@"
-        echo 'please double check above files exist and readable !!!'
+        echo "ERROR : $STEP check output file failed !!! exit ..."
+        echo "ERROR : $STEP $@"
+        echo "ERROR : $STEP please double check above files exist and readable !!!"
         exit 1
     fi
 }

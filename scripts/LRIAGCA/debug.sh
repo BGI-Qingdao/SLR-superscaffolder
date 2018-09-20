@@ -24,7 +24,6 @@ m4 $MACRO $DATA/step_3_contig_dlink.m4 >step_3_contig_dlink.sh
 m4 $MACRO $DATA/step_4_contig_road.m4 >step_4_contig_road.sh
 m4 $MACRO $DATA/step_5_contig_road_fill.m4 >step_5_contig_road_fill.sh
 m4 $MACRO $DATA/step_6_merge_contig.m4 >step_6_merge_contig.sh
-m4 $MACRO $DATA/run.m4 >run.sh
 m4 $MACRO $DATA/clean_prepare.m4 >clean_prepare.sh
 
 chmod u+x step_*.sh 

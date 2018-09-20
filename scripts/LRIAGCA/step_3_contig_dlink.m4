@@ -1,5 +1,7 @@
 #!/bin/bash
 
+STEP="step_3 "
+
 source ./__common_function.sh || exit 1
 
 check_input xxx.cluster xxx.Arc xxx.updated.edge

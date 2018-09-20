@@ -24,7 +24,6 @@ m4 $MACRO $DATA/step_2_bin_cluster.m4 >step_2_bin_cluster.sh
 m4 $MACRO $DATA/step_3_mst.m4 >step_3_mst.sh
 m4 $MACRO $DATA/step_4_gap_oo.m4 >step_4_gap_oo.sh
 m4 $MACRO $DATA/step_5_trunk2scaff.m4 >step_5_trunk2scaff.sh
-m4 $MACRO $DATA/run.m4 >run.sh
 m4 $MACRO $DATA/clean_prepare.m4 >clean_prepare.sh
 
 chmod u+x *.sh 

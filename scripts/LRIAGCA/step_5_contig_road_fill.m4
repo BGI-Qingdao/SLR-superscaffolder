@@ -1,5 +1,7 @@
 #!/bin/bash
 
+STEP="step_5 "
+
 source ./__common_function.sh || exit 1
 
 check_input xxx.contigroad xxx.Arc xxx.updated.edge xxx.cluster xxx.barcodeOnContig

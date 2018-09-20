@@ -1,7 +1,8 @@
 #!/bin/bash
 
-source ./__common_function.sh || exit 1
+STEP="step_1 "
 
+source ./__common_function.sh || exit 1
 
 check_input xxx.contig
 try_backup_list xxx.seeds
