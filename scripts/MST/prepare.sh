@@ -17,7 +17,8 @@ fi
 # check SOAP diectory
 SOAP=$SOAP_DIR
 Contig=$SOAP/$PREFIX".contig"
-if [[ ! -e $Contig ]] ; then 
+ContigIndex=$SOAP/$PREFIX".ContigIndex"
+if [[ ! -e $Contig || ! -e $ContigIndex  ]] ; then 
     echo "$SOAP/$PREFIX is not a valid SOAP prefix . exit ..."
     exit 1
 fi
@@ -36,6 +37,8 @@ mkdir $PROJECT_NAME
 cd $PROJECT_NAME
 echo "ln -s $Contig"
 ln -s $Contig
+echo "ln -s $ContigIndex"
+ln -s $ContigIndex
 chmod a-w $PREFIX*
 chmod a-x $PREFIX*
 # prepare scripts
