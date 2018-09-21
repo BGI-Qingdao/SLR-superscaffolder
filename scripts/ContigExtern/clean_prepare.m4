@@ -1,5 +1,5 @@
 #!/bin/bash
-#
+
 mkdir output
 mkdir logs
 mkdir tmps
