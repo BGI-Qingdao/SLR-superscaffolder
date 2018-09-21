@@ -4,15 +4,14 @@ STEP="step_4 "
 
 source ./__common_function.sh || exit 1
 
+check_input xxx.contig xxx.Arc  xxx.updated.edge  xxx.contigroadfill
+try_backup_list  xxx.super_used xxx.super_only \
+                xxx.super_and_left xxx.contig_round_1\
+                xxx.Arc_round_1 xxx.updated.edge_round_1 \
+                xxx.ContigIndex_round_1
 
-check_input chr19_soap2.contig chr19_soap2.Arc  chr19_soap2.updated.edge  chr19_soap2.contigroadfill
-try_backup_list  chr19_soap2.super_used chr19_soap2.super_only \
-                chr19_soap2.super_and_left chr19_soap2.contig_round_1\
-                chr19_soap2.Arc_round_1 chr19_soap2.updated.edge_round_1 \
-                chr19_soap2.ContigIndex_round_1
-
-/home/guolidong/stLFR/debug/stLFR_Assembler/src/main/MergeContig --prefix chr19_soap2  --kvalue 63 --strategy 5 2>>log_mergecontig
-check_output chr19_soap2.super_used chr19_soap2.super_only \
-                chr19_soap2.super_and_left chr19_soap2.contig_round_1\
-                chr19_soap2.Arc_round_1 chr19_soap2.updated.edge_round_1 \
-                chr19_soap2.ContigIndex_round_1
+BIN/MergeContig --prefix xxx  --kvalue KVALUE --strategy 5 2>>log_mergecontig
+check_output xxx.super_used xxx.super_only \
+                xxx.super_and_left xxx.contig_round_1\
+                xxx.Arc_round_1 xxx.updated.edge_round_1 \
+                xxx.ContigIndex_round_1
