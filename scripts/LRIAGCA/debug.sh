@@ -2,6 +2,8 @@
 source conf.ini
 # prepare scripts
 
+DATA="./"
+
 MACRO=" -D xxx=$PREFIX \
    -D BIN=$EXEC_DIR \
    -D BIN_SIZE=$BIN_SIZE \
@@ -11,6 +13,7 @@ MACRO=" -D xxx=$PREFIX \
    -D R2=$R2 \
    -D SLEN=$SEARCH_DEPTH \
    -D SF=$SIM_FACTOR \
+   -D SEED_MIN=$SEED_MIN \
    -D THRESHOLD=$CLUSTER \
    -D THREADS=$THREADS \
    -D TAIL=$TAIL_DEL \
