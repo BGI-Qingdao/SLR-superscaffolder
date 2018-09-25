@@ -1,7 +1,7 @@
 #!/bin/bash
 source conf.ini
 # prepare scripts
-
+DATA="./"
 MACRO=" -D xxx=$PREFIX \
    -D BIN=$EXEC_DIR \
    -D BWA=$BWA_DIR/bwa \
@@ -14,6 +14,7 @@ MACRO=" -D xxx=$PREFIX \
    -D R1=$R1 \
    -D R2=$R2 \
    -D RANK=$RANK \
+   -D SEED_MIN=$SEED_MIN \
    -D THREADS=$THREADS \
    -D TAIL=$TAIL_DEL "
 
@@ -26,6 +27,6 @@ m4 $MACRO $DATA/step_4_gap_oo.m4 >step_4_gap_oo.sh
 m4 $MACRO $DATA/step_5_trunk2scaff.m4 >step_5_trunk2scaff.sh
 m4 $MACRO $DATA/clean_prepare.m4 >clean_prepare.sh
 
-chmod u+x *.sh 
+chmod u+x *.sh
 
 echo "prepare.sh finish"

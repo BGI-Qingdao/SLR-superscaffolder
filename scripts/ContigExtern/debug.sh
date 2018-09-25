@@ -2,6 +2,8 @@
 source conf.ini
 # prepare scripts
 
+DATA="./"
+
 MACRO=" -D xxx=$PREFIX \
    -D BWA=$BWA_DIR/bwa \
    -D BC_MIN=$BC_MIN \

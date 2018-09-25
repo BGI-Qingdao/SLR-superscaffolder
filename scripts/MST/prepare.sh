@@ -55,6 +55,7 @@ MACRO=" -D xxx=$PREFIX \
    -D R1=$R1 \
    -D R2=$R2 \
    -D RANK=$RANK \
+   -D SEED_MIN=$SEED_MIN \
    -D THREADS=$THREADS \
    -D TAIL=$TAIL_DEL "
 
