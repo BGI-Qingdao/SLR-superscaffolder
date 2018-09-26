@@ -1,4 +1,4 @@
-.PHONY: all clean
+.PHONY: all clean bin
 
 CC 		   =	gcc
 CXX 	   =	g++
@@ -154,74 +154,101 @@ jobs_o 	   =	${ChopBin_o} \
 				${SeedCluster_o}\
 
 
-all : ${jobs}
+all : bin  ${jobs} 
+
+bin :
+	mkdir -p ../bin
 
 MergePEInfo : clean ${MergePEInfo_o}
 	${CXX} ${DEUBG_CXX} ${MergePEInfo_o} -o MergePEInfo
+	mv $@ ../bin/
 
 SplitContig : clean ${SplitContig_o}
 	${CXX} ${DEUBG_CXX} ${SplitContig_o} -o SplitContig
+	mv $@ ../bin/
 
 SplitInfo : clean ${SplitInfo_o}
 	${CXX} ${DEUBG_CXX} ${SplitInfo_o} -o SplitInfo
+	mv $@ ../bin/
 
 ChopBin : clean ${ChopBin_o}
 	${CXX} ${DEUBG_CXX} ${ChopBin_o} -o ChopBin
+	mv $@ ../bin/
 
 ParseContig2Read : clean ${ParseContig2Read_o}
 	${CXX} ${DEUBG_CXX} ${ParseContig2Read_o} -o ParseContig2Read
+	mv $@ ../bin/
 
 ParseRead2Contig : clean ${ParseRead2Contig_o}
 	${CXX} ${DEUBG_CXX} ${ParseRead2Contig_o} -o ParseRead2Contig
+	mv $@ ../bin/
 
 ParseReadName : clean ${ParseReadName_o}
 	${CXX} ${DEUBG_CXX} ${ParseReadName_o} -o ParseReadName
+	mv $@ ../bin/
 
 BinCluster : clean ${BinCluster_o}
 	${CXX} ${DEUBG_CXX} ${BinCluster_o} -o BinCluster
+	mv $@ ../bin/
 
 
 StaticsticUnique : clean ${StaticsticUnique_o}
 	${CXX} ${DEUBG_CXX} ${StaticsticUnique_o} -o StaticsticUnique
+	mv $@ ../bin/
 
 
 Sam2ReadOnContig: clean ${Sam2ReadOnContig_o}
 	${CXX} ${DEUBG_CXX} ${Sam2ReadOnContig_o} -o Sam2ReadOnContig 
+	mv $@ ../bin/
 
 ContigDlink: clean ${ContigDlink_o}
 	${CXX} ${DEUBG_CXX} ${ContigDlink_o} -o ContigDlink
+	mv $@ ../bin/
 
 FillContigRoad: clean ${FillContigRoad_o}
 	${CXX} ${DEUBG_CXX} ${FillContigRoad_o} -o FillContigRoad 
+	mv $@ ../bin/
 
 MergeContig : clean ${MergeContig_o}
 	${CXX} ${DEUBG_CXX} ${MergeContig_o} -o MergeContig
+	mv $@ ../bin/
 
 LinearCDG: clean ${LinearCDG_o}
 	${CXX} ${DEUBG_CXX} ${LinearCDG_o} -o LinearCDG 
+	mv $@ ../bin/
 
 MinTree: clean ${MinTree_o}
 	${CXX} ${DEUBG_CXX} ${MinTree_o} -o MinTree 
+	mv $@ ../bin/
 
 SeedCluster: clean ${SeedCluster_o}
 	${CXX} ${DEUBG_CXX} ${SeedCluster_o} -o SeedCluster 
+	mv $@ ../bin/
 
 
 FillTrunkByPE: clean ${FillTrunkByPE_o}
 	${CXX} ${DEUBG_CXX} ${FillTrunkByPE_o} -o FillTrunkByPE 
+	mv $@ ../bin/
 
 FCRFByTF: clean ${FCRFByTF_o}
 	${CXX} ${DEUBG_CXX} ${FCRFByTF_o} -o FCRFByTF 
+	mv $@ ../bin/
 
 ExternContigByPE: clean ${ExternContigByPE_o}
 	${CXX} ${DEUBG_CXX} ${ExternContigByPE_o} -o ExternContigByPE 
+	mv $@ ../bin/
+
 Gap_OAO: clean ${Gap_OAO_o}
 	${CXX} ${DEUBG_CXX} ${Gap_OAO_o} -o Gap_OAO 
+	mv $@ ../bin/
+
 PEGraph: clean ${PEGraph_o}
 	${CXX} ${DEUBG_CXX} ${PEGraph_o} -o PEGraph 
+	mv $@ ../bin/
 
 Trunk2Scaff: clean ${Trunk2Scaff_o}
 	${CXX} ${DEUBG_CXX} ${Trunk2Scaff_o} -o Trunk2Scaff 
+	mv $@ ../bin/
 
 dirty	   =${jobs_o} ${jobs}  
 
