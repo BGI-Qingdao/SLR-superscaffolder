@@ -6,7 +6,7 @@ source ./__common_function.sh || exit 1
 
 check_input xxx.seeds xxx.barcodeOnContig
 try_backup_list xxx.barcodeOnBin
-BIN/ChopBin --prefix xxx --bin_size eval(BIN_SIZE/2)  --delete_tail TAIL --ht_only  2>>log_chopbin_ht
+BIN/ChopBin --prefix xxx --bin_size HT_BIN_SIZE  --delete_tail TAIL --ht_only  2>>log_chopbin_ht
 check_output xxx.barcodeOnBin
 
 check_input xxx.barcodeOnBin
