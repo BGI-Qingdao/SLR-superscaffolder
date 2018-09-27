@@ -11,5 +11,5 @@ check_output xxx.barcodeOnBin
 
 check_input xxx.barcodeOnBin
 try_backup_list xxx.cluster
-BIN/BinCluster --prefix xxx --thread THREADS --threshold BIN_THRESHOLD 2>>log_bincluster
+BIN/BinCluster --prefix xxx --thread THREADS --threshold MST_BIN_THRESHOLD 2>>log_bincluster
 check_output xxx.cluster
