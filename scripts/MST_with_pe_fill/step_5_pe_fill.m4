@@ -30,4 +30,4 @@ check_output xxx.seeds_cluster_seeds
 check_input xxx.seeds xxx.seeds_cluster_seeds xxx.pe_graph
 try_backup_list xxx.trunk_fill
 BIN/FillTrunkByPE  --prefix xxx  --searchMax  PE_SEARCH_MAX --insert_max MAX_IS  --min_count  PE_MIN_COUNT 2>>log_fill_trunk_by_pe 
-check_input xxx.trunk_fill
+check_output xxx.trunk_fill
