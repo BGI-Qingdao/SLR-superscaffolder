@@ -7,7 +7,7 @@ try_backup_list xxx.seeds
 BIN/StaticsticUnique --prefix xxx --kvalue KVALUE --min PE_SEED_MIN 2>>log_staticsticunique
 check_output xxx.seeds
 
-check_input xxx.pe_pairs xxx.pe_info 
+check_input xxx.pe_pair xxx.pe_info 
 try_backup_list xxx.pe_graph
 BIN/PEGraph --prefix xxx --max_is MAX_IS  2>>log_pe_graph
 check_output xxx.pe_graph

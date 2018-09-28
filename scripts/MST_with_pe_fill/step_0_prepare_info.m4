@@ -16,7 +16,7 @@ try_backup_list xxx.read2contig
 BIN/Sam2ReadOnContig --prefix xxx 2>>log_sam2readoncontig || exit 1
 check_output xxx.read2contig
 
-try_backup_list xxx.barcodeOnContig xxx.contigOnBarcode xxx.pe_info xxx.pe_pairs
+try_backup_list xxx.barcodeOnContig xxx.contigOnBarcode xxx.pe_info xxx.pe_pair
 BIN/SplitInfo --prefix xxx --parse_barcode --parse_pe 2>>log_splitinfo || exit 1
-check_output xxx.barcodeOnContig xxx.contigOnBarcode xxx.pe_info xxx.pe_pairs
+check_output xxx.barcodeOnContig xxx.contigOnBarcode xxx.pe_info xxx.pe_pair
 
