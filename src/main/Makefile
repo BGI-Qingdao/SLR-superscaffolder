@@ -176,7 +176,7 @@ SplitInfo : clean ${SplitInfo_o}
 	mv $@ ../bin/
 
 ChopBin : clean ${ChopBin_o}
-	${CXX}  ${ChopBin_o} ${DEUBG_CXX}-o ChopBin
+	${CXX}  ${ChopBin_o} ${DEUBG_CXX} -o ChopBin
 	mv $@ ../bin/
 
 ParseContig2Read : clean ${ParseContig2Read_o}
@@ -206,7 +206,7 @@ Sam2ReadOnContig: clean ${Sam2ReadOnContig_o}
 	mv $@ ../bin/
 
 ContigDlink: clean ${ContigDlink_o}
-	${CXX}  ${ContigDlink_o} ${DEUBG_CXX}-o ContigDlink
+	${CXX}  ${ContigDlink_o} ${DEUBG_CXX} -o ContigDlink
 	mv $@ ../bin/
 
 FillContigRoad: clean ${FillContigRoad_o}
