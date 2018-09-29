@@ -73,6 +73,8 @@ namespace BGIQD {
 
             DEFINE_SUFFIX(BarcodeOnContig, ".barcodeOnContig");
 
+            DEFINE_SUFFIX(BarcodeOnContig_fake, ".barcodeOnContig_fake");
+
             DEFINE_SUFFIX(contigOnBarcode,".contigOnBarcode");
 
             DEFINE_SUFFIX(contig_at_barcode_v1,".contig_at_barcode_v1");
