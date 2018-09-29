@@ -74,6 +74,8 @@ struct AppConfig
         auto in1 = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.BarcodeOnContig_fake());
         for( const auto & pair : boc)
         {
+            if( pair.second.barcodesOnPos.empty() )
+                continue ;
             (*in1)<<pair.second.ToString()<<'\n';
         }
         delete in1 ;

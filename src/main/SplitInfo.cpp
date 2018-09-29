@@ -171,12 +171,16 @@ struct AppConfig
             auto in1 = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.BarcodeOnContig());
             for( const auto & pair : cbs)
             {
+                if( pair.second.barcodesOnPos.empty() )
+                    continue ;
                 (*in1)<<pair.second.ToString()<<'\n';
             }
             delete in1 ;
             auto in2 = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.contigOnBarcode());
             for( const auto & pair : c2bs)
             {
+                if( pair.second.contig_data.empty() )
+                    continue ;
                 (*in2)<<pair.second.ToString()<<'\n';
             }
             delete in2 ;
