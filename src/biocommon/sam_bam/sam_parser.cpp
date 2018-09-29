@@ -95,7 +95,7 @@ int MatchData::CalcRead1Position() const
         {
             if( IsReverseComplete() )
             {
-                return (int)info.start_position_on_ref + read_len - (int)info.start_position_on_read ;
+                return (int)info.start_position_on_ref + read_len - (int)info.start_position_on_read - 1;
             }
             else
             {

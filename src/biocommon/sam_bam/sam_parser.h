@@ -55,10 +55,12 @@ enum CIGAR
 struct MatchInfo
 {
     CIGAR type;
-    int start_position_on_read;
+    int start_position_on_read;  // this index start from 0
     int end_position_on_read;
-    int start_position_on_ref;
+    int start_position_on_ref;   // this index start from 1
     int end_position_on_ref;
+
+    // start and end construct a [ start , end ] area .
 };
 
 struct FLAGS

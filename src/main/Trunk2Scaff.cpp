@@ -601,7 +601,7 @@ struct AppConfig
             for( int i = 0 ; i < (int)line.size() ; i++ )
             {
                 (*out)<<line[i];
-                if( i != 0 && ( i % 100 == 0 || i ==(int) line.size() -1 ))
+                if( ( i +1 ) % 100 == 0 || i ==(int) line.size() -1 )
                 {
                     (*out)<<'\n';
                 }
@@ -611,7 +611,7 @@ struct AppConfig
         {
             id++ ;
             std::string line ;
-            (*out)<<">scaffold"<<id<<"\t20.5\n";
+            (*out)<<">scaffold"<<id<<'\n';
             if(ptest)
                 std::cout<<">scaffold\n";
             for(size_t i = 0 ; i < a_scaff.size() ; i++ )
