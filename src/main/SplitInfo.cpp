@@ -163,7 +163,7 @@ struct AppConfig
                 total += pair.first * pair.second;
                 num += pair.second ;
             }
-            (*in2)<<"Aveage insert size is :\t"<<total/num<<'\n';
+            (*in2)<<"Average insert size is :\t"<<total/num<<'\n';
             delete in2;
         }
         if(parse_barcode)
