@@ -165,12 +165,12 @@ struct AppConfig
             }
             if( num < 1 )
             {
-                (*in2)<<"Aveage insert size is :\t0 !!! NO PE INFO FOUND IN DATA !!! ERROR !!! "<<'\n';
+                (*in2)<<"Average insert size is :\t0 !!! NO PE INFO FOUND IN DATA !!! ERROR !!! "<<'\n';
                 loger<<BGIQD::LOG::lstart()<<"ERROR : NO PE INFO FOUND IN DATA !!! ERROR !!!"<<BGIQD::LOG::lend();
             }
             else
             {
-                (*in2)<<"Aveage insert size is :\t"<<total/num<<'\n';
+                (*in2)<<"Average insert size is :\t"<<total/num<<'\n';
             }
             delete in2;
         }
