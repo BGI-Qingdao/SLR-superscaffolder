@@ -58,7 +58,7 @@ struct AppConfig
             FATAL(" open xxx.pe_info to read failed !!! ");
         std::getline(*in , line);
         delete in ;
-        sscanf(line.c_str() , "Aveage insert size is :\t%d",&insert_size);
+        sscanf(line.c_str() , "Average insert size is :\t%d",&insert_size);
     }
 
     void LoadPEPair()
