@@ -23,9 +23,19 @@ struct AppConfig {
 
     int K;
 
+    int min_cout ;
+
+    float min_factor;
+
+    int bmin ;
+
+    float bfac ;
+
     typedef BGIQD::MultiKeyMap::BiKeyHash<unsigned int , int> PECache;
 
     PECache pe_cache ;
+
+    std::map<unsigned int , BGIQD::stLFR::ContigBarcodeInfo> cbs;
 
     void TouchPECahce(unsigned int c1 , unsigned int c2)
     {
@@ -39,6 +49,11 @@ struct AppConfig {
         }
     }
 
+    void TouchPECahce(unsigned int c1 , unsigned int c2, int i)
+    {
+        pe_cache.Set(c1 , c2 , i);
+    }
+
     BGIQD::SOAP2::GraphEA graph_ea ;
     BGIQD::SOAP2::FileNames fNames;
 
@@ -50,6 +65,32 @@ struct AppConfig {
 
         std::set<unsigned int> l_group ;
         std::set<unsigned int> r_group ;
+
+
+        std::set<int> barcodes ;
+
+
+        int ShareBarcodeCount(const BGIQD::stLFR::ContigBarcodeInfo & info)
+        {
+            int ret = 0 ;
+            for( const auto & pair : info.barcodesOnPos )
+            {
+                for( int i : pair.second ) 
+                    if( barcodes.find(i) != barcodes.end() )
+                        ret ++ ;
+            }
+            return ret ;
+        }
+
+        void UpdateBarcodes(const BGIQD::stLFR::ContigBarcodeInfo & info)
+        {
+            for( const auto & pair : info.barcodesOnPos )
+            {
+                for( int i : pair.second ) 
+                    if( barcodes.find(i) == barcodes.end() )
+                        barcodes.insert(i);
+            }
+        }
 
         bool AddRightPath( unsigned int c , unsigned int c1 )
         {
@@ -85,7 +126,8 @@ struct AppConfig {
         ADD_A_FLAG(5,LEndBy1ArcFork);
         ADD_A_FLAG(6,LEndByNo1Arc);
         ADD_A_FLAG(7,LEndByCircle);
-        //ADD_A_FLAG(8,LEndBy
+        ADD_A_FLAG(8,LEndByNoBarcode);
+        ADD_A_FLAG(9,LEndByBarcodeFailed);
 
         ADD_A_FLAG(12,REndByNoInfo);
         ADD_A_FLAG(13,REndByConfuse);
@@ -93,6 +135,8 @@ struct AppConfig {
         ADD_A_FLAG(15,REndBy1ArcFork);
         ADD_A_FLAG(16,REndByNo1Arc);
         ADD_A_FLAG(17,REndByCircle);
+        ADD_A_FLAG(18,REndByNoBarcode);
+        ADD_A_FLAG(19,REndByBarcodeFailed);
 
         ADD_A_FLAG(1,UsedAsFill);
         ADD_A_FLAG(21,UsedAsCenter);
@@ -111,6 +155,7 @@ struct AppConfig {
     std::map<unsigned int, unsigned int> seed_ids ;
     std::map<unsigned int, int> seed_index;
     //PE
+
     void LoadPECache()
     {
         BGIQD::LOG::timer t(loger,"LoadPECache");
@@ -135,6 +180,38 @@ struct AppConfig {
             {
                 TouchPECahce(c1.id , c2.bal_id ) ;  
                 TouchPECahce(c1.bal_id , c2.id ) ;  
+            }
+        };
+        BGIQD::FILES::FileReaderFactory::EachLine(*in,eachline);
+        delete in ;
+    }
+
+    void LoadPECache_1()
+    {
+        BGIQD::LOG::timer t(loger,"LoadPECache");
+        auto in = BGIQD::FILES::FileReaderFactory
+            ::GenerateReaderFromFileName(fNames.contig_pe_conns()) ;
+        if( in == NULL )
+            FATAL( "open .contig_pe_conns file to read failed !!! " );
+
+        auto eachline = [this](const std::string & line) ->void 
+        {
+            unsigned int cc1 ,cc2;
+            int count ;
+            char pos ;
+            std::istringstream ist(line);
+            ist>>cc1>>cc2>>count>>pos;
+            const auto & c1 = graph_ea.edge_array[cc1];
+            const auto & c2 = graph_ea.edge_array[cc2];
+            if( pos == '+')
+            {
+                TouchPECahce(cc1,cc2,count);
+                TouchPECahce(c1.bal_id,c2.bal_id,count);
+            }
+            else
+            {
+                TouchPECahce(c1.bal_id,cc2,count);
+                TouchPECahce(cc1,c2.bal_id,count);
             }
         };
         BGIQD::FILES::FileReaderFactory::EachLine(*in,eachline);
@@ -175,9 +252,66 @@ struct AppConfig {
 
     void ExternSeeds(SeedExternInfo & seed)
     {
+        struct ChooseData
+        {
+            int c , c1 ; 
+            BGIQD::SOAP2::Arc * a, *a1;
+        };
+
+        auto GetBarcodeInfo = [this](unsigned int s )
+            -> BGIQD::stLFR::ContigBarcodeInfo &
+            {
+                const auto & edge = graph_ea.edge_array[s] ;
+                if( edge.IsBase() )
+                    return cbs[s] ;
+                else
+                    return cbs[s-1] ;
+            };
+
+        auto extractPEData = [&]( const std::set<unsigned int> & g, BGIQD::SOAP2::Arc * arc ) 
+        {
+            std::vector<std::tuple<int, BGIQD::SOAP2::Arc *> > data;
+            do{
+                unsigned int to = arc->to ;
+                int count = 0 ;
+                for( const auto i : g )
+                {
+                    if( pe_cache.Contain( i , to ) )
+                    {
+                        count += pe_cache.At( i , to );
+                    }
+                }
+                data.push_back( std::make_tuple( count , arc ) );
+                arc = arc->next ;
+            }while(arc != NULL );
+            assert(data.size() >1);
+            std::sort(data.rbegin() , data.rend());
+            ChooseData ret  ;
+            std::tie(ret.c,ret.a) = data[0];
+            std::tie(ret.c1,ret.a1) = data[1];
+            return ret;
+        };
+
+        auto extractBarcodeData = [&]( BGIQD::SOAP2::Arc * arc ) 
+        {
+            std::vector<std::tuple<int, BGIQD::SOAP2::Arc *> > data;
+            do{
+                unsigned int to = arc->to ;
+                int count =  seed.ShareBarcodeCount(GetBarcodeInfo(to));
+                data.push_back( std::make_tuple( count , arc ) );
+                arc = arc->next ;
+            }while(arc != NULL );
+            assert(data.size() >1);
+            std::sort(data.rbegin() , data.rend());
+            ChooseData ret  ;
+            std::tie(ret.c,ret.a) = data[0];
+            std::tie(ret.c1,ret.a1) = data[1];
+            return ret;
+        };
+
         auto CheckSeeds = [this] ( unsigned int s ) -> void
         {
-            if(seed_ids.find(s) != seed_ids.end() )
+            if( seed_ids.find(s) != seed_ids.end() )
             {
                 unsigned int seed_id = seed_ids.at(s) ;
                 int index = seed_index.at(seed_id);
@@ -195,6 +329,7 @@ struct AppConfig {
 
         auto & edge = graph_ea.edge_array[seed.c_info.contig];
         seed.Set_UsedAsCenter();
+        seed.UpdateBarcodes(cbs[seed.c_info.contig]);
         // Downstream
         do{
             BGIQD::SOAP2::Arc * next_cross = edge.arc ;
@@ -203,22 +338,6 @@ struct AppConfig {
                 seed.Set_REndByNo1Arc();
                 break;
             }
-            /*
-            if( next_cross->next != NULL )
-            {
-                seed.Set_REndBy1ArcFork();
-                break;
-            }
-            unsigned int next = next_cross->to ;
-            CheckSeeds(next);
-            auto & next_edge = graph_ea.edge_array[next] ;
-            if( ! seed.AddRightPath(next_edge.id , next_edge.bal_id) )
-            {
-                seed.Set_REndByCircle() ;
-                break ;
-            }
-            next_cross = next_edge.arc ;
-            */
             while( next_cross != NULL )
             {
                 if( next_cross->next == NULL )
@@ -230,44 +349,27 @@ struct AppConfig {
                         seed.Set_REndByCircle() ;
                         break ;
                     }
+                    seed.UpdateBarcodes(GetBarcodeInfo(next));
                     CheckSeeds(next);
                     next_cross = next_edge.arc ;
                 }
                 else
                 {
                     BGIQD::SOAP2::Arc * arc = next_cross ;
-                    std::vector<std::tuple<int, BGIQD::SOAP2::Arc *> > data;
-                    do{
-                        unsigned int to = arc->to ;
-                        int count = 0 ;
-                        for( const auto i : seed.r_group )
+                    auto ret = extractPEData(seed.r_group,arc); 
+                    if( ret.c < min_cout || float(ret.c)/float(ret.c1) < min_factor )
+                    {
+                        auto ret1 = extractBarcodeData(arc);
+                        if( ret1.c < bmin || float(ret1.c)/float(ret1.c1) < bfac )
                         {
-                            if( pe_cache.Contain( i , to ) )
-                            {
-                                count += pe_cache.At( i , to );
-                            }
+                            seed.Set_REndByBarcodeFailed();
+                            break ;
                         }
-                        data.push_back( std::make_tuple( count , arc ) );
-                        //assert(data.size() < 5);
-                        arc = arc->next ;
-                    }while(arc != NULL );
-                    assert(data.size() >1);
-                    std::sort(data.rbegin() , data.rend());
-                    int c , c1 ; BGIQD::SOAP2::Arc * a, *a1;
-                    std::tie(c,a) = data[0];
-                    std::tie(c1,a1) = data[1];
-                    if( c <= 2 )
-                    {
-                        seed.Set_REndByNoInfo();
-                        break;
+                        ret.a = ret1.a ;
                     }
-                    if( float(c)/float(c1) < 1.2 ) 
-                    {
-                        seed.Set_REndByConfuse();
-                        break;
-                    }
-                    auto & next_edge = graph_ea.edge_array[a->to] ;
-                    CheckSeeds(a->to);
+                    auto & next_edge = graph_ea.edge_array[ret.a->to] ;
+                    CheckSeeds(ret.a->to);
+                    seed.UpdateBarcodes(GetBarcodeInfo(ret.a->to));
                     if(! seed.AddRightPath(next_edge.id , next_edge.bal_id) )
                     {
                         seed.Set_REndByCircle() ;
@@ -291,22 +393,6 @@ struct AppConfig {
                 seed.Set_LEndByNo1Arc();
                 break;
             }
-            /*
-            if( next_cross->next != NULL )
-            {
-                seed.Set_LEndBy1ArcFork();
-                break;
-            }
-            unsigned int next = next_cross->to ;
-            auto & next_edge = graph_ea.edge_array[next] ;
-            if( ! seed.AddLeftPath(next_edge.id , next_edge.bal_id) )
-            {
-                seed.Set_LEndByCircle() ;
-                break ;
-            }
-            CheckSeeds(next);
-            next_cross = next_edge.arc ;
-            */
             while( next_cross != NULL )
             {
                 if( next_cross->next == NULL )
@@ -319,48 +405,31 @@ struct AppConfig {
                         break ;
                     }
                     CheckSeeds(next);
+                    seed.UpdateBarcodes(GetBarcodeInfo(next));
                     next_cross = next_edge.arc ;
                 }
                 else
                 {
                     BGIQD::SOAP2::Arc * arc = next_cross ;
-                    std::vector<std::tuple<int, BGIQD::SOAP2::Arc *> > data;
-                    do{
-                        unsigned int to = arc->to ;
-                        int count = 0 ;
-                        for( const auto i : seed.l_group)
+                    auto ret = extractPEData(seed.l_group,arc); 
+                    if( ret.c < min_cout  || float(ret.c)/float(ret.c1) < min_factor )
+                    {
+                        auto ret1 = extractBarcodeData(arc);
+                        if( ret1.c < bmin || float(ret1.c)/float(ret1.c1) < bfac )
                         {
-                            if( pe_cache.Contain( i , to ) )
-                            {
-                                count += pe_cache.At( i , to );
-                            }
+                            seed.Set_LEndByBarcodeFailed();
+                            break ;
                         }
-                        data.push_back( std::make_tuple( count , arc ) );
-                        //assert(data.size() < 5);
-                        arc = arc->next ;
-                    }while(arc != NULL );
-                    assert(data.size() >1);
-                    std::sort(data.rbegin() , data.rend());
-                    int c , c1 ; BGIQD::SOAP2::Arc * a,*a1;
-                    std::tie(c,a) = data[0];
-                    std::tie(c1,a1) = data[1];
-                    if( c <= 2 ) 
-                    {
-                        seed.Set_LEndByNoInfo();
-                        break;
+                        ret.a = ret1.a ;
                     }
-                    if( float(c)/float(c1) < 1.2 ) 
-                    {
-                        seed.Set_LEndByConfuse();
-                        break;
-                    }
-                    auto & next_edge = graph_ea.edge_array[a->to] ;
+                    auto & next_edge = graph_ea.edge_array[ret.a->to] ;
                     if( ! seed.AddLeftPath(next_edge.id , next_edge.bal_id)) 
                     {
                         seed.Set_LEndByCircle() ;
                         break ;
                     }
-                    CheckSeeds(a->to);
+                    CheckSeeds(ret.a->to);
+                    seed.UpdateBarcodes(GetBarcodeInfo(ret.a->to));
                     next_cross = next_edge.arc ;
                 }
             }
@@ -388,7 +457,6 @@ struct AppConfig {
             if( a_seed.Is_UsedAsFill() )
                 continue ;
             ExternSeeds(a_seed);
-
         }
     }
 
@@ -473,6 +541,8 @@ struct AppConfig {
                     seedLEnd.Touch("LEndBy1ArcFork");
                 else if ( a_seed.Is_LEndByCircle() )
                     seedLEnd.Touch("LEndByCircle");
+                else if ( a_seed.Is_LEndByBarcodeFailed() )
+                    seedLEnd.Touch("LEndByBarcodeFailed");
                 else
                     assert(0);
                 if( a_seed.Is_REndByConfuse() )
@@ -487,6 +557,8 @@ struct AppConfig {
                     seedREnd.Touch("REndBy1ArcFork");
                 else if ( a_seed.Is_REndByCircle() )
                     seedREnd.Touch("REndByCircle");
+                else if ( a_seed.Is_REndByBarcodeFailed() )
+                    seedREnd.Touch("REndByBarcodeFailed");
                 else 
                     assert(0);
             }
@@ -516,21 +588,57 @@ struct AppConfig {
         BGIQD::stLFR::ContigIndex::K = K ;
     }
 
+    void LoadBarcodeAtContig()
+    {
+        auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName
+            (fNames.barcode_at_contig_v1());
+        if( in  == NULL )
+            FATAL( "xxx.barcode_at_contig_v1 open for read failed !!! ");
+
+        auto parseline = [&](const std::string & line )
+        {
+            BGIQD::stLFR::ContigBarcodeInfo tmp ;
+            tmp.InitFromString(line);
+            cbs[tmp.contig_id] = tmp;
+        };
+
+        BGIQD::FILES::FileReaderFactory::EachLine(*in , parseline);
+
+        delete in ;
+    }
+
 } config ;
 
 int main(int argc , char **argv )
 {
     START_PARSE_ARGS
-    DEFINE_ARG_REQUIRED(std::string , prefix , "prefix , Input xxx.pe_pairs . Output xxx.pe_contig ");
+    DEFINE_ARG_REQUIRED(std::string , prefix , "prefix of file name \n\
+                                                    Input \n\
+                                                            xxx.pe_seeds\n\
+                                                            xxx.barcode_at_contig_v1\n\
+                                                            xxx.seed_extern_fill\n\
+                                                            xxx.updated.edge\n\
+                                                            xxx.Arc\n\
+                                                    Output \n\
+                                                            xxx.seed_extern_fill");
     DEFINE_ARG_REQUIRED(int , kvalue , "kvalue used by SOAP");
+    DEFINE_ARG_OPTIONAL(int , min_count, "min PE conn count", "20");
+    DEFINE_ARG_OPTIONAL(float ,min_factor, "min factor that biggest conn count / second biggest","3");
+    DEFINE_ARG_OPTIONAL(int , min_bcount, "min barcode conn count", "2");
+    DEFINE_ARG_OPTIONAL(float ,min_bfactor, "min factor that biggest barcode count / second biggest","2");
     END_PARSE_ARGS
 
     config.K = kvalue.to_int();
+    config.min_cout = min_count.to_int();
+    config.min_factor = min_factor.to_float();
+    config.bmin = min_bcount.to_int() ;
+    config.bfac = min_bfactor.to_float() ;
     config.Init(prefix.to_string());
 
     config.LoadSeeds();
     config.LoadGraphEA();
-    config.LoadPECache();
+    config.LoadPECache_1();
+    config.LoadBarcodeAtContig();
     config.ExternAll();
     config.PrintResult();
     config.PrintStatistics();

@@ -130,12 +130,13 @@ struct GlobalConfig
                     assert( edges.find( start.first -1 ) != edges.end() );
 
                     const auto & start_edge = edges.at(start.first - 1);
+                    unsigned int  X1 = graph_eab.graph_ea.edge_array[start.second].bal_id ;
 
-                    if( start_edge.from.find( start.second ) != start_edge.from.end() )
+                    if( start_edge.from.find( X1 ) != start_edge.from.end() )
                     {
                         a_road.contig_path.insert( a_road.contig_path.end()
-                                , start_edge.from.at(start.second).path.begin()
-                                , start_edge.from.at(start.second).path.end() );
+                                , start_edge.from.at(X1).path.begin()
+                                , start_edge.from.at(X1).path.end() );
                     }
                     else
                     {
@@ -366,6 +367,7 @@ struct GlobalConfig
 
         if( strategy == GlobalConfig::FillStrategy::ShortestPath )
         {
+            graph_eab.graph_ea.LoadEdge(fNames.updatedEdge(),K);
             LoadShortestPath();
             lger<<BGIQD::LOG::lstart()<<"load connInfo end ... "<<BGIQD::LOG::lend();
         }
@@ -499,7 +501,7 @@ struct GlobalConfig
 
         ret.searcher.accesser.base = &graph_eab.graph_ea;
         ret.searcher.accesser.K = K ;
-        ret.searcher.ender.Init( key , max_length);
+        ret.searcher.ender.Init( key , max_length,max_branch);
         ret.searcher.DoSPFSearch(ret.true_from);
 
         // Check result
@@ -593,6 +595,7 @@ struct GlobalConfig
         road.circle_runs.push_back(p2pgrapg.final_circled);
         return true;
     }
+    int max_branch;
 } config;
 
 
@@ -620,16 +623,18 @@ int  main(int argc, char **argv)
                                                         BarcodeCov_FillCircle = 4\
     ");
     DEFINE_ARG_OPTIONAL(int, searchDepth, "search depth (bp) ","10000");
+    DEFINE_ARG_OPTIONAL(int, maxBranch,"max search branch ","10");
     END_PARSE_ARGS
 
-    BGIQD::LOG::logfilter::singleton().get("FillContigRoad",BGIQD::LOG::loglevel::INFO , config.lger);
     BGIQD::LOG::timer t(config.lger,"FillContigRoad");
+    config.max_branch = maxBranch.to_int();
     config.K = kvalue.to_int();
     config.Init(prefix.to_string());
     config.max_length = searchDepth.to_int();
     config.Ecov = Ecov.to_float();
     config.strategy = static_cast<GlobalConfig::FillStrategy>(fill_strategy.to_int());
     config.thread = thread.to_int();
+    BGIQD::LOG::logfilter::singleton().get("FillContigRoad",BGIQD::LOG::loglevel::INFO , config.lger);
     config.lger<<BGIQD::LOG::lstart()<<"parse args end ... "<<BGIQD::LOG::lend();
 
     //step1 Load data from disk...

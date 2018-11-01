@@ -138,7 +138,7 @@ struct AppConf
 int main(int argc , char **argv )
 {
     START_PARSE_ARGS
-    DEFINE_ARG_REQUIRED(std::string , prefix , "prefix , Input xxx.connInfo . Output xxx.minTree ");
+    DEFINE_ARG_REQUIRED(std::string , prefix , "prefix , Input xxx.cluster . Output xxx.minTree ");
     DEFINE_ARG_OPTIONAL(float , threshold, " threshold of simularity","0.1");
     DEFINE_ARG_OPTIONAL(bool, salas, "use salas strategy ","false");
     END_PARSE_ARGS

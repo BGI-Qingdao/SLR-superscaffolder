@@ -195,10 +195,10 @@ int main(int argc , char ** argv)
     START_PARSE_ARGS
     DEFINE_ARG_REQUIRED(int , bin_size, "bin size . must be smaller than seed min length");
     DEFINE_ARG_REQUIRED(int , delete_tail, "delete size at contig tail . depends on you alignment tools and args");
-    DEFINE_ARG_OPTIONAL(float ,bin_factor , "factor of smallest bin in the millde", "0.5");
+    DEFINE_ARG_OPTIONAL(float ,bin_factor , "factor of smallest bin in the middle", "0.5");
     DEFINE_ARG_REQUIRED(std::string ,prefix, "prefix . Input xxx.seeds && xxx.barcodeOnContig ; Output xxx.barcodeOnBin");
     //DEFINE_ARG_OPTIONAL(bool ,p_b2c , "print barcode on contig", "0");
-    DEFINE_ARG_OPTIONAL(bool ,ht_only, "only chop bin at head at tail", "0");
+    DEFINE_ARG_OPTIONAL(bool ,ht_only, "only chop bin at head and tail", "0");
     END_PARSE_ARGS
 
     config.Init( prefix.to_string() , bin_size.to_int() ,delete_tail.to_int() , bin_factor.to_float());

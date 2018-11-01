@@ -55,10 +55,12 @@ enum CIGAR
 struct MatchInfo
 {
     CIGAR type;
-    int start_position_on_read;
+    int start_position_on_read;  // this index start from 0
     int end_position_on_read;
-    int start_position_on_ref;
+    int start_position_on_ref;   // this index start from 1
     int end_position_on_ref;
+
+    // start and end construct a [ start , end ] area .
 };
 
 struct FLAGS
@@ -109,6 +111,7 @@ struct MatchData
                   , quality(0) , read_len(-1){}
 
     int CalcRead1Position() const;
+    int CalcLeft1Position() const;
     bool IsP() const ;
     bool IsE() const ;
     bool IsPrimaryMatch() const ;
@@ -117,6 +120,7 @@ struct MatchData
     bool IsPEBothMatch() const ;
     bool IsPEBothProperlyMatch() const ;
     bool IsSupplementaryMatch() const ;
+    bool IsSecondaryMatch() const ;
     bool Valid() const { return ! detail.infos.empty() ; }
     bool UnMap() const ;
     bool OtherUnMap() const ;

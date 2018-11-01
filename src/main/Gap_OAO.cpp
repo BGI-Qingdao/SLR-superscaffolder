@@ -206,6 +206,7 @@ struct AppConfig
                 scaffs[pairs.first].push_back(item);
             }
         }
+
         // fill scaffs 
         for(auto & pair : scaffs)
         {
@@ -217,6 +218,7 @@ struct AppConfig
                 unsigned int contig = item.base ;
                 std::map<unsigned int , int > lindex;
                 std::map<unsigned int , int > rindex;
+                item.simularity = 0;
                 for ( int j = l ; j < i ; j ++ )
                 {
                     lindex[pair.second[j].base]=item.LLeft.size();
@@ -224,8 +226,8 @@ struct AppConfig
                     item.LLeft.push_back(0);
                     item.LRight.push_back(0);
                     item.LRight.push_back(0);
-                    item.simularity = 0;
                 }
+
                 for( int j = i+1 ; j <= r ; j ++ )
                 {
                     rindex[pair.second[j].base]=item.RLeft.size();
@@ -236,6 +238,7 @@ struct AppConfig
                 }
 
                 const auto & binLeft = bra[contigIndex[contig][0]];
+
                 for( const auto & pair : binLeft.sims)
                 {
                     const auto & sim = pair.second ;
@@ -511,18 +514,22 @@ int main(int argc, char **argv)
 {
     //step 0 Parse parmeters...
     START_PARSE_ARGS
-    DEFINE_ARG_REQUIRED(std::string , prefix, " In xxx.mintree_trunk_linear , xxx.bin_cluster ; xxx.gap_order");
+    DEFINE_ARG_REQUIRED(std::string , prefix, "prefix of read names.\n\
+                                                    In \n\
+                                                        xxx.mintree_trunk_linear; xxx.bin_cluster ;\n\
+                                                    Out\n\
+                                                        xxx.gap_oo ; xxx.gap_area");
     DEFINE_ARG_OPTIONAL( int , rank , " rank to detect gap ","3");
-    DEFINE_ARG_OPTIONAL( bool , ptest , " print test data into STDOUT " , "false");
-    DEFINE_ARG_OPTIONAL( bool , ptest1, " print gap_sim into STDOUT " , "false");
+    //DEFINE_ARG_OPTIONAL( bool , ptest , " print test data into STDOUT " , "false");
+    //DEFINE_ARG_OPTIONAL( bool , ptest1, " print gap_sim into STDOUT " , "false");
     DEFINE_ARG_OPTIONAL( bool , calc_linear , "calc linear relationsship between simularity and gap length " , "false");
-    DEFINE_ARG_OPTIONAL( bool , calc_linear_filter , "calc linear relationsship between simularity and gap length " , "false");
+    //DEFINE_ARG_OPTIONAL( bool , calc_linear_filter , "calc linear relationsship between simularity and gap length " , "false");
     END_PARSE_ARGS;
 
     config.Init( prefix.to_string());
     config.rank = rank.to_int() ;
-    config.ptest = ptest.to_bool() ;
-    config.ptest1 = ptest1.to_bool() ;
+    config.ptest =false ;// ptest.to_bool() ;
+    config.ptest1 =false ;// ptest1.to_bool() ;
     config.LoadTrunk();
     config.LoadBinRelationArrayFromFile();
 
@@ -532,12 +539,12 @@ int main(int argc, char **argv)
     config.CalcAll1();
     //config.PrintGapOO() ;
     config.PrintGapOO1() ;
-    if( calc_linear.to_bool() || calc_linear_filter.to_bool())
+    if( calc_linear.to_bool() )//|| calc_linear_filter.to_bool())
     {
         config.LoadLinearCachce();
-        if( calc_linear_filter.to_bool() )
-            config.ReLiner();
-        else
+        //if( calc_linear_filter.to_bool() )
+        //    config.ReLiner();
+        //else
             config.PrintGapArea();
     }
     return 0;

@@ -37,9 +37,9 @@ namespace BGIQD{
             std::map<int , std::set<unsigned int > > barcodesOnPos;
 
             std::string ToString() const ;
-            void Touch( int pos , unsigned int contig)
+            void Touch( int pos , unsigned int barcode)
             {
-                barcodesOnPos[pos].insert(contig);
+                barcodesOnPos[pos].insert(barcode);
             }
             void InitFromString(const std::string & line ) ;
         };
@@ -53,7 +53,7 @@ namespace BGIQD{
             void InitFromString(const std::string & line) ;
 
             std::string ToString() const ;
-            
+
             void Touch(unsigned int contig )
             {
                 if( contig_data.find(contig) == contig_data.end())

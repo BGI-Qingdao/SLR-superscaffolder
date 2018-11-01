@@ -40,6 +40,10 @@ bool MatchData::IsPrimaryMatch() const
     return ((flags.flags.ox800 & 0x1) == 0 ) &&( (flags.flags.ox100 & 0x1 ) == 0 ) ;
 }
 
+bool MatchData::IsSecondaryMatch() const 
+{
+    return ((flags.flags.ox100 & 0x1) == 1 && (flags.flags.ox800 & 0x1) == 0 );
+}
 bool MatchData::IsSupplementaryMatch() const 
 {
     return ((flags.flags.ox800 & 0x1) == 1 );
@@ -70,6 +74,18 @@ int MatchData::firstMatchInRefNoReverse() const
     return -1 ;
 }
 
+int MatchData::CalcLeft1Position() const
+{
+    for( int i = 0 ; i < (int) detail.infos.size() ; i ++ )
+    {
+        const auto & info = detail.infos[i] ;
+        if( info.type == CIGAR::EQUAL || info.type == CIGAR::M )
+        {
+            return (int)info.start_position_on_ref - (int)info.start_position_on_read ;
+        }
+    }
+    return 0;
+}
 int MatchData::CalcRead1Position() const
 {
     for( int i = 0 ; i < (int) detail.infos.size() ; i ++ )
@@ -79,7 +95,7 @@ int MatchData::CalcRead1Position() const
         {
             if( IsReverseComplete() )
             {
-                return (int)info.start_position_on_ref + read_len - (int)info.start_position_on_read ;
+                return (int)info.start_position_on_ref + read_len - (int)info.start_position_on_read - 1;
             }
             else
             {

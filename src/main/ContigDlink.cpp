@@ -202,7 +202,7 @@ struct AppConfig
         Searcher searcher;
         searcher.accesser.base = &graph_ea ;
         searcher.accesser.K = K ;
-        searcher.ender.Init( key , max_length );
+        searcher.ender.Init( key , max_length ,max_branch );
 
         searcher.DoSPFSearch(real_from);
         index ++ ;
@@ -441,6 +441,7 @@ struct AppConfig
 
     int thread;
     int searchDepth ;
+    int max_branch ;
     void RunAllJobs()
     {
         lger<<BGIQD::LOG::lstart()<<"buildConnection start ... "<<BGIQD::LOG::lend();
@@ -477,8 +478,10 @@ int main(int argc , char **argv)
     DEFINE_ARG_REQUIRED(int , kvalue,"K value");
     DEFINE_ARG_OPTIONAL(int , thread, "thread num .","8");
     DEFINE_ARG_OPTIONAL(int, searchDepth,"search depth (bp) ","300");
+    DEFINE_ARG_OPTIONAL(int, maxBranch,"max search branch ","10");
     END_PARSE_ARGS;
 
+    config.max_branch = maxBranch.to_int();
     config.Init(prefix.to_string() , kvalue.to_int());
     config.thread = thread.to_int() ;
     config.searchDepth = searchDepth.to_int() ;

@@ -34,6 +34,8 @@ namespace BGIQD {
             DEFINE_SUFFIX(updatedEdge,".updated.edge");
 
             DEFINE_SUFFIX(contig, ".contig");
+            DEFINE_SUFFIX(contig_short, ".contig_short");
+            DEFINE_SUFFIX(contig_long, ".contig_long");
 
             DEFINE_SUFFIX(ContigIndex, ".ContigIndex");
             // StaticUnique
@@ -45,7 +47,15 @@ namespace BGIQD {
             // Same2ReadOnContig
             DEFINE_SUFFIX(read2contig_sam, ".read2contig.sam");
 
+            DEFINE_SUFFIX(contig2r1_sam,".contig2r1.sam");
+            DEFINE_SUFFIX(contig2r2_sam,".contig2r2.sam");
+
             DEFINE_SUFFIX(read2contig, ".read2contig");
+            DEFINE_SUFFIX(read2contig_v1, ".read2contig_v1");
+            DEFINE_SUFFIX(contig2read_v1,".contig2read_v1");
+            DEFINE_SUFFIX(contig2r1_v1,".contig2r1_v1");
+            DEFINE_SUFFIX(contig2r2_v1,".contig2r2_v1");
+            DEFINE_SUFFIX(contig_pe_conns,".contig_pe_conns");
             // PEGraph 
             DEFINE_SUFFIX(pe_graph , ".pe_graph");
 
@@ -55,6 +65,7 @@ namespace BGIQD {
 
             // ChopBin
             DEFINE_SUFFIX(barcodeList, ".barcodeList");
+            DEFINE_SUFFIX(readNameList, ".readNameList");
 
             DEFINE_SUFFIX(barcodeFreq, ".barcodeFreq");
 
@@ -62,7 +73,14 @@ namespace BGIQD {
 
             DEFINE_SUFFIX(BarcodeOnContig, ".barcodeOnContig");
 
+            DEFINE_SUFFIX(BarcodeOnContig_fake, ".barcodeOnContig_fake");
+
             DEFINE_SUFFIX(contigOnBarcode,".contigOnBarcode");
+
+            DEFINE_SUFFIX(contig_at_barcode_v1,".contig_at_barcode_v1");
+
+            DEFINE_SUFFIX(barcode_at_contig_v1 , ".barcode_at_contig_v1");
+
             // Bin Cluster
             DEFINE_SUFFIX(cluster, ".cluster");
 

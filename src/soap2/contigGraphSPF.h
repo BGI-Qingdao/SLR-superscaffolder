@@ -18,6 +18,7 @@ namespace BGIQD{
         {
             bool ender_flag ;
 
+            int max_branch ;
 
             typedef std::function<NodeType(NodeId)> NodeTypeDetector;
 
@@ -29,6 +30,11 @@ namespace BGIQD{
 
             void AddNode(const Node & node , const SNode & dnode ) 
             {
+                if( int(founder.size()) >= max_branch )
+                {
+                    ender_flag = true ;
+                    return ;
+                }
                 auto ret =  keyer(node.id);
                 if( ret == NodeType::Unknow )
                 {
@@ -71,10 +77,11 @@ namespace BGIQD{
             {
                 ender_flag = false ;
             }
-            void Init( NodeTypeDetector  k , int max_l )
+            void Init( NodeTypeDetector  k , int max_l ,int max_b )
             {
                 keyer= k ;
                 max_length = max_l;
+                max_branch = max_b ;
             }
             bool IsEnd() const { return ender_flag ; }
         };

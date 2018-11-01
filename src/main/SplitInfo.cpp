@@ -163,7 +163,15 @@ struct AppConfig
                 total += pair.first * pair.second;
                 num += pair.second ;
             }
-            (*in2)<<"Average insert size is :\t"<<total/num<<'\n';
+            if( num < 1 )
+            {
+                (*in2)<<"Average insert size is :\t0 !!! NO PE INFO FOUND IN DATA !!! ERROR !!! "<<'\n';
+                loger<<BGIQD::LOG::lstart()<<"ERROR : NO PE INFO FOUND IN DATA !!! ERROR !!!"<<BGIQD::LOG::lend();
+            }
+            else
+            {
+                (*in2)<<"Average insert size is :\t"<<total/num<<'\n';
+            }
             delete in2;
         }
         if(parse_barcode)
@@ -171,12 +179,16 @@ struct AppConfig
             auto in1 = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.BarcodeOnContig());
             for( const auto & pair : cbs)
             {
+                if( pair.second.barcodesOnPos.empty() )
+                    continue ;
                 (*in1)<<pair.second.ToString()<<'\n';
             }
             delete in1 ;
             auto in2 = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.contigOnBarcode());
             for( const auto & pair : c2bs)
             {
+                if( pair.second.contig_data.empty() )
+                    continue ;
                 (*in2)<<pair.second.ToString()<<'\n';
             }
             delete in2 ;

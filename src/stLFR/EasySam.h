@@ -96,6 +96,43 @@ namespace BGIQD {
             int total_pair_in_diff;
         };
 
+        struct EasySam_V1
+        {
+            long read_id ;
+
+            int read_index;
+
+            int contig_name ;
+
+            int left_1bp;
+
+            int barcode ;
+
+            bool match_reverse;
+
+            std::string ToString() const 
+            {
+                std::ostringstream ost;
+                ost<<read_id<<'\t';
+                ost<<read_index<<'\t';
+                ost<<contig_name<<'\t';
+                ost<<match_reverse<<'\t';
+                ost<<left_1bp<<'\t';
+                ost<<barcode;
+                return ost.str();
+            }
+
+            void InitFromString(const std::string & line)
+            {
+                std::istringstream ist(line);
+                ist>>read_id
+                    >>read_index
+                    >>contig_name
+                    >>match_reverse
+                    >>left_1bp
+                    >>barcode;
+            }
+        };
     }
 }
 
