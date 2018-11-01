@@ -1,4 +1,4 @@
-#stLFR denovo prototype project
+# stLFR denovo prototype project
 ## part 1 . contig extern by PE and barcode info and DBG .
 
 TODO
