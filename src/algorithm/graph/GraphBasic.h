@@ -58,10 +58,27 @@ namespace BGIQD {
                     return ost.str();
                 }
 
+                bool InvalidMe()
+                {
+                    if ( id != invalid ) 
+                    {
+                        id = invalid ;
+                        return true ;
+                    }
+                    else 
+                        return false ;
+                }
+
+                bool IsValid() const 
+                {
+                    return id != invalid ;
+                }
+
                 static std::string DOTHead()
                 {
                     return "graph {";
                 }
+
                 static const EdgeId invalid = -1 ;
             };
 
@@ -126,6 +143,17 @@ namespace BGIQD {
                 {
                     edge_ids.clear();
                 }
+
+                bool RemoveEdge( const NodeEdgeId &id )
+                {
+                    if ( edge_ids.find(id ) != edge_ids.end () )
+                    {
+                        edge_ids.erase( id ) ;
+                        return true ;
+                    }
+                    else
+                        return false ;
+                }
             };
 
         template<class TNode 
@@ -180,6 +208,38 @@ namespace BGIQD {
                 Edge & GetEdge( const EdgeId & id )
                 {
                     return edges[id] ;
+                }
+
+                bool RemoveNode( const NodeId & id )
+                {
+                    if ( nodes.find(id) != nodes.end() )
+                    {
+                        auto & n1 = GetNode( id );
+                        for( auto  x : n1.edge_ids )
+                        {
+                            RemoveEdge(x);
+                        }
+                        nodes.erase(id);
+                        return true ;
+                    }
+                    else
+                        return false ;
+                }
+
+                bool RemoveEdge( const EdgeId& id )
+                {
+                    auto & edge = GetEdge( id );
+                    if( edge.IsValid() )
+                    {
+                        auto & n1 = GetNode( edge.from );
+                        auto & n2 = GetNode( edge.to );
+                        n1.RemoveEdge(id);
+                        n2.RemoveEdge(id);
+                        edge.InvalidMe();
+                        return true ;
+                    }
+                    else
+                        return false ;
                 }
 
                 const Edge & GetEdge( const EdgeId &id )const
