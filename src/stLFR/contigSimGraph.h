@@ -9,6 +9,7 @@
 #include "algorithm/graph/MinTree.h"
 #include "algorithm/graph/GraphTrunk.h"
 #include "algorithm/disjoin_set/disjoin_set.h"
+#include "algorithm/graph/GraphTipRemove.h"
 
 namespace BGIQD {
     namespace stLFR {
@@ -78,6 +79,7 @@ namespace BGIQD {
 
             typedef BGIQD::GRAPH::MinTreeHelper<ContigSimGraph, float , EdgeAttr> MTHelper;
             typedef BGIQD::GRAPH::TrunkHelper< ContigSimGraph> TKHelper;
+            typedef BGIQD::GRAPH::TipRemoveHelper<ContigSimGraph> TipHlper ;
 
             typedef BGIQD::Algorithm::DisJoin_Set<NodeId> DJ_Sets;
 

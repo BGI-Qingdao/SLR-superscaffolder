@@ -33,6 +33,7 @@ struct TipTestGraphBasic : public BGIQD::GRAPH::ListGraph<TipTestNode , TipTestE
          * c --+  |             |
          *     f--+             +------n--o
          * d --+
+         * aa --- bb
          *
          * after 2 round of tip( detect only 1 node as tip ) remove :
          *
@@ -40,6 +41,7 @@ struct TipTestGraphBasic : public BGIQD::GRAPH::ListGraph<TipTestNode , TipTestE
          *       g---h---i--j--k
          *                     |
          *                     +---n---o
+         * aa --- bb
          */
 
         test.AddEdgeValue( "a" , "e");
@@ -55,6 +57,7 @@ struct TipTestGraphBasic : public BGIQD::GRAPH::ListGraph<TipTestNode , TipTestE
         test.AddEdgeValue( "k" , "m");
         test.AddEdgeValue( "k" , "n");
         test.AddEdgeValue( "n" , "o");
+        test.AddEdgeValue( "aa" , "bb");
         return test;
     }
 
@@ -77,7 +80,11 @@ TEST(TipRemove_test1)
     tester.Init(tip_checker,true);
     std::cerr<<"before tip remove"<<std::endl;
     test_graph.PrintAsDOT(std::cerr);
-    tester.DeepTipRemove(test_graph);
+    auto ret = tester.DeepTipRemove(test_graph);
+    CHECK(16 , ret.base_node_num );
+    CHECK( 9 , ret.base_left_node_num );
+    CHECK( 7 , ret.tip_num );
+    CHECK( 7 , ret.tip_node_num ) ;
     std::cerr<<"after tip remove"<<std::endl;
     test_graph.PrintAsDOT(std::cerr);
     std::cerr<<std::endl;

@@ -103,7 +103,7 @@ namespace BGIQD{
                                     auto edge_id = *(node.edge_ids.begin());
                                     const auto & edge = base.GetEdge(edge_id);
                                     auto next1 = edge.OppoNode(next) ;
-                                    assert(next1 == next );
+                                    assert(next1 == prev );
                                     break ;
                                 }
                                 else if ( node.EdgeNum() == 2 )
