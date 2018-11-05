@@ -40,6 +40,7 @@ test_cpp   =	test.cpp\
 				../algorithm/distribution/distribution_test.cpp\
 				../algorithm/linear_fitting/Minimum_multiplication_test.cpp\
 				../algorithm/graph/GraphTrunk_test.cpp\
+				../algorithm/graph/GraphTipRemove_test.cpp\
 				../algorithm/graph/MinTree_test.cpp\
 				../algorithm/graph/SPFSearch_test.cpp\
 				../algorithm/graph/GraphTest.cpp\
