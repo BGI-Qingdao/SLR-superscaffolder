@@ -130,7 +130,8 @@ namespace BGIQD {
                 DJ_Sets dj_sets;
                 for( const auto & edge : mintree.edges )
                 {
-                    dj_sets.AddConnect(edge.from , edge.to);
+                    if( edge.IsValid())
+                        dj_sets.AddConnect(edge.from , edge.to);
                 }
                 for( const auto & edge : mintree.edges )
                 {
