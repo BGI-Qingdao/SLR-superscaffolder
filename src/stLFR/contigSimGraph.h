@@ -135,6 +135,8 @@ namespace BGIQD {
                 }
                 for( const auto & edge : mintree.edges )
                 {
+                    if( ! edge.IsValid() )
+                        continue;
                     auto rep = dj_sets.GetGroup(edge.from);
                     if( ! ret[rep].HasNode(edge.from) )
                     {
