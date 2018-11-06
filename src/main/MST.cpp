@@ -180,7 +180,6 @@ struct AppConf
     {
         graph.use_salas = false;
         auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fNames.cluster());
-        std::vector<std::tuple<float,unsigned int , unsigned int> >simcache;
         if( in == NULL )
             FATAL("failed to open xxx.cluster for read!!! ");
         auto parseline = [&]( const std::string & line )
@@ -191,13 +190,15 @@ struct AppConf
             {
                 if( x.second.simularity >= smallest )
                 {
-                    simcache.push_back(std::make_tuple( x.second.simularity,tmp.contigId , x.first ));
+                    graph.AddEdgeSim( tmp.contigId , x.first , x.second.simularity );
                 }
             }
         };
         BGIQD::FILES::FileReaderFactory::EachLine(*in,parseline);
         delete  in;
         lger<<BGIQD::LOG::lstart() << "load contig sim graph done "<<BGIQD::LOG::lend() ;
+        lger<<BGIQD::LOG::lstart() << "contig-sim graph nodes : "<<graph.nodes.size()<<BGIQD::LOG::lend() ;
+        lger<<BGIQD::LOG::lstart() << "contig-sim graph edges : "<<graph.edges.size()<<BGIQD::LOG::lend() ;
     }
 
     void SplitGraph()
