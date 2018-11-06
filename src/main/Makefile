@@ -80,6 +80,10 @@ MergeContig_o			= ${MergeContig_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 LinearCDG_cpp 			= LinearCDG.cpp
 LinearCDG_o				= ${LinearCDG_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
+
+MST_cpp 			= MST.cpp
+MST_o				= ${MST_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+
 MinTree_cpp 			= MinTree.cpp
 MinTree_o				= ${MinTree_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
@@ -125,6 +129,7 @@ jobs 	   =	ChopBin\
 				MergeContig\
 				LinearCDG\
 				MinTree\
+				MST\
 				PEGraph\
 				Trunk2Scaff\
 				Gap_OAO\
@@ -148,6 +153,7 @@ jobs_o 	   =	${ChopBin_o} \
 				${MergeContig_o}\
 				${LinearCDG_o} \
 				${MinTree_o}\
+				${MST_o}\
 				${PEGraph_o}\
 				${Trunk2Scaff_o}\
 				${Gap_OAO_o}\
@@ -219,6 +225,10 @@ MergeContig : clean ${MergeContig_o}
 
 LinearCDG: clean ${LinearCDG_o}
 	${CXX} ${LinearCDG_o} ${DEUBG_CXX} -o LinearCDG 
+	mv $@ ../bin/
+
+MST: clean ${MST_o}
+	${CXX} ${MST_o} ${DEUBG_CXX} -o MST 
 	mv $@ ../bin/
 
 MinTree: clean ${MinTree_o}

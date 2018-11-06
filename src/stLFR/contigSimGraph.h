@@ -79,9 +79,38 @@ namespace BGIQD {
 
             typedef BGIQD::GRAPH::MinTreeHelper<ContigSimGraph, float , EdgeAttr> MTHelper;
             typedef BGIQD::GRAPH::TrunkHelper< ContigSimGraph> TKHelper;
-            typedef BGIQD::GRAPH::TipRemoveHelper<ContigSimGraph> TipHlper ;
+            typedef BGIQD::GRAPH::TipRemoveHelper<ContigSimGraph> TipHelper ;
+            typedef TipHelper::TipRemoveResult TipRemoveResult;
 
             typedef BGIQD::Algorithm::DisJoin_Set<NodeId> DJ_Sets;
+
+
+            static TipRemoveResult RemoveTip_n2( ContigSimGraph & mintree )
+            {
+                TipHelper tip_helper ;
+
+                auto tip_checker = [](const TipHelper::tip & t ) -> bool
+                {
+                    return t.size() < 2 ;
+                };
+                tip_helper.Init(tip_checker);
+                return tip_helper.DeepTipRemove(mintree);
+            }
+
+
+            static std::vector<NodeId> DetectJunctions( const ContigSimGraph & mintree)
+            {
+                std::vector<NodeId> ret ;
+                for( const auto & pair : mintree.nodes )
+                {
+                    const auto & node = pair.second ;
+                    if( node.EdgeNum() > 2 )
+                    {
+                        ret.push_back( node.id ) ;
+                    }
+                }
+                return ret;
+            }
 
             ContigSimGraph  MinTree() const 
             {
@@ -120,7 +149,7 @@ namespace BGIQD {
                 }
                 return ret ;
             }
-            std::vector<Basic::NodeId> TrunkLinear(const ContigSimGraph & mintree)
+            static std::vector<Basic::NodeId> TrunkLinear(const ContigSimGraph & mintree)
             {
                 return TKHelper::LinearTrunk( mintree );
             }
