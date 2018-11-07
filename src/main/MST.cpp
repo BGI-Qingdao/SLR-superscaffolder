@@ -84,7 +84,6 @@ struct AppConf
         void Simplify()
         {
             maximum_span_graph = base_contig_sim_graph.MinTree();
-            curr_log.mst_node_num = maximum_span_graph.nodes.size() ;
             if ( curr_log.mst_node_num > 3 )
             {
                 curr_log.tip_result = BGIQD::stLFR::ContigSimGraph
@@ -98,6 +97,7 @@ struct AppConf
                         base_contig_sim_graph.RemoveNode(x);
                 }
             }
+            curr_log.mst_node_num = maximum_span_graph.nodes.size() ;
         }
 
         bool IsClean() const 
