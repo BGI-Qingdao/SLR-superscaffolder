@@ -84,7 +84,7 @@ struct AppConf
         void Simplify()
         {
             maximum_span_graph = base_contig_sim_graph.MinTree();
-            if ( curr_log.mst_node_num > 3 )
+            if ( maximum_span_graph.nodes.size() > 3 )
             {
                 curr_log.tip_result = BGIQD::stLFR::ContigSimGraph
                     ::RemoveTip_n2(maximum_span_graph) ;
