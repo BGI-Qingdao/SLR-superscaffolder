@@ -54,13 +54,14 @@ namespace BGIQD{
 
             std::string ToString() const ;
 
-            void Touch(unsigned int contig )
+            void Touch(unsigned int contig , int num = 1)
             {
                 if( contig_data.find(contig) == contig_data.end())
-                    contig_data[contig] =1 ;
+                    contig_data[contig] =num ;
                 else
-                    contig_data[contig]++ ;
+                    contig_data[contig]+=num ;
             }
+
         };
 
         struct BarcodeOnBin

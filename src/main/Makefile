@@ -80,7 +80,6 @@ MergeContig_o			= ${MergeContig_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 LinearCDG_cpp 			= LinearCDG.cpp
 LinearCDG_o				= ${LinearCDG_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
-
 MST_cpp 			= MST.cpp
 MST_o				= ${MST_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
@@ -111,6 +110,9 @@ FCRFByTF_o				= ${FCRFByTF_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 FakePE2BC_cpp 			= FakePE2BC.cpp
 FakePE2BC_o				= ${FakePE2BC_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
+Barcode2Scaffold_cpp 			= Barcode2Scaffold.cpp
+Barcode2Scaffold_o				= ${Barcode2Scaffold_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+
 .cpp.o:
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
@@ -136,6 +138,7 @@ jobs 	   =	ChopBin\
 				ExternContigByPE\
 				FCRFByTF\
 				FakePE2BC\
+				Barcode2Scaffold\
 				FillTrunkByPE\
 				SeedCluster\
 
@@ -160,6 +163,7 @@ jobs_o 	   =	${ChopBin_o} \
 				${ExternContigByPE_o}\
 				${FCRFByTF_o}\
 				${FakePE2BC_o}\
+				${Barcode2Scaffold_o}\
 				${FillTrunkByPE_o}\
 				${SeedCluster_o}\
 
@@ -241,6 +245,10 @@ SeedCluster: clean ${SeedCluster_o}
 
 FillTrunkByPE: clean ${FillTrunkByPE_o}
 	${CXX} ${FillTrunkByPE_o} ${DEUBG_CXX} -o FillTrunkByPE 
+	mv $@ ../bin/
+
+Barcode2Scaffold: clean ${Barcode2Scaffold_o}
+	${CXX}  ${Barcode2Scaffold_o} ${DEUBG_CXX} -o Barcode2Scaffold 
 	mv $@ ../bin/
 
 FakePE2BC: clean ${FakePE2BC_o}
