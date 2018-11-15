@@ -15,6 +15,7 @@
 struct AppConfig
 {
     BGIQD::SOAP2::FileNames fNames;
+    BGIQD::LOG::logger loger;
 
     typedef BGIQD::stLFR::TrunkGap<int> GapInfo;
     std::map<int,std::vector<GapInfo>> gaps;
@@ -25,7 +26,6 @@ struct AppConfig
     typedef BGIQD::FREQ::Freq<std::string> BarcodesInfo;
     std::map<int,BarcodesInfo> barcodeOnscaff;
     std::map<int,std::string> barcodes;
-    BGIQD::LOG::logger loger;
 
     void Init(const std::string & prefix)
     {
@@ -90,15 +90,17 @@ struct AppConfig
         BGIQD::FILES::FileReaderFactory::EachLine(*in,read_line);
         delete in ;
     }
+
     void PrintBarcodeOnScaffold()
     {
-        auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fNames.barcodeOnScaff());
+        auto out = BGIQD::FILES::FileWriterFactory
+            ::GenerateWriterFromFileName(fNames.barcodeOnScaff());
         if( out == NULL )
             FATAL(" failed to open xxx.barcodeOnScaffold for write!!! ");
         for( const auto & pair : barcodeOnscaff )
         {
-            (*out)<<">scaffold "<<pair.first<<'\n';
-            (*out)<<pair.second.ToString()<<'\n';
+            (*out)<<">"<<pair.first<<'\n';
+            (*out)<<pair.second.ToString();
         }
         delete out;
     }
