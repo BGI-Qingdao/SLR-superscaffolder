@@ -82,8 +82,11 @@ struct AppConfig
                 auto items = BGIQD::STRING::split(line,'\t');
                 assert(items.size() == 2 );
                 assert(curr_scaff != -1 );
-                barcodeOnscaff[curr_scaff].Touch(items[0],std::stoi(items[1]));
-                barcode2scaffs[items[0]].insert(std::stoi(items[1]));
+                int freq = std::stoi(items[1]);
+                if( freq < min || freq > max )
+                    return ;
+                barcodeOnscaff[curr_scaff].Touch(items[0],freq);
+                barcode2scaffs[items[0]].insert(curr_scaff);
             }
         };
 
@@ -100,7 +103,6 @@ struct AppConfig
         Reader::LoadAllFasta(*in , scaff_buffer);
         delete in ;
     }
-
 
     struct ScaffPackage
     {
@@ -236,6 +238,8 @@ struct AppConfig
         ParseRead2();
     }
 
+    int min ;
+    int max ;
 } config;
 
 int main(int argc , char **argv)
@@ -244,7 +248,13 @@ int main(int argc , char **argv)
         DEFINE_ARG_REQUIRED(std::string , prefix , "prefix , Input xxx.cluster . Output xxx.minTree ");
         DEFINE_ARG_REQUIRED(std::string , r1, "read1");
         DEFINE_ARG_REQUIRED(std::string , r2, "read2");
+        DEFINE_ARG_OPTIONAL(int , min_t," the minimum reads number that can prove a barcode is mapped onto a scaffold ","4");
+        DEFINE_ARG_OPTIONAL(int , max_t," the maximum reads number that can prove a barcode is mapped onto a scaffold ","300");
     END_PARSE_ARGS
+
+    config.min = min_t.to_int();
+
+    config.max = max_t.to_int();
 
     config.Init(prefix.to_string(), r1.to_string() , r2.to_string());
 
