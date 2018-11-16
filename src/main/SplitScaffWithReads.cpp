@@ -34,6 +34,9 @@ struct AppConfig
     typedef BGIQD::FASTQ::Fastq<BGIQD::FASTQ::stLFRHeader>  stLFRRead ;
     typedef BGIQD::FASTQ::FastqReader<stLFRRead> stLFRReader ;
 
+    std::map<std::string , std::set<int>> barcode2scaffs;
+
+
     bool IsBarcodeInScaff( const std::pair<int,BarcodesInfo> & info , const std::string & barcode)
     {
         return info.second.data.find(barcode) != info.second.data.end() ;
@@ -42,12 +45,11 @@ struct AppConfig
     std::set<int> FilterScaffolds( const std::string & barcode )
     {
         std::set<int> ret ;
-        for( const auto & pair : barcodeOnscaff )
-        {
-            if( IsBarcodeInScaff( pair,barcode ) )
-                ret.insert( pair.first );
-        }
-        return ret ;
+        auto itr = barcode2scaffs.find(barcode) ;
+        if( itr == barcode2scaffs.end() )
+            return ret ;
+        else 
+            return itr->second ;
     }
 
     void Init(const std::string & prefix
@@ -71,13 +73,17 @@ struct AppConfig
         auto read_line = [this, &curr_scaff](const std::string & line)
         {
             if( line[0] == '>' )
-                curr_scaff = std::stoi(line);
+            {
+                curr_scaff ++ ;
+                if( curr_scaff == 0 ) curr_scaff = 1 ;
+            }
             else
             {
                 auto items = BGIQD::STRING::split(line,'\t');
                 assert(items.size() == 2 );
                 assert(curr_scaff != -1 );
                 barcodeOnscaff[curr_scaff].Touch(items[0],std::stoi(items[1]));
+                barcode2scaffs[items[0]].insert(std::stoi(items[1]));
             }
         };
 
@@ -111,6 +117,7 @@ struct AppConfig
             scaff = new std::ofstream(prefix+".scaff.fa");
             r1 = new std::ofstream(prefix+".r1.fq");
             r2 = new std::ofstream(prefix+".r2.fq");
+            index = 0 ;
         }
 
         void AddScaff(const ScaffItem & item )
@@ -121,17 +128,41 @@ struct AppConfig
             delete scaff ;
             scaff = NULL ;
         }
+        stLFRRead buffer[10000];
+        int index ;
 
+        void CleanBufferR1()
+        {
+            for( int i = 0 ; i < index ; i ++ )
+            {
+                (*r1)<<buffer[i].head.Head()<<'\n';
+                (*r1)<<buffer[i].seq.Seq(10000000);
+            }
+            index = 0 ;
+        }
         void AddR1( const stLFRRead & read )
         {
-            (*r1)<<read.head.Head()<<'\n';
-            (*r1)<<read.seq.Seq(10000000);
+            buffer[index] = read ;
+            index ++ ;
+            if ( index >= 10000 )
+                CleanBufferR1() ;
         }
 
+        void CleanBufferR2()
+        {
+            for( int i = 0 ; i < index ; i ++ )
+            {
+                (*r2)<<buffer[i].head.Head()<<'\n';
+                (*r2)<<buffer[i].seq.Seq(10000000);
+            }
+            index = 0 ;
+        }
         void AddR2( const stLFRRead & read )
         {
-            (*r2)<<read.head.Head()<<'\n';
-            (*r2)<<read.seq.Seq(10000000);
+            buffer[index] = read ;
+            index ++ ;
+            if ( index >= 10000 )
+                CleanBufferR2() ;
         }
 
         ~ScaffPackage()
@@ -171,6 +202,8 @@ struct AppConfig
                 scaffPrinters[item].AddR1(tmp);
             }
         }
+        for(auto & pair : scaffPrinters)
+            pair.second.CleanBufferR1();
         delete in ;
     }
 
@@ -192,6 +225,8 @@ struct AppConfig
                 scaffPrinters[item].AddR2(tmp);
             }
         }
+        for(auto & pair : scaffPrinters)
+            pair.second.CleanBufferR2();
         delete in ;
     }
 
