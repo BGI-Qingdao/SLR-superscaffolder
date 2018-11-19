@@ -17,7 +17,7 @@ MACRO=" -D xxx=$PREFIX \
    -D RANK=$RANK \
    -D SEED_MIN=$SEED_MIN \
    -D THREADS=$THREADS \
-   -D TAIL=$TAIL_DEL "
+   -D BWA_K=$BWA_K"
 
 echo "Generate all scripts ..."
 m4 $MACRO $DATA/step_0_prepare_info.m4 >step_0_prepare_info.sh

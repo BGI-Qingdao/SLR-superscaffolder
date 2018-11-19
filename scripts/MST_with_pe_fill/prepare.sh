@@ -65,7 +65,7 @@ MACRO=" -D xxx=$PREFIX \
    -D R2=$R2 \
    -D RANK=$RANK \
    -D THREADS=$THREADS \
-   -D TAIL=$TAIL_DEL "
+   -D BWA_K=$BWA_K "
 
 echo "Generate all scripts ..."
 cp $DATA/__common_function.sh ./
