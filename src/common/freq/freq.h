@@ -9,16 +9,15 @@ namespace FREQ{
         class Freq
         {
             public:
-                void Touch( const Key k)
+                void Touch( const Key k , int num = 1)
                 {
                     if( data.find(k) != data.end() )
-                        data[k] ++ ;
+                        data[k] += num  ;
                     else
-                        data[k] = 1 ;
+                        data[k] = num ;
                 }
 
-
-                std::string ToString()
+                std::string ToString() const
                 {
                     std::ostringstream ret ;
                     for( const auto i : data )

@@ -27,7 +27,6 @@ namespace BGIQD {
 
         struct stLFRHeader
         {
-
             enum ReadType
             {
                 Unknow = 0 ,

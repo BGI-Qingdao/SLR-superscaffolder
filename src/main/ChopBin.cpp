@@ -101,11 +101,10 @@ struct AppConfig
 
     void Init(const std::string & prefix
             ,const  int bin 
-            , int del
             , float bin_f)
     {
         bin_size = bin;
-        del_at_tail = del;
+        del_at_tail = 0;
         bin_factor = bin_f;
         BGIQD::LOG::logfilter::singleton().get("ChopBin",BGIQD::LOG::loglevel::INFO,log);
         fName.Init(prefix);
@@ -194,14 +193,14 @@ int main(int argc , char ** argv)
 {
     START_PARSE_ARGS
     DEFINE_ARG_REQUIRED(int , bin_size, "bin size . must be smaller than seed min length");
-    DEFINE_ARG_REQUIRED(int , delete_tail, "delete size at contig tail . depends on you alignment tools and args");
+    //DEFINE_ARG_REQUIRED(int , delete_tail, "delete size at contig tail . depends on you alignment tools and args");
     DEFINE_ARG_OPTIONAL(float ,bin_factor , "factor of smallest bin in the middle", "0.5");
     DEFINE_ARG_REQUIRED(std::string ,prefix, "prefix . Input xxx.seeds && xxx.barcodeOnContig ; Output xxx.barcodeOnBin");
     //DEFINE_ARG_OPTIONAL(bool ,p_b2c , "print barcode on contig", "0");
     DEFINE_ARG_OPTIONAL(bool ,ht_only, "only chop bin at head and tail", "0");
     END_PARSE_ARGS
 
-    config.Init( prefix.to_string() , bin_size.to_int() ,delete_tail.to_int() , bin_factor.to_float());
+    config.Init( prefix.to_string() , bin_size.to_int() , bin_factor.to_float());
     config.head_tail_only= ht_only.to_bool() ;
 
     BGIQD::LOG::timer t(config.log,"ChopBin");

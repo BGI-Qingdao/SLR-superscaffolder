@@ -59,6 +59,9 @@ ParseContig2Read_o   =	${ParseContig2Read_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 ChopBin_cpp 	=	ChopBin.cpp
 ChopBin_o   =	${ChopBin_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
+SplitScaffWithReads_cpp 	=	SplitScaffWithReads.cpp
+SplitScaffWithReads_o   =	${SplitScaffWithReads_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+
 BinCluster_cpp =	BinCluster.cpp
 BinCluster_o   =	${BinCluster_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
@@ -79,6 +82,9 @@ MergeContig_o			= ${MergeContig_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
 LinearCDG_cpp 			= LinearCDG.cpp
 LinearCDG_o				= ${LinearCDG_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+
+MST_cpp 			= MST.cpp
+MST_o				= ${MST_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
 MinTree_cpp 			= MinTree.cpp
 MinTree_o				= ${MinTree_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
@@ -107,10 +113,14 @@ FCRFByTF_o				= ${FCRFByTF_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 FakePE2BC_cpp 			= FakePE2BC.cpp
 FakePE2BC_o				= ${FakePE2BC_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
+Barcode2Scaffold_cpp 			= Barcode2Scaffold.cpp
+Barcode2Scaffold_o				= ${Barcode2Scaffold_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+
 .cpp.o:
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
 jobs 	   =	ChopBin\
+				SplitScaffWithReads\
 				ParseReadName\
 				ParseRead2Contig\
 				ParseContig2Read\
@@ -125,16 +135,19 @@ jobs 	   =	ChopBin\
 				MergeContig\
 				LinearCDG\
 				MinTree\
+				MST\
 				PEGraph\
 				Trunk2Scaff\
 				Gap_OAO\
 				ExternContigByPE\
 				FCRFByTF\
 				FakePE2BC\
+				Barcode2Scaffold\
 				FillTrunkByPE\
 				SeedCluster\
 
 jobs_o 	   =	${ChopBin_o} \
+				${SplitScaffWithReads_o}\
 				${ParseReadName_o}\
 				${ParseRead2Contig_o}\
 				${ParseContig2Read_o}\
@@ -148,12 +161,14 @@ jobs_o 	   =	${ChopBin_o} \
 				${MergeContig_o}\
 				${LinearCDG_o} \
 				${MinTree_o}\
+				${MST_o}\
 				${PEGraph_o}\
 				${Trunk2Scaff_o}\
 				${Gap_OAO_o}\
 				${ExternContigByPE_o}\
 				${FCRFByTF_o}\
 				${FakePE2BC_o}\
+				${Barcode2Scaffold_o}\
 				${FillTrunkByPE_o}\
 				${SeedCluster_o}\
 
@@ -177,6 +192,10 @@ SplitInfo : clean ${SplitInfo_o}
 
 ChopBin : clean ${ChopBin_o}
 	${CXX}  ${ChopBin_o} ${DEUBG_CXX} -o ChopBin
+	mv $@ ../bin/
+
+SplitScaffWithReads : clean ${SplitScaffWithReads_o}
+	${CXX}  ${SplitScaffWithReads_o} ${DEUBG_CXX} -o SplitScaffWithReads
 	mv $@ ../bin/
 
 ParseContig2Read : clean ${ParseContig2Read_o}
@@ -221,6 +240,10 @@ LinearCDG: clean ${LinearCDG_o}
 	${CXX} ${LinearCDG_o} ${DEUBG_CXX} -o LinearCDG 
 	mv $@ ../bin/
 
+MST: clean ${MST_o}
+	${CXX} ${MST_o} ${DEUBG_CXX} -o MST 
+	mv $@ ../bin/
+
 MinTree: clean ${MinTree_o}
 	${CXX} ${MinTree_o} ${DEUBG_CXX} -o MinTree 
 	mv $@ ../bin/
@@ -231,6 +254,10 @@ SeedCluster: clean ${SeedCluster_o}
 
 FillTrunkByPE: clean ${FillTrunkByPE_o}
 	${CXX} ${FillTrunkByPE_o} ${DEUBG_CXX} -o FillTrunkByPE 
+	mv $@ ../bin/
+
+Barcode2Scaffold: clean ${Barcode2Scaffold_o}
+	${CXX}  ${Barcode2Scaffold_o} ${DEUBG_CXX} -o Barcode2Scaffold 
 	mv $@ ../bin/
 
 FakePE2BC: clean ${FakePE2BC_o}

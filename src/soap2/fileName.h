@@ -117,6 +117,8 @@ namespace BGIQD {
 
             DEFINE_SUFFIX(seed_extern_fill ,".seed_extern_fill");
 
+            DEFINE_SUFFIX(barcodeOnScaff, ".barcodeOnScaff");
+
             private:
                 std::string m_prefix;
         };
