@@ -17,11 +17,13 @@
 ####	生成流程
 
 > cd  /home/project/xxx/
+ 
 > /home/software/stLFR/script/MST/prepare.sh ./conf.ini
 
 #### 运行脚本。 上一步根据配置，会生成项目目录/home/project/xxx/test， 内部有全部脚本。
 
-> cd test 
+> cd test
+
 > ./run.sh # 或者按需要单步执行具体脚本。
 
 
