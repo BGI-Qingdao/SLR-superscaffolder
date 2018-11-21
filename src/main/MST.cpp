@@ -25,6 +25,7 @@ struct AppConf
 
     struct MST_correct
     {
+        typedef std::vector<BGIQD::stLFR::ContigSimGraph::NodeId> JunctionResults;
 
         struct simplify_log
         {
@@ -37,7 +38,7 @@ struct AppConf
 
             BGIQD::stLFR::ContigSimGraph::TipRemoveResult tip_result;
 
-            std::vector<BGIQD::stLFR::ContigSimGraph::NodeId> junction_result;
+            JunctionResults junction_result;
 
             void Init(int basic , int curr )
             {
@@ -79,6 +80,20 @@ struct AppConf
         void RoundEnd()
         {
             logs.push(curr_log);
+        }
+
+        // MAKE SURE THIS INTERFACE CALLED ONLY AT THE END OF PROGRAM
+        std::vector<JunctionResults> GetAllJunctionResults() const 
+        {
+            auto log = logs ;
+            std::vector<JunctionResults> ret ;
+            while( ! log.empty() )
+            {
+                auto i = log.top();
+                ret.push_back(i.junction_result);
+                log.pop();
+            }
+            return ret ;
         }
 
         void Simplify()
@@ -244,6 +259,25 @@ struct AppConf
         lger<<BGIQD::LOG::lstart() << "linear freq is :\n "<<trunk_freq.ToString()<<BGIQD::LOG::lend() ;
         delete out3;
     }
+
+    void PrintJunctionNodes()
+    {
+        auto out3 = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fNames.mst_error());
+        if( out3 == NULL )
+            FATAL(" failed to open xxx.mst_error for write !!! ");
+        for(const auto & pair : split_graphs)
+        {
+            auto nodes = pair.second.GetAllJunctionResults();
+            for( auto & i: nodes )
+            {
+                for( auto j : i )
+                {
+                    (*out3)<<j<<'\n';
+                }
+            }
+        }
+        delete out3;
+    }
 }config;
 
 int main(int argc , char **argv )
@@ -262,5 +296,6 @@ int main(int argc , char **argv )
     config.SplitGraph();
     config.CorrectGraph();
     config.GenerateLinears();
+    config.PrintJunctionNodes() ;
     return 0 ;
 }
