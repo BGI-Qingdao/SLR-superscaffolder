@@ -60,6 +60,8 @@ gap_cluster_check_o   =	${gap_cluster_check_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.
 
 FakeSOAPContig:
 	g++ -g -o FakeSOAPContig -std=c++11 FakeSOAPContig.cpp
+	mkdir -p ../../bin
+	cp FakeSOAPContig ../../bin
 
 .cpp.o:
 	${CXX} ${DEUBG_CXX} -c $< -o $@

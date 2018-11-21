@@ -33,6 +33,7 @@ fi
 
 echo "info  :   start compier ...   "
 cd src/main && make >>../../log_make 2>&1 && cd  -
+cd src/tools && make >>../../log_make 2>&1 && cd  -
 echo "info  :   end compier ...   "
 
 echo "info  :   cp executive files to $path/bin "
