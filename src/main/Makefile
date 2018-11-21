@@ -173,118 +173,118 @@ jobs_o 	   =	${ChopBin_o} \
 				${SeedCluster_o}\
 
 
-all : bin  ${jobs} 
+all :  ${jobs} 
 
-bin :
-	mkdir -p ../bin
-
-MergePEInfo : clean ${MergePEInfo_o}
+MergePEInfo : clean ${MergePEInfo_o} ../bin
 	${CXX} ${MergePEInfo_o} ${DEUBG_CXX} -o MergePEInfo
 	mv $@ ../bin/
 
-SplitContig : clean ${SplitContig_o}
+SplitContig : clean ${SplitContig_o} ../bin
 	${CXX} ${SplitContig_o} ${DEUBG_CXX}  -o SplitContig
 	mv $@ ../bin/
 
-SplitInfo : clean ${SplitInfo_o}
+SplitInfo : clean ${SplitInfo_o} ../bin
 	${CXX}  ${SplitInfo_o} ${DEUBG_CXX} -o SplitInfo
 	mv $@ ../bin/
 
-ChopBin : clean ${ChopBin_o}
+ChopBin : clean ${ChopBin_o} ../bin
 	${CXX}  ${ChopBin_o} ${DEUBG_CXX} -o ChopBin
 	mv $@ ../bin/
 
-SplitScaffWithReads : clean ${SplitScaffWithReads_o}
+SplitScaffWithReads : clean ${SplitScaffWithReads_o} ../bin
 	${CXX}  ${SplitScaffWithReads_o} ${DEUBG_CXX} -o SplitScaffWithReads
 	mv $@ ../bin/
 
-ParseContig2Read : clean ${ParseContig2Read_o}
+ParseContig2Read : clean ${ParseContig2Read_o} ../bin
 	${CXX} ${ParseContig2Read_o} ${DEUBG_CXX} -o ParseContig2Read
 	mv $@ ../bin/
 
-ParseRead2Contig : clean ${ParseRead2Contig_o}
+ParseRead2Contig : clean ${ParseRead2Contig_o}  ../bin
 	${CXX} ${DEUBG_CXX} ${ParseRead2Contig_o} -o ParseRead2Contig
 	mv $@ ../bin/
 
-ParseReadName : clean ${ParseReadName_o}
+ParseReadName : clean ${ParseReadName_o} ../bin
 	${CXX}  ${ParseReadName_o} ${DEUBG_CXX} -o ParseReadName
 	mv $@ ../bin/
 
-BinCluster : clean ${BinCluster_o}
+BinCluster : clean ${BinCluster_o} ../bin
 	${CXX} ${BinCluster_o} ${DEUBG_CXX}  -o BinCluster
 	mv $@ ../bin/
 
 
-StaticsticUnique : clean ${StaticsticUnique_o}
+StaticsticUnique : clean ${StaticsticUnique_o}  ../bin
 	${CXX} ${StaticsticUnique_o} ${DEUBG_CXX} -o StaticsticUnique
 	mv $@ ../bin/
 
 
-Sam2ReadOnContig: clean ${Sam2ReadOnContig_o}
+Sam2ReadOnContig: clean ${Sam2ReadOnContig_o}  ../bin
 	${CXX}  ${Sam2ReadOnContig_o} ${DEUBG_CXX} -o Sam2ReadOnContig 
 	mv $@ ../bin/
 
-ContigDlink: clean ${ContigDlink_o}
+ContigDlink: clean ${ContigDlink_o} ../bin
 	${CXX}  ${ContigDlink_o} ${DEUBG_CXX} -o ContigDlink
 	mv $@ ../bin/
 
-FillContigRoad: clean ${FillContigRoad_o}
+FillContigRoad: clean ${FillContigRoad_o}  ../bin
 	${CXX} ${FillContigRoad_o} ${DEUBG_CXX} -o FillContigRoad 
 	mv $@ ../bin/
 
-MergeContig : clean ${MergeContig_o}
+MergeContig : clean ${MergeContig_o} ../bin
 	${CXX} ${MergeContig_o}  ${DEUBG_CXX} -o MergeContig
 	mv $@ ../bin/
 
-LinearCDG: clean ${LinearCDG_o}
+LinearCDG: clean ${LinearCDG_o} ../bin
 	${CXX} ${LinearCDG_o} ${DEUBG_CXX} -o LinearCDG 
 	mv $@ ../bin/
 
-MST: clean ${MST_o}
+MST: clean ${MST_o} ../bin
 	${CXX} ${MST_o} ${DEUBG_CXX} -o MST 
 	mv $@ ../bin/
 
-MinTree: clean ${MinTree_o}
+MinTree: clean ${MinTree_o} ../bin
 	${CXX} ${MinTree_o} ${DEUBG_CXX} -o MinTree 
 	mv $@ ../bin/
 
-SeedCluster: clean ${SeedCluster_o}
+SeedCluster: clean ${SeedCluster_o} ../bin
 	${CXX} ${SeedCluster_o} ${DEUBG_CXX} -o SeedCluster 
 	mv $@ ../bin/
 
-FillTrunkByPE: clean ${FillTrunkByPE_o}
+FillTrunkByPE: clean ${FillTrunkByPE_o} ../bin
 	${CXX} ${FillTrunkByPE_o} ${DEUBG_CXX} -o FillTrunkByPE 
 	mv $@ ../bin/
 
-Barcode2Scaffold: clean ${Barcode2Scaffold_o}
+Barcode2Scaffold: clean ${Barcode2Scaffold_o} ../bin
 	${CXX}  ${Barcode2Scaffold_o} ${DEUBG_CXX} -o Barcode2Scaffold 
 	mv $@ ../bin/
 
-FakePE2BC: clean ${FakePE2BC_o}
+FakePE2BC: clean ${FakePE2BC_o} ../bin
 	${CXX}  ${FakePE2BC_o} ${DEUBG_CXX} -o FakePE2BC 
 	mv $@ ../bin/
 
-FCRFByTF: clean ${FCRFByTF_o}
+FCRFByTF: clean ${FCRFByTF_o} ../bin
 	${CXX}  ${FCRFByTF_o} ${DEUBG_CXX} -o FCRFByTF 
 	mv $@ ../bin/
 
-ExternContigByPE: clean ${ExternContigByPE_o}
+ExternContigByPE: clean ${ExternContigByPE_o} ../bin
 	${CXX}  ${ExternContigByPE_o} ${DEUBG_CXX} -o ExternContigByPE 
 	mv $@ ../bin/
 
-Gap_OAO: clean ${Gap_OAO_o}
+Gap_OAO: clean ${Gap_OAO_o} ../bin
 	${CXX} ${Gap_OAO_o}  ${DEUBG_CXX} -o Gap_OAO 
 	mv $@ ../bin/
 
-PEGraph: clean ${PEGraph_o}
+PEGraph: clean ${PEGraph_o} ../bin
 	${CXX}  ${PEGraph_o} ${DEUBG_CXX} -o PEGraph 
 	mv $@ ../bin/
 
-Trunk2Scaff: clean ${Trunk2Scaff_o}
+Trunk2Scaff: clean ${Trunk2Scaff_o} ../bin
 	${CXX} ${Trunk2Scaff_o} ${DEUBG_CXX} -o Trunk2Scaff 
 	mv $@ ../bin/
 
 dirty	   =${jobs_o} ${jobs}  
+
+../bin:
+	mkdir -p ../bin
 
 clean:
 	rm -rf ${dirty}
