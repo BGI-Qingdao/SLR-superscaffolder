@@ -58,10 +58,13 @@ seedGapFreq_o   =	${seedGapFreq_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 gap_cluster_check_cpp 	=	gap_cluster_check.cpp
 gap_cluster_check_o   =	${gap_cluster_check_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
-FakeSOAPContig:
+
+FakeSOAPContig:  ../bin
 	g++ -g -o FakeSOAPContig -std=c++11 FakeSOAPContig.cpp
-	mkdir -p ../../bin
-	cp FakeSOAPContig ../../bin
+	cp FakeSOAPContig ../bin
+
+../bin:
+	mkdir -p ../bin
 
 .cpp.o:
 	${CXX} ${DEUBG_CXX} -c $< -o $@

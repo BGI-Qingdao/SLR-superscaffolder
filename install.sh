@@ -32,12 +32,24 @@ if [[ ! -e $path ]] ; then
 fi
 
 echo "info  :   start compier ...   "
-cd src/main && make >>../../log_make 2>&1 && cd  -
-cd src/tools && make >>../../log_make 2>&1 && cd  -
+cd src/main && make >>../../log_make 2>&1 
+if [[ $? != 0 ]] ; then 
+    echo "error :   compier unfinish!!! please check log_make for details ."
+    cd  -
+    exit
+fi
+cd  -
+cd src/tools && make >>../../log_make 2>&1  
+if [[ $? != 0 ]] ; then 
+    echo "error :   compier unfinish!!! please check log_make for details ."
+    cd  -
+    exit
+fi
+cd  -
 echo "info  :   end compier ...   "
 
 echo "info  :   cp executive files to $path/bin "
-cp -r src/bin $path
+cp -r src/bin $path 
 echo "info  :   cp scripts to $path/scripts "
 cp -r scripts $path
 
