@@ -286,7 +286,7 @@ int main(int argc , char **argv )
         DEFINE_ARG_REQUIRED(std::string , prefix , "prefix , Input xxx.cluster . Output xxx.minTree ");
         DEFINE_ARG_OPTIONAL(float , threshold, " threshold of simularity","0.1");
         DEFINE_ARG_OPTIONAL(float , del_fac, " threshold of del junction node","0.9");
-        DEFINE_ARG_OPTIONAL(int, del_round, "maximum del round ","3");
+        DEFINE_ARG_OPTIONAL(int, del_round, "maximum del round ","1000");
     END_PARSE_ARGS
 
     config.Init(prefix.to_string(),threshold.to_float());
