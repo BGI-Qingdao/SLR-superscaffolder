@@ -58,6 +58,19 @@ namespace BGIQD {
             int gap_index ;
             int prev_contig ;
             int next_contig ;
+
+            enum GapType {
+                UNKNOW = 0 ,
+                PE =1 ,
+                PE_TRUNK = 2 ,
+                TRUNK = 3 
+            } gap_type ;
+
+            void Init( const std::string & line ) ;
+
+            std::string Head() const ;
+
+            void Reset(){ scaff_id = 0 ; gap_index = 0 ; prev_contig = 0 ; next_contig = 0;  } ;
         };
 
         template<class T>

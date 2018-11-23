@@ -19,13 +19,38 @@ namespace BGIQD {
         }
 
         std::string SOAP2ContigHead::Head() const {
-                std::ostringstream ost;
-                ost<<'<'<<contigId
-                    <<" length "<<len
-                    <<" cvg_"<<cov
-                    <<"_tip_"<<is_tip;
-                return ost.str();
-            }
+            std::ostringstream ost;
+            ost<<'>'<<contigId
+                <<" length "<<len
+                <<" cvg_"<<cov
+                <<"_tip_"<<is_tip;
+            return ost.str();
+        }
+
+
+        void ScaffSplitGapHead::Init(const std::string & line)
+        {
+            int t ;
+            sscanf(line.c_str() 
+                    ,">%d_%d\t%u\t%u\t%d"
+                    ,&scaff_id
+                    ,&gap_index
+                    ,&prev_contig
+                    ,&next_contig
+                    ,&t
+                  );
+            gap_type = static_cast<GapType>(t);
+        }
+
+        std::string ScaffSplitGapHead::Head() const 
+        {
+            std::ostringstream ost;
+            ost<<'>'<<scaff_id<<'_'<<gap_index
+                <<'\t'<<prev_contig
+                <<'\t'<<next_contig
+                <<'\t'<<int(gap_type);
+            return ost.str();
+        }
 
     }
 }
