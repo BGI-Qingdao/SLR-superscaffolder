@@ -52,6 +52,13 @@ namespace BGIQD {
             void Reset(){ contigId = 0 ; is_tip = 0 ; cov = 0 ; len = 0;  } ;
         };
 
+        struct ScaffSplitGapHead
+        {
+            int scaff_id ;
+            int gap_index ;
+            int prev_contig ;
+            int next_contig ;
+        };
 
         template<class T>
             struct Fasta
