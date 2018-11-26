@@ -623,42 +623,48 @@ struct AppConfig
                     std::cout<<tc.ToString()<<'\n';
                 line+=contigMap.contigs[contig].K;
                 line+=contigMap.contigs[contig].linear;
-                if( i != a_scaff.size() - 1 )
+                if( i == a_scaff.size() - 1 )
+                    break;
+                int fill = min_fill ;
+                if( tc.pe_fill.empty() )
                 {
-                    if( tc.pe_fill.empty() )
+                    if (tc.pe_next_ask == 0)
                     {
-                        if (tc.pe_next_ask == 0)
+                        if( gapArea.size() > 0 )
                         {
-                            if( gapArea.size() > 0 )
-                            {
-                                int fill = GetGapLen(tc.cluster_value) ;
-                                gapFreq.Touch(fill);
-                                line += std::string(fill,'N');
-                                if( ptest1 )
-                                    std::cout<<tc.basic<<'\t'<<fill<<'\t'<<tc.cluster_value<<'\n';
-                            }
-                            else
-                            {
-                                line += std::string(gap_trunk,'N');
-                            }
+                            fill = GetGapLen(tc.cluster_value) ;
+                            gapFreq.Touch(fill);
+                            if( ptest1 )
+                                std::cout<<tc.basic<<'\t'<<fill<<'\t'<<tc.cluster_value<<'\n';
                         }
                         else
                         {
-                            if( i != a_scaff.size() - 1 )
-                            {
-                                line += std::string(gap_petrunk,'N');
-                            }
+                            fill = gap_trunk ;
                         }
                     }
                     else
                     {
-                        line += std::string(gap_pe,'N');
-                        for( unsigned int x : tc.pe_fill )
-                        {
-                            line+=contigMap.contigs[x].K;
-                            line+=contigMap.contigs[x].linear;
-                            line += std::string(gap_pe,'N');
-                        }
+                        fill = gap_petrunk ;
+                    }
+                }
+                else
+                {
+                    fill = gap_pe ;
+                }
+                if( fill < min_fill )
+                    fill = min_fill ;
+
+                line += std::string(fill,'N');
+                if( ! tc.pe_fill.empty() )
+                {
+                    for( unsigned int x : tc.pe_fill )
+                    {
+                        line+=contigMap.contigs[x].K;
+                        line+=contigMap.contigs[x].linear;
+                        int fill_pe = gap_pe ;
+                        if( fill_pe  < min_fill )
+                            fill_pe  = min_fill ;
+                        line += std::string(fill_pe,'N');
                     }
                 }
             }
@@ -681,7 +687,7 @@ struct AppConfig
                 continue ;
             if( item.second.IsMerge() )
                 continue ;
-            if( item.second.length < min )
+            if( item.second.length < min_contig )
                 continue ;
             (*out)<<">contig"<<item.second.id<<'\t'<<item.second.cov<<'\n';
             std::string line= item.second.K + item.second.linear ;
@@ -693,7 +699,8 @@ struct AppConfig
             <<gapFreq.ToString()
             <<BGIQD::LOG::lend() ;
     }
-    int min ;
+    int min_contig ;
+    int min_fill ;
 } config ;
 
 int main(int argc, char **argv)
@@ -715,6 +722,7 @@ int main(int argc, char **argv)
         DEFINE_ARG_OPTIONAL( int , gap_petrunk, "gap in trunk and has pe conn" , "300");
         DEFINE_ARG_OPTIONAL( int , gap_pe, "gap in pe" , "10");
         DEFINE_ARG_OPTIONAL( int , min_scontig, "min signle contig that print out" , "300");
+        DEFINE_ARG_OPTIONAL( int , min_gap, "min gap size " , "11");
         //DEFINE_ARG_OPTIONAL( bool, ptest, "print test data ( Orientation) " , "no");
         //DEFINE_ARG_OPTIONAL( bool, ptest1, "print test data ( Gap )" , "no");
     END_PARSE_ARGS;
@@ -722,7 +730,8 @@ int main(int argc, char **argv)
     config.Init(prefix.to_string());
     config.ptest = false ;//ptest.to_bool();
     config.ptest1 = false ; //ptest1.to_bool();
-    config.min = min_scontig.to_int();
+    config.min_contig = min_scontig.to_int();
+    config.min_fill = min_gap.to_int();
     config.K = K.to_int();
     config.gap_trunk = gap_trunk.to_int();
     config.gap_pe = gap_pe.to_int();
