@@ -95,13 +95,16 @@ struct AppConfig
         else 
         {
             assert( bin_num >= 2 );
-            if( head_tail_only )
-                bin_num = 2;
             for( int i = 0  ; i< bin_num ; i++ )
             {
                 assert( start <= end );
                 if( i % 2 == 0 )
                 {
+                    // Make sure we do not chop bin from very middle area .
+                    if ( start > max_bin_size )
+                    {
+                        break ;
+                    }
                     ret[i/2] = 
                         BinInterval(start , start+bin_size -1 );
                     start += bin_size ;
@@ -243,7 +246,7 @@ int main(int argc , char ** argv)
                             3 for chop 1 bin for a contig ", "1");
 
     DEFINE_ARG_OPTIONAL(float ,bin_factor , "factor of smallest bin in the middle", "0.5");
-    DEFINE_ARG_OPTIONAL(int,  max_bin_size , "max_bin_size for head&tail mode" ,"15");
+    DEFINE_ARG_OPTIONAL(int,  max_bin_size , "max_bin_size for head&tail mode" ,"15000");
     END_PARSE_ARGS
 
     config.work_mode = static_cast<AppConfig::WorkingMode>(work_mode.to_int());
