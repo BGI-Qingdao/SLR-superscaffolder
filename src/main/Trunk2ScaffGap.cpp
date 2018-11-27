@@ -548,6 +548,7 @@ struct AppConfig
                 (*out)<<tmp.head.Head()<<'\n';
                 (*out)<<tmp.seq.Seq(100);
             };
+
             for( size_t i = 0 ; i < a_scaff.size() ; i++ )
             {
                 const auto & tc = a_scaff[i];

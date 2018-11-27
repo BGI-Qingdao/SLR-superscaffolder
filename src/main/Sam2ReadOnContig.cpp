@@ -123,6 +123,7 @@ int main(int argc , char ** argv)
 
     config.Init(prefix.to_string() , barcodeList.to_string() ,false );// no_stLFR.to_bool());
     BGIQD::LOG::timer t(config.loger,"Same2ReadOnContig");
+    config.TryLoadReadName2Num();
     config.TryLoadBarcode2Num() ;
     config.ParseSam2ReadOnContig();
     config.PrintBarcodeList();
