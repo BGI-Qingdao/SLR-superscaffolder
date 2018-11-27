@@ -528,6 +528,7 @@ struct AppConfig
                 gap_index ++ ;
                 tmp.head.gap_index = gap_index ;
                 tmp.head.prev_contig = contig ;
+                tmp.Clean_UnSet();
                 tmp.Set_Set_head();
                 tmp.AddSeq(c.K);
                 tmp.AddSeq(c.linear);
