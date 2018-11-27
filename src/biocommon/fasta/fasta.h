@@ -63,7 +63,7 @@ namespace BGIQD {
                 UNKNOW = 0 ,
                 PE =1 ,
                 PE_TRUNK = 2 ,
-                TRUNK = 3 
+                TRUNK = 3
             } gap_type ;
 
             void Init( const std::string & line ) ;
