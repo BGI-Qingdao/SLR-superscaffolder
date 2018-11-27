@@ -72,7 +72,7 @@ struct AppConfig
             tmp.match_reverse = d.IsReverseComplete() ;
             stLFRHeader header;
             header.Init(d.read_name);
-            assert(header.type != stLFRHeader::readName );
+            assert(header.type != stLFRHeader::ReadType::Unknow );
             //tmp.barcode = BGIQD::stLFR::BarcodeIdHelper::Id(BGIQD::stLFR::readName2Barcode(d.read_name));
             tmp.barcode = barcodeIds.Id(header.barcode_str);
             tmp.read_id = readNameIds.Id(header.readName);
