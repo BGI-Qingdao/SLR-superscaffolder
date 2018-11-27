@@ -592,6 +592,8 @@ struct AppConfig
                     }
                     if( fill < min_fill )
                         fill = min_fill ;
+                    if( fill < 2*K + 1 )
+                        type = BGIQD::FASTA::ScaffSplitGapHead::GapType::PE_TRUNK;
                     add_ns(fill,type);
 
                     if( ! tc.pe_fill.empty() )
