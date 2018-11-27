@@ -109,7 +109,7 @@ int main(int argc , char **argv )
     END_PARSE_ARGS
 
     config.Init(read1.to_string() , prefix.to_string());
-    BGIQD::LOG::timer timer(config.loger,"ParseReadName");
+    BGIQD::LOG::timer timer(config.loger,"ReadName2Num");
 
     config.ParseRead1();
 

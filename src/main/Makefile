@@ -50,6 +50,11 @@ SplitInfo_o   =	${SplitInfo_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 ParseReadName_cpp 	=	ParseReadName.cpp
 ParseReadName_o   =	${ParseReadName_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
+
+ReadName2Num_cpp 	=	ReadName2Num.cpp
+ReadName2Num_o   =	${ReadName2Num_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+
+
 ParseRead2Contig_cpp 	=	ParseRead2Contig.cpp
 ParseRead2Contig_o   =	${ParseRead2Contig_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
@@ -127,6 +132,7 @@ Barcode2Scaffold_o				= ${Barcode2Scaffold_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o
 jobs 	   =	ChopBin\
 				SplitScaffWithReads\
 				ParseReadName\
+				ReadName2Num\
 				ParseRead2Contig\
 				ParseContig2Read\
 				SplitInfo\
@@ -155,6 +161,7 @@ jobs 	   =	ChopBin\
 jobs_o 	   =	${ChopBin_o} \
 				${SplitScaffWithReads_o}\
 				${ParseReadName_o}\
+				${ReadName2Num_o}\
 				${ParseRead2Contig_o}\
 				${ParseContig2Read_o}\
 				${SplitInfo_o}\
@@ -212,6 +219,10 @@ ParseRead2Contig : clean ${ParseRead2Contig_o}  ../bin
 
 ParseReadName : clean ${ParseReadName_o} ../bin
 	${CXX}  ${ParseReadName_o} ${DEUBG_CXX} -o ParseReadName
+	mv $@ ../bin/
+
+ReadName2Num : clean ${ReadName2Num_o} ../bin
+	${CXX}  ${ReadName2Num_o} ${DEUBG_CXX} -o ReadName2Num
 	mv $@ ../bin/
 
 BinCluster : clean ${BinCluster_o} ../bin
