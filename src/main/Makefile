@@ -95,6 +95,11 @@ PEGraph_o				= ${PEGraph_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 Trunk2Scaff_cpp 			= Trunk2Scaff.cpp
 Trunk2Scaff_o				= ${Trunk2Scaff_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
+
+Trunk2ScaffGap_cpp 			= Trunk2ScaffGap.cpp
+Trunk2ScaffGap_o				= ${Trunk2ScaffGap_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
+
+
 Gap_OAO_cpp 			= Gap_OAO.cpp
 Gap_OAO_o				= ${Gap_OAO_cpp:%.cpp=%.o} ${source_cpp:%.cpp=%.o}
 
@@ -138,6 +143,7 @@ jobs 	   =	ChopBin\
 				MST\
 				PEGraph\
 				Trunk2Scaff\
+				Trunk2ScaffGap\
 				Gap_OAO\
 				ExternContigByPE\
 				FCRFByTF\
@@ -164,6 +170,7 @@ jobs_o 	   =	${ChopBin_o} \
 				${MST_o}\
 				${PEGraph_o}\
 				${Trunk2Scaff_o}\
+				${Trunk2ScaffGap_o}\
 				${Gap_OAO_o}\
 				${ExternContigByPE_o}\
 				${FCRFByTF_o}\
@@ -279,6 +286,10 @@ PEGraph: clean ${PEGraph_o} ../bin
 
 Trunk2Scaff: clean ${Trunk2Scaff_o} ../bin
 	${CXX} ${Trunk2Scaff_o} ${DEUBG_CXX} -o Trunk2Scaff 
+	mv $@ ../bin/
+
+Trunk2ScaffGap: clean ${Trunk2ScaffGap_o} ../bin
+	${CXX} ${Trunk2ScaffGap_o} ${DEUBG_CXX} -o Trunk2ScaffGap 
 	mv $@ ../bin/
 
 dirty	   =${jobs_o} ${jobs}  

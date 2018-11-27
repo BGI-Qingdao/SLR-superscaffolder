@@ -16,9 +16,13 @@
 #include <string.h>
 #include "algorithm/interval/Interval.h"
 
+#include "biocommon/fasta/fasta.h"
+
 struct AppConfig
 {
     typedef BGIQD::INTERVAL::Interval<float, BGIQD::INTERVAL::IntervalType::Left_Open_Right_Close> SimArea;
+
+    typedef BGIQD::FASTA::Fasta<BGIQD::FASTA::ScaffSplitGapHead> GapFasta;
 
     std::map<SimArea, int> gapArea;
 
@@ -27,12 +31,11 @@ struct AppConfig
 
     BGIQD::SOAP2::ContigFastAMap contig_fasta_map;
     BGIQD::FREQ::Freq<std::string> pfreq;
+    BGIQD::FREQ::Freq<std::string> gapTypeFreq;
     BGIQD::FREQ::Freq<int>gapFreq;
     int gap_trunk ;
     int gap_petrunk ;
     int gap_pe ;
-    bool ptest;
-    bool ptest1;
 
     struct TrueContig
     {
@@ -278,11 +281,7 @@ struct AppConfig
     };
 
     typedef std::vector<TrueContig> ContigOrientation;
-    // struct GapPos
-    // {
-    //     int trunkId ;
-    //     int gapId;
-    // };
+
     struct GapExtra
     {
         unsigned int true_prev ;
@@ -344,18 +343,6 @@ struct AppConfig
         loger<<BGIQD::LOG::lstart() << "Load Trunk done "<<BGIQD::LOG::lend() ;
     }
 
-    //    void BuildGapPos()
-    //    {
-    //        for( const auto & p : gaps )
-    //        {
-    //            for( size_t i = 0 ; i < p.second.size() ; i++)
-    //            {
-    //                const auto gap = p.second[i];
-    //                contigPos[gap.prev] = GapPos{ p.first , (int)i } ;
-    //            }
-    //        }
-    //    }
-
     void LoadGapOO()
     {
         auto in  = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.gap_oo());
@@ -381,78 +368,6 @@ struct AppConfig
         loger<<BGIQD::LOG::lstart() << "Load Contig done "<<BGIQD::LOG::lend() ;
     }
 
-    /*
-    void BuildScaff()
-    {
-        auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.scaff_seqs());
-        if( out == NULL )
-            FATAL(" failed to open xxx.scaff_seqs to write ");
-
-        std::vector<std::vector<unsigned int> >scaffs ;
-
-        for( const auto & pair : gaps )
-        {
-            std::vector<unsigned int> a_scaff;
-            for(size_t i = 0 ; i< pair.second.size() ; i++ )
-            {
-                const auto & gap = pair.second[i];
-                const auto & fill = gapfills[gap.prev];
-
-                if( a_scaff.empty() )
-                {
-                    a_scaff.push_back(fill.true_prev); 
-                    a_scaff.push_back(fill.true_next); 
-                }
-                else
-                {
-                    if( *(a_scaff.rbegin()) == fill.true_prev ) 
-                    {
-                        a_scaff.push_back(fill.true_next);
-                    }
-                    else
-                    {
-                        auto & fill_prev = gapfills[*(a_scaff.rbegin()+1)] ;
-                        int value = *fill_prev.extra.begin();
-                        int value1 =* fill.extra.begin() ;
-                        if( value1 > value )
-                        {
-                            *(a_scaff.rbegin()) = fill.true_prev ;
-                        }
-                        a_scaff.push_back(fill.true_next);
-                    }
-                }
-            }
-            scaffs.push_back(a_scaff);
-        }
-        int id = 0 ;
-        for( const auto & a_scaff : scaffs )
-        {
-            id++ ;
-            std::string line ;
-            (*out)<<">scaffold"<<id<<"\t20.5\n";
-            for(size_t i = 0 ; i < a_scaff.size() ; i++ )
-            {
-                unsigned int contig = a_scaff[i] ;
-                line+=contigMap.contigs[contig].K;
-                line+=contigMap.contigs[contig].linear;
-                if( i != a_scaff.size() - 1 )
-                {
-                    line += std::string(5000,'N');
-                }
-            }
-            for( int i = 0 ; i < (int)line.size() ; i++ )
-            {
-                (*out)<<line[i];
-                if( i % 100 == 0 || i ==(int) line.size() -1 )
-                {
-                    (*out)<<'\n';
-                }
-            }
-        }
-        delete out;
-        loger<<BGIQD::LOG::lstart() << "Build scaff done "<<BGIQD::LOG::lend() ;
-    }
-    */
     int GetGapLen(float s)
     {
         for( const auto p : gapArea )
@@ -596,105 +511,116 @@ struct AppConfig
         if( out == NULL )
             FATAL(" failed to open xxx.scaff_gap2filler_seqs to write ");
 
-        int id = 0 ;
-        auto print_seq = [&] ( const std::string & line)
-        {
-            for( int i = 0 ; i < (int)line.size() ; i++ )
-            {
-                (*out)<<line[i];
-                if( ( i +1 ) % 100 == 0 || i ==(int) line.size() -1 )
-                {
-                    (*out)<<'\n';
-                }
-            }
-        };
+        int scaff_id = 0 ;
+
         for( const auto & a_scaff : scaffs )
         {
-            id++ ;
+            scaff_id++ ;
             std::string line ;
-            (*out)<<">scaffold"<<id<<'\n';
-            if(ptest)
-                std::cout<<">scaffold\n";
-            for(size_t i = 0 ; i < a_scaff.size() ; i++ )
+            GapFasta tmp;
+            int gap_index = 0 ;
+            auto add_c1 = [&tmp, &scaff_id ,&gap_index ](
+                    unsigned int contig ,
+                    const BGIQD::SOAP2::ContigFastA &c )
+            {
+                tmp.Reset();
+                tmp.head.scaff_id = scaff_id ;
+                gap_index ++ ;
+                tmp.head.gap_index = gap_index ;
+                tmp.head.prev_contig = contig ;
+                tmp.AddSeq(c.K);
+                tmp.AddSeq(c.linear);
+            };
+
+            auto add_ns= [&tmp]( int n , BGIQD::FASTA::ScaffSplitGapHead::GapType  type  )
+            {
+                tmp.AddSeq(std::string(n,'N'));
+                tmp.head.gap_type = type ;
+            };
+
+            auto add_c2 = [&tmp, &out](int contig,  const BGIQD::SOAP2::ContigFastA &c )
+            {
+                tmp.head.next_contig = contig;
+                tmp.AddSeq(c.K);
+                tmp.AddSeq(c.linear);
+                (*out)<<tmp.head.Head()<<'\n';
+                (*out)<<tmp.seq.Seq(100);
+            };
+            for( size_t i = 0 ; i < a_scaff.size() ; i++ )
             {
                 const auto & tc = a_scaff[i];
                 unsigned int contig = tc.Value() ;
-                contigMap.contigs[contig].MarkMerge();
-                if(ptest)
-                    std::cout<<tc.ToString()<<'\n';
-                line+=contigMap.contigs[contig].K;
-                line+=contigMap.contigs[contig].linear;
+                if( i > 0 )
+                {
+                    add_c2( contig , contigMap.contigs[contig]);
+                }
                 if( i != a_scaff.size() - 1 )
                 {
+                    add_c1(contig,contigMap.contigs[contig]);
+                    BGIQD::FASTA::ScaffSplitGapHead::GapType type ;
+                    int fill = min_fill ;
+                    if( gapArea.size() > 0 )
+                    {
+                        fill = GetGapLen(tc.cluster_value) ;
+                        gapFreq.Touch(fill);
+                        // Use default value ;
+                        gapTypeFreq.Touch("TrunkGap");
+                        type = BGIQD::FASTA::ScaffSplitGapHead::GapType::TRUNK ;
+                    }
                     if( tc.pe_fill.empty() )
                     {
                         if (tc.pe_next_ask == 0)
                         {
-                            if( gapArea.size() > 0 )
+                            if( gapArea.empty() )
                             {
-                                int fill = GetGapLen(tc.cluster_value) ;
-                                gapFreq.Touch(fill);
-                                line += std::string(fill,'N');
-                                if( ptest1 )
-                                    std::cout<<tc.basic<<'\t'<<fill<<'\t'<<tc.cluster_value<<'\n';
-                            }
-                            else
-                            {
-                                line += std::string(gap_trunk,'N');
+                                fill = gap_trunk ;
+                                type = BGIQD::FASTA::ScaffSplitGapHead::GapType::TRUNK;
                             }
                         }
                         else
                         {
-                            if( i != a_scaff.size() - 1 )
-                            {
-                                line += std::string(gap_petrunk,'N');
-                            }
+                            gapTypeFreq.Touch("TrunkGap_PE_LINK");
+                            fill = gap_petrunk ;
+                            type = BGIQD::FASTA::ScaffSplitGapHead::GapType::PE_TRUNK;
                         }
                     }
                     else
                     {
-                        line += std::string(gap_pe,'N');
+                        fill = gap_pe ;
+                        gapTypeFreq.Touch("TrunkGap_PE_FILL");
+                        type = BGIQD::FASTA::ScaffSplitGapHead::GapType::PE_TRUNK;
+                    }
+                    if( fill < min_fill )
+                        fill = min_fill ;
+                    add_ns(fill,type);
+
+                    if( ! tc.pe_fill.empty() )
+                    {
                         for( unsigned int x : tc.pe_fill )
                         {
-                            line+=contigMap.contigs[x].K;
-                            line+=contigMap.contigs[x].linear;
-                            line += std::string(gap_pe,'N');
+                            add_c2(x,contigMap.contigs[x]);
+                            add_c1(x,contigMap.contigs[x]);
+                            int fill_pe = gap_pe ;
+                            if( fill_pe < min_fill )
+                                fill_pe = min_fill ;
+                            add_ns(fill,BGIQD::FASTA::ScaffSplitGapHead::GapType::PE);
                         }
                     }
                 }
             }
-            print_seq(line);
         }
 
-        for( auto & item : contigMap.contigs )
-        {
-            if( item.second.IsBase() )
-                continue ;
-            if( item.second.IsMerge() )
-            {
-                contigMap.contigs[item.second.id - 1].MarkMerge();
-            }
-        }
-
-        for( auto & item : contigMap.contigs )
-        {
-            if(! item.second.IsBase() )
-                continue ;
-            if( item.second.IsMerge() )
-                continue ;
-            if( item.second.length < min )
-                continue ;
-            (*out)<<">contig"<<item.second.id<<'\t'<<item.second.cov<<'\n';
-            std::string line= item.second.K + item.second.linear ;
-            print_seq(line);
-        }
         delete out;
         loger<<BGIQD::LOG::lstart() << "Build scaff done "<<BGIQD::LOG::lend() ;
         loger<<BGIQD::LOG::lstart() << " gap freq "
             <<gapFreq.ToString()
             <<BGIQD::LOG::lend() ;
+
+        loger<<BGIQD::LOG::lstart() << " gap type freq "
+            <<gapTypeFreq.ToString()
+            <<BGIQD::LOG::lend() ;
     }
-    int min ;
+    int min_fill ;
 } config ;
 
 int main(int argc, char **argv)
@@ -715,15 +641,11 @@ int main(int argc, char **argv)
         DEFINE_ARG_OPTIONAL( int , gap_trunk, "gap in trunk" , "5000");
         DEFINE_ARG_OPTIONAL( int , gap_petrunk, "gap in trunk and has pe conn" , "300");
         DEFINE_ARG_OPTIONAL( int , gap_pe, "gap in pe" , "10");
-        DEFINE_ARG_OPTIONAL( int , min_scontig, "min signle contig that print out" , "300");
-        //DEFINE_ARG_OPTIONAL( bool, ptest, "print test data ( Orientation) " , "no");
-        //DEFINE_ARG_OPTIONAL( bool, ptest1, "print test data ( Gap )" , "no");
+        DEFINE_ARG_OPTIONAL( int , min_gap, "min gap size " , "11");
     END_PARSE_ARGS;
 
+    config.min_fill = min_gap.to_int();
     config.Init(prefix.to_string());
-    config.ptest = false ;//ptest.to_bool();
-    config.ptest1 = false ; //ptest1.to_bool();
-    config.min = min_scontig.to_int();
     config.K = K.to_int();
     config.gap_trunk = gap_trunk.to_int();
     config.gap_pe = gap_pe.to_int();

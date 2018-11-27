@@ -70,7 +70,13 @@ namespace BGIQD {
 
             std::string Head() const ;
 
-            void Reset(){ scaff_id = 0 ; gap_index = 0 ; prev_contig = 0 ; next_contig = 0;  } ;
+            void Reset(){
+                scaff_id = 0 ;
+                gap_index = 0 ;
+                prev_contig = 0 ;
+                next_contig = 0;
+                gap_type = GapType::UNKNOW;
+            } ;
         };
 
         template<class T>
