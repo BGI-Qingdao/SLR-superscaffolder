@@ -41,9 +41,9 @@ jobs_o="$jobs_o \${$AppName""_o}"
 echo """
 
 $AppName"_cpp 	=	"$AppName".cpp"
-$AppName"_o   =	\${"$AppName"_cpp:%.cpp=%.o} \${source_cpp:%.cpp=%.o}"
-$AppName" : clean \${"$AppName"_o} ../bin"
-	\${CXX} \${$AppName"_o} \${DEUBG_CXX}  -o "$AppName
+$AppName"_o   =	"$AppName".o"
+$AppName" : clean \${"$AppName"_o} \${source_o} ../bin"
+	\${CXX} \${$AppName"_o} \${source_o} \${DEUBG_CXX}  -o "$AppName
 	mv \$@ ../bin/
 
 """>>Makefile
@@ -100,13 +100,12 @@ all :  \${jobs}
 """ >>Makefile
 for x in $apps
 do
-    echo "x is [$x]"
     GenApp $x
 done
 
 echo "jobs_o=$jobs_o">>Makefile
 echo """
-dirty	   =\${jobs_o} \${jobs}
+dirty	   =\${jobs_o} \${jobs} \${source_o}
 
 ../bin:
 	mkdir -p ../bin
