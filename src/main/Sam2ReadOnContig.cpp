@@ -6,6 +6,8 @@
 #include "common/multithread/MultiThread.h"
 
 #include "biocommon/pair/pair_sam_parser.h"
+#include "biocommon/fastq/fastq.h"
+
 
 #include "soap2/soap2.h"
 #include "soap2/fileName.h"
@@ -13,9 +15,11 @@
 #include "stLFR/barcodeId.h"
 #include "stLFR/readName2Barcode.h"
 #include "stLFR/EasySam.h"
+#include "stLFR/StringIdCache.h"
 
 #include <iostream>
 #include <string>
+#include <cassert>
 
 struct AppConfig
 {
@@ -23,6 +27,8 @@ struct AppConfig
     std::string barcode_2_num_file;
     BGIQD::SOAP2::FileNames fName;
     bool has_barcode_in_read_name ;
+
+    typedef BGIQD::FASTQ::stLFRHeader stLFRHeader ;
 
     void Init(const std::string & prefix  ,const std::string & b2n_f, bool b )
     {
@@ -33,19 +39,22 @@ struct AppConfig
         has_barcode_in_read_name = ! b;
     }
 
-    void TryLoadBarcode2Num()
+    BGIQD::stLFR::StringIdCache barcodeIds;
+
+    BGIQD::stLFR::StringIdCache readNameIds ;
+
+    void LoadBarcode2Num()
     {
-        if( !barcode_2_num_file.empty())
-        {
-            BGIQD::stLFR::BarcodeIdHelper::preload = true ;
-            BGIQD::stLFR::BarcodeIdHelper::Load(barcode_2_num_file);
-            loger<<BGIQD::LOG::lstart()<<" load barcodeList from "<<barcode_2_num_file<<BGIQD::LOG::lend();
-        }
-        else
-        {
-            BGIQD::stLFR::BarcodeIdHelper::preload = false ;
-            loger<<BGIQD::LOG::lstart()<<" no barcodeList. will assign new barcode number ."<<BGIQD::LOG::lend();
-        }
+        BGIQD::LOG::timer t (loger,"LoadBarcode2Num");
+        barcodeIds.preload = true ;
+        barcodeIds.Load(fName.barcodeList());
+    }
+
+    void LoadRead2Num()
+    {
+        BGIQD::LOG::timer t(loger,"LoadRead2Num");
+        readNameIds.preload = true ;
+        readNameIds.Load(fName.readNameList());
     }
 
     void ParseSam2ReadOnContig()
@@ -53,16 +62,23 @@ struct AppConfig
         std::vector<BGIQD::EASY_SAM::EasySam> easy_cache;
         auto sam_in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.read2contig_sam());
         // basic function
-        long long readId = 1 ;
+        // long long readId = 1 ;
         auto print1read= [&](const BGIQD::SAM::MatchData &d)
         {
             BGIQD::EASY_SAM::EasySam tmp;
-            tmp.read_id = readId++;
+            //tmp.read_id = readId++;
             tmp.contig_name = std::stoul(d.ref_name);
             tmp.pos_1bp = d.CalcRead1Position();
             tmp.match_reverse = d.IsReverseComplete() ;
-            tmp.barcode = BGIQD::stLFR::BarcodeIdHelper::Id(BGIQD::stLFR::readName2Barcode(d.read_name));
+            stLFRHeader header;
+            header.Init(d.read_name);
+            assert(header.type != stLFRHeader::readName );
+            //tmp.barcode = BGIQD::stLFR::BarcodeIdHelper::Id(BGIQD::stLFR::readName2Barcode(d.read_name));
+            tmp.barcode = barcodeIds.Id(header.barcode_str);
+            tmp.read_id = readNameIds.Id(header.readName);
             tmp.is_p = d.IsP();
+            if( tmp.is_p == 0 )
+                tmp.read_id ++ ;
             tmp.pe_match = (d.IsPEBothMatch() && ! d.XA);
             tmp.insert_size = d.insert_size ;
             easy_cache.push_back(tmp);
@@ -123,8 +139,8 @@ int main(int argc , char ** argv)
 
     config.Init(prefix.to_string() , barcodeList.to_string() ,false );// no_stLFR.to_bool());
     BGIQD::LOG::timer t(config.loger,"Same2ReadOnContig");
-    //config.TryLoadReadName2Num();
-    config.TryLoadBarcode2Num() ;
+    config.LoadRead2Num();
+    config.LoadBarcode2Num() ;
     config.ParseSam2ReadOnContig();
     config.PrintBarcodeList();
     return 0;
