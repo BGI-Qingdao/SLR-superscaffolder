@@ -6,10 +6,13 @@
 #include "common/log/logfilter.h"
 #include "common/freq/freq.h"
 
+#include "algorithm/collection/collection.h"
 
 #include "biocommon/fasta/fasta.h"
 
 #include "soap2/fileName.h"
+#include "soap2/contigIndex.h"
+
 #include "stLFR/TrunkGap.h"
 #include "stLFR/CBB.h"
 
@@ -17,23 +20,25 @@
 
 struct AppConfig
 {
-    BGIQD::SOAP2::FileNames fNames;
-    BGIQD::LOG::logger loger;
-
-    typedef BGIQD::stLFR::TrunkGap<int> GapInfo;
-
     typedef BGIQD::FASTA::ScaffSplitGapHead Header;
 
     typedef BGIQD::FASTA::Fasta<Header>  GapFasta;
 
-    std::map<int,std::vector<GapInfo>> gaps;
-    std::map<int,BGIQD::stLFR::ContigOnBarcode>  c2bs;
+    typedef BGIQD::Collection::Collection<int> BarcodeCollection;
 
-    //std::map<int,std::set<int>> scaff2contig;
-    std::map<int,std::set<int> > contigOnScaffld;
-    typedef BGIQD::FREQ::Freq<std::string> BarcodesInfo;
-    std::map<int,BarcodesInfo> barcodeOnscaff;
+    BGIQD::SOAP2::FileNames fNames;
+
+    BGIQD::LOG::logger loger;
+
+    std::map<unsigned int , BarcodeCollection > contig_barcode_info;
+
+    std::vector<Header> gap_infos;
+
+    std::set<unsigned int> used_contigs ;
+
     std::map<int,std::string> barcodes;
+
+    BGIQD::SOAP2::ContigIndexMap contigIndexs ;
 
     void Init(const std::string & prefix)
     {
@@ -41,28 +46,13 @@ struct AppConfig
         BGIQD::LOG::logfilter::singleton().get("PEGraph",BGIQD::LOG::loglevel::INFO, loger);
     }
 
-    void LoadContigOnBarcode()
+    void LoadContigIndex()
     {
-        auto in  = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fNames.contigOnBarcode());
-        if( in == NULL )
-            FATAL(" failed to open xxx.contigOnBarcode for read!!! ");
-        auto read_line = [this](const std::string & line)
-        {
-            BGIQD::stLFR::ContigOnBarcode tmp ;
-            tmp.InitFromString(line);
-            auto barcode_str = barcodes[tmp.barcode_id];
-            for(auto pair : tmp.contig_data)
-            {
-                int contigId = pair.first;
-                if( contigOnScaffld.find( contigId ) == contigOnScaffld.end())
-                    continue ;
-                for( int scaffoldId : contigOnScaffld[contigId])
-                {
-                    barcodeOnscaff[scaffoldId].Touch(barcode_str , pair.second );
-                }
-            }
-        };
-        BGIQD::FILES::FileReaderFactory::EachLine(*in,read_line);
+        auto in = BGIQD::FILES::FileReaderFactory::
+            GenerateReaderFromFileName(fNames.ContigIndex());
+        if(in == NULL)
+            FATAL(" failed to open xxx.contigIndex for read!!! ");
+        contigIndexs.LoadContigIndexs(*in);
         delete in ;
     }
 
@@ -74,14 +64,14 @@ struct AppConfig
         BGIQD::FASTA::FastaReader<GapFasta> Reader ;
 
         GapFasta tmp ;
-        int scaffold_id = 1 ;
+
         while(Reader.LoadNextFasta(*in,tmp))
         {
             if(tmp.head.gap_type != Header::GapType::TRUNK )
                 continue ;
-            contigOnScaffld[tmp.head.prev_contig].insert(scaffold_id);
-            contigOnScaffld[tmp.head.next_contig].insert(scaffold_id);
-            scaffold_id ++ ;
+            gap_infos.push_back(tmp.head);
+            used_contigs.insert(tmp.head.next_base_contig);
+            used_contigs.insert(tmp.head.prev_base_contig);
         }
 
         delete in ;
@@ -103,19 +93,59 @@ struct AppConfig
         delete in ;
     }
 
-    void PrintBarcodeOnScaffold()
+    void PrintBarcodeOnGaps()
     {
         auto out = BGIQD::FILES::FileWriterFactory
-            ::GenerateWriterFromFileName(fNames.barcodeOnScaff());
+            ::GenerateWriterFromFileName(fNames.barcodeOnGaps());
         if( out == NULL )
-            FATAL(" failed to open xxx.barcodeOnScaffold for write!!! ");
-        for( const auto & pair : barcodeOnscaff )
+            FATAL(" failed to open xxx.barcodeOnGaps for write!!! ");
+
+        for( const auto & gap: gap_infos)
         {
-            (*out)<<">"<<pair.first<<'\n';
-            (*out)<<pair.second.ToString();
+            (*out)<<gap.Head()<<'\n';
+            auto barcode_both = 
+                BarcodeCollection::Intersection(
+                        contig_barcode_info.at( gap.prev_base_contig)
+                    ,   contig_barcode_info.at( gap.next_base_contig) );
+
+            for(const auto & pair : barcode_both.elements)
+            {
+                (*out)<<barcodes.at(pair.first)<<'\n';
+            }
         }
         delete out;
     }
+
+    void LoadBarcodeOnContig()
+    {
+        auto in = BGIQD::FILES::FileReaderFactory::
+            GenerateReaderFromFileName(fNames.BarcodeOnContig());
+        if(! in )
+            FATAL( "failed to open xxx.barcodeOnContig to read !");
+        BGIQD::LOG::timer t(loger,"LoadBarcodeOnContig");
+        std::string line;
+        while(!std::getline(*in,line).eof())
+        {
+            BGIQD::stLFR::ContigBarcodeInfo tmp ;
+            tmp.InitFromString(line);
+            if( used_contigs.find( tmp.contig_id) == used_contigs.end() )
+            {
+                continue;
+            }
+            BarcodeCollection tdata;
+            for(const auto & pair : tmp.barcodesOnPos)
+            {
+                const auto & barcodes = pair.second ;
+                for(auto b : barcodes)
+                {
+                    tdata.IncreaseElement(b);
+                }
+            }
+            contig_barcode_info[tmp.contig_id] = tdata;
+        }
+        delete in;
+    }
+
 }config;
 
 int main(int argc , char **argv)
@@ -125,9 +155,9 @@ int main(int argc , char **argv)
     END_PARSE_ARGS
 
     config.Init(prefix.to_string());
-
+    config.LoadContigIndex();
     config.LoadBarcodeList();
     config.LoadScaffoldsGaps();
-    config.LoadContigOnBarcode();
-    config.PrintBarcodeOnScaffold();
+    config.LoadBarcodeOnContig();
+    config.PrintBarcodeOnGaps();
 }

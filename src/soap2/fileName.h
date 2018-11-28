@@ -121,6 +121,8 @@ namespace BGIQD {
 
             DEFINE_SUFFIX(barcodeOnScaff, ".barcodeOnScaff");
 
+            DEFINE_SUFFIX(barcodeOnGaps, ".barcodeOnGaps");
+
             private:
                 std::string m_prefix;
         };

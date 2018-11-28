@@ -22,10 +22,14 @@ namespace BGIQD {
 
         struct ContigIndexMap
         {
-            std::map<unsigned int , ContigIndex>  map;
+            std::map<unsigned int , ContigIndex>  data;
             void LoadContigIndexs(std::istream & ist);
             void BuildReverseCompleteContigs();
             const ContigIndex & GetContigIndex(unsigned int id) const ;
+            unsigned int BaseId(unsigned int id ) const 
+            {
+                return GetContigIndex(id).contig ;
+            }
         };
     }
 }

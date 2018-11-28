@@ -8,8 +8,11 @@
 #include "common/stl/mapHelper.h"
 #include "common/freq/freq.h"
 #include "common/flags/flags.h"
+
 #include "soap2/fileName.h"
 #include "soap2/contigFasta.h"
+#include "soap2/contigIndex.h"
+
 #include "stLFR/CBB.h"
 #include "stLFR/TrunkGap.h"
 
@@ -29,6 +32,7 @@ struct AppConfig
     BGIQD::SOAP2::FileNames fName ;
     BGIQD::LOG::logger loger;
 
+    BGIQD::SOAP2::ContigIndexMap contigIndexs ;
     BGIQD::SOAP2::ContigFastAMap contig_fasta_map;
     BGIQD::FREQ::Freq<std::string> pfreq;
     BGIQD::FREQ::Freq<std::string> gapTypeFreq;
@@ -281,6 +285,16 @@ struct AppConfig
     };
 
     typedef std::vector<TrueContig> ContigOrientation;
+
+    void LoadContigIndex()
+    {
+        auto in = BGIQD::FILES::FileReaderFactory::
+            GenerateReaderFromFileName(fName.ContigIndex());
+        if(in == NULL)
+            FATAL(" failed to open xxx.contigIndex for read!!! ");
+        contigIndexs.LoadContigIndexs(*in);
+        delete in ;
+    }
 
     struct GapExtra
     {
@@ -609,8 +623,8 @@ struct AppConfig
                     {
                         for( unsigned int x : tc.pe_fill )
                         {
-                            add_c2(0,x,contigMap.contigs[x]);
-                            add_c1(0,x,contigMap.contigs[x]);
+                            add_c2(contigIndexs.BaseId(x),x,contigMap.contigs[x]);
+                            add_c1(contigIndexs.BaseId(x),x,contigMap.contigs[x]);
                             int fill_pe = gap_pe ;
                             if( fill_pe < min_fill )
                                 fill_pe = min_fill ;
@@ -661,6 +675,7 @@ int main(int argc, char **argv)
     config.gap_trunk = gap_trunk.to_int();
     config.gap_pe = gap_pe.to_int();
     config.gap_petrunk = gap_petrunk.to_int();
+    config.LoadContigIndex();
     config.LoadTrunk();
     config.LoadGapOO();
     config.LoadGapArea();
