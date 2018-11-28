@@ -133,15 +133,15 @@ int main(int argc , char ** argv)
     START_PARSE_ARGS
     //DEFINE_ARG_OPTIONAL(bool ,no_stLFR , "no barcode in read name -- if the sam file was no barcode info , open this.","");
     DEFINE_ARG_REQUIRED(std::string,prefix, "prefix. Input xxx.read2contig.sam ; Output xxx.read2contig && xxx.barcodeList");
-    DEFINE_ARG_OPTIONAL(std::string,barcodeList, "barcodeList file file","");
+    //DEFINE_ARG_OPTIONAL(std::string,barcodeList, "barcodeList file file","");
     //DEFINE_ARG_OPTIONAL(long,file_cache, "cache size of file buffer","1000000");
     END_PARSE_ARGS
 
-    config.Init(prefix.to_string() , barcodeList.to_string() ,false );// no_stLFR.to_bool());
+    config.Init(prefix.to_string() , ""/*barcodeList.to_string()*/ ,false );// no_stLFR.to_bool());
     BGIQD::LOG::timer t(config.loger,"Same2ReadOnContig");
     config.LoadRead2Num();
-    config.LoadBarcode2Num() ;
+    //config.LoadBarcode2Num() ;
     config.ParseSam2ReadOnContig();
-    config.PrintBarcodeList();
+    //config.PrintBarcodeList();
     return 0;
 }
