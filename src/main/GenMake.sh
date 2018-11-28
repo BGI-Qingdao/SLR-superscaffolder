@@ -1,8 +1,8 @@
 #!/bin/bash
 
-apps="Barcode2Scaffold \
+apps="Barcode2Gap\
+ Barcode2Scaffold \
  BinCluster\
- BaR2ScaffGap\
  ChopBin\
  ContigDlink\
  ExternContigByPE\
@@ -87,6 +87,7 @@ source_cpp =	../common/files/file_reader.cpp \\
 				../soap2/contigGraph.cpp\\
 				../soap2/contigFasta.cpp\\
 				../soap2/contigType.cpp\\
+				../soap2/contigIndex.cpp\\
 
 source_o		= \${source_cpp:%.cpp=%.o}
 

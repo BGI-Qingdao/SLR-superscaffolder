@@ -13,6 +13,7 @@
 #include "stLFR/CBB.h"
 
 #include "soap2/contigGraph.h"
+#include "soap2/contigIndex.h"
 #include "soap2/fileName.h"
 
 #include <algorithm>
@@ -59,7 +60,7 @@ struct AppConfig {
 
     struct SeedExternInfo
     {
-        BGIQD::stLFR::ContigIndex c_info;
+        BGIQD::SOAP2::ContigIndex c_info;
         std::vector<unsigned int> left_extern_path;
         std::vector<unsigned int> right_extern_path;
 
@@ -585,7 +586,7 @@ struct AppConfig {
     {
         fNames.Init(prefix);
         BGIQD::LOG::logfilter::singleton().get("PEGraph",BGIQD::LOG::loglevel::INFO, loger);
-        BGIQD::stLFR::ContigIndex::K = K ;
+        BGIQD::SOAP2::ContigIndex::K = K ;
     }
 
     void LoadBarcodeAtContig()

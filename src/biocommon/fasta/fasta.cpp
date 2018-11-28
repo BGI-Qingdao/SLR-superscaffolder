@@ -32,9 +32,11 @@ namespace BGIQD {
         {
             int t ;
             sscanf(line.c_str() 
-                    ,">%d_%d\t%u\t%u\t%d"
+                    ,">%d_%d\t%u\t%u\t%u\t%u\t%d"
                     ,&scaff_id
                     ,&gap_index
+                    ,&prev_base_contig
+                    ,&next_base_contig
                     ,&prev_contig
                     ,&next_contig
                     ,&t
@@ -46,6 +48,8 @@ namespace BGIQD {
         {
             std::ostringstream ost;
             ost<<'>'<<scaff_id<<'_'<<gap_index
+                <<'\t'<<prev_base_contig
+                <<'\t'<<next_base_contig
                 <<'\t'<<prev_contig
                 <<'\t'<<next_contig
                 <<'\t'<<int(gap_type);

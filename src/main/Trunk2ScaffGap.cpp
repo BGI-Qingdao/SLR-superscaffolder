@@ -520,6 +520,7 @@ struct AppConfig
             GapFasta tmp;
             int gap_index = 0 ;
             auto add_c1 = [&tmp, &scaff_id ,&gap_index ](
+                    unsigned int base ,
                     unsigned int contig ,
                     const BGIQD::SOAP2::ContigFastA &c )
             {
@@ -528,6 +529,7 @@ struct AppConfig
                 gap_index ++ ;
                 tmp.head.gap_index = gap_index ;
                 tmp.head.prev_contig = contig ;
+                tmp.head.prev_base_contig = base;
                 tmp.Clean_UnSet();
                 tmp.Set_Set_head();
                 tmp.AddSeq(c.K);
@@ -540,9 +542,13 @@ struct AppConfig
                 tmp.head.gap_type = type ;
             };
 
-            auto add_c2 = [&tmp, &out](int contig,  const BGIQD::SOAP2::ContigFastA &c )
+            auto add_c2 = [&tmp, &out](
+                    unsigned int base ,
+                    unsigned int contig, 
+                    const BGIQD::SOAP2::ContigFastA &c )
             {
                 tmp.head.next_contig = contig;
+                tmp.head.next_base_contig = base;
                 tmp.AddSeq(c.K);
                 tmp.AddSeq(c.linear);
                 (*out)<<tmp.head.Head()<<'\n';
@@ -555,11 +561,11 @@ struct AppConfig
                 unsigned int contig = tc.Value() ;
                 if( i > 0 )
                 {
-                    add_c2( contig , contigMap.contigs[contig]);
+                    add_c2(tc.basic ,contig , contigMap.contigs[contig]);
                 }
                 if( i != a_scaff.size() - 1 )
                 {
-                    add_c1(contig,contigMap.contigs[contig]);
+                    add_c1(tc.basic, contig,contigMap.contigs[contig]);
                     BGIQD::FASTA::ScaffSplitGapHead::GapType type ;
                     int fill = min_fill ;
                     if( gapArea.size() > 0 )
@@ -595,7 +601,7 @@ struct AppConfig
                     }
                     if( fill < min_fill )
                         fill = min_fill ;
-                    if( fill < 2*K + 1 )
+                    if( fill <= gap_pe )
                         type = BGIQD::FASTA::ScaffSplitGapHead::GapType::PE_TRUNK;
                     add_ns(fill,type);
 
@@ -603,8 +609,8 @@ struct AppConfig
                     {
                         for( unsigned int x : tc.pe_fill )
                         {
-                            add_c2(x,contigMap.contigs[x]);
-                            add_c1(x,contigMap.contigs[x]);
+                            add_c2(0,x,contigMap.contigs[x]);
+                            add_c1(0,x,contigMap.contigs[x]);
                             int fill_pe = gap_pe ;
                             if( fill_pe < min_fill )
                                 fill_pe = min_fill ;
@@ -645,7 +651,7 @@ int main(int argc, char **argv)
         DEFINE_ARG_REQUIRED(int, K, " kvalue ");
         DEFINE_ARG_OPTIONAL( int , gap_trunk, "gap in trunk" , "5000");
         DEFINE_ARG_OPTIONAL( int , gap_petrunk, "gap in trunk and has pe conn" , "300");
-        DEFINE_ARG_OPTIONAL( int , gap_pe, "gap in pe" , "10");
+        DEFINE_ARG_OPTIONAL( int , gap_pe, "gap in pe" , "50");
         DEFINE_ARG_OPTIONAL( int , min_gap, "min gap size " , "11");
     END_PARSE_ARGS;
 

@@ -7,7 +7,7 @@
 
 namespace BGIQD{
     namespace stLFR {
-        int ContigIndex::K  ;
+
         bool BarcodeOnBin::empty() const 
         {
             return collections.size() == 0 ;
@@ -218,21 +218,6 @@ namespace BGIQD{
             return ost.str();
         }
 
-        std::string ContigIndex::ToString() const 
-        {
-            std::ostringstream ist;
-            ist<<contig<<'\t'<<length<<'\t'<<reverse_add;
-            return ist.str();
-        }
-        void ContigIndex::InitFromString(const std::string &line )
-        {
-            std::istringstream ist(line);
-            ist>>contig>>length;
-            if( ! ist.eof() )
-                ist>>reverse_add;
-            else
-                reverse_add = 1 ;
-        }
         void LoadContigRelationArray(const std::string & file ,ContigRelationArray & data)
         {
             auto parseline = [&data](const std::string &line)

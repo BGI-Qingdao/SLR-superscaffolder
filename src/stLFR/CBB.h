@@ -17,16 +17,6 @@
 namespace BGIQD{
     namespace stLFR {
 
-        struct ContigIndex
-        {
-            static int K ;
-            unsigned int contig;
-            int length ;
-            bool reverse_add;
-
-            void InitFromString(const std::string & line);
-            std::string ToString() const;
-        };
 
         typedef BGIQD::Collection::Collection<int> BarcodeCollection;
 

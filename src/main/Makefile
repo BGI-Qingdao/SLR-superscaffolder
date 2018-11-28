@@ -35,15 +35,25 @@ source_cpp =	../common/files/file_reader.cpp \
 				../soap2/contigGraph.cpp\
 				../soap2/contigFasta.cpp\
 				../soap2/contigType.cpp\
+				../soap2/contigIndex.cpp\
 
 source_o		= ${source_cpp:%.cpp=%.o}
 
 .cpp.o:
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
-jobs =Barcode2Scaffold  BinCluster BaR2ScaffGap ChopBin ContigDlink ExternContigByPE FakePE2BC FCRFByTF FillContigRoad FillTrunkByPE Gap_OAO LinearCDG MergeContig MergePEInfo MinTree MST ParseContig2Read ParseRead2Contig ParseReadName PEGraph ReadName2Num Sam2ReadOnContig SeedCluster SplitInfo SplitScaffWithReads StaticsticUnique Trunk2Scaff Trunk2ScaffGap
+jobs =Barcode2Gap Barcode2Scaffold  BinCluster ChopBin ContigDlink ExternContigByPE FakePE2BC FCRFByTF FillContigRoad FillTrunkByPE Gap_OAO LinearCDG MergeContig MergePEInfo MinTree MST ParseContig2Read ParseRead2Contig ParseReadName PEGraph ReadName2Num Sam2ReadOnContig SeedCluster SplitInfo SplitScaffWithReads StaticsticUnique Trunk2Scaff Trunk2ScaffGap
 
 all :  ${jobs}
+
+
+
+
+Barcode2Gap_cpp = Barcode2Gap.cpp
+Barcode2Gap_o = Barcode2Gap.o
+Barcode2Gap : clean ${Barcode2Gap_o} ${source_o} ../bin
+	${CXX} ${Barcode2Gap_o} ${source_o} ${DEUBG_CXX} -o Barcode2Gap
+	mv $@ ../bin/
 
 
 
@@ -61,15 +71,6 @@ BinCluster_cpp = BinCluster.cpp
 BinCluster_o = BinCluster.o
 BinCluster : clean ${BinCluster_o} ${source_o} ../bin
 	${CXX} ${BinCluster_o} ${source_o} ${DEUBG_CXX} -o BinCluster
-	mv $@ ../bin/
-
-
-
-
-BaR2ScaffGap_cpp = BaR2ScaffGap.cpp
-BaR2ScaffGap_o = BaR2ScaffGap.o
-BaR2ScaffGap : clean ${BaR2ScaffGap_o} ${source_o} ../bin
-	${CXX} ${BaR2ScaffGap_o} ${source_o} ${DEUBG_CXX} -o BaR2ScaffGap
 	mv $@ ../bin/
 
 
@@ -298,7 +299,7 @@ Trunk2ScaffGap : clean ${Trunk2ScaffGap_o} ${source_o} ../bin
 	mv $@ ../bin/
 
 
-jobs_o=  ${Barcode2Scaffold_o} ${BinCluster_o} ${BaR2ScaffGap_o} ${ChopBin_o} ${ContigDlink_o} ${ExternContigByPE_o} ${FakePE2BC_o} ${FCRFByTF_o} ${FillContigRoad_o} ${FillTrunkByPE_o} ${Gap_OAO_o} ${LinearCDG_o} ${MergeContig_o} ${MergePEInfo_o} ${MinTree_o} ${MST_o} ${ParseContig2Read_o} ${ParseRead2Contig_o} ${ParseReadName_o} ${PEGraph_o} ${ReadName2Num_o} ${Sam2ReadOnContig_o} ${SeedCluster_o} ${SplitInfo_o} ${SplitScaffWithReads_o} ${StaticsticUnique_o} ${Trunk2Scaff_o} ${Trunk2ScaffGap_o}
+jobs_o=  ${Barcode2Gap_o} ${Barcode2Scaffold_o} ${BinCluster_o} ${ChopBin_o} ${ContigDlink_o} ${ExternContigByPE_o} ${FakePE2BC_o} ${FCRFByTF_o} ${FillContigRoad_o} ${FillTrunkByPE_o} ${Gap_OAO_o} ${LinearCDG_o} ${MergeContig_o} ${MergePEInfo_o} ${MinTree_o} ${MST_o} ${ParseContig2Read_o} ${ParseRead2Contig_o} ${ParseReadName_o} ${PEGraph_o} ${ReadName2Num_o} ${Sam2ReadOnContig_o} ${SeedCluster_o} ${SplitInfo_o} ${SplitScaffWithReads_o} ${StaticsticUnique_o} ${Trunk2Scaff_o} ${Trunk2ScaffGap_o}
 
 dirty	   =${jobs_o} ${jobs} ${source_o}
 

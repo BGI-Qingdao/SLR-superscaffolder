@@ -56,6 +56,8 @@ namespace BGIQD {
         {
             int scaff_id ;
             int gap_index ;
+            int prev_base_contig;
+            int next_base_contig;
             int prev_contig ;
             int next_contig ;
 
@@ -75,6 +77,8 @@ namespace BGIQD {
                 gap_index = 0 ;
                 prev_contig = 0 ;
                 next_contig = 0;
+                prev_base_contig = 0 ;
+                next_base_contig = 0;
                 gap_type = GapType::UNKNOW;
             } ;
         };

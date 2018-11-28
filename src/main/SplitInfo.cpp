@@ -17,6 +17,7 @@
 #include "stLFR/EasySam.h"
 
 #include "soap2/fileName.h"
+#include "soap2/contigIndex.h"
 
 struct AppConfig
 {
@@ -32,7 +33,7 @@ struct AppConfig
 
     std::map<int , BGIQD::stLFR::ContigOnBarcode> c2bs ;
 
-    std::map<unsigned int ,BGIQD::stLFR::ContigIndex> seeds;
+    std::map<unsigned int ,BGIQD::SOAP2::ContigIndex> seeds;
 
     BGIQD::FREQ::Freq<int> ISFreq;
 
@@ -52,7 +53,7 @@ struct AppConfig
         std::string line ;
         while( in && !std::getline(*in, line).eof() )
         {
-            BGIQD::stLFR::ContigIndex tmp;
+            BGIQD::SOAP2::ContigIndex tmp;
             tmp.InitFromString(line);
             seeds[tmp.contig] = tmp;
         }

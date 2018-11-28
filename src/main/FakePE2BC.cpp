@@ -7,6 +7,7 @@
 #include "common/log/logfilter.h"
 
 #include "soap2/fileName.h"
+#include "soap2/contigIndex.h"
 #include "stLFR/CBB.h"
 #include "stLFR/EasySam.h"
 
@@ -24,7 +25,7 @@ struct AppConfig
         BGIQD::LOG::logfilter::singleton().get("FakePE2BC",BGIQD::LOG::loglevel::INFO,log);
     }
 
-    std::map<unsigned int ,BGIQD::stLFR::ContigIndex> seeds;
+    std::map<unsigned int ,BGIQD::SOAP2::ContigIndex> seeds;
     std::map<unsigned int , BGIQD::stLFR::ContigBarcodeInfo> boc;
 
     void LoadSeeds()
@@ -37,7 +38,7 @@ struct AppConfig
         std::string line ;
         while( in && !std::getline(*in, line).eof() )
         {
-            BGIQD::stLFR::ContigIndex tmp ;
+            BGIQD::SOAP2::ContigIndex tmp ;
             tmp.InitFromString(line) ;
             seeds[tmp.contig] = tmp ;
             boc[tmp.contig].contig_id= tmp.contig;

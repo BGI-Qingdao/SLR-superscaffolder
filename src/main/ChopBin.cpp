@@ -8,6 +8,7 @@
 #include "common/string/stringtools.h"
 #include "common/error/Error.h"
 
+#include "soap2/contigIndex.h"
 #include "soap2/fileName.h"
 #include "soap2/soap2.h"
 
@@ -35,7 +36,7 @@ struct AppConfig
 
     BarcodeOnContig boc;
 
-    std::map<unsigned int ,BGIQD::stLFR::ContigIndex> seeds;
+    std::map<unsigned int ,BGIQD::SOAP2::ContigIndex> seeds;
 
     BGIQD::SOAP2::FileNames fName;
 
@@ -91,7 +92,7 @@ struct AppConfig
         std::string line ;
         while( in && !std::getline(*in, line).eof() )
         {
-            BGIQD::stLFR::ContigIndex tmp;
+            BGIQD::SOAP2::ContigIndex tmp;
             tmp.InitFromString(line);
             seeds[tmp.contig] = tmp;
             boc[tmp.contig].contig_id= tmp.contig;
