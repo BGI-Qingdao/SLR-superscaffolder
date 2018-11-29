@@ -79,15 +79,16 @@ struct AppConfig
         {
             BGIQD::EASY_SAM::EasySam curr_line;
             curr_line.InitFromString(line);
+
             if( curr_line.barcode != 0 && parse_barcode )
             {
                 cbs[curr_line.contig_name].Touch(curr_line.pos_1bp,curr_line.barcode);
                 c2bs[curr_line.barcode].Touch(curr_line.contig_name);
             }
 
+
             if( curr_line.pe_match && parse_pe )
             {
-                prev_line = curr_line ;
                 BGIQD::EASY_SAM::PE_Single tmp_pe ;
                 tmp_pe.read1 = curr_line.read_id ;
                 tmp_pe.match_reverse1 = curr_line.match_reverse ;
@@ -97,7 +98,7 @@ struct AppConfig
                 if( (curr_line.is_p ||  (! curr_line.pe_match) ))
                 {
                     prev_line = curr_line ;
-                    if((! curr_line.pe_match) && parse_gap)
+                    if((! curr_line.pe_match))
                     {
                         pe_singles.push_back(tmp_pe);
                     }
@@ -107,10 +108,7 @@ struct AppConfig
                 if( (!( prev_line.is_p && prev_line.pe_match)) 
                  || ( prev_line.read_id != curr_line.read_id -1 ) )
                 {
-                    if( parse_gap )
-                    {
-                        pe_singles.push_back(tmp_pe);
-                    }
+                    pe_singles.push_back(tmp_pe);
                     continue;
                 }
                 BGIQD::EASY_SAM::PEInfo tmp ;
@@ -141,10 +139,7 @@ struct AppConfig
                     int IS = pos[3] - pos [0] +1 ;
                     ISFreq.Touch(IS);
 
-                    if( parse_gap )
-                    {
-                        pe_boths.push_back(tmp);
-                    }
+                    pe_boths.push_back(tmp);
                 }
                 // pe_pair hook 2 contig
                 else
@@ -152,7 +147,6 @@ struct AppConfig
                     pe_diffs.push_back(tmp);
                 }
             }
-            prev_line = curr_line ;
         }
         for( auto & pair : cbs )
         {
@@ -250,13 +244,11 @@ int main(int argc , char ** argv)
     START_PARSE_ARGS
         DEFINE_ARG_REQUIRED(std::string, prefix ,"prefix of files. Input xxx.read2contig , Output depends on below options. Please at least choose one of below options.");
         DEFINE_ARG_OPTIONAL(bool, parse_pe,"parse pe data. will output xxx.pe_info && xxx.pe_pairs", "false");
-        DEFINE_ARG_OPTIONAL(bool, parse_gap,"parse pe data for gap closer. will output xxx.pe_single && xxx.pe_both ", "false");
         DEFINE_ARG_OPTIONAL(bool, parse_barcode,"parse barcode data . will output xxx.barcodeOnContig && xxx.contigOnBarcode", "false");
     END_PARSE_ARGS;
 
     config.parse_pe = parse_pe.to_bool() ;
     config.parse_barcode = parse_barcode.to_bool() ;
-    config.parse_gap = parse_gap.to_bool() ;
 
     config.Init(prefix.to_string());
     if( ! config.CheckParameters()  )
