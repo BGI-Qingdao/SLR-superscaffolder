@@ -168,7 +168,7 @@ struct AppConfig
 
     void PrintResult()
     {
-        if( parse_gap ) 
+        if( parse_pe ) 
         {
             auto in_s = BGIQD::FILES::FileWriterFactory::
                 GenerateWriterFromFileName(fName.pe_singles());
@@ -235,7 +235,6 @@ struct AppConfig
         }
     }
 
-    bool parse_gap ;
 
 }config;
 
