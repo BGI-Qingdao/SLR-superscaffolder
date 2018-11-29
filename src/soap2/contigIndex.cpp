@@ -30,7 +30,7 @@ namespace BGIQD {
             std::string line ;
             ContigIndex tmp ;
 
-            while(std::getline(ist,line).eof())
+            while( ! std::getline(ist,line).eof())
             {
                 if(! std::isdigit( line[0]) )
                     continue ;
