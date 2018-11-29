@@ -8,12 +8,16 @@
 #include "common/stl/mapHelper.h"
 #include "common/freq/freq.h"
 #include "common/flags/flags.h"
+
 #include "soap2/fileName.h"
 #include "soap2/contigFasta.h"
+#include "soap2/contigIndex.h"
+
 #include "stLFR/CBB.h"
 #include "stLFR/TrunkGap.h"
 
 #include <string.h>
+
 #include "algorithm/interval/Interval.h"
 
 struct AppConfig
@@ -277,6 +281,17 @@ struct AppConfig
             }
     };
 
+
+    BGIQD::SOAP2::ContigIndexMap contigIndexs ;
+    void LoadContigIndex()
+    {
+        auto in = BGIQD::FILES::FileReaderFactory::
+            GenerateReaderFromFileName(fName.ContigIndex());
+        if(in == NULL)
+            FATAL(" failed to open xxx.contigIndex for read!!! ");
+        contigIndexs.LoadContigIndexs(*in);
+        delete in ;
+    }
     typedef std::vector<TrueContig> ContigOrientation;
     // struct GapPos
     // {
@@ -381,78 +396,6 @@ struct AppConfig
         loger<<BGIQD::LOG::lstart() << "Load Contig done "<<BGIQD::LOG::lend() ;
     }
 
-    /*
-    void BuildScaff()
-    {
-        auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.scaff_seqs());
-        if( out == NULL )
-            FATAL(" failed to open xxx.scaff_seqs to write ");
-
-        std::vector<std::vector<unsigned int> >scaffs ;
-
-        for( const auto & pair : gaps )
-        {
-            std::vector<unsigned int> a_scaff;
-            for(size_t i = 0 ; i< pair.second.size() ; i++ )
-            {
-                const auto & gap = pair.second[i];
-                const auto & fill = gapfills[gap.prev];
-
-                if( a_scaff.empty() )
-                {
-                    a_scaff.push_back(fill.true_prev); 
-                    a_scaff.push_back(fill.true_next); 
-                }
-                else
-                {
-                    if( *(a_scaff.rbegin()) == fill.true_prev ) 
-                    {
-                        a_scaff.push_back(fill.true_next);
-                    }
-                    else
-                    {
-                        auto & fill_prev = gapfills[*(a_scaff.rbegin()+1)] ;
-                        int value = *fill_prev.extra.begin();
-                        int value1 =* fill.extra.begin() ;
-                        if( value1 > value )
-                        {
-                            *(a_scaff.rbegin()) = fill.true_prev ;
-                        }
-                        a_scaff.push_back(fill.true_next);
-                    }
-                }
-            }
-            scaffs.push_back(a_scaff);
-        }
-        int id = 0 ;
-        for( const auto & a_scaff : scaffs )
-        {
-            id++ ;
-            std::string line ;
-            (*out)<<">scaffold"<<id<<"\t20.5\n";
-            for(size_t i = 0 ; i < a_scaff.size() ; i++ )
-            {
-                unsigned int contig = a_scaff[i] ;
-                line+=contigMap.contigs[contig].K;
-                line+=contigMap.contigs[contig].linear;
-                if( i != a_scaff.size() - 1 )
-                {
-                    line += std::string(5000,'N');
-                }
-            }
-            for( int i = 0 ; i < (int)line.size() ; i++ )
-            {
-                (*out)<<line[i];
-                if( i % 100 == 0 || i ==(int) line.size() -1 )
-                {
-                    (*out)<<'\n';
-                }
-            }
-        }
-        delete out;
-        loger<<BGIQD::LOG::lstart() << "Build scaff done "<<BGIQD::LOG::lend() ;
-    }
-    */
     int GetGapLen(float s)
     {
         for( const auto p : gapArea )
@@ -589,8 +532,17 @@ struct AppConfig
         loger<<BGIQD::LOG::lstart()<<'\n'<<pfreq.ToString()<<BGIQD::LOG::lend();
     }
 
+    struct ContigInScaffDetails
+    {
+        unsigned int base ;
+        bool plus ;
+        int gap ;
+    };
+
     void BuildScaff()
     {
+        std::map<int , std::vector<ContigInScaffDetails> > scaff_details;
+
         auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.scaff_seqs());
         if( out == NULL )
             FATAL(" failed to open xxx.scaff_seqs to write ");
@@ -624,7 +576,11 @@ struct AppConfig
                 line+=contigMap.contigs[contig].K;
                 line+=contigMap.contigs[contig].linear;
                 if( i == a_scaff.size() - 1 )
+                {
+                    scaff_details[id].push_back(
+                            ContigInScaffDetails{tc.basic , tc.basic!=contig ,0});
                     break;
+                }
                 int fill = min_fill ;
                 if( tc.pe_fill.empty() )
                 {
@@ -655,6 +611,7 @@ struct AppConfig
                     fill = min_fill ;
 
                 line += std::string(fill,'N');
+                scaff_details[id].push_back(ContigInScaffDetails{tc.basic , tc.basic!=contig ,fill});
                 if( ! tc.pe_fill.empty() )
                 {
                     for( unsigned int x : tc.pe_fill )
@@ -665,6 +622,9 @@ struct AppConfig
                         if( fill_pe  < min_fill )
                             fill_pe  = min_fill ;
                         line += std::string(fill_pe,'N');
+                        unsigned int base = contigIndexs.BaseId(x);
+                        scaff_details[id].push_back(
+                                ContigInScaffDetails{base , base != x,fill_pe});
                     }
                 }
             }
@@ -694,10 +654,28 @@ struct AppConfig
             print_seq(line);
         }
         delete out;
+        out = NULL ;
         loger<<BGIQD::LOG::lstart() << "Build scaff done "<<BGIQD::LOG::lend() ;
         loger<<BGIQD::LOG::lstart() << " gap freq "
             <<gapFreq.ToString()
             <<BGIQD::LOG::lend() ;
+
+        auto out1 = BGIQD::FILES::FileWriterFactory::
+            GenerateWriterFromFileName(fName.scaff_infos());
+        if( out == NULL )
+            FATAL(" failed to open xxx.scaff_infos to write ");
+        for( const auto & pair : scaff_details )
+        {
+            (*out1)<<"<scaffold "<<pair.first<<'\n';
+            for( const auto & i : pair.second )
+            {
+                (*out1)<<i.base<<'\t'
+                       <<(i.plus ? '-' : '+' )<<'\t'
+                       <<i.gap<<'\n';
+            }
+        }
+
+        delete out1;
     }
     int min_contig ;
     int min_fill ;
@@ -736,6 +714,8 @@ int main(int argc, char **argv)
     config.gap_trunk = gap_trunk.to_int();
     config.gap_pe = gap_pe.to_int();
     config.gap_petrunk = gap_petrunk.to_int();
+
+    config.LoadContigIndex();
     config.LoadTrunk();
     config.LoadGapOO();
     config.LoadGapArea();
