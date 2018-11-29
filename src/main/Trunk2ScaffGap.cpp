@@ -294,6 +294,7 @@ struct AppConfig
             FATAL(" failed to open xxx.contigIndex for read!!! ");
         contigIndexs.LoadContigIndexs(*in);
         delete in ;
+        contigIndexs.BuildReverseCompleteContigs();
     }
 
     struct GapExtra

@@ -54,6 +54,7 @@ struct AppConfig
             FATAL(" failed to open xxx.contigIndex for read!!! ");
         contigIndexs.LoadContigIndexs(*in);
         delete in ;
+        contigIndexs.BuildReverseCompleteContigs();
     }
 
     void  LoadScaffoldsGaps()
@@ -67,7 +68,7 @@ struct AppConfig
 
         while(Reader.LoadNextFasta(*in,tmp))
         {
-            if(tmp.head.gap_type != Header::GapType::TRUNK )
+            if ( tmp.head.gap_type != Header::GapType::TRUNK )
                 continue ;
             gap_infos.push_back(tmp.head);
             used_contigs.insert(tmp.head.next_base_contig);

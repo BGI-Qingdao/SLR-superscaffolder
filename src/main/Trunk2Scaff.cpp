@@ -291,6 +291,7 @@ struct AppConfig
             FATAL(" failed to open xxx.contigIndex for read!!! ");
         contigIndexs.LoadContigIndexs(*in);
         delete in ;
+        contigIndexs.BuildReverseCompleteContigs();
     }
     typedef std::vector<TrueContig> ContigOrientation;
     // struct GapPos
@@ -662,7 +663,7 @@ struct AppConfig
 
         auto out1 = BGIQD::FILES::FileWriterFactory::
             GenerateWriterFromFileName(fName.scaff_infos());
-        if( out == NULL )
+        if( out1 == NULL )
             FATAL(" failed to open xxx.scaff_infos to write ");
         for( const auto & pair : scaff_details )
         {
