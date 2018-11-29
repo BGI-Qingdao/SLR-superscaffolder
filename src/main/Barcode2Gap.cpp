@@ -43,7 +43,7 @@ struct AppConfig
     void Init(const std::string & prefix)
     {
         fNames.Init(prefix);
-        BGIQD::LOG::logfilter::singleton().get("PEGraph",BGIQD::LOG::loglevel::INFO, loger);
+        BGIQD::LOG::logfilter::singleton().get("Barcode2Gap",BGIQD::LOG::loglevel::INFO, loger);
     }
 
     void LoadContigIndex()
