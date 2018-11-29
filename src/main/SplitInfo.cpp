@@ -29,6 +29,10 @@ struct AppConfig
 
     std::vector<BGIQD::EASY_SAM::PEInfo> pe_diffs;
 
+    std::vector<BGIQD::EASY_SAM::PEInfo> pe_boths;
+
+    std::vector<BGIQD::EASY_SAM::PE_Single> pe_singles;
+
     std::map<unsigned int , BGIQD::stLFR::ContigBarcodeInfo> cbs;
 
     std::map<int , BGIQD::stLFR::ContigOnBarcode> c2bs ;
@@ -83,16 +87,42 @@ struct AppConfig
 
             if( curr_line.pe_match && parse_pe )
             {
+                prev_line = curr_line ;
+                BGIQD::EASY_SAM::PE_Single tmp_pe ;
+                tmp_pe.read1 = curr_line.read_id ;
+                tmp_pe.match_reverse1 = curr_line.match_reverse ;
+                tmp_pe.contig1 = curr_line.contig_name ;
+                tmp_pe.pos_1bp1 = curr_line.pos_1bp ;
+                // pe_single r1
                 if( (curr_line.is_p ||  (! curr_line.pe_match) ))
                 {
                     prev_line = curr_line ;
+                    if((! curr_line.pe_match) && parse_gap)
+                    {
+                        pe_singles.push_back(tmp_pe);
+                    }
                     continue;
                 }
-                if( !( prev_line.is_p && prev_line.pe_match) ) 
+                // pe_single r2
+                if( (!( prev_line.is_p && prev_line.pe_match)) 
+                 || ( prev_line.read_id != curr_line.read_id -1 ) )
                 {
-                    prev_line = curr_line ;
+                    if( parse_gap )
+                    {
+                        pe_singles.push_back(tmp_pe);
+                    }
                     continue;
                 }
+                BGIQD::EASY_SAM::PEInfo tmp ;
+                tmp.read1 = prev_line.read_id ;
+                tmp.read2 = curr_line.read_id ;
+                tmp.match_reverse1 = prev_line.match_reverse ;
+                tmp.match_reverse2 = curr_line.match_reverse ;
+                tmp.pos_1bp1 = prev_line.pos_1bp; 
+                tmp.pos_1bp2 = curr_line.pos_1bp;
+                tmp.contig1 = prev_line.contig_name ;
+                tmp.contig2 = curr_line.contig_name;
+                // pe_both & Insert size calc
                 if( prev_line.contig_name == curr_line.contig_name)
                 {
                     std::vector<int> pos;
@@ -110,18 +140,15 @@ struct AppConfig
                     std::sort(pos.begin() ,pos.end());
                     int IS = pos[3] - pos [0] +1 ;
                     ISFreq.Touch(IS);
+
+                    if( parse_gap )
+                    {
+                        pe_boths.push_back(tmp);
+                    }
                 }
+                // pe_pair hook 2 contig
                 else
                 {
-                    BGIQD::EASY_SAM::PEInfo tmp ;
-                    tmp.read1 = prev_line.read_id ;
-                    tmp.read2 = curr_line.read_id ;
-                    tmp.match_reverse1 = prev_line.match_reverse ;
-                    tmp.match_reverse2 = curr_line.match_reverse ;
-                    tmp.pos_1bp1 = prev_line.pos_1bp; 
-                    tmp.pos_1bp2 = curr_line.pos_1bp;
-                    tmp.contig1 = prev_line.contig_name ;
-                    tmp.contig2 = curr_line.contig_name;
                     pe_diffs.push_back(tmp);
                 }
             }
@@ -147,6 +174,24 @@ struct AppConfig
 
     void PrintResult()
     {
+        if( parse_gap ) 
+        {
+            auto in_s = BGIQD::FILES::FileWriterFactory::
+                GenerateWriterFromFileName(fName.pe_singles());
+            for( const auto & item : pe_singles )
+            {
+                (*in_s)<<item.ToString()<<'\n';
+            }
+            delete in_s ;
+
+            auto in_b = BGIQD::FILES::FileWriterFactory::
+                GenerateWriterFromFileName(fName.pe_boths());
+            for( const auto & item : pe_boths )
+            {
+                (*in_b)<<item.ToString()<<'\n';
+            }
+            delete in_b ;
+        }
         if( parse_pe) 
         {
             auto in1 = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.pe_pairs());
@@ -196,6 +241,8 @@ struct AppConfig
         }
     }
 
+    bool parse_gap ;
+
 }config;
 
 int main(int argc , char ** argv)
@@ -203,11 +250,14 @@ int main(int argc , char ** argv)
     START_PARSE_ARGS
         DEFINE_ARG_REQUIRED(std::string, prefix ,"prefix of files. Input xxx.read2contig , Output depends on below options. Please at least choose one of below options.");
         DEFINE_ARG_OPTIONAL(bool, parse_pe,"parse pe data. will output xxx.pe_info && xxx.pe_pairs", "false");
+        DEFINE_ARG_OPTIONAL(bool, parse_gap,"parse pe data for gap closer. will output xxx.pe_single && xxx.pe_both ", "false");
         DEFINE_ARG_OPTIONAL(bool, parse_barcode,"parse barcode data . will output xxx.barcodeOnContig && xxx.contigOnBarcode", "false");
     END_PARSE_ARGS;
 
     config.parse_pe = parse_pe.to_bool() ;
     config.parse_barcode = parse_barcode.to_bool() ;
+    config.parse_gap = parse_gap.to_bool() ;
+
     config.Init(prefix.to_string());
     if( ! config.CheckParameters()  )
     {

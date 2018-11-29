@@ -49,6 +49,33 @@ namespace BGIQD {
 
         };
 
+        struct PE_Single
+        {
+            long  read1;
+            bool match_reverse1;
+            int contig1;
+            int pos_1bp1;
+
+            std::string ToString() const 
+            {
+                std::ostringstream ost;
+                ost<<read1<<'\t';
+                ost<<contig1<<'\t';
+                ost<<pos_1bp1<<'\t';
+                ost<<match_reverse1;
+                return ost.str();
+            }
+
+            void InitFromString(const std::string & line)
+            {
+                std::istringstream ist(line);
+                ist>>read1
+                    >>contig1
+                    >>pos_1bp1
+                    >>match_reverse1;
+            }
+        };
+
         struct PEInfo
         {
             long  read1;

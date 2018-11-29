@@ -60,8 +60,9 @@ namespace BGIQD {
             DEFINE_SUFFIX(pe_graph , ".pe_graph");
 
             DEFINE_SUFFIX(pe_info,".pe_info");
-
             DEFINE_SUFFIX(pe_pairs,".pe_pair");
+            DEFINE_SUFFIX(pe_singles,".pe_singles");
+            DEFINE_SUFFIX(pe_boths,".pe_boths");
 
             // ChopBin
             DEFINE_SUFFIX(barcodeList, ".barcodeList");
