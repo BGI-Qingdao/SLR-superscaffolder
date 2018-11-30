@@ -2,6 +2,7 @@
 #define __DESIGN_PATTERN_PUBLISH_SUBSCRIBE_H__
 
 #include <set>
+#include <cassert>
 
 namespace BGIQD {
     namespace DesignPattern {
@@ -21,6 +22,7 @@ namespace BGIQD {
 
                 void add( Subscriber * ptr )
                 {
+                    assert(ptr != NULL );
                     _subsribers.insert(ptr);
                 }
 
@@ -38,6 +40,7 @@ namespace BGIQD {
                 {
                     for( auto x : _subsribers )
                     {
+                        assert( x != NULL );
                         x->update_msg(_msg);
                     }
                 };
@@ -46,6 +49,7 @@ namespace BGIQD {
                 {
                     for( auto x : _subsribers )
                     {
+                        assert( x != NULL );
                         x->update_msg(msg);
                     }
                 }

@@ -222,6 +222,7 @@ struct ReadNameRegister : public PESingleSub
 
     virtual void update_msg( const BGIQD::EASY_SAM::PE_Single & info )
     {
+        assert(item != NULL );
         if( info.read1 %2 == 0 )
         {
             std::string read_name = read_num_2_str.Id(info.read1-1);
@@ -243,7 +244,6 @@ struct ITrunkSub : public ISub
 struct ReadNameRegisterPEBoth : public PEBothSub 
 {
     ISub* item ;
-    ITrunkSub * item_t;
     virtual void update_msg( const BGIQD::EASY_SAM::PEInfo& info )
     {
         unsigned int read = info.read1 < info.read2 ? info.read1 : info.read2 ;
@@ -251,8 +251,8 @@ struct ReadNameRegisterPEBoth : public PEBothSub
         //PE share the same read_name
         read_name_filter.watch( read_name , item);
         // TODO : need split make r1 & r2
-        item_t->CheckMatch(info.PInfo(), true);
-        item_t->CheckMatch(info.EInfo(), false);
+        dynamic_cast<ITrunkSub*>(item)->CheckMatch(info.PInfo(), true);
+        dynamic_cast<ITrunkSub*>(item)->CheckMatch(info.EInfo(), false);
     }
 };
 
@@ -290,7 +290,6 @@ struct TrunkGap : public GapContigs , public ScaffPackage , public ITrunkSub
         pe_single_filter.watch(c2.contig ,&rgt);
 
         rgtb.item = this ;
-        rgtb.item_t = this ;
         pe_both_filter.watch(c1.contig ,&rgtb);
         pe_both_filter.watch(c2.contig ,&rgtb);
     }
@@ -382,6 +381,7 @@ struct AppConfig
 
     void LoadGaps()
     {
+        BGIQD::LOG::timer t( loger,"LoadGaps");
         auto in  = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fNames.scaff_gap2filler_seqs());
         if( in == NULL )
             FATAL(" failed to open xxx.scaff_gap2filler_seqs for read!!! ");
@@ -398,6 +398,7 @@ struct AppConfig
 
     void BuildGaps()
     {
+        BGIQD::LOG::timer t( loger,"BuildGaps");
         pe_gap_num = 0 ;
         trunk_gap_num = 0 ;
         for( const auto & i : gap_buffer )
@@ -434,6 +435,7 @@ struct AppConfig
 
     void LoadPESingles()
     {
+        BGIQD::LOG::timer t( loger,"LoadPESingles");
         auto in = BGIQD::FILES::FileReaderFactory::
             GenerateReaderFromFileName(fNames.pe_singles());
         if(in == NULL)
@@ -450,6 +452,7 @@ struct AppConfig
 
     void LoadPEBoths()
     {
+        BGIQD::LOG::timer t( loger,"LoadPEBoths");
         auto in = BGIQD::FILES::FileReaderFactory::
             GenerateReaderFromFileName(fNames.pe_boths());
         if(in == NULL)
@@ -466,6 +469,7 @@ struct AppConfig
     }
     void LoadContigIndex()
     {
+        BGIQD::LOG::timer t( loger,"LoadContigIndex");
         auto in = BGIQD::FILES::FileReaderFactory::
             GenerateReaderFromFileName(fNames.ContigIndex());
         if(in == NULL)
@@ -484,6 +488,7 @@ struct AppConfig
 
     void LoadBarcodeOnGaps()
     {
+        BGIQD::LOG::timer t( loger,"LoadBarcodeOnGaps");
         auto in = BGIQD::FILES::FileReaderFactory
             ::GenerateReaderFromFileName(fNames.barcodeOnGaps());
         if( in == NULL )
@@ -503,6 +508,7 @@ struct AppConfig
 
     void ParseAReadFile(std::string r)
     {
+        BGIQD::LOG::timer t( loger,"ParseAReadFile "+r);
         auto in  = BGIQD::FILES::FileReaderFactory
             ::GenerateReaderFromFileName(r);
         if( in == NULL )
@@ -525,6 +531,7 @@ struct AppConfig
     std::string r2;
     void ParseReads()
     {
+        BGIQD::LOG::timer t( loger,"ParseReads");
         // Parse read1 
         ParseAReadFile(r1);
         for( int i = 0 ; i < pe_gap_num ; i++ )
