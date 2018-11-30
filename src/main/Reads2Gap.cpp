@@ -163,7 +163,9 @@ struct ScaffPackage
 
     void AddR1( const stLFRRead & read )
     {
-        buffer[index] = read ;
+        assert(0<=index);
+        assert(index<reads_buffer_size);
+        buffer[index%reads_buffer_size] = read ;
         index ++ ;
         if ( index >= reads_buffer_size )
             CleanBufferR1() ;
@@ -181,9 +183,11 @@ struct ScaffPackage
 
     void AddR2( const stLFRRead & read )
     {
-        buffer[index] = read ;
+        assert(0<=index);
+        assert(index<reads_buffer_size);
+        buffer[index%reads_buffer_size] = read ;
         index ++ ;
-        if ( index >= 10000 )
+        if ( index >= reads_buffer_size )
             CleanBufferR2() ;
     }
 
