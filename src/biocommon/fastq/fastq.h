@@ -34,7 +34,29 @@ namespace BGIQD {
                 readName_barcodeStr_index =  2 ,
                 readName_barcodeStr_index_barcodeNum = 3 ,
             } type ;
+            stLFRHeader() {
+                Reset();
+            }
 
+            stLFRHeader(const stLFRHeader & a) {
+                type = a.type ;
+                readIndex  = a.readIndex ;
+                barcode_num = a.barcode_num ;
+                barcode_str = a.barcode_str ;
+                readName = a.readName ;
+            }
+
+            stLFRHeader & operator = ( const stLFRHeader & a ) {
+                if( &a != this )
+                {
+                    type = a.type ;
+                    readIndex  = a.readIndex ;
+                    barcode_num = a.barcode_num ;
+                    barcode_str = a.barcode_str ;
+                    readName = a.readName ;
+                }
+                return *this ;
+            }
 
             int readIndex ; //  1/2/3
 
@@ -53,7 +75,8 @@ namespace BGIQD {
                 type = Unknow ;
                 readName ="";
                 barcode_str = "" ;
-                readIndex = barcode_num = 0 ;
+                readIndex = 0 ;
+                barcode_num = 0 ;
             }
         };
 
