@@ -121,9 +121,17 @@ struct ScaffPackage
     std::ofstream * r2;
     const static int reads_buffer_size = 1024;
 
-    void Init(std::string id )
+    void Init(const std::string & id )
     {
-        std::string prefix = "tmp_gap_filler_" + (id);
+        std::string idd = id ;
+        for( auto & x :idd )
+        {
+            if( std::isalnum(x) )
+                continue ;
+            else
+                x = '_';
+        }
+        std::string prefix = "tmp_filler_" + (idd);
         // open 3 files
         scaff = new std::ofstream(prefix+".scaff.fa");
         r1 = new std::ofstream(prefix+".r1.fq");
@@ -140,6 +148,7 @@ struct ScaffPackage
         delete scaff ;
         scaff = NULL ;
     }
+
     stLFRRead buffer[reads_buffer_size];
     int index ;
 
@@ -213,14 +222,22 @@ struct ReadNameRegister : public PESingleSub
 
     virtual void update_msg( const BGIQD::EASY_SAM::PE_Single & info )
     {
-        std::string read_name = read_num_2_str.Id(info.read1);
-        read_name_filter.watch( read_name , item);
+        if( info.read1 %2 == 0 )
+        {
+            std::string read_name = read_num_2_str.Id(info.read1-1);
+            read_name_filter.watch( read_name , item);
+        }
+        else
+        {
+            std::string read_name = read_num_2_str.Id(info.read1);
+            read_name_filter.watch( read_name , item);
+        }
     }
 };
 
 struct ITrunkSub : public ISub
 {
-    virtual void CheckMatch( const BGIQD::EASY_SAM::PE_Single & info ) = 0 ;
+    virtual void CheckMatch( const BGIQD::EASY_SAM::PE_Single & info , bool p) = 0 ;
 };
 
 struct ReadNameRegisterPEBoth : public PEBothSub 
@@ -229,13 +246,13 @@ struct ReadNameRegisterPEBoth : public PEBothSub
     ITrunkSub * item_t;
     virtual void update_msg( const BGIQD::EASY_SAM::PEInfo& info )
     {
-        std::string read_name = read_num_2_str.Id(info.read1);
+        unsigned int read = info.read1 < info.read2 ? info.read1 : info.read2 ;
+        std::string read_name = read_num_2_str.Id(read);
+        //PE share the same read_name
         read_name_filter.watch( read_name , item);
-        std::string read_name1 = read_num_2_str.Id(info.read2);
-        read_name_filter.watch( read_name1 , item);
-
-        item_t->CheckMatch(info.PInfo());
-        item_t->CheckMatch(info.EInfo());
+        // TODO : need split make r1 & r2
+        item_t->CheckMatch(info.PInfo(), true);
+        item_t->CheckMatch(info.EInfo(), false);
     }
 };
 
@@ -280,7 +297,9 @@ struct TrunkGap : public GapContigs , public ScaffPackage , public ITrunkSub
 
     std::set<std::string> barcodes ;
 
-    std::set<std::string> maped_reads_str;
+    std::set<std::string> maped_reads_str_r1;
+
+    std::set<std::string> maped_reads_str_r2;
 
     std::vector<stLFRRead> maped_reads ;
 
@@ -288,10 +307,16 @@ struct TrunkGap : public GapContigs , public ScaffPackage , public ITrunkSub
 
     std::string prev_read_name ;
 
-    void CheckMatch( const BGIQD::EASY_SAM::PE_Single & info )
+    void CheckMatch( const BGIQD::EASY_SAM::PE_Single & info , bool p)
     {
         if( IsContain(info) )
-            maped_reads_str.insert(read_num_2_str.Id(info.read1));
+        {
+            unsigned int read = info.read1 % 2 == 1 ? info.read1  : info.read1 -1 ;
+            if( p ) 
+                maped_reads_str_r1.insert(read_num_2_str.Id(read));
+            else
+                maped_reads_str_r2.insert(read_num_2_str.Id(read));
+        }
     }
 
     virtual void update_msg( const stLFRRead & msg ) final
@@ -306,10 +331,20 @@ struct TrunkGap : public GapContigs , public ScaffPackage , public ITrunkSub
         // barcode reads save first.
         else
         {
-            if( maped_reads_str.find( msg.head.readName ) == maped_reads_str.end())
-                maped_reads.push_back(msg);
+            if( r1_flag )
+            {
+                if( maped_reads_str_r1.find( msg.head.readName ) == maped_reads_str_r1.end())
+                    maped_reads.push_back(msg);
+                else
+                    unmaped_reads.push_back(msg);
+            }
             else
-                unmaped_reads.push_back(msg);
+            {
+                if( maped_reads_str_r2.find( msg.head.readName ) == maped_reads_str_r2.end())
+                    maped_reads.push_back(msg);
+                else
+                    unmaped_reads.push_back(msg);
+            }
         }
     }
 
