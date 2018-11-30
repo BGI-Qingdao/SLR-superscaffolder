@@ -22,7 +22,7 @@ namespace BGIQD {
 
                 void add( Subscriber * ptr )
                 {
-                    assert(ptr != NULL && *ptr != NULL );
+                    assert(ptr != NULL );
                     _subsribers.insert(ptr);
                 }
 

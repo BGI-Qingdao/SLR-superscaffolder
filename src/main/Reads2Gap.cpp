@@ -220,7 +220,7 @@ struct ReadNameRegister : public PESingleSub
 {
     ISub* item ;
 
-    virtual void update_msg( const BGIQD::EASY_SAM::PE_Single & info )
+    virtual void update_msg( const BGIQD::EASY_SAM::PE_Single & info ) final
     {
         assert(item != NULL );
         if( info.read1 %2 == 0 )
@@ -244,7 +244,7 @@ struct ITrunkSub : public ISub
 struct ReadNameRegisterPEBoth : public PEBothSub 
 {
     ISub* item ;
-    virtual void update_msg( const BGIQD::EASY_SAM::PEInfo& info )
+    virtual void update_msg( const BGIQD::EASY_SAM::PEInfo& info ) final
     {
         unsigned int read = info.read1 < info.read2 ? info.read1 : info.read2 ;
         std::string read_name = read_num_2_str.Id(read);
@@ -420,7 +420,7 @@ struct AppConfig
                 (pe_gaps[pe_gap_num]).Init(i);
                 (pe_gaps[pe_gap_num]).AddScaff(i);
                 pe_gap_num ++ ;
-                gapname_ptr_map[i.head.Head()] = &(pe_gaps[pe_gap_num]);
+                //gapname_ptr_map[i.head.Head()] = &(pe_gaps[pe_gap_num]);
             }
             else
             {
@@ -500,7 +500,12 @@ struct AppConfig
             if(line[0] == '>')
                 gap_name = line ;
             else
-                barcode_filter.watch( line , gapname_ptr_map[gap_name] );
+            {
+                if( gapname_ptr_map.find(gap_name) != gapname_ptr_map.end() )
+                {
+                    barcode_filter.watch( line , gapname_ptr_map.at(gap_name) );
+                }
+            }
         }
         delete in ;
     }

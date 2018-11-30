@@ -24,7 +24,7 @@ namespace BGIQD {
 
                 void watch(const Key & k ,Subscriber * ptr)
                 {
-                    assert(ptr != NULL && *ptr != NULL );
+                    assert(ptr != NULL  );
                     _filter_map[k].add(ptr);
                 }
 
