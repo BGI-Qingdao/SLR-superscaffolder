@@ -115,7 +115,6 @@ struct GapContigs
 
 struct ScaffPackage
 {
-    int id ;
     std::ofstream * scaff ; 
     std::ofstream * r1; 
     std::ofstream * r2;
@@ -511,7 +510,7 @@ struct AppConfig
     }
 
 
-    void ParseAReadFile(std::string r)
+    void ParseAReadFile(const std::string & r)
     {
         BGIQD::LOG::timer t( loger,"ParseAReadFile "+r);
         auto in  = BGIQD::FILES::FileReaderFactory
@@ -550,6 +549,7 @@ struct AppConfig
             (pe_gaps[i]).EndR2();
         for( int i = 0 ; i < trunk_gap_num ; i++ )
             (trunk_gaps[i]).EndR2();
+
         for( int i = 0 ; i < trunk_gap_num ; i++ )
             (trunk_gaps[i]).EndAllReads();
     }

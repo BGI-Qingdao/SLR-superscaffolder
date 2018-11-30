@@ -51,7 +51,8 @@ namespace BGIQD {
             void Reset()
             {
                 type = Unknow ;
-                readName = barcode_str = "" ;
+                readName ="";
+                barcode_str = "" ;
                 readIndex = barcode_num = 0 ;
             }
         };
