@@ -12,7 +12,7 @@ namespace BGIQD {
         struct EasySam
         {
             long read_id ;
-            int contig_name ;
+            unsigned int contig_name ;
             int pos_1bp;
             int barcode ;
             bool match_reverse;
@@ -53,7 +53,7 @@ namespace BGIQD {
         {
             long  read1;
             bool match_reverse1;
-            int contig1;
+            unsigned int contig1;
             int pos_1bp1;
 
             std::string ToString() const 
@@ -82,8 +82,8 @@ namespace BGIQD {
             long  read2;
             bool match_reverse1;
             bool match_reverse2;
-            int contig1;
-            int contig2;
+            unsigned int contig1;
+            unsigned int contig2;
             int pos_1bp1;
             int pos_1bp2;
 
@@ -113,6 +113,26 @@ namespace BGIQD {
                     >>pos_1bp2
                     >>match_reverse2;
             }
+
+            PE_Single PInfo() const 
+            {
+                PE_Single tmp;
+                tmp.read1 = read1 ;
+                tmp.match_reverse1 = match_reverse1 ;
+                tmp.pos_1bp1 = pos_1bp1 ;
+                tmp.contig1 = contig1 ;
+                return tmp ;
+            };
+
+            PE_Single EInfo() const 
+            {
+                PE_Single tmp;
+                tmp.read1 = read2 ;
+                tmp.match_reverse1 = match_reverse2 ;
+                tmp.pos_1bp1 = pos_1bp2 ;
+                tmp.contig1 = contig2 ;
+                return tmp ;
+            }
         };
 
         struct PE_Baisc
@@ -129,7 +149,7 @@ namespace BGIQD {
 
             int read_index;
 
-            int contig_name ;
+            unsigned int contig_name ;
 
             int left_1bp;
 

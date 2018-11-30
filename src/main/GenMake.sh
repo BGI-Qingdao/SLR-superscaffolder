@@ -21,6 +21,7 @@ apps="Barcode2Gap\
  ParseReadName\
  PEGraph\
  ReadName2Num\
+ Reads2Gap\
  Sam2ReadOnContig\
  SeedCluster\
  SplitInfo\

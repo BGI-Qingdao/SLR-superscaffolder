@@ -42,7 +42,7 @@ source_o		= ${source_cpp:%.cpp=%.o}
 .cpp.o:
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
-jobs =Barcode2Gap Barcode2Scaffold  BinCluster ChopBin ContigDlink ExternContigByPE FakePE2BC FCRFByTF FillContigRoad FillTrunkByPE Gap_OAO LinearCDG MergeContig MergePEInfo MinTree MST ParseContig2Read ParseRead2Contig ParseReadName PEGraph ReadName2Num Sam2ReadOnContig SeedCluster SplitInfo SplitScaffWithReads StaticsticUnique Trunk2Scaff Trunk2ScaffGap
+jobs =Barcode2Gap Barcode2Scaffold  BinCluster ChopBin ContigDlink ExternContigByPE FakePE2BC FCRFByTF FillContigRoad FillTrunkByPE Gap_OAO LinearCDG MergeContig MergePEInfo MinTree MST ParseContig2Read ParseRead2Contig ParseReadName PEGraph ReadName2Num Reads2Gap Sam2ReadOnContig SeedCluster SplitInfo SplitScaffWithReads StaticsticUnique Trunk2Scaff Trunk2ScaffGap
 
 all :  ${jobs}
 
@@ -238,6 +238,15 @@ ReadName2Num : clean ${ReadName2Num_o} ${source_o} ../bin
 
 
 
+Reads2Gap_cpp = Reads2Gap.cpp
+Reads2Gap_o = Reads2Gap.o
+Reads2Gap : clean ${Reads2Gap_o} ${source_o} ../bin
+	${CXX} ${Reads2Gap_o} ${source_o} ${DEUBG_CXX} -o Reads2Gap
+	mv $@ ../bin/
+
+
+
+
 Sam2ReadOnContig_cpp = Sam2ReadOnContig.cpp
 Sam2ReadOnContig_o = Sam2ReadOnContig.o
 Sam2ReadOnContig : clean ${Sam2ReadOnContig_o} ${source_o} ../bin
@@ -299,7 +308,7 @@ Trunk2ScaffGap : clean ${Trunk2ScaffGap_o} ${source_o} ../bin
 	mv $@ ../bin/
 
 
-jobs_o=  ${Barcode2Gap_o} ${Barcode2Scaffold_o} ${BinCluster_o} ${ChopBin_o} ${ContigDlink_o} ${ExternContigByPE_o} ${FakePE2BC_o} ${FCRFByTF_o} ${FillContigRoad_o} ${FillTrunkByPE_o} ${Gap_OAO_o} ${LinearCDG_o} ${MergeContig_o} ${MergePEInfo_o} ${MinTree_o} ${MST_o} ${ParseContig2Read_o} ${ParseRead2Contig_o} ${ParseReadName_o} ${PEGraph_o} ${ReadName2Num_o} ${Sam2ReadOnContig_o} ${SeedCluster_o} ${SplitInfo_o} ${SplitScaffWithReads_o} ${StaticsticUnique_o} ${Trunk2Scaff_o} ${Trunk2ScaffGap_o}
+jobs_o=  ${Barcode2Gap_o} ${Barcode2Scaffold_o} ${BinCluster_o} ${ChopBin_o} ${ContigDlink_o} ${ExternContigByPE_o} ${FakePE2BC_o} ${FCRFByTF_o} ${FillContigRoad_o} ${FillTrunkByPE_o} ${Gap_OAO_o} ${LinearCDG_o} ${MergeContig_o} ${MergePEInfo_o} ${MinTree_o} ${MST_o} ${ParseContig2Read_o} ${ParseRead2Contig_o} ${ParseReadName_o} ${PEGraph_o} ${ReadName2Num_o} ${Reads2Gap_o} ${Sam2ReadOnContig_o} ${SeedCluster_o} ${SplitInfo_o} ${SplitScaffWithReads_o} ${StaticsticUnique_o} ${Trunk2Scaff_o} ${Trunk2ScaffGap_o}
 
 dirty	   =${jobs_o} ${jobs} ${source_o}
 

@@ -4,10 +4,12 @@
 #include "common/string/stringtools.h"
 #include "common/error/Error.h"
 
+#include <cassert>
+
 namespace BGIQD{
 namespace stLFR{
 
-    int StringIdCache::Id(const std::string & tag)
+    long StringIdCache::Id(const std::string & tag)
     {
         if( tag == "0_0_0")
             return 0;
@@ -44,5 +46,37 @@ namespace stLFR{
         data.Print(*out);
         delete out;
     }
+
+    std::string IdStringCache::Id(long id)
+    {
+        try{
+            return data.at(id) ;
+        }
+        catch(...)
+        {
+            assert(0);
+        }
+    }
+
+    void IdStringCache::LoadStringIdCache( const std::string & file)
+    {
+        if( ! preload )
+            return ;
+        auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(file);
+        if( in == NULL )
+            FATAL( " open (barcodeList) file for read failed !!! " );
+        std::string line ;
+        while(in &&!std::getline(*in,line).eof())
+        {
+            auto pair = BGIQD::STRING::split(line,"\t");
+            data[std::stoi(pair.at(1))]=pair.at(0);
+        }
+        if( in )
+            delete in ;
+
+    }
+
+
+
 }
 }

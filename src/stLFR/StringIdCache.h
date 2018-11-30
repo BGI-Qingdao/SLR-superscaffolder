@@ -21,7 +21,7 @@ namespace BGIQD{
                 //      return correct id or -1 
                 //  else
                 //      return correct id or assign a new id and return it .
-                int  Id( const std::string & tag );
+                long  Id( const std::string & tag );
 
                 // Load barcodeList from file 
                 //  content format :
@@ -35,6 +35,21 @@ namespace BGIQD{
                 TagId data;
         };
 
+        class IdStringCache
+        {
+            public:
+
+                IdStringCache() : preload (false) {}
+
+                // Is barcodeList preLoaded or not ?
+                bool preload ;
+
+                std::string  Id(long id);
+
+                void LoadStringIdCache( const std::string & file);
+
+                std::map<long , std::string > data;
+        };
     } // namespace stLFR
 } // namespace BGIQD
 #endif //__STLFR_STRINGIDCACHE_H__
