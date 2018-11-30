@@ -382,12 +382,14 @@ struct AppConfig
             if( i.head.gap_type != GapHead::GapType::TRUNK )
             {
                 (pe_gaps[pe_gap_num]).Init(i);
+                (pe_gaps[pe_gap_num]).AddScaff(i);
                 pe_gap_num ++ ;
                 gapname_ptr_map[i.head.Head()] = &(pe_gaps[pe_gap_num]);
             }
             else
             {
                 (trunk_gaps[trunk_gap_num]).Init(i);
+                (trunk_gaps[trunk_gap_num]).AddScaff(i);
                 trunk_gap_num ++ ;
                 gapname_ptr_map[i.head.Head()] = &(trunk_gaps[trunk_gap_num]);
             }
