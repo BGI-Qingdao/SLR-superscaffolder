@@ -68,8 +68,6 @@ struct AppConfig
 
         while(Reader.LoadNextFasta(*in,tmp))
         {
-            if ( tmp.head.gap_type != Header::GapType::TRUNK )
-                continue ;
             gap_infos.push_back(tmp.head);
             used_contigs.insert(tmp.head.next_base_contig);
             used_contigs.insert(tmp.head.prev_base_contig);
