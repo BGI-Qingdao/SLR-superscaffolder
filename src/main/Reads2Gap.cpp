@@ -242,6 +242,7 @@ struct ReadNameRegister : public PESingleSub
 struct ITrunkSub : public ISub
 {
     virtual void CheckMatch( const BGIQD::EASY_SAM::PE_Single & info , bool p) = 0 ;
+    virtual void AssignBarcode(  const std::string & barcode ) = 0 ;
 };
 
 struct ReadNameRegisterPEBoth : public PEBothSub 
@@ -261,16 +262,16 @@ struct ReadNameRegisterPEBoth : public PEBothSub
 
 struct PEGap :  public GapContigs , public ScaffPackage , public ISub
 {
-    ReadNameRegister rgt;
+    //ReadNameRegister rgt;
 
     void Init(const GapItem & item )
     {
         GapContigs::Init(item.head.prev_base_contig ,
                 item.head.next_base_contig);
         ScaffPackage::Init(item.head.Head());
-        rgt.item = this ;
-        pe_single_filter.watch(c1.contig ,&rgt);
-        pe_single_filter.watch(c2.contig ,&rgt);
+        //rgt.item = this ;
+        //pe_single_filter.watch(c1.contig ,&rgt);
+        //pe_single_filter.watch(c2.contig ,&rgt);
     }
 
     virtual void update_msg( const stLFRRead & msg ) final
@@ -309,6 +310,10 @@ struct TrunkGap : public GapContigs , public ScaffPackage , public ITrunkSub
 
     std::string prev_read_name ;
 
+    virtual void AssignBarcode(  const std::string & barcode ) final 
+    {
+        barcodes.insert(barcode);
+    }
     void CheckMatch( const BGIQD::EASY_SAM::PE_Single & info , bool p)
     {
         if( IsContain(info) )
@@ -398,7 +403,7 @@ struct AppConfig
     int trunk_gap_num ;
 
     std::map<std::string , ISub * > gapname_ptr_map;
-
+    std::map<std::string , ITrunkSub * > trunkname_ptr_map;
     void BuildGaps()
     {
         BGIQD::LOG::timer t( loger,"BuildGaps");
@@ -422,7 +427,7 @@ struct AppConfig
             {
                 (pe_gaps[pe_gap_num]).Init(i);
                 (pe_gaps[pe_gap_num]).AddScaff(i);
-                //gapname_ptr_map[i.head.Head()] = &(pe_gaps[pe_gap_num]);
+                gapname_ptr_map[i.head.Head()] = &(pe_gaps[pe_gap_num]);
                 pe_gap_num ++ ;
             }
             else
@@ -430,6 +435,7 @@ struct AppConfig
                 (trunk_gaps[trunk_gap_num]).Init(i);
                 (trunk_gaps[trunk_gap_num]).AddScaff(i);
                 gapname_ptr_map[i.head.Head()] = &(trunk_gaps[trunk_gap_num]);
+                trunkname_ptr_map[i.head.Head()] = &(trunk_gaps[trunk_gap_num]);
                 trunk_gap_num ++ ;
             }
         }
@@ -489,13 +495,13 @@ struct AppConfig
         read_num_2_str.LoadStringIdCache(fNames.readNameList());
     }
 
-    void LoadBarcodeOnGaps()
+    void LoadBarcodeOnGaps_union()
     {
-        BGIQD::LOG::timer t( loger,"LoadBarcodeOnGaps");
+        BGIQD::LOG::timer t( loger,"LoadBarcodeOnGaps_union");
         auto in = BGIQD::FILES::FileReaderFactory
-            ::GenerateReaderFromFileName(fNames.barcodeOnGaps());
+            ::GenerateReaderFromFileName(fNames.barcodeOnGaps_union());
         if( in == NULL )
-          FATAL(" failed to open xxx.barcodeOnGaps for read !!! ");
+          FATAL(" failed to open xxx.barcodeOnGaps_union for read !!! ");
         std::string line ;
         std::string gap_name ;
         while( ! std::getline(*in, line).eof() )
@@ -507,6 +513,33 @@ struct AppConfig
                 if( gapname_ptr_map.find(gap_name) != gapname_ptr_map.end() )
                 {
                     barcode_filter.watch( line , gapname_ptr_map.at(gap_name) );
+                }
+            }
+        }
+        delete in ;
+    }
+    void LoadBarcodeOnGaps_intersection()
+    {
+        BGIQD::LOG::timer t( loger,"LoadBarcodeOnGaps");
+        auto in = BGIQD::FILES::FileReaderFactory
+            ::GenerateReaderFromFileName(fNames.barcodeOnGaps_intersection());
+        if( in == NULL )
+          FATAL(" failed to open xxx.barcodeOnGaps_intersection for read !!! ");
+        std::string line ;
+        std::string gap_name ;
+        while( ! std::getline(*in, line).eof() )
+        {
+            if(line[0] == '>')
+                gap_name = line ;
+            else
+            {
+                if( gapname_ptr_map.find(gap_name) != gapname_ptr_map.end() )
+                {
+                    barcode_filter.watch( line , gapname_ptr_map.at(gap_name) );
+                }
+                if( trunkname_ptr_map.find( gap_name ) != trunkname_ptr_map.end() )
+                {
+                    trunkname_ptr_map.at(gap_name)->AssignBarcode(line);
                 }
             }
         }
@@ -578,6 +611,7 @@ int main(int argc , char **argv)
     config.BuildGaps();
     config.LoadPESingles();
     config.LoadPEBoths();
-    config.LoadBarcodeOnGaps();
+    config.LoadBarcodeOnGaps_intersection();
+    config.LoadBarcodeOnGaps_union();
     config.ParseReads();
 }
