@@ -124,7 +124,8 @@ namespace BGIQD {
 
             DEFINE_SUFFIX(barcodeOnScaff, ".barcodeOnScaff");
 
-            DEFINE_SUFFIX(barcodeOnGaps, ".barcodeOnGaps");
+            DEFINE_SUFFIX(barcodeOnGaps_intersection, ".barcodeOnGaps_intersection");
+            DEFINE_SUFFIX(barcodeOnGaps_union, ".barcodeOnGaps_union");
 
             private:
                 std::string m_prefix;

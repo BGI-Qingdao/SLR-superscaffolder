@@ -94,18 +94,41 @@ struct AppConfig
         delete in ;
     }
 
-    void PrintBarcodeOnGaps()
+    void PrintBarcode_Intersection_OnGaps()
     {
         auto out = BGIQD::FILES::FileWriterFactory
-            ::GenerateWriterFromFileName(fNames.barcodeOnGaps());
+            ::GenerateWriterFromFileName(fNames.barcodeOnGaps_intersection());
         if( out == NULL )
-            FATAL(" failed to open xxx.barcodeOnGaps for write!!! ");
+            FATAL(" failed to open xxx.barcodeOnGaps_intersection for write!!! ");
 
         for( const auto & gap: gap_infos)
         {
             (*out)<<gap.Head()<<'\n';
             auto barcode_both = 
                 BarcodeCollection::Intersection(
+                        contig_barcode_info.at( gap.prev_base_contig)
+                    ,   contig_barcode_info.at( gap.next_base_contig) );
+
+            for(const auto & pair : barcode_both.elements)
+            {
+                (*out)<<barcodes.at(pair.first)<<'\n';
+            }
+        }
+        delete out;
+    }
+
+    void PrintBarcode_Union_OnGaps()
+    {
+        auto out = BGIQD::FILES::FileWriterFactory
+            ::GenerateWriterFromFileName(fNames.barcodeOnGaps_union());
+        if( out == NULL )
+            FATAL(" failed to open xxx.barcodeOnGaps_union for write!!! ");
+
+        for( const auto & gap: gap_infos)
+        {
+            (*out)<<gap.Head()<<'\n';
+            auto barcode_both = 
+                BarcodeCollection::Union(
                         contig_barcode_info.at( gap.prev_base_contig)
                     ,   contig_barcode_info.at( gap.next_base_contig) );
 
@@ -152,7 +175,7 @@ struct AppConfig
 int main(int argc , char **argv)
 {
     START_PARSE_ARGS
-        DEFINE_ARG_REQUIRED(std::string , prefix , "prefix , Input xxx.cluster . Output xxx.minTree ");
+        DEFINE_ARG_REQUIRED(std::string , prefix , "prefix  ");
     END_PARSE_ARGS
 
     config.Init(prefix.to_string());
@@ -160,5 +183,6 @@ int main(int argc , char **argv)
     config.LoadBarcodeList();
     config.LoadScaffoldsGaps();
     config.LoadBarcodeOnContig();
-    config.PrintBarcodeOnGaps();
+    config.PrintBarcode_Intersection_OnGaps();
+    config.PrintBarcode_Union_OnGaps();
 }
