@@ -542,11 +542,12 @@ struct AppConfig
         for( const auto & a_scaff : scaffs )
         {
             id++ ;
+            auto & a_scaffold = helper.all_scaff[id];
+            a_scaffold.scaff_id = id ;
             int index = 1 ;
             int pos = 1 ;
             for(size_t i = 0 ; i < a_scaff.size() ; i++ )
             {
-                auto & a_scaffold = helper.all_scaff[id];
                 const auto & tc = a_scaff[i];
                 unsigned int contig = tc.Value() ;
                 if( i == a_scaff.size() - 1 )
