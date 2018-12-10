@@ -36,7 +36,7 @@ struct AppConfig {
         delete in ;
     }
 
-    void PrintShort() 
+    void PrintShort()
     {
         auto out = BGIQD::FILES::FileWriterFactory
             ::GenerateWriterFromFileName(fNames.contig_short());

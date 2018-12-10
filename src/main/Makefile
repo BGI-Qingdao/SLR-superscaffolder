@@ -43,7 +43,7 @@ source_o		= ${source_cpp:%.cpp=%.o}
 .cpp.o:
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
-jobs = Barcode2Scaffold  BinCluster ChopBin ContigDlink ExternContigByPE FakePE2BC FCRFByTF FillContigRoad FillTrunkByPE Gap_OAO LinearCDG MergeContig MergePEInfo MinTree MST ParseContig2Read ParseRead2Contig ParseReadName PEGraph Sam2ReadOnContig SeedCluster SplitInfo SplitScaffWithReads StaticsticUnique Trunk2Scaff Trunk2ScaffInfo
+jobs = Barcode2Scaffold  BinCluster ChopBin ContigDlink ExternContigByPE FakePE2BC FCRFByTF FillContigRoad FillTrunkByPE Gap_OAO LinearCDG MergeContig MergePEInfo MinTree MST ParseContig2Read ParseRead2Contig ParseReadName PEGraph Sam2ReadOnContig ScaffInfo2Seq SeedCluster SplitInfo SplitScaffWithReads StaticsticUnique Trunk2Scaff Trunk2ScaffInfo
 
 all :  ${jobs}
 
@@ -230,6 +230,15 @@ Sam2ReadOnContig : clean ${Sam2ReadOnContig_o} ${source_o} ../bin
 
 
 
+ScaffInfo2Seq_cpp = ScaffInfo2Seq.cpp
+ScaffInfo2Seq_o = ScaffInfo2Seq.o
+ScaffInfo2Seq : clean ${ScaffInfo2Seq_o} ${source_o} ../bin
+	${CXX} ${ScaffInfo2Seq_o} ${source_o} ${DEUBG_CXX} -o ScaffInfo2Seq
+	mv $@ ../bin/
+
+
+
+
 SeedCluster_cpp = SeedCluster.cpp
 SeedCluster_o = SeedCluster.o
 SeedCluster : clean ${SeedCluster_o} ${source_o} ../bin
@@ -282,7 +291,7 @@ Trunk2ScaffInfo : clean ${Trunk2ScaffInfo_o} ${source_o} ../bin
 	mv $@ ../bin/
 
 
-jobs_o=  ${Barcode2Scaffold_o} ${BinCluster_o} ${ChopBin_o} ${ContigDlink_o} ${ExternContigByPE_o} ${FakePE2BC_o} ${FCRFByTF_o} ${FillContigRoad_o} ${FillTrunkByPE_o} ${Gap_OAO_o} ${LinearCDG_o} ${MergeContig_o} ${MergePEInfo_o} ${MinTree_o} ${MST_o} ${ParseContig2Read_o} ${ParseRead2Contig_o} ${ParseReadName_o} ${PEGraph_o} ${Sam2ReadOnContig_o} ${SeedCluster_o} ${SplitInfo_o} ${SplitScaffWithReads_o} ${StaticsticUnique_o} ${Trunk2Scaff_o} ${Trunk2ScaffInfo_o}
+jobs_o=  ${Barcode2Scaffold_o} ${BinCluster_o} ${ChopBin_o} ${ContigDlink_o} ${ExternContigByPE_o} ${FakePE2BC_o} ${FCRFByTF_o} ${FillContigRoad_o} ${FillTrunkByPE_o} ${Gap_OAO_o} ${LinearCDG_o} ${MergeContig_o} ${MergePEInfo_o} ${MinTree_o} ${MST_o} ${ParseContig2Read_o} ${ParseRead2Contig_o} ${ParseReadName_o} ${PEGraph_o} ${Sam2ReadOnContig_o} ${ScaffInfo2Seq_o} ${SeedCluster_o} ${SplitInfo_o} ${SplitScaffWithReads_o} ${StaticsticUnique_o} ${Trunk2Scaff_o} ${Trunk2ScaffInfo_o}
 
 dirty	   =${jobs_o} ${jobs} ${source_o}
 

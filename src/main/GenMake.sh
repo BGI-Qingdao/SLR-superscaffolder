@@ -20,6 +20,7 @@ apps=" Barcode2Scaffold \
  ParseReadName\
  PEGraph\
  Sam2ReadOnContig\
+ ScaffInfo2Seq\
  SeedCluster\
  SplitInfo\
  SplitScaffWithReads\

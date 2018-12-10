@@ -2,9 +2,29 @@
 #define __BIOCOMMON_SEQ_TOOL_FUNC_H__
 
 #include <string>
+#include <sstream>
 
 namespace BGIQD{
     namespace SEQ{
+
+        static std::string blockSeq(const std::string & atcgs , int weight )
+        {
+            if( weight < 1 )
+                return atcgs ;
+            else
+            {
+                std::ostringstream ost;
+                int i = 1 ;
+                for( char c : atcgs)
+                {
+                    ost<<c;
+                    if( i % weight == 0 || i == (int)atcgs.size() )
+                        ost<<'\n';
+                    i++ ;
+                }
+                return ost.str();
+            }
+        }
 
         static std::string seqCompleteReverse(const std::string & line)
         {
