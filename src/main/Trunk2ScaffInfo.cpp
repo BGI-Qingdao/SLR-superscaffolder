@@ -16,6 +16,8 @@
 #include "stLFR/CBB.h"
 #include "stLFR/TrunkGap.h"
 
+#include "stLFR/ScaffInfo.h"
+
 #include <string.h>
 
 #include "algorithm/interval/Interval.h"
@@ -525,30 +527,42 @@ struct AppConfig
         loger<<BGIQD::LOG::lstart()<<'\n'<<pfreq.ToString()<<BGIQD::LOG::lend();
     }
 
-    struct ContigInScaffDetails
-    {
-        unsigned int base ;
-        bool plus ;
-        int gap ;
-    };
+   // struct ContigInScaffDetails
+   // {
+   //     unsigned int base ;
+   //     bool plus ;
+   //     int gap ;
+   // };
 
     void BuildScaff()
     {
-        std::map<int , std::vector<ContigInScaffDetails> > scaff_details;
+        //std::map<int , std::vector<ContigInScaffDetails> > scaff_details;
+        BGIQD::stLFR::ScaffInfoHelper helper ;
         int id = 0 ;
         for( const auto & a_scaff : scaffs )
         {
             id++ ;
+            int index = 1 ;
+            int pos = 1 ;
             for(size_t i = 0 ; i < a_scaff.size() ; i++ )
             {
+                auto & a_scaffold = helper.all_scaff[id];
                 const auto & tc = a_scaff[i];
                 unsigned int contig = tc.Value() ;
                 if( i == a_scaff.size() - 1 )
                 {
-                    scaff_details[id].push_back(
-                            ContigInScaffDetails{tc.basic , tc.basic!=contig ,0});
+                    BGIQD::stLFR::ContigDetail tmp;
+                    tmp.contig_id = tc.basic ;
+                    tmp.orientation = (tc.basic==contig);
+                    tmp.gap_size = 0 ;
+                    tmp.contig_len = contigIndexs.GetContigIndex(tc.basic).length ;
+                    tmp.scaff_index = index  ;
+                    tmp.scaff_id = id ;
+                    tmp.start_pos = pos ;
+                    a_scaffold.a_scaff.push_back(tmp);
                     break;
                 }
+
                 int fill = min_fill ;
                 if( tc.pe_fill.empty() )
                 {
@@ -575,7 +589,18 @@ struct AppConfig
                 if( fill < min_fill )
                     fill = min_fill ;
 
-                scaff_details[id].push_back(ContigInScaffDetails{tc.basic , tc.basic!=contig ,fill});
+                BGIQD::stLFR::ContigDetail tmp;
+                tmp.contig_id = tc.basic ;
+                tmp.orientation = (tc.basic==contig);
+                tmp.gap_size = fill ;
+                tmp.contig_len = contigIndexs.GetContigIndex(tc.basic).length ;
+                tmp.scaff_index = index  ;
+                tmp.scaff_id = id ;
+                tmp.start_pos = pos ;
+                a_scaffold.a_scaff.push_back(tmp);
+                index ++ ;
+                pos += (fill+ tmp.contig_len);
+
                 if( ! tc.pe_fill.empty() )
                 {
                     for( unsigned int x : tc.pe_fill )
@@ -584,8 +609,17 @@ struct AppConfig
                         if( fill_pe  < min_fill )
                             fill_pe  = min_fill ;
                         unsigned int base = contigIndexs.BaseId(x);
-                        scaff_details[id].push_back(
-                                ContigInScaffDetails{base , base != x,fill_pe});
+                        BGIQD::stLFR::ContigDetail tmp;
+                        tmp.contig_id = base;
+                        tmp.orientation = (base == x );
+                        tmp.gap_size = fill_pe ;
+                        tmp.contig_len = contigIndexs.GetContigIndex(base).length ;
+                        tmp.scaff_index = index  ;
+                        tmp.scaff_id = id ;
+                        tmp.start_pos = pos ;
+                        a_scaffold.a_scaff.push_back(tmp);
+                        index ++ ;
+                        pos += (fill_pe+ tmp.contig_len);
                     }
                 }
             }
@@ -595,16 +629,7 @@ struct AppConfig
             GenerateWriterFromFileName(fName.scaff_infos());
         if( out1 == NULL )
             FATAL(" failed to open xxx.scaff_infos to write ");
-        for( const auto & pair : scaff_details )
-        {
-            (*out1)<<"<scaffold "<<pair.first<<'\n';
-            for( const auto & i : pair.second )
-            {
-                (*out1)<<i.base<<'\t'
-                       <<(i.plus ? '-' : '+' )<<'\t'
-                       <<i.gap<<'\n';
-            }
-        }
+        helper.PrintAllScaff(*out1);
         delete out1;
     }
     int min_contig ;

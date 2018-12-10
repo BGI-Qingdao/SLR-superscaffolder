@@ -27,6 +27,7 @@ source_cpp =	../common/files/file_reader.cpp \
 				../stLFR/readName2Barcode.cpp\
 				../stLFR/barcodeOnContig.cpp\
 				../stLFR/ContigCluster.cpp\
+                ../stLFR/ScaffInfo.cpp\
 				../stLFR/LineGroup.cpp\
 				../stLFR/CBB.cpp\
 				../stLFR/TagId.cpp\
