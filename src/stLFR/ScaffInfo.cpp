@@ -48,7 +48,7 @@ namespace BGIQD {
 
         void ScaffInfo::PrintScaff(  std::ostream &ost ) const
         {
-            ost<<">scaffold "<<scaff_id<<'\n';
+            ost<<">scaffold"<<scaff_id<<'\n';
             for(const auto & i : a_scaff)
             {
                 ost<<i.ToString()<<'\n';

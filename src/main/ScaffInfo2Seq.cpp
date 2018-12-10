@@ -13,6 +13,7 @@
 #include "stLFR/ScaffInfo.h"
 
 #include <map>
+#include <set>
 
 struct AppConfig
 {
@@ -28,7 +29,9 @@ struct AppConfig
 
     typedef BGIQD::FASTA::FastaReader<ContigFasta> Reader;
 
-    std::map< int , ContigFasta> contigs;
+    std::map<unsigned int , ContigFasta> contigs;
+
+    std::set<unsigned int> used;
 
     void Init( const std::string & prefix )
     {
@@ -92,9 +95,18 @@ struct AppConfig
             std::string str ;
             for( const auto & i : pair.second.a_scaff) 
             {
+                used.insert(i.contig_id);
                 str+= get_atcg(i);
             }
             (*out)<<BGIQD::SEQ::blockSeq(str,100);
+        }
+        for( const auto & pair : contigs )
+        {
+            if( used.find( pair.first ) == used.end () )
+            {
+                (*out)<<pair.second.head.Head()<<'\n';
+                (*out)<<pair.second.seq.Seq(100);
+            }
         }
         delete out ;
     }
@@ -114,6 +126,5 @@ int main(int argc , char ** argv)
     config.LoadScaffInfos();
     config.LoadAllFasta();
     config.PrintScaffSeqs();
-
     return 0;
 }
