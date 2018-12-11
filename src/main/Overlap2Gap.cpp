@@ -93,8 +93,13 @@ struct AppConfig
                 else 
                 {
                     used_freq.Touch(int(itr->second.size()));
-                    auto overlap = itr->second[0] ;
-                    prev.gap_size = - overlap.overlap_len ;
+                    int overlap_len = 0 ;
+                    for( const auto & x : itr->second )
+                    {
+                        if( x.overlap_len > overlap_len )
+                            overlap_len = x.overlap_len ;
+                    }
+                    prev.gap_size = - overlap_len ;
                 }
                 std::cout<<prev.ToString()<<'\n';
             }
