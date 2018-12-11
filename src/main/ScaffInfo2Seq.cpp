@@ -80,7 +80,7 @@ struct AppConfig
                 str += std::string(detail.gap_size,'N');
             else if ( detail.gap_size < 0 )
             {
-                assert( str.length() > detail.gap_size );
+                assert( (int)str.length() > (int)std::abs(detail.gap_size) );
                 str = str.substr(0,str.length() + detail.gap_size);
             }
             else
