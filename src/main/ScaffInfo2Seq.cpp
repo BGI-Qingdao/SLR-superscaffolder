@@ -82,9 +82,10 @@ struct AppConfig
             {
                 assert( (int)str.length() > (int)std::abs(detail.gap_size) );
                 str = str.substr(0,str.length() + detail.gap_size);
+                str += "N" ;
             }
             else
-            {;}
+            { str += "N" ; }
 
             return str ;
         };
