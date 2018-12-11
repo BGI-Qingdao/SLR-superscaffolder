@@ -19,7 +19,6 @@
 
 struct AppConfig
 {
-    BGIQD::SOAP2::FileNames fNames;
 
     BGIQD::LOG::logger loger;
 
@@ -31,9 +30,8 @@ struct AppConfig
 
     BGIQD::FREQ::Freq<int> used_freq ;
 
-    void Init( const std::string & prefix )
+    void Init()
     {
-        fNames.Init(prefix);
         BGIQD::LOG::logfilter::singleton().get("ScaffInfo2Seqs",BGIQD::LOG::loglevel::INFO, loger);
     }
 
@@ -55,13 +53,61 @@ struct AppConfig
         delete in;
     }
 
-    void PrintCacheFreq()
+    void PrintFreq()
     {
         for( const auto & pair : overlap_caches)
         {
             cache_freq.Touch(int(pair.second.size()));
         }
         std::cerr<<"Cache freq\n"<<cache_freq.ToString();
+        std::cerr<<"Used freq\n"<<used_freq.ToString();
+    }
+
+    void FilterAllScaffItems()
+    {
+        std::string line ;
+        BGIQD::stLFR::ContigDetail prev ;
+        prev.scaff_id = -1 ;
+        while( ! std::getline(std::cin , line).eof() )
+        {
+            if( line[0] == '>' )
+            {
+                if( prev.scaff_id != -1 )
+                {
+                    std::cout<<prev.ToString()<<'\n';
+                }
+                std::cout<<line<<'\n';
+                continue ;
+            }
+            BGIQD::stLFR::ContigDetail tmp ;
+            tmp.InitFromString(line);
+            if( tmp.scaff_id == prev.scaff_id )
+            {
+                BGIQD::stLFR::OverlapInfo ov;
+                ov.InitFromScaffItem(prev,tmp);
+                auto itr = overlap_caches.find( ov.KeyT() );
+                if( itr == overlap_caches.end() )
+                {
+                    used_freq.Touch(0);
+                }
+                else 
+                {
+                    used_freq.Touch(int(itr->second.size()));
+                    auto overlap = itr->second[0] ;
+                    prev.gap_size = - overlap.overlap_len ;
+                }
+                std::cout<<prev.ToString()<<'\n';
+            }
+            else
+            {
+                ;
+            }
+            prev = tmp ;
+        }
+        if( prev.scaff_id != -1 )
+        {
+            std::cout<<prev.ToString()<<'\n';
+        }
     }
 
 } config;
@@ -70,16 +116,15 @@ struct AppConfig
 int main(int argc , char ** argv)
 {
     START_PARSE_ARGS
-        DEFINE_ARG_REQUIRED(std::string, prefix ,"prefix of files. Input xxx.scaff_infos; Output xxx.scaff_infos_new");
         DEFINE_ARG_REQUIRED(std::string, overlaps,"the overlaps.paf file ");
     END_PARSE_ARGS;
 
     config.overlaps = overlaps.to_string() ;
-    config.Init( prefix.to_string() );
+    config.Init( );
     BGIQD::LOG::timer t(config.loger,"Overlap2Gap");
 
     config.LoadOverlaps();
-    config.PrintCacheFreq();
-    //config.FilterAllScaffItems();
+    config.FilterAllScaffItems();
+    config.PrintFreq();
     return 0;
 }

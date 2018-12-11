@@ -2,6 +2,7 @@
 #define __STLFR_CONTIGOVERLAP_H__
 
 #include <string>
+#include "stLFR/ScaffInfo.h"
 #include "biocommon/paf/PAF.h"
 
 namespace BGIQD {
@@ -50,6 +51,9 @@ namespace BGIQD {
             }
 
             void InitFromPAF( const BGIQD::PAF::PAF_Item & item );
+
+            void InitFromScaffItem( const BGIQD::stLFR::ContigDetail & prev 
+                    , const BGIQD::stLFR::ContigDetail & next);
         };
     }
 }
