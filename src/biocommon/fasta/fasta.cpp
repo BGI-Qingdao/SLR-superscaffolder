@@ -20,7 +20,7 @@ namespace BGIQD {
 
         std::string SOAP2ContigHead::Head() const {
                 std::ostringstream ost;
-                ost<<'<'<<contigId
+                ost<<'>'<<contigId
                     <<" length "<<len
                     <<" cvg_"<<cov
                     <<"_tip_"<<is_tip;
