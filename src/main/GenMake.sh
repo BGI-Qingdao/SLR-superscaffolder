@@ -15,6 +15,7 @@ apps=" Barcode2Scaffold \
  MergePEInfo\
  MinTree\
  MST\
+ Overlap2Gap\
  ParseContig2Read\
  ParseRead2Contig\
  ParseReadName\
@@ -68,6 +69,7 @@ source_cpp =	../common/files/file_reader.cpp \\
 				../biocommon/fasta/fasta.cpp\\
 				../biocommon/fastq/fastq.cpp\\
 				../biocommon/seq/seq.cpp\\
+				../biocommon/paf/PAF.cpp\\
 		   		../common/files/file_writer.cpp \\
 		   		../common/files/gzstream.cpp \\
 				../common/log/log.cpp\\
@@ -80,6 +82,7 @@ source_cpp =	../common/files/file_reader.cpp \\
 				../stLFR/ContigCluster.cpp\\
                 ../stLFR/ScaffInfo.cpp\\
 				../stLFR/LineGroup.cpp\\
+				../stLFR/ContigOverlap.cpp\\
 				../stLFR/CBB.cpp\\
 				../stLFR/TagId.cpp\\
 				../stLFR/StringIdCache.cpp\\

@@ -17,6 +17,7 @@ source_cpp =	../common/files/file_reader.cpp \
 				../biocommon/fasta/fasta.cpp\
 				../biocommon/fastq/fastq.cpp\
 				../biocommon/seq/seq.cpp\
+				../biocommon/paf/PAF.cpp\
 		   		../common/files/file_writer.cpp \
 		   		../common/files/gzstream.cpp \
 				../common/log/log.cpp\
@@ -29,6 +30,7 @@ source_cpp =	../common/files/file_reader.cpp \
 				../stLFR/ContigCluster.cpp\
                 ../stLFR/ScaffInfo.cpp\
 				../stLFR/LineGroup.cpp\
+				../stLFR/ContigOverlap.cpp\
 				../stLFR/CBB.cpp\
 				../stLFR/TagId.cpp\
 				../stLFR/StringIdCache.cpp\
@@ -43,7 +45,7 @@ source_o		= ${source_cpp:%.cpp=%.o}
 .cpp.o:
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
-jobs = Barcode2Scaffold  BinCluster ChopBin ContigDlink ExternContigByPE FakePE2BC FCRFByTF FillContigRoad FillTrunkByPE Gap_OAO LinearCDG MergeContig MergePEInfo MinTree MST ParseContig2Read ParseRead2Contig ParseReadName PEGraph Sam2ReadOnContig ScaffInfo2Seq SeedCluster SplitInfo SplitScaffWithReads StaticsticUnique Trunk2Scaff Trunk2ScaffInfo
+jobs = Barcode2Scaffold  BinCluster ChopBin ContigDlink ExternContigByPE FakePE2BC FCRFByTF FillContigRoad FillTrunkByPE Gap_OAO LinearCDG MergeContig MergePEInfo MinTree MST Overlap2Gap ParseContig2Read ParseRead2Contig ParseReadName PEGraph Sam2ReadOnContig ScaffInfo2Seq SeedCluster SplitInfo SplitScaffWithReads StaticsticUnique Trunk2Scaff Trunk2ScaffInfo
 
 all :  ${jobs}
 
@@ -185,6 +187,15 @@ MST : clean ${MST_o} ${source_o} ../bin
 
 
 
+Overlap2Gap_cpp = Overlap2Gap.cpp
+Overlap2Gap_o = Overlap2Gap.o
+Overlap2Gap : clean ${Overlap2Gap_o} ${source_o} ../bin
+	${CXX} ${Overlap2Gap_o} ${source_o} ${DEUBG_CXX} -o Overlap2Gap
+	mv $@ ../bin/
+
+
+
+
 ParseContig2Read_cpp = ParseContig2Read.cpp
 ParseContig2Read_o = ParseContig2Read.o
 ParseContig2Read : clean ${ParseContig2Read_o} ${source_o} ../bin
@@ -291,7 +302,7 @@ Trunk2ScaffInfo : clean ${Trunk2ScaffInfo_o} ${source_o} ../bin
 	mv $@ ../bin/
 
 
-jobs_o=  ${Barcode2Scaffold_o} ${BinCluster_o} ${ChopBin_o} ${ContigDlink_o} ${ExternContigByPE_o} ${FakePE2BC_o} ${FCRFByTF_o} ${FillContigRoad_o} ${FillTrunkByPE_o} ${Gap_OAO_o} ${LinearCDG_o} ${MergeContig_o} ${MergePEInfo_o} ${MinTree_o} ${MST_o} ${ParseContig2Read_o} ${ParseRead2Contig_o} ${ParseReadName_o} ${PEGraph_o} ${Sam2ReadOnContig_o} ${ScaffInfo2Seq_o} ${SeedCluster_o} ${SplitInfo_o} ${SplitScaffWithReads_o} ${StaticsticUnique_o} ${Trunk2Scaff_o} ${Trunk2ScaffInfo_o}
+jobs_o=  ${Barcode2Scaffold_o} ${BinCluster_o} ${ChopBin_o} ${ContigDlink_o} ${ExternContigByPE_o} ${FakePE2BC_o} ${FCRFByTF_o} ${FillContigRoad_o} ${FillTrunkByPE_o} ${Gap_OAO_o} ${LinearCDG_o} ${MergeContig_o} ${MergePEInfo_o} ${MinTree_o} ${MST_o} ${Overlap2Gap_o} ${ParseContig2Read_o} ${ParseRead2Contig_o} ${ParseReadName_o} ${PEGraph_o} ${Sam2ReadOnContig_o} ${ScaffInfo2Seq_o} ${SeedCluster_o} ${SplitInfo_o} ${SplitScaffWithReads_o} ${StaticsticUnique_o} ${Trunk2Scaff_o} ${Trunk2ScaffInfo_o}
 
 dirty	   =${jobs_o} ${jobs} ${source_o}
 
