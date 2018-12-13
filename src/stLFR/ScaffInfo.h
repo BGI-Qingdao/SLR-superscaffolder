@@ -32,6 +32,8 @@ namespace BGIQD {
 
             void PrintScaff( std::ostream & ost ) const;
 
+            void FormatIndex();
+            void FormatStartPos();
         };
 
         struct ScaffInfoHelper
@@ -51,6 +53,16 @@ namespace BGIQD {
             std::map<unsigned int , ContigIndex>  contig_indexs ;
 
             ContigDetail & GetContig( unsigned int contig_id ) ;
+            void FormatAllIndex()
+            {
+                for( auto & pair : all_scaff )
+                    pair.second.FormatIndex();
+            }
+            void FormatAllStartPos()
+            {
+                for( auto & pair : all_scaff )
+                    pair.second.FormatIndex();
+            }
         };
     }
 }

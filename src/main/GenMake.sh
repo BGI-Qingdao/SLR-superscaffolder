@@ -9,6 +9,7 @@ apps=" Barcode2Scaffold \
  FCRFByTF\
  FillContigRoad\
  FillTrunkByPE\
+ FormatScaffInfo\
  Gap_OAO\
  LinearCDG\
  MergeContig\

@@ -46,6 +46,30 @@ namespace BGIQD {
             return ost.str();
         }
 
+        void ScaffInfo::FormatStartPos()
+        {
+            int start_pos= 1 ;
+            for( auto & contigd : a_scaff )
+            {
+                contigd.start_pos = start_pos;
+                start_pos += contigd.contig_len ;
+                start_pos += contigd.gap_size ;
+                if( contigd.scaff_id != scaff_id )
+                    contigd.scaff_id = scaff_id ;
+            }
+        }
+        void ScaffInfo::FormatIndex()
+        {
+            int index = 1 ;
+            for( auto & contigd : a_scaff )
+            {
+                contigd.scaff_index = index ;
+                index ++ ;
+                if( contigd.scaff_id != scaff_id )
+                    contigd.scaff_id = scaff_id ;
+            }
+        }
+
         void ScaffInfo::PrintScaff(  std::ostream &ost ) const
         {
             ost<<">scaffold"<<scaff_id<<'\n';
