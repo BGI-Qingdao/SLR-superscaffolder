@@ -61,7 +61,7 @@ namespace BGIQD {
             void FormatAllStartPos()
             {
                 for( auto & pair : all_scaff )
-                    pair.second.FormatIndex();
+                    pair.second.FormatStartPos();
             }
         };
     }
