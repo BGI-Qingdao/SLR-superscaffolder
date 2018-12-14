@@ -26,6 +26,7 @@ apps="Barcode2Gap\
  Reads2Gap\
  Sam2ReadOnContig\
  ScaffInfo2Seq\
+ ScaffInfo2GapSeq\
  SeedCluster\
  SplitInfo\
  SplitScaffWithReads\
