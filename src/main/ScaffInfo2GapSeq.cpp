@@ -119,7 +119,7 @@ struct AppConfig
                 BGIQD::FASTA::ScaffSplitGapHead header ;
                 if( prev.gap_size < 50 )
                 {
-                    header.gap_type = BGIQD::FASTA::ScaffSplitGapHead::GapType::PE ;
+                    header.gap_type = BGIQD::FASTA::ScaffSplitGapHead::GapType::PE_TRUNK ;
                 }
                 else
                 {
