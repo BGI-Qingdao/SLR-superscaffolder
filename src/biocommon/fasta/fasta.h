@@ -125,7 +125,6 @@ namespace BGIQD {
                         && Is_Set_head() 
                         && Is_Set_seq() ;
                 }
-
             };
 
         template<class T > 

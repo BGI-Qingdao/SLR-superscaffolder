@@ -10,12 +10,14 @@ apps="Barcode2Gap\
  FCRFByTF\
  FillContigRoad\
  FillTrunkByPE\
+ FormatScaffInfo\
  Gap_OAO\
  LinearCDG\
  MergeContig\
  MergePEInfo\
  MinTree\
  MST\
+ Overlap2Gap\
  ParseContig2Read\
  ParseRead2Contig\
  ParseReadName\
@@ -23,12 +25,14 @@ apps="Barcode2Gap\
  ReadName2Num\
  Reads2Gap\
  Sam2ReadOnContig\
+ ScaffInfo2Seq\
  SeedCluster\
  SplitInfo\
  SplitScaffWithReads\
  StaticsticUnique\
  Trunk2Scaff\
  Trunk2ScaffGap\
+ Trunk2ScaffInfo\
 "
 
 jobs_o=" "
@@ -70,6 +74,7 @@ source_cpp =	../common/files/file_reader.cpp \\
 				../biocommon/fasta/fasta.cpp\\
 				../biocommon/fastq/fastq.cpp\\
 				../biocommon/seq/seq.cpp\\
+				../biocommon/paf/PAF.cpp\\
 		   		../common/files/file_writer.cpp \\
 		   		../common/files/gzstream.cpp \\
 				../common/log/log.cpp\\
@@ -80,7 +85,9 @@ source_cpp =	../common/files/file_reader.cpp \\
 				../stLFR/readName2Barcode.cpp\\
 				../stLFR/barcodeOnContig.cpp\\
 				../stLFR/ContigCluster.cpp\\
+                ../stLFR/ScaffInfo.cpp\\
 				../stLFR/LineGroup.cpp\\
+				../stLFR/ContigOverlap.cpp\\
 				../stLFR/CBB.cpp\\
 				../stLFR/TagId.cpp\\
 				../stLFR/StringIdCache.cpp\\
