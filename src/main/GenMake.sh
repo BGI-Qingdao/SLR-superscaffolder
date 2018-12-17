@@ -5,6 +5,7 @@ apps="Barcode2Gap\
  BinCluster\
  ChopBin\
  ContigDlink\
+ CutContig\
  ExternContigByPE\
  FakePE2BC\
  FCRFByTF\
