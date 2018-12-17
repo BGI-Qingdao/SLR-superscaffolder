@@ -55,7 +55,7 @@ struct AppConfig
         auto in = BGIQD::FILES::FileReaderFactory
             ::GenerateReaderFromFileName(fNames.contig());
         if( in == NULL )
-            FATAL("failed to open xxx.scaff_infos to read");
+            FATAL("failed to open xxx.contig to read");
 
         Reader reader;
         ContigFasta tmp ;
