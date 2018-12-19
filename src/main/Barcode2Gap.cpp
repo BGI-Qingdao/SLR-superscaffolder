@@ -104,8 +104,8 @@ struct AppConfig
             (*out)<<gap.Head()<<'\n';
             auto barcode_both = 
                 BarcodeCollection::Intersection(
-                        contig_barcode_info.at( gap.prev_base_contig)
-                    ,   contig_barcode_info.at( gap.next_base_contig) );
+                        contig_barcode_info[ gap.prev_base_contig]
+                    ,   contig_barcode_info[ gap.next_base_contig] );
 
             for(const auto & pair : barcode_both.elements)
             {
@@ -127,8 +127,8 @@ struct AppConfig
             (*out)<<gap.Head()<<'\n';
             auto barcode_both = 
                 BarcodeCollection::Union(
-                        contig_barcode_info.at( gap.prev_base_contig)
-                    ,   contig_barcode_info.at( gap.next_base_contig) );
+                        contig_barcode_info[ gap.prev_base_contig]
+                    ,   contig_barcode_info[ gap.next_base_contig] );
 
             for(const auto & pair : barcode_both.elements)
             {
