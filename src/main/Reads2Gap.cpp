@@ -115,10 +115,7 @@ struct GapContigs
 
 struct ScaffPackage
 {
-    std::ofstream * scaff ; 
-    std::ofstream * r1; 
-    std::ofstream * r2;
-    const static int reads_buffer_size = 1024;
+    //const static int reads_buffer_size = 1024;
 
     void Init(const std::string & id )
     {
@@ -130,65 +127,98 @@ struct ScaffPackage
             else
                 x = '_';
         }
-        std::string prefix = "tmp_filler_" + (idd);
+        prefix = "tmp_filler_" + (idd);
         // open 3 files
-        scaff = new std::ofstream(prefix+".scaff.fa");
+        // index = 0 ;
+        r1_flag = true ;
+    }
+
+    std::string prefix ;
+
+    void PrintAll()
+    {
+        std::ofstream * r1; 
+        std::ofstream * r2;
         r1 = new std::ofstream(prefix+".r1.fq");
         r2 = new std::ofstream(prefix+".r2.fq");
-        index = 0 ;
-        r1_flag = true ;
+        for ( const auto & read : r1_buffer )
+        {
+            (*r1)<<read.head.Head()<<'\n';
+            (*r1)<<read.seq.Seq(10000000);
+        }
+        for ( const auto & read : r2_buffer )
+        {
+            (*r2)<<read.head.Head()<<'\n';
+            (*r2)<<read.seq.Seq(10000000);
+        }
+        r1->close();
+        r2->close();
+        delete r1 ;
+        delete r2 ;
+        r1 = NULL ;
+        r2 = NULL ;
     }
 
     void AddScaff(const GapItem & item )
     {
+        std::ofstream * scaff ; 
+        scaff = new std::ofstream(prefix+".scaff.fa");
         // save scaffold
         (*scaff)<<item.head.Head()<<'\n';
         (*scaff)<<item.seq.Seq(100);
+        scaff->close();
         delete scaff ;
         scaff = NULL ;
     }
 
-    stLFRRead buffer[reads_buffer_size];
-    int index ;
+    //stLFRRead buffer[reads_buffer_size];
+
+    //int index ;
+
+    std::vector<stLFRRead> r1_buffer ;
+
+    std::vector<stLFRRead> r2_buffer ;
 
     void CleanBufferR1()
     {
-        for( int i = 0 ; i < index ; i ++ )
-        {
-            (*r1)<<buffer[i].head.Head()<<'\n';
-            (*r1)<<buffer[i].seq.Seq(10000000);
-        }
-        index = 0 ;
+        //for( int i = 0 ; i < index ; i ++ )
+        //{
+        //    (*r1)<<buffer[i].head.Head()<<'\n';
+        //    (*r1)<<buffer[i].seq.Seq(10000000);
+        //}
+        //index = 0 ;
     }
 
     void AddR1( const stLFRRead & read )
     {
-        assert(0<=index);
-        assert(index<reads_buffer_size);
-        buffer[index%reads_buffer_size] = read ;
-        index ++ ;
-        if ( index >= reads_buffer_size )
-            CleanBufferR1() ;
+        r1_buffer.push_back(read);
+        //assert(0<=index);
+        //assert(index<reads_buffer_size);
+        //buffer[index%reads_buffer_size] = read ;
+        //index ++ ;
+        //if ( index >= reads_buffer_size )
+        //    CleanBufferR1() ;
     }
 
     void CleanBufferR2()
     {
-        for( int i = 0 ; i < index ; i ++ )
-        {
-            (*r2)<<buffer[i].head.Head()<<'\n';
-            (*r2)<<buffer[i].seq.Seq(10000000);
-        }
-        index = 0 ;
+        //for( int i = 0 ; i < index ; i ++ )
+        //{
+        //    (*r2)<<buffer[i].head.Head()<<'\n';
+        //    (*r2)<<buffer[i].seq.Seq(10000000);
+        //}
+        //index = 0 ;
     }
 
     void AddR2( const stLFRRead & read )
     {
-        assert(0<=index);
-        assert(index<reads_buffer_size);
-        buffer[index%reads_buffer_size] = read ;
-        index ++ ;
-        if ( index >= reads_buffer_size )
-            CleanBufferR2() ;
+        r2_buffer.push_back(read);
+        //assert(0<=index);
+        //assert(index<reads_buffer_size);
+        //buffer[index%reads_buffer_size] = read ;
+        //index ++ ;
+        //if ( index >= reads_buffer_size )
+        //    CleanBufferR2() ;
     }
 
     void AddRead(  const stLFRRead & read )
@@ -201,20 +231,20 @@ struct ScaffPackage
 
     ~ScaffPackage()
     {
-        if ( scaff ) delete  scaff ;
-        if ( r1 ) delete r1;
-        if ( r2 ) delete r2;
+        //if ( scaff ) delete  scaff ;
+        //if ( r1 ) delete r1;
+        //if ( r2 ) delete r2;
     }
 
     void EndR1()
     {
-        CleanBufferR1();
+        //CleanBufferR1();
         r1_flag = false ;
     }
 
     void EndR2()
     {
-        CleanBufferR2();
+        //CleanBufferR2();
     }
     bool r1_flag ;
 };
@@ -589,6 +619,11 @@ struct AppConfig
 
         for( int i = 0 ; i < trunk_gap_num ; i++ )
             (trunk_gaps[i]).EndAllReads();
+
+        for( int i = 0 ; i < pe_gap_num ; i++ )
+            (pe_gaps[i]).PrintAll();
+        for( int i = 0 ; i < trunk_gap_num ; i++ )
+            (trunk_gaps[i]).PrintAll();
     }
 
 }config;
