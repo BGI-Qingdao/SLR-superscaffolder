@@ -140,7 +140,7 @@ int main(int argc , char ** argv)
     config.Init(prefix.to_string() , ""/*barcodeList.to_string()*/ ,false );// no_stLFR.to_bool());
     BGIQD::LOG::timer t(config.loger,"Same2ReadOnContig");
     config.LoadRead2Num();
-    //config.LoadBarcode2Num() ;
+    config.LoadBarcode2Num() ;
     config.ParseSam2ReadOnContig();
     //config.PrintBarcodeList();
     return 0;
