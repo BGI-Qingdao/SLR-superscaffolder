@@ -8,7 +8,7 @@ namespace BGIQD {
             assert( cc1 != cc2 );
             c1 = cc1 ;
             c2 = cc2 ;
-            if ( t1 == '+' && t2 == '-')
+            if ( t1 == '+' && t2 == '+')
                 type = OOType::C1_2_C2 ;
             else if ( t1 == '+' && t2 == '-' )
                 type = OOType::C1_2_C2p ;
@@ -30,11 +30,12 @@ namespace BGIQD {
         void PairPN::InitFromPAF( const BGIQD::PAF::PAF_Item & cc1 
                 , const BGIQD::PAF::PAF_Item & cc2 )
         {
-            BGIQD::PAF::PAF_Item  ci1 = cc1;
+            BGIQD::PAF::PAF_Item ci1 = cc1;
             BGIQD::PAF::PAF_Item ci2 = cc2;
 
             c1 = std::stoul(cc1.query_name) ;
             c2 = std::stoul(cc2.query_name) ;
+
             if( c1 > c2 )
             {
                 int swap = c2 ; c2 = c1 ; c1 = swap ;
