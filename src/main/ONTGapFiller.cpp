@@ -146,7 +146,7 @@ struct AppConfig
                 auto & next = a_scaff.at(i) ;
                 auto itr1 = aligned_data.find(prev.contig_id) ;
                 auto itr2 = aligned_data.find(next.contig_id) ;
-                if( itr1 == aligned_data.end() || itr1 == aligned_data.end() )
+                if( itr1 == aligned_data.end() || itr2 == aligned_data.end() )
                 {
                     no_match ++ ;
                     continue ;
