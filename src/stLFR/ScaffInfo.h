@@ -23,6 +23,7 @@ namespace BGIQD {
 
             std::map<std::string , std::string> extra ;
 
+            static const std::string ONT_FILL  ;
         };
 
         struct ScaffInfo

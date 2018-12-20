@@ -6,6 +6,8 @@
 namespace BGIQD {
     namespace stLFR {
 
+        const std::string ContigDetail::ONT_FILL = "ONT_FILL" ;
+
         void ContigDetail::InitFromString(const std::string &line)
         {
             std::istringstream ist(line);

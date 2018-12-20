@@ -77,15 +77,29 @@ struct AppConfig
             if( ! detail.orientation )
                 str = BGIQD::SEQ::seqCompleteReverse(str);
             if( detail.gap_size > 0 )
-                str += std::string(detail.gap_size,'N');
+            {
+                if( detail.extra.find(BGIQD::stLFR::ContigDetail::ONT_FILL) 
+                        != detail.extra.end() )
+                {
+                    str += detail.extra.at(BGIQD::stLFR::ContigDetail::ONT_FILL);
+                }
+                else
+                {
+                    int gap_size = detail.gap_size > min_n ?  detail.gap_size : min_n ;
+                    str += std::string(gap_size,'N');
+                }
+            }
             else if ( detail.gap_size < 0 )
             {
                 assert( (int)str.length() > (int)std::abs(detail.gap_size) );
                 str = str.substr(0,str.length() + detail.gap_size);
-                str += "NNNNNNNNNNN" ;
+                str += std::string(min_n,'N');
             }
             else
-            { str += "NNNNNNNNNNN" ; }
+            {
+                // gap size = 0
+                ;
+            }
 
             return str ;
         };
@@ -111,7 +125,7 @@ struct AppConfig
         }
         delete out ;
     }
-
+    int min_n ;
 } config;
 
 
@@ -119,8 +133,10 @@ int main(int argc , char ** argv)
 {
     START_PARSE_ARGS
         DEFINE_ARG_REQUIRED(std::string, prefix ,"prefix of files. Input xxx.scaff_infos; Output xxx.scaff_seqs");
+        DEFINE_ARG_OPTIONAL(int, min_n,"min N size for gap in scaffold if not filled ","11");
     END_PARSE_ARGS;
 
+    config.min_n = min_n.to_int();
     config.Init( prefix.to_string() );
     BGIQD::LOG::timer t(config.loger,"ScaffInfo2Seqs");
 
