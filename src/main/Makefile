@@ -30,7 +30,7 @@ source_cpp =	../common/files/file_reader.cpp \
 				../stLFR/ContigCluster.cpp\
                 ../stLFR/ScaffInfo.cpp\
 				../stLFR/LineGroup.cpp\
-                ../stLFR/contigPairInfo.h\
+                ../stLFR/contigPairInfo.cpp\
 				../stLFR/ContigOverlap.cpp\
 				../stLFR/CBB.cpp\
 				../stLFR/TagId.cpp\

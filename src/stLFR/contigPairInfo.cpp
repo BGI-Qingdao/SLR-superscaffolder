@@ -22,7 +22,7 @@ namespace BGIQD {
                 unsigned int tmp = c1 ;
                 c1 = c2 ;
                 c2 = tmp ;
-                type = TypeCompleteReverse(type) ;
+                type = GetCR(type) ;
             }
             gap_size = gap ;
         }
