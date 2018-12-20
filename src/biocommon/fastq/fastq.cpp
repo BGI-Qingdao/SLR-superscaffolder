@@ -58,5 +58,25 @@ namespace BGIQD {
                 ost<<'/'<<readIndex<<'\t'<<barcode_num;
             return ost.str();
         }
+
+        void Id_Desc_Head::Init( const std::string &line )
+        {
+            Reset() ;
+            bool turn = false ;
+            assert(line.size() > 1);
+            assert(line[0] == '@');
+            for( int i = 1 ; i < (int)line.size() ; i++ )
+            {
+                if( !turn  )
+                {
+                    if( ! std::isblank(line[i]) )
+                        Id += line[i] ;
+                    else 
+                        turn = true ;
+                }
+                if( turn )
+                    Desc += line[i] ;
+            }
+        }
     }
 }
