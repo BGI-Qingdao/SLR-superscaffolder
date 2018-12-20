@@ -98,7 +98,7 @@ struct AppConfig
         for( const auto & pair1 : aligned_data )
         {
             contig2read_num_freq.Touch(pair1.second.size());
-            for( const auto & pair2 : aligned_data ) 
+            for( const auto & pair2 : pair1.second)
             {
                 contig2a_read_freq.Touch(pair2.second.size());
             }
@@ -206,10 +206,6 @@ struct AppConfig
                 BGIQD::stLFR::PairPN tmp ;
                 tmp.InitFromPAF(m1,m2);
 
-                int prev_read_start = m1.target_start ;
-                int prev_read_end = m1.target_end ;
-                int next_read_start = m2.target_start ;
-                int next_read_end = m2.target_end ;
                 // trust contig overlap first 
                 if( scaff_pn.gap_size < 0 )
                 {
@@ -247,6 +243,37 @@ struct AppConfig
                 prev.extra[BGIQD::stLFR::ContigDetail::ONT_FILL] = cut_seq;
             }
         }
+
+        loger<<BGIQD::LOG::lstart()<<">the gap_total is "
+            <<gap_tatal<<BGIQD::LOG::lend();
+
+        loger<<BGIQD::LOG::lstart()<<">the no_match is "
+            <<no_match<<BGIQD::LOG::lend();
+
+        loger<<BGIQD::LOG::lstart()<<">the no choose is "
+            <<no_choose<<BGIQD::LOG::lend();
+
+        loger<<BGIQD::LOG::lstart()<<">the no common is "
+            <<no_common<<BGIQD::LOG::lend();
+
+        loger<<BGIQD::LOG::lstart()<<">the scaff_negotive_gap_size is "
+            <<scaff_negotive_gap_size<<BGIQD::LOG::lend();
+
+        loger<<BGIQD::LOG::lstart()<<">the ont_negotive_gap_size is "
+            <<ont_negotive_gap_size<<BGIQD::LOG::lend();
+
+        loger<<BGIQD::LOG::lstart()<<">the common reads count freq for a gap \n"
+            <<gap_both_read_freq<<BGIQD::LOG::lend();
+
+        loger<<BGIQD::LOG::lstart()<<">the correct oo reads count freq for a gap \n"
+            <<gap_oo_read_freq.ToString()<<BGIQD::LOG::lend();
+
+        loger<<BGIQD::LOG::lstart()<<">the filler choose count freq for a gap \n"
+            <<filler_choose_freq.ToString()<<BGIQD::LOG::lend();
+
+        loger<<BGIQD::LOG::lstart()<<">the one read provide filler choose count freq for a gap \n"
+            <<a_read_oo_choose_freq.ToString()<<BGIQD::LOG::lend();
+
     }
 
     void PrintScaffInfo()
