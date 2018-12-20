@@ -263,7 +263,7 @@ struct AppConfig
             <<ont_negotive_gap_size<<BGIQD::LOG::lend();
 
         loger<<BGIQD::LOG::lstart()<<">the common reads count freq for a gap \n"
-            <<gap_both_read_freq<<BGIQD::LOG::lend();
+            <<gap_both_read_freq.ToString()<<BGIQD::LOG::lend();
 
         loger<<BGIQD::LOG::lstart()<<">the correct oo reads count freq for a gap \n"
             <<gap_oo_read_freq.ToString()<<BGIQD::LOG::lend();
