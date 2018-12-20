@@ -127,6 +127,7 @@ struct AppConfig
         int no_common = 0 ;
         int no_choose = 0 ;
         int no_match = 0 ;
+        int cut_err = 0 ;
         int scaff_negotive_gap_size = 0 ;
         int ont_negotive_gap_size = 0 ;
 
@@ -200,47 +201,57 @@ struct AppConfig
                     continue ;
                 }
                 // Random choose the 1th 1 choose .
-                auto & pair = chooses.front() ;
-                auto & m1 = pair.first ;
-                auto & m2 = pair.second ;
-                BGIQD::stLFR::PairPN tmp ;
-                tmp.InitFromPAF(m1,m2);
+                for ( const auto & pair : chooses )
+                {
+                    //auto & pair = chooses.front() ;
+                    auto & m1 = pair.first ;
+                    auto & m2 = pair.second ;
+                    BGIQD::stLFR::PairPN tmp ;
+                    tmp.InitFromPAF(m1,m2);
 
-                // trust contig overlap first 
-                if( scaff_pn.gap_size < 0 )
-                {
-                    scaff_negotive_gap_size ++ ;
-                    continue ;
+                    // trust contig overlap first 
+                    if( scaff_pn.gap_size < 0 )
+                    {
+                        scaff_negotive_gap_size ++ ;
+                        break;
+                    }
+                    if( tmp.gap_size < 0 )
+                    {
+                        ont_negotive_gap_size ++ ;
+                        prev.gap_size = tmp.gap_size ;
+                        break;
+                    }
+                    if( tmp.gap_size == 0 )
+                    {
+                        ont_negotive_gap_size ++ ;
+                        prev.gap_size = -1 ;
+                        break ;
+                    }
+                    int cut_start = 0 ;
+                    int cut_len = tmp.gap_size ;
+                    bool need_reverse = false ;
+                    if( ( m1.query_char == '+' && prev.orientation)
+                    ||  ( m1.query_char == '-' && !prev.orientation ) )
+                    {
+                        cut_start = m1.target_end + 1 ;
+                    }
+                    else
+                    {
+                        cut_start = m2.target_end + 1;
+                        need_reverse = true ;
+                    }
+                    const auto & ont_read = reads.at(m1.target_name).seq.atcgs ;
+                    if( cut_start<0 ||  cut_start + cut_len  >= (int) ont_read.size() )
+                    {
+                        cut_err ++ ;
+                        continue ;
+                    }
+                    std::string cut_seq =  ont_read.substr(cut_start,cut_len) ;
+                    if( need_reverse )
+                        cut_seq = BGIQD::SEQ::seqCompleteReverse(cut_seq);
+                    prev.extra[BGIQD::stLFR::ContigDetail::ONT_FILL] = cut_seq;
+                    break ;
                 }
-                if( tmp.gap_size < 0 )
-                {
-                    ont_negotive_gap_size ++ ;
-                    prev.gap_size = tmp.gap_size ;
-                    continue ;
-                }
-                if( tmp.gap_size == 0 )
-                {
-                    ont_negotive_gap_size ++ ;
-                    prev.gap_size = -1 ;
-                    continue ;
-                }
-                int cut_start = 0 ;
-                int cut_len = tmp.gap_size ;
-                bool need_reverse = false ;
-                if( m1.query_char == '+' )
-                {
-                    cut_start = m1.target_end + 1 ;
-                }
-                else
-                {
-                    cut_start = m2.target_end + 1;
-                    need_reverse = true ;
-                }
-                const auto & ont_read = reads.at(m1.target_name).seq.atcgs ;
-                std::string cut_seq =  ont_read.substr(cut_start,cut_len) ;
-                if( need_reverse )
-                    cut_seq = BGIQD::SEQ::seqCompleteReverse(cut_seq);
-                prev.extra[BGIQD::stLFR::ContigDetail::ONT_FILL] = cut_seq;
             }
         }
 
@@ -274,6 +285,8 @@ struct AppConfig
         loger<<BGIQD::LOG::lstart()<<">the one read provide filler choose count freq for a gap \n"
             <<a_read_oo_choose_freq.ToString()<<BGIQD::LOG::lend();
 
+        loger<<BGIQD::LOG::lstart()<<">the cut error is "
+            <<cut_err<<BGIQD::LOG::lend();
     }
 
     void PrintScaffInfo()
