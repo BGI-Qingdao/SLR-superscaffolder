@@ -32,6 +32,16 @@ struct AppConfig
 
     float bin_factor ;
 
+    enum WorkingMode
+    {
+        Unknow = 0 ,
+        EqualBin = 1 ,
+        Head_Tail = 2 ,
+        OneBin = 3 
+    };
+
+    WorkingMode work_mode ;
+
     bool head_tail_only;
 
     BarcodeOnContig boc;
@@ -46,10 +56,38 @@ struct AppConfig
     {
         std::map<int , BinInterval > ret ;
         int contig_used_len = contig_len - del_at_tail;
-        int bin_num = contig_used_len / bin_size + ( (float ( contig_used_len % bin_size ) /(float) bin_size) >= bin_factor? 1 : 0 );
+
+        if( work_mode == WorkingMode::OneBin)
+        {
+            ret[0] = BinInterval(-100,contig_used_len+100);
+            return  ret ;
+        }
+        else if ( work_mode == WorkingMode::Head_Tail)
+        {
+            int half = contig_used_len / 2 ;
+            int end1 = half -1 ;
+            int start2 = half ;
+            if ( end1 > max_bin_size )
+            {
+                end1 = max_bin_size ;
+                start2 = contig_used_len - max_bin_size +1 ;
+            }
+            ret[0] = BinInterval( 1 , end1 );
+            ret[1] = BinInterval( start2 , contig_used_len);
+            return ret ;
+        }
+        else if ( work_mode != WorkingMode::EqualBin )
+        {
+            assert(0);
+        }
+        else
+        {
+            ;
+        }
+
         int start = 1 ;
         int end = contig_used_len ;
-
+        int bin_num = contig_used_len / bin_size + ( (float ( contig_used_len % bin_size ) /(float) bin_size) >= bin_factor? 1 : 0 );
         if ( bin_num == 1 )
         {
             start += (end -start- bin_size) / 2;
@@ -58,13 +96,16 @@ struct AppConfig
         else 
         {
             assert( bin_num >= 2 );
-            if( head_tail_only )
-                bin_num = 2;
             for( int i = 0  ; i< bin_num ; i++ )
             {
                 assert( start <= end );
                 if( i % 2 == 0 )
                 {
+                    // Make sure we do not chop bin from very middle area .
+                    if ( start > max_bin_size )
+                    {
+                        break ;
+                    }
                     ret[i/2] = 
                         BinInterval(start , start+bin_size -1 );
                     start += bin_size ;
@@ -80,7 +121,6 @@ struct AppConfig
         assert( bin_num > 0 );
         return ret ;
     };
-
 
     void LoadSeeds()
     {
@@ -111,6 +151,9 @@ struct AppConfig
         fName.Init(prefix);
         b2b_array.Init(1024);
         log<<BGIQD::LOG::lstart()<<"Init finsish ..."<<BGIQD::LOG::lend();
+
+        assert( int(work_mode) > 0 );
+        assert( int(work_mode) < 4 );
     }
 
     void LoadBarcodeOnContig()
@@ -188,21 +231,28 @@ struct AppConfig
         BGIQD::stLFR::PrintBarcodeOnBinArray(fName.BarcodeOnBin(),b2b_array);
     }
 
+    int max_bin_size ;
+
 }config;
 
 int main(int argc , char ** argv)
 {
     START_PARSE_ARGS
     DEFINE_ARG_REQUIRED(int , bin_size, "bin size . must be smaller than seed min length");
-    //DEFINE_ARG_REQUIRED(int , delete_tail, "delete size at contig tail . depends on you alignment tools and args");
-    DEFINE_ARG_OPTIONAL(float ,bin_factor , "factor of smallest bin in the middle", "0.5");
     DEFINE_ARG_REQUIRED(std::string ,prefix, "prefix . Input xxx.seeds && xxx.barcodeOnContig ; Output xxx.barcodeOnBin");
     //DEFINE_ARG_OPTIONAL(bool ,p_b2c , "print barcode on contig", "0");
-    DEFINE_ARG_OPTIONAL(bool ,ht_only, "only chop bin at head and tail", "0");
+    DEFINE_ARG_OPTIONAL(int , work_mode, " the work_mode for chopbin : \n\
+                            1 for chop bin with equal bin size \n\
+                            2 for chop bin only at contig head and tail \n\
+                            3 for chop 1 bin for a contig ", "1");
+
+    DEFINE_ARG_OPTIONAL(float ,bin_factor , "factor of smallest bin in the middle", "0.5");
+    DEFINE_ARG_OPTIONAL(int,  max_bin_size , "max_bin_size for head&tail mode" ,"15000");
     END_PARSE_ARGS
 
+    config.work_mode = static_cast<AppConfig::WorkingMode>(work_mode.to_int());
+    config.max_bin_size = max_bin_size.to_int();
     config.Init( prefix.to_string() , bin_size.to_int() , bin_factor.to_float());
-    config.head_tail_only= ht_only.to_bool() ;
 
     BGIQD::LOG::timer t(config.log,"ChopBin");
 

@@ -43,6 +43,16 @@ struct AppConfig
 
     bool calc_same_contig;
 
+
+    enum WorkMode
+    {
+        Unknow = 0 ,
+        Jaccard = 1 ,
+        JoinBarcodeNum = 2
+    } ;
+
+    WorkMode work_mode ;
+
     void Init(const std::string & p , float t, bool cs)
     {
         fName.Init(p);
@@ -116,7 +126,14 @@ struct AppConfig
         for(auto index : relates)
         {
             auto & other = barcodeOnBin[index];
-            float sim = BGIQD::stLFR::BarcodeCollection::Jaccard(bin.collections,other.collections);
+            float sim = 0 ;
+            if( work_mode == WorkMode::Jaccard )
+                sim = BGIQD::stLFR::BarcodeCollection::Jaccard(bin.collections,other.collections);
+            else if ( work_mode == WorkMode::JoinBarcodeNum )
+                sim =  BGIQD::stLFR::BarcodeCollection::Intersection(bin.collections,other.collections).size();
+            else
+                assert(0);
+
             if( sim >= thresold )
             {
                 auto & sinfo = result.sims[index];
@@ -216,11 +233,13 @@ int main(int argc ,char **argv)
     DEFINE_ARG_REQUIRED(std::string , prefix, "prefix. Input xxx.barcodeOnBin ; Output xxx.bin_cluster && xxx.cluster");
     DEFINE_ARG_REQUIRED(float , threshold, "simularity threshold");
     DEFINE_ARG_OPTIONAL(int , thread, "thread num" ,"8");
+    DEFINE_ARG_OPTIONAL(int , work_mode, "1 for Jaccard value , 2 for join_barcode_num" ,"1");
     DEFINE_ARG_OPTIONAL(bool, pbc, "print bin cluster" ,"0");
     DEFINE_ARG_OPTIONAL(bool, bin_same_contig, "calc for bin on same contig ." ,"false");
     //DEFINE_ARG_OPTIONAL(bool, del, "calc for bin on same contig ." ,"false");
     END_PARSE_ARGS
 
+    config.work_mode = static_cast<AppConfig::WorkMode>(work_mode.to_int());
     config.Init(prefix.to_string() , threshold.to_float(), bin_same_contig.to_bool());
     config.del = false;// del.to_bool();
     BGIQD::LOG::timer t(config.lger,"BinCluster");
