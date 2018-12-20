@@ -18,6 +18,7 @@ apps="Barcode2Gap\
  MergePEInfo\
  MinTree\
  MST\
+ ONTGapFiller\
  Overlap2Gap\
  ParseContig2Read\
  ParseRead2Contig\
@@ -89,6 +90,7 @@ source_cpp =	../common/files/file_reader.cpp \\
 				../stLFR/ContigCluster.cpp\\
                 ../stLFR/ScaffInfo.cpp\\
 				../stLFR/LineGroup.cpp\\
+                ../stLFR/contigPairInfo.cpp\\
 				../stLFR/ContigOverlap.cpp\\
 				../stLFR/CBB.cpp\\
 				../stLFR/TagId.cpp\\

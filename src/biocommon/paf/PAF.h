@@ -23,6 +23,9 @@ namespace BGIQD {
 
             void InitFromString( const std::string & line );
 
+            // force map all read length onto target
+            PAF_Item Flatten() const ;
+
         };
     }
 }

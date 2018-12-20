@@ -11,5 +11,27 @@ namespace BGIQD {
             ist>>target_name>>target_len>>target_start>>target_end;
             ist>>len_query_match>>len_target_match>>quality;
         }
+
+        PAF_Item PAF_Item::Flatten() const 
+        {
+            PAF_Item  ret = *this ;
+            if( query_start < query_end )
+            {
+                ret.query_start = 0 ;
+                ret.target_start = target_start - query_start  ;
+                ret.query_end = query_len -1 ;
+                ret.target_end = target_end + ( query_len -1 - query_end) ;
+            }
+            else
+            {
+                ret.query_start = query_len -1 ;
+                ret.target_start = target_start - ( query_len -1 - query_start ) ;
+                ret.query_end = 0  ;
+                ret.target_end = target_end + query_end ;
+            }
+            // ret.len_query_match = ?
+            // ret.len_target_match = ?
+            return ret ;
+        }
     }
 }
