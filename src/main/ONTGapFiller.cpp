@@ -18,6 +18,8 @@
 #include <map>
 #include <vector>
 #include <set>
+#include <algorithm>
+
 
 typedef BGIQD::FASTQ::Id_Desc_Head Header;
 
@@ -129,7 +131,10 @@ struct AppConfig
         int no_match = 0 ;
         int cut_err = 0 ;
         int scaff_negotive_gap_size = 0 ;
+        int scaff_negotive_gap_size_no_choose = 0 ;
         int ont_negotive_gap_size = 0 ;
+        int ont_negotive_gap_size_no_choose = 0 ;
+        int force_fill_succ = 0 ;
 
         BGIQD::FREQ::Freq<int> gap_both_read_freq ;
         BGIQD::FREQ::Freq<int> gap_oo_read_freq ;
@@ -171,6 +176,7 @@ struct AppConfig
                 scaff_pn.InitFromScaffInfo(prev,next);
                 int used_read = 0 ;
                 std::vector< std::pair< BGIQD::PAF::PAF_Item , BGIQD::PAF::PAF_Item> > chooses;
+                std::vector< std::pair< BGIQD::PAF::PAF_Item , BGIQD::PAF::PAF_Item> > others;
                 for( const auto & read_name : commons )
                 {
                     auto & prev_matched_infos = map_info1.at(read_name) ;
@@ -187,6 +193,11 @@ struct AppConfig
                                 used_pair ++ ;
                                 chooses.push_back(std::make_pair( m1 , m2 ));
                             }
+                            else
+                            {
+                                if( force_fill )
+                                    others.push_back(std::make_pair( m1 , m2 ));
+                            }
                         }
                     }
                     if( used_pair > 0 )
@@ -198,7 +209,62 @@ struct AppConfig
                 if( chooses.empty() )
                 {
                     no_choose ++ ;
-                    continue ;
+                    if(  force_fill )
+                    {
+                        // trust contig overlap first 
+                        if( scaff_pn.gap_size < 0 )
+                        {
+                            scaff_negotive_gap_size_no_choose ++ ;
+                        }
+                        else
+                        {
+                            // force choose some to fill ;
+                            for ( const auto & pair : others )
+                            {
+                                auto & m1 = pair.first ;
+                                auto & m2 = pair.second ;
+                                BGIQD::stLFR::PairPN tmp ;
+                                tmp.InitFromPAF(m1,m2);
+                                if( tmp.type == BGIQD::stLFR::OOType::Unknow  )
+                                    continue ;
+                                if( tmp.gap_size < 0 )
+                                {
+                                    prev.gap_size = tmp.gap_size ;
+                                    ont_negotive_gap_size_no_choose ++ ;
+                                    break ;
+                                }
+                                else if ( tmp.gap_size == 0 )
+                                {
+                                    prev.gap_size = -1;
+                                    ont_negotive_gap_size_no_choose ++ ;
+                                    break ;
+                                }
+                                else
+                                {
+                                    std::vector<int> pos;
+                                    pos.push_back(m1.target_start);
+                                    pos.push_back(m2.target_start);
+                                    pos.push_back(m1.target_end);
+                                    pos.push_back(m2.target_end);
+                                    std::sort( pos.begin() , pos.end()) ;
+                                    int cut_start = pos[1] + 1 ;
+                                    int cut_len = pos[2] - pos[1] - 1 ;
+                                    const auto & ont_read = reads.at(m1.target_name).seq.atcgs ;
+                                    prev.gap_size = cut_len ;
+                                    if( cut_len < 1 || cut_start<0 ||  cut_start + cut_len  >= (int) ont_read.size() )
+                                    {
+                                        cut_err ++ ;
+                                        continue ;
+                                    }
+                                    force_fill_succ ++ ;
+                                    std::string cut_seq =  ont_read.substr(cut_start,cut_len) ;
+                                    prev.extra[BGIQD::stLFR::ContigDetail::ONT_FILL] = cut_seq;
+                                    break ;
+                                }
+                            }
+                        }
+                    }
+                        continue ;
                 }
                 // Random choose the 1th 1 choose .
                 for ( const auto & pair : chooses )
@@ -273,6 +339,17 @@ struct AppConfig
         loger<<BGIQD::LOG::lstart()<<">the ont_negotive_gap_size is "
             <<ont_negotive_gap_size<<BGIQD::LOG::lend();
 
+        if( force_fill )
+        {
+            loger<<BGIQD::LOG::lstart()<<">the scaff_negotive_gap_size_no_choose  is "
+                <<scaff_negotive_gap_size_no_choose<<BGIQD::LOG::lend();
+
+            loger<<BGIQD::LOG::lstart()<<">the force fill succ is "
+                <<force_fill_succ<<BGIQD::LOG::lend();
+            loger<<BGIQD::LOG::lstart()<<">the ont_negotive_gap_size_no_choose is "
+                <<ont_negotive_gap_size_no_choose<<BGIQD::LOG::lend();
+        }
+
         loger<<BGIQD::LOG::lstart()<<">the common reads count freq for a gap \n"
             <<gap_both_read_freq.ToString()<<BGIQD::LOG::lend();
 
@@ -295,7 +372,7 @@ struct AppConfig
         scaff_info_helper.PrintAllScaff(std::cout);
     }
 
-
+    bool force_fill ;
 } config ;
 
 int main(int argc , char ** argv)
@@ -303,7 +380,10 @@ int main(int argc , char ** argv)
     START_PARSE_ARGS
         DEFINE_ARG_REQUIRED(std::string, contig2ont_paf ,"the paf file that map contig into ont reads.");
         DEFINE_ARG_REQUIRED(std::string, ont_reads,"the ont reads in fastq format.");
+        DEFINE_ARG_OPTIONAL(bool, force_fill,"will force fill as much gap as it can. ","false");
     END_PARSE_ARGS;
+
+    config.force_fill = force_fill.to_bool() ;
 
     config.ont_reads_file = ont_reads.to_string();
 
