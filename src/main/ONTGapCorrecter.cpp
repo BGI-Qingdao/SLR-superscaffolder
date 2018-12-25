@@ -249,13 +249,13 @@ struct AppConfig
                                     std::sort( pos.begin() , pos.end()) ;
                                     int cut_start = pos[1] + 1 ;
                                     int cut_len = pos[2] - pos[1] - 1 ;
-                                    const auto & ont_read = reads.at(m1.target_name).seq.atcgs ;
+                                    //const auto & ont_read = reads.at(m1.target_name).seq.atcgs ;
                                     prev.gap_size = cut_len ;
-                                    if( cut_len < 1 || cut_start<0 ||  cut_start + cut_len  >= (int) ont_read.size() )
-                                    {
-                                        cut_err ++ ;
-                                        continue ;
-                                    }
+                                    //if( cut_len < 1 || cut_start<0 ||  cut_start + cut_len  >= (int) ont_read.size() )
+                                    //{
+                                    //    cut_err ++ ;
+                                    //    continue ;
+                                    //}
                                     force_fill_succ ++ ;
                                     prev.gap_size = cut_len ;
                                     break ;
@@ -305,12 +305,12 @@ struct AppConfig
                         cut_start = m2.target_end + 1;
                         need_reverse = true ;
                     }
-                    const auto & ont_read = reads.at(m1.target_name).seq.atcgs ;
-                    if( cut_start<0 ||  cut_start + cut_len  >= (int) ont_read.size() )
-                    {
-                        cut_err ++ ;
-                        continue ;
-                    }
+                    //const auto & ont_read = reads.at(m1.target_name).seq.atcgs ;
+                    //if( cut_start<0 ||  cut_start + cut_len  >= (int) ont_read.size() )
+                    //{
+                    //    cut_err ++ ;
+                    //    continue ;
+                    //}
                     prev.gap_size = cut_len ;
                     break ;
                 }
@@ -389,7 +389,7 @@ int main(int argc , char ** argv)
 
     BGIQD::LOG::timer t(config.loger,"ONTGapFiller");
 
-    config.LoadONTReads() ;
+    //config.LoadONTReads() ;
 
     config.LoadPAF() ;
 
