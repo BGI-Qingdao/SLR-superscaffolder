@@ -18,6 +18,7 @@ apps="Barcode2Gap\
  MergePEInfo\
  MinTree\
  MST\
+ ONTGapCorrecter\
  ONTGapFiller\
  Overlap2Gap\
  ParseContig2Read\
