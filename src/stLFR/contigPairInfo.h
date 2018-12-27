@@ -21,7 +21,16 @@ namespace BGIQD {
 
         static inline OOType GetCR( OOType type )
         {
-            return static_cast<OOType>( 5- static_cast<int>(type) );
+            if(  type == C1_2_C2 )
+            {
+                return C1p_2_C2p ;
+            }
+            if( type == C1p_2_C2p )
+            {
+                return C1_2_C2 ;
+            }
+            return type ; 
+            //return static_cast<OOType>( 5- static_cast<int>(type) );
         }
 
         struct PairPN
