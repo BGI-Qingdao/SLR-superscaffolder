@@ -35,6 +35,20 @@ namespace BGIQD {
                 C1p_2_C2p   = 4 ,
             };
 
+            static inline OverlapType GetCR( OverlapType type )
+            {
+                if(  type == C1_2_C2 )
+                {
+                    return C1p_2_C2p ;
+                }
+                if( type == C1p_2_C2p )
+                {
+                    return C1_2_C2 ;
+                }
+                return type ; 
+                //return static_cast<OOType>( 5- static_cast<int>(type) );
+            }
+
             OverlapType type ;
             int overlap_len ;
             int c1_start_pos ;
