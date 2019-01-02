@@ -33,7 +33,6 @@ typedef std::map<std::string , Contig2ONT> Contig2ONTReads;
 
 struct AppConfig
 {
-    std::string  ont_reads_file ;
 
     std::string  contig_2_ont_paf_file ;
 
@@ -52,21 +51,6 @@ struct AppConfig
     }
 
 
-    void LoadONTReads()
-    {
-        BGIQD::LOG::timer t(loger,"LoadONTReads");
-        auto in = BGIQD::FILES::FileReaderFactory
-            ::GenerateReaderFromFileName(ont_reads_file);
-        if ( in == NULL )
-            FATAL(" failed to open the ont_reads_file to read ");
-        Reader reader ;
-        ONTRead tmp ;
-        while( reader.LoadNextFastq(*in ,tmp) )
-        {
-            reads[tmp.head.Id] = tmp ;
-        }
-        delete in ;
-    }
 
 
     void LoadPAF()
@@ -375,21 +359,17 @@ int main(int argc , char ** argv)
 {
     START_PARSE_ARGS
         DEFINE_ARG_REQUIRED(std::string, contig2ont_paf ,"the paf file that map contig into ont reads.");
-        DEFINE_ARG_REQUIRED(std::string, ont_reads,"the ont reads in fastq format.");
         DEFINE_ARG_OPTIONAL(bool, force_fill,"will force fill as much gap as it can. ","false");
     END_PARSE_ARGS;
 
     config.force_fill = force_fill.to_bool() ;
 
-    config.ont_reads_file = ont_reads.to_string();
 
     config.contig_2_ont_paf_file = contig2ont_paf.to_string() ;
 
     config.Init();
 
     BGIQD::LOG::timer t(config.loger,"ONTGapFiller");
-
-    //config.LoadONTReads() ;
 
     config.LoadPAF() ;
 
