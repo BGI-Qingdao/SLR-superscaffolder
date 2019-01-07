@@ -126,7 +126,8 @@ namespace BGIQD {
 
             {
                 std::swap(c1,c2);
-                type = static_cast<OverlapType>(5-static_cast<int>(type)) ;
+                type = GetCR(type);
+                //type = static_cast<OverlapType>(5-static_cast<int>(type)) ;
             }
         }
     }
