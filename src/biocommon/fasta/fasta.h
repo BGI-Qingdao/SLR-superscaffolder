@@ -35,6 +35,19 @@ namespace BGIQD {
             void Reset() { head.clear() ;} 
         };
 
+        struct Id_Desc_Head
+        {
+            std::string Id;
+
+            std::string Desc;
+
+            void Init( const std::string & line ) ;
+
+            std::string Head() const { return ">" + Id +Desc ; }
+
+            void Reset() { Id.clear() ; Desc.clear() ;} 
+        };
+
         struct SOAP2ContigHead 
         {
             unsigned int contigId ;
