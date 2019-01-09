@@ -91,8 +91,8 @@ struct AppConfig
             }
             else if ( detail.gap_size < 0 )
             {
-                assert( (int)str.length() > (int)std::abs(detail.gap_size) );
-                str = str.substr(0,str.length() + detail.gap_size);
+                if(  (int)str.length() +  (int)std::abs(detail.gap_size) > 0 )
+                    str = str.substr(0,str.length() + detail.gap_size);
                 str += std::string(min_c,'N');
             }
             else
