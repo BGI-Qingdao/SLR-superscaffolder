@@ -93,7 +93,7 @@ struct AppConfig
             {
                 assert( (int)str.length() > (int)std::abs(detail.gap_size) );
                 str = str.substr(0,str.length() + detail.gap_size);
-                str += std::string(min_n,'N');
+                str += std::string(min_c,'N');
             }
             else
             {
@@ -126,6 +126,7 @@ struct AppConfig
         delete out ;
     }
     int min_n ;
+    int min_c ;
 } config;
 
 
@@ -134,8 +135,9 @@ int main(int argc , char ** argv)
     START_PARSE_ARGS
         DEFINE_ARG_REQUIRED(std::string, prefix ,"prefix of files. Input xxx.scaff_infos; Output xxx.scaff_seqs");
         DEFINE_ARG_OPTIONAL(int, min_n,"min N size for gap in scaffold if not filled ","11");
+        DEFINE_ARG_OPTIONAL(int, min_c,"min N size for contig overlap cut ","11");
     END_PARSE_ARGS;
-
+    config.min_c = min_c.to_int() ;
     config.min_n = min_n.to_int();
     config.Init( prefix.to_string() );
     BGIQD::LOG::timer t(config.loger,"ScaffInfo2Seqs");
