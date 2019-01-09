@@ -652,9 +652,9 @@ int main(int argc, char **argv)
                                                             xxx.scaff_infos\n\
                                                         ");
         DEFINE_ARG_OPTIONAL( int , gap_trunk, "gap in trunk" , "5000");
-        DEFINE_ARG_OPTIONAL( int , gap_petrunk, "gap in trunk and has pe conn" , "300");
-        DEFINE_ARG_OPTIONAL( int , gap_pe, "gap in pe" , "10");
-        DEFINE_ARG_OPTIONAL( int , min_gap, "min gap size " , "11");
+        DEFINE_ARG_OPTIONAL( int , gap_petrunk, "gap in trunk and has pe conn" , "1");
+        DEFINE_ARG_OPTIONAL( int , gap_pe, "gap in pe" , "1");
+        DEFINE_ARG_OPTIONAL( int , min_gap, "min gap size " , "1");
     END_PARSE_ARGS;
 
     config.min_fill = min_gap.to_int();
