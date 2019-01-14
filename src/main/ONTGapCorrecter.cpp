@@ -14,6 +14,7 @@
 
 #include "stLFR/contigPairInfo.h"
 #include "stLFR/ScaffInfo.h"
+#include "stLFR/ONT2Gap.h"
 
 #include <map>
 #include <vector>
@@ -159,8 +160,10 @@ struct AppConfig
                 BGIQD::stLFR::PairPN scaff_pn;
                 scaff_pn.InitFromScaffInfo(prev,next);
                 int used_read = 0 ;
-                std::vector< std::pair< BGIQD::PAF::PAF_Item , BGIQD::PAF::PAF_Item> > chooses;
-                std::vector< std::pair< BGIQD::PAF::PAF_Item , BGIQD::PAF::PAF_Item> > others;
+                BGIQD::ONT::ONT2GapInfos chooses ;
+                BGIQD::ONT::ONT2GapInfos others;
+                //std::vector< std::pair< BGIQD::PAF::PAF_Item , BGIQD::PAF::PAF_Item> > chooses;
+                //std::vector< std::pair< BGIQD::PAF::PAF_Item , BGIQD::PAF::PAF_Item> > others;
                 for( const auto & read_name : commons )
                 {
                     auto & prev_matched_infos = map_info1.at(read_name) ;
@@ -175,12 +178,14 @@ struct AppConfig
                             if( ont_pn.type == scaff_pn.type )
                             {
                                 used_pair ++ ;
-                                chooses.push_back(std::make_pair( m1 , m2 ));
+                                //chooses.push_back(std::make_pair( m1 , m2 ));
+                                chooses.push_back( { m1 , m2 , ont_pn } );
                             }
                             else
                             {
                                 if( force_fill )
-                                    others.push_back(std::make_pair( m1 , m2 ));
+                                    others.push_back( { m1 , m2 , ont_pn } );
+                                    //others.push_back(std::make_pair( m1 , m2 ));
                             }
                         }
                     }
@@ -190,6 +195,14 @@ struct AppConfig
                 }
                 gap_oo_read_freq.Touch(used_read);
                 filler_choose_freq.Touch(chooses.size());
+                if( work_mode == 1 )
+                {
+                    BGIQD::ONT::SortLess(chooses);
+                }
+                else if ( work_mode == 3 )
+                {
+                    BGIQD::ONT::SortMedian(chooses);
+                }
                 if( chooses.empty() )
                 {
                     no_choose ++ ;
@@ -205,8 +218,8 @@ struct AppConfig
                             // force choose some to fill ;
                             for ( const auto & pair : others )
                             {
-                                auto & m1 = pair.first ;
-                                auto & m2 = pair.second ;
+                                auto & m1 = pair.from ;
+                                auto & m2 = pair.to;
                                 BGIQD::stLFR::PairPN tmp ;
                                 tmp.InitFromPAF(m1,m2);
                                 if( tmp.type == BGIQD::stLFR::OOType::Unknow  )
@@ -253,8 +266,8 @@ struct AppConfig
                 for ( const auto & pair : chooses )
                 {
                     //auto & pair = chooses.front() ;
-                    auto & m1 = pair.first ;
-                    auto & m2 = pair.second ;
+                    auto & m1 = pair.from ;
+                    auto & m2 = pair.to;
                     BGIQD::stLFR::PairPN tmp ;
                     tmp.InitFromPAF(m1,m2);
 
@@ -353,6 +366,9 @@ struct AppConfig
     }
 
     bool force_fill ;
+
+    int  work_mode ;
+
 } config ;
 
 int main(int argc , char ** argv)
@@ -360,10 +376,12 @@ int main(int argc , char ** argv)
     START_PARSE_ARGS
         DEFINE_ARG_REQUIRED(std::string, contig2ont_paf ,"the paf file that map contig into ont reads.");
         DEFINE_ARG_OPTIONAL(bool, force_fill,"will force fill as much gap as it can. ","false");
+        DEFINE_ARG_OPTIONAL(int, work_mode,"1, shortest ; 2, random ; 3, median","1");
     END_PARSE_ARGS;
 
     config.force_fill = force_fill.to_bool() ;
 
+    config.work_mode = work_mode.to_int() ;
 
     config.contig_2_ont_paf_file = contig2ont_paf.to_string() ;
 

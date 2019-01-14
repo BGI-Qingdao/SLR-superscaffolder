@@ -15,6 +15,7 @@
 
 #include "stLFR/contigPairInfo.h"
 #include "stLFR/ScaffInfo.h"
+#include "stLFR/ONT2Gap.h"
 
 #include <map>
 #include <vector>
@@ -202,8 +203,10 @@ struct AppConfig
                 BGIQD::stLFR::PairPN scaff_pn;
                 scaff_pn.InitFromScaffInfo(prev,next);
                 int used_read = 0 ;
-                std::vector< std::pair< BGIQD::PAF::PAF_Item , BGIQD::PAF::PAF_Item> > chooses;
-                std::vector< std::pair< BGIQD::PAF::PAF_Item , BGIQD::PAF::PAF_Item> > others;
+                BGIQD::ONT::ONT2GapInfos chooses ;
+                BGIQD::ONT::ONT2GapInfos others;
+                //std::vector< std::pair< BGIQD::PAF::PAF_Item , BGIQD::PAF::PAF_Item> > chooses;
+                //std::vector< std::pair< BGIQD::PAF::PAF_Item , BGIQD::PAF::PAF_Item> > others;
                 for( const auto & read_name : commons )
                 {
                     auto & prev_matched_infos = map_info1.at(read_name) ;
@@ -218,18 +221,30 @@ struct AppConfig
                             if( ont_pn.type == scaff_pn.type )
                             {
                                 used_pair ++ ;
-                                chooses.push_back(std::make_pair( m1 , m2 ));
+                                chooses.push_back({ m1 , m2 , ont_pn });
+                                //chooses.push_back(std::make_pair( m1 , m2 ));
                             }
                             else
                             {
                                 if( force_fill )
-                                    others.push_back(std::make_pair( m1 , m2 ));
+                                {
+                                    chooses.push_back({ m1 , m2 , ont_pn });
+                                }
+                                    //others.push_back(std::make_pair( m1 , m2 ));
                             }
                         }
                     }
                     if( used_pair > 0 )
                         used_read ++ ;
                     a_read_oo_choose_freq.Touch(used_pair);
+                }
+                if( work_mode == 1 )
+                {
+                    BGIQD::ONT::SortLess(chooses);
+                }
+                else if ( work_mode == 3 )
+                {
+                    BGIQD::ONT::SortMedian(chooses);
                 }
                 gap_oo_read_freq.Touch(used_read);
                 filler_choose_freq.Touch(chooses.size());
@@ -248,10 +263,10 @@ struct AppConfig
                             // force choose some to fill ;
                             for ( const auto & pair : others )
                             {
-                                auto & m1 = pair.first ;
-                                auto & m2 = pair.second ;
-                                BGIQD::stLFR::PairPN tmp ;
-                                tmp.InitFromPAF(m1,m2);
+                                const auto & m1 = pair.from ;
+                                const auto & m2 = pair.to ;
+                                const BGIQD::stLFR::PairPN & tmp = pair.pair_info  ;
+                                //tmp.InitFromPAF(m1,m2);
                                 if( tmp.type == BGIQD::stLFR::OOType::Unknow  )
                                     continue ;
                                 if( tmp.gap_size < 0 )
@@ -297,10 +312,10 @@ struct AppConfig
                 for ( const auto & pair : chooses )
                 {
                     //auto & pair = chooses.front() ;
-                    auto & m1 = pair.first ;
-                    auto & m2 = pair.second ;
-                    BGIQD::stLFR::PairPN tmp ;
-                    tmp.InitFromPAF(m1,m2);
+                    const auto & m1 = pair.from  ;
+                    const auto & m2 = pair.to ;
+                    const BGIQD::stLFR::PairPN & tmp = pair.pair_info  ;
+                    //tmp.InitFromPAF(m1,m2);
 
                     // trust contig overlap first 
                     if( scaff_pn.gap_size < 0 )
@@ -402,6 +417,7 @@ struct AppConfig
     bool force_fill ;
     std::string ont_read_a  ;
     std::string ont_read_q  ;
+    int work_mode ;
 } config ;
 
 int main(int argc , char ** argv)
@@ -411,17 +427,19 @@ int main(int argc , char ** argv)
         DEFINE_ARG_OPTIONAL(std::string, ont_reads_q,"the ont reads in fastq format.","");
         DEFINE_ARG_OPTIONAL(std::string, ont_reads_a,"the ont reads in fasta format.","");
         DEFINE_ARG_OPTIONAL(bool, force_fill,"will force fill as much gap as it can. ","false");
+        DEFINE_ARG_OPTIONAL(int, work_mode,"1, shortest ; 2, random ; 3, median","1");
     END_PARSE_ARGS;
 
     if( ! ont_reads_q.setted && ! ont_reads_a.setted )
         FATAL("please give the ont reads !!!");
     config.force_fill = force_fill.to_bool() ;
+    config.work_mode = work_mode.to_int();
     if( ont_reads_a.setted )
     {
         config.ont_read_a  = ont_reads_a.to_string();
         config.ont_read_q  = "" ;
     }
-    else 
+    else
     {
         config.ont_read_q  = ont_reads_q.to_string();
         config.ont_read_a  = "" ;
