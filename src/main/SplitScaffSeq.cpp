@@ -144,7 +144,7 @@ int main(int argc , char **argv)
             { // this is the last scaftig of this scaffold
                 if( !gen_contig )
                 {
-                    if( x != 'n' || x != 'N' )
+                    if( x != 'n' && x != 'N' )
                     {
                         index ++ ;
                         auto tmp = get_contig( index ,a_scaftig_agcts);
