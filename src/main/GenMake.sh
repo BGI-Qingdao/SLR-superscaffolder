@@ -34,6 +34,7 @@ apps="Barcode2Gap\
  SplitInfo\
  SplitScaffWithReads\
  StaticsticUnique\
+ SplitScaffSeq\
  Trunk2Scaff\
  Trunk2ScaffGap\
  Trunk2ScaffInfo\
