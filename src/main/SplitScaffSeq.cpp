@@ -108,7 +108,7 @@ int main(int argc , char **argv)
             {
                 if( ! n_prev )
                 {
-                    gap_size = 1 ;
+                    gap_size = 0 ;
                     if( ! a_scaftig_agcts.empty() )
                     {
                         index ++ ;
@@ -132,7 +132,6 @@ int main(int argc , char **argv)
                     helper.all_scaff[scaff_id].a_scaff.push_back(tmp);
 
                     contig_len = 0 ;
-                    gap_size = 0 ;
                     gen_contig_detail = true ;
                     a_scaftig_agcts.clear() ;
                 }
