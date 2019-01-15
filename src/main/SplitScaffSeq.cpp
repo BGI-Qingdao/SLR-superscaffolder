@@ -132,6 +132,7 @@ int main(int argc , char **argv)
                     helper.all_scaff[scaff_id].a_scaff.push_back(tmp);
 
                     contig_len = 0 ;
+                    gap_size = 0 ;
                     gen_contig_detail = true ;
                     a_scaftig_agcts.clear() ;
                 }
@@ -143,12 +144,15 @@ int main(int argc , char **argv)
             { // this is the last scaftig of this scaffold
                 if( !gen_contig )
                 {
-                    index ++ ;
-                    auto tmp = get_contig( index ,a_scaftig_agcts);
-                    contig_len = a_scaftig_agcts.size();
-                    AllScafftigs.push_back(tmp);
-                    a_scaftig_agcts.clear() ;
-                    gen_contig = true ;
+                    if( x != 'n' || x != 'N' )
+                    {
+                        index ++ ;
+                        auto tmp = get_contig( index ,a_scaftig_agcts);
+                        contig_len = a_scaftig_agcts.size();
+                        AllScafftigs.push_back(tmp);
+                        a_scaftig_agcts.clear() ;
+                        gen_contig = true ;
+                    }
                 }
                 if( !gen_contig_detail )
                 {
