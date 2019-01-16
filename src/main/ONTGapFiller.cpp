@@ -240,7 +240,8 @@ struct AppConfig
                 }
                 if( work_mode == 1 )
                 {
-                    BGIQD::ONT::SortLess(chooses);
+                    BGIQD::ONT::SortModifyLess(chooses);
+                    //BGIQD::ONT::SortLess(chooses);
                 }
                 else if ( work_mode == 3 )
                 {

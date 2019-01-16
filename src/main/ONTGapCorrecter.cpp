@@ -197,7 +197,7 @@ struct AppConfig
                 filler_choose_freq.Touch(chooses.size());
                 if( work_mode == 1 )
                 {
-                    BGIQD::ONT::SortLess(chooses);
+                    BGIQD::ONT::SortModifyLess(chooses);
                 }
                 else if ( work_mode == 3 )
                 {
