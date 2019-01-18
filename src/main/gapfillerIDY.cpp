@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>
 #include <set>
+#include <cassert>
 
 std::map<long , std::vector<BGIQD::SAM::MatchData> >   cache_data;
 
@@ -58,26 +59,36 @@ int main()
     for( const auto & pair : cache_data )
     {
         const auto & info = pair.second.at(0);
-        idy+= info.md_data.total_same ;
+        int the_result_len = info.total_result_len() ;
+        int the_read_len = info.read_len ;
+        int the_match_len = info.total_match_len();
+        int the_correct_len =  info.md_data.total_same ;
+        int the_miss = the_match_len - the_correct_len ;
+        int the_in = info.total_in_len() ;
+        int the_del = info.total_del_len() ;
+        int the_indel = info.total_indel_len();
         total_result_len += info.total_result_len() ;
         total_read_len  += info.read_len ;
+        idy+= info.md_data.total_same ;
         missmatch += ( info.total_match_len() - info.md_data.total_same ) ;
-        in_f =  info.total_in_len() ;
-        del_f = info.total_del_len() ;
+        in_f +=  info.total_in_len() ;
+        del_f += info.total_del_len() ;
 
-        m_base +=     (pair.second[0].total_match_len()) ;
-        in_base +=    (pair.second[0].total_indel_len()) ;
-        clip_base +=  (pair.second[0].total_clip_len()) ;
+        assert( idy + missmatch + in_f + del_f == total_result_len );
+        m_base +=     (info.total_match_len()) ;
+        in_base +=    (info.total_in_len()) ;
+        clip_base +=  (info.total_clip_len()) ;
+        assert( m_base + in_base + clip_base   == total_read_len );
     }
     int total_size = cache_data.size() ;
-    std::cerr<<"mean idy     " <<float(idy) / float(total_result_len) / float(total_size)<<std::endl;
-    std::cerr<<"mean missmatch     " << (float)missmatch / float(total_result_len) / float(total_size) <<std::endl;
-    std::cerr<<"mean insert " << (float)in_f / float(total_result_len) / float(total_size) <<std::endl;
-    std::cerr<<"mean deletion " << (float)del_f  / float(total_result_len) / float(total_size) <<std::endl;
+    std::cerr<<"mean idy     " <<float(idy) / float(total_result_len) <<std::endl;
+    std::cerr<<"mean missmatch     " << (float)missmatch / float(total_result_len)  <<std::endl;
+    std::cerr<<"mean insert " << (float)in_f / float(total_result_len)  <<std::endl;
+    std::cerr<<"mean deletion " << (float)del_f  / float(total_result_len)  <<std::endl;
     std::cerr<<"________________"<<std::endl;
-    std::cerr<<"mean match fraction " << (float) m_base / float(total_read_len) / float(total_size) <<std::endl;
-    std::cerr<<"mean insert fraction " << (float)in_base  / float(total_read_len) / float(total_size) <<std::endl;
-    std::cerr<<"mean clip fraction " << (float) clip_base / float(total_read_len) / float(total_size) <<std::endl;
+    std::cerr<<"mean match fraction " << (float) m_base / float(total_read_len)  <<std::endl;
+    std::cerr<<"mean insert fraction " << (float)in_base  / float(total_read_len)  <<std::endl;
+    std::cerr<<"mean clip fraction " << (float) clip_base / float(total_read_len)  <<std::endl;
 
     return 0 ;
 }
