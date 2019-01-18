@@ -44,42 +44,40 @@ int main()
     std::cerr<<"total query   "<<querys.size()<<std::endl;
     std::cerr<<"total matched "<<matched.size()<<std::endl;
     std::cerr<<"total self matched "<<cache_data.size()<<std::endl;
-    double idy = 0.0f ;
-    double missmatch = 0.0f ;
-    double in_f ;
-    double del_f ;
-    
-    double m_base = 0.0f ;
-    double in_base = 0.0f ;
-    double clip_base = 0.0f ;
+
+    long idy = 0 ;
+    long missmatch = 0 ;
+    long in_f = 0;
+    long del_f = 0;
+
+    long  m_base = 0 ;
+    long  in_base = 0 ;
+    long  clip_base = 0 ;
+    long total_result_len = 0 ;
+    long total_read_len = 0;
     for( const auto & pair : cache_data )
     {
         const auto & info = pair.second.at(0);
-        idy+= info.md_data.IDY(info.total_result_len());
-        missmatch +=  double(info.total_match_len() - info.md_data.total_same ) /(double) info.total_result_len();
-        in_f = double( info.total_in_len() ) / (double) info.total_result_len();
-        del_f = double( info.total_del_len() ) /(double) info.total_result_len();
+        idy+= info.md_data.total_same ;
+        total_result_len += info.total_result_len() ;
+        total_read_len  += info.read_len ;
+        missmatch += ( info.total_match_len() - info.md_data.total_same ) ;
+        in_f =  info.total_in_len() ;
+        del_f = info.total_del_len() ;
 
-        m_base +=  (double)(pair.second[0].total_match_len()) / (double)(pair.second[0].read_len) ;
-        in_base +=  (double)(pair.second[0].total_indel_len()) / (double)(pair.second[0].read_len) ;
-        clip_base +=  (double)(pair.second[0].total_clip_len()) / (double)(pair.second[0].read_len) ;
+        m_base +=     (pair.second[0].total_match_len()) ;
+        in_base +=    (pair.second[0].total_indel_len()) ;
+        clip_base +=  (pair.second[0].total_clip_len()) ;
     }
-    idy= idy/ cache_data.size() ;
-    clip_base= clip_base/ cache_data.size() ;
-    in_base= in_base/ cache_data.size() ;
-    missmatch= missmatch/ cache_data.size() ;
-    in_f= in_f/ cache_data.size() ;
-    del_f= del_f/ cache_data.size() ;
-    m_base = m_base / cache_data.size() ;
-
-    std::cerr<<"mean idy     " <<idy<<std::endl;
-    std::cerr<<"mean missmatch     " <<missmatch<<std::endl;
-    std::cerr<<"mean insert " <<in_f<<std::endl;
-    std::cerr<<"mean deletion " <<del_f<<std::endl;
+    int total_size = cache_data.size() ;
+    std::cerr<<"mean idy     " <<float(idy) / float(total_result_len) / float(total_size)<<std::endl;
+    std::cerr<<"mean missmatch     " << (float)missmatch / float(total_result_len) / float(total_size) <<std::endl;
+    std::cerr<<"mean insert " << (float)in_f / float(total_result_len) / float(total_size) <<std::endl;
+    std::cerr<<"mean deletion " << (float)del_f  / float(total_result_len) / float(total_size) <<std::endl;
     std::cerr<<"________________"<<std::endl;
-    std::cerr<<"mean match fraction " <<m_base<<std::endl;
-    std::cerr<<"mean insert fraction " <<in_base<<std::endl;
-    std::cerr<<"mean clip fraction " <<clip_base<<std::endl;
+    std::cerr<<"mean match fraction " << (float) m_base / float(total_read_len) / float(total_size) <<std::endl;
+    std::cerr<<"mean insert fraction " << (float)in_base  / float(total_read_len) / float(total_size) <<std::endl;
+    std::cerr<<"mean clip fraction " << (float) clip_base / float(total_read_len) / float(total_size) <<std::endl;
 
     return 0 ;
 }

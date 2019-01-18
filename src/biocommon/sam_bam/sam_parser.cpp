@@ -315,6 +315,7 @@ namespace BGIQD{
                 if(extra.size() >1 &&  extra[0]  == 'M' && extra[1] == 'D' ) 
                 {
                     data.md_data.InitFromStr(extra);
+                    data.MD = true ;
                 }
                 if(extra.size() >1 &&  extra[0]  == 'X' && extra[1] == 'A' )
                 {
@@ -423,7 +424,7 @@ namespace BGIQD{
                     case 'D':
                         {
                             int length = std::stoi(number_buffer);
-                            append_new_info( CIGAR::I, -1, length );
+                            append_new_info( CIGAR::D, -1, length );
                             number_buffer.clear();
                         }
                         break;
