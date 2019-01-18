@@ -45,12 +45,16 @@ int main()
     std::cerr<<"total matched "<<matched.size()<<std::endl;
     std::cerr<<"total self matched "<<cache_data.size()<<std::endl;
     float idy_total = 0.0f ;
+    float err_base = 0.0f ;
     for( const auto & pair : cache_data )
     {
         idy_total += pair.second[0].md_data.IDY(pair.second[0].total_match_len());
+        err_base +=  (float)(pair.second[0].total_match_len()) / (float)(pair.second[0].read_len) ;
     }
     idy_total = idy_total / cache_data.size() ;
+    err_base = err_base / cache_data.size() ;
     std::cerr<<"mean idy     " <<idy_total<<std::endl;
+    std::cerr<<"mean match fraction " <<err_base<<std::endl;
 
     return 0 ;
 }
