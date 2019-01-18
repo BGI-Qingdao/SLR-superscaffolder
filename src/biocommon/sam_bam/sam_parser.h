@@ -59,7 +59,7 @@ struct MatchInfo
     int end_position_on_read;
     int start_position_on_ref;   // this index start from 1
     int end_position_on_ref;
-
+    int len ;
     // start and end construct a [ start , end ] area .
 };
 
@@ -141,6 +141,14 @@ struct MatchData
 
     // the match len + insert len + delete len 
     int total_match_len() const ;
+
+    int total_in_len()  const ;
+
+    int total_del_len() const ;
+
+    int total_clip_len() const ;
+
+    int total_indel_len() const ;
     //TODO : other columns . 
 };// class MapData
 /******************************************************************************

@@ -45,6 +45,65 @@ namespace BGIQD{
             return total_same > 0 ;
         }
 
+
+        int MatchData::total_del_len()  const 
+        {
+            int ret = 0 ;
+            for ( const  auto & x : detail.infos )
+            {
+                if ( x.type == CIGAR::D 
+                  )
+                {
+                    ret += x.len;
+                }
+            }
+            return ret ;
+        }
+
+        int MatchData::total_in_len()  const 
+        {
+            int ret = 0 ;
+            for ( const  auto & x : detail.infos )
+            {
+                if ( x.type == CIGAR::I 
+                  )
+                {
+                    ret += x.len;
+                }
+            }
+            return ret ;
+        }
+
+
+        int MatchData::total_clip_len()  const 
+        {
+            int ret = 0 ;
+            for ( const  auto & x : detail.infos )
+            {
+                if ( x.type == CIGAR::S
+                    || x.type == CIGAR::H 
+                  )
+                {
+                    ret += x.len;
+                }
+            }
+            return ret ;
+        }
+        int MatchData::total_indel_len()  const 
+        {
+            int ret = 0 ;
+            for ( const  auto & x : detail.infos )
+            {
+                if ( x.type == CIGAR::I 
+                || x.type == CIGAR::D 
+                   )
+                {
+                    ret += x.len;
+                }
+            }
+            return ret ;
+        }
+
         int MatchData::total_result_len() const
         {
             int ret = 0 ;
@@ -57,7 +116,7 @@ namespace BGIQD{
                     || x.type == CIGAR::I 
                   )
                 {
-                    ret += x.end_position_on_read - x.start_position_on_read +1 ;
+                    ret += x.len;
                 }
             }
             return ret ;
@@ -73,7 +132,7 @@ namespace BGIQD{
                     || x.type == CIGAR::EQUAL
                   )
                 {
-                    ret += x.end_position_on_read - x.start_position_on_read +1 ;
+                    ret += x.len;
                 }
             }
             return ret ;
@@ -294,12 +353,14 @@ namespace BGIQD{
                         info_buffer.end_position_on_read = curr_position_on_read + read_move -1 ;
                         ret = info_buffer.end_position_on_read + 1;
                         curr_position_on_read += read_move ;
+                        info_buffer.len =  read_move ;
                     }
                     if ( ref_move > 0 )
                     {
                         info_buffer.start_position_on_ref = curr_position_on_ref ;
                         info_buffer.end_position_on_ref = curr_position_on_ref + ref_move -1 ;
                         curr_position_on_ref += ref_move ;
+                        info_buffer.len =  ref_move;
                     }
 
                     detail.infos.push_back(info_buffer);
