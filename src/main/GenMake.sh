@@ -13,6 +13,7 @@ apps="Barcode2Gap\
  FillTrunkByPE\
  FormatScaffInfo\
  Gap_OAO\
+ gapfillerIDY\
  LinearCDG\
  MergeContig\
  MergePEInfo\

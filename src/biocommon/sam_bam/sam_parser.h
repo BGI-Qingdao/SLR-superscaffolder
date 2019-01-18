@@ -91,6 +91,13 @@ struct MatchDetail
     std::vector<MatchInfo> infos;
 };
 
+struct MDData
+{
+    int total_same;
+    float IDY(int total_match) const { return float(total_same)/ float(total_match ) ; }
+    bool InitFromStr(const std::string & line );
+} ;
+
 struct MatchData
 {
     std::string read_name;
@@ -106,6 +113,8 @@ struct MatchData
     int next_ref_pos;
     int insert_size ;
     bool XA;
+    bool MD;
+    MDData md_data;
     MatchData() : read_name("") , ref_name("")
                   , first_match_position(0)
                   , quality(0) , read_len(-1){}
@@ -126,6 +135,12 @@ struct MatchData
     bool OtherUnMap() const ;
     bool IsReverseComplete() const ;
     int firstMatchInRefNoReverse() const ;
+
+    // the match len + insert len + delete len 
+    int total_result_len() const ;
+
+    // the match len + insert len + delete len 
+    int total_match_len() const ;
     //TODO : other columns . 
 };// class MapData
 /******************************************************************************
@@ -141,6 +156,7 @@ class LineParser
         bool IsHead() const { return m_line.at(0) == '@' ; }
         MatchData ParseAsMatchData() const ;
         Head ParseAsHead() const ;
+
     private:
         const std::string m_line;
     private:
