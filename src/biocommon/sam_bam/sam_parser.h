@@ -94,7 +94,7 @@ struct MatchDetail
 struct MDData
 {
     int total_same;
-    float IDY(int total_match) const { return float(total_same)/ float(total_match ) ; }
+    double IDY(int total_match) const { return double(total_same)/ double(total_match ) ; }
     bool InitFromStr(const std::string & line );
 } ;
 

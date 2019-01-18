@@ -347,6 +347,7 @@ namespace BGIQD{
                     info_buffer.end_position_on_read = -1 ;
                     info_buffer.start_position_on_ref = -1 ;
                     info_buffer.end_position_on_ref = -1 ;
+                    info_buffer.len = 0 ;
                     if ( read_move > 0 )
                     {
                         info_buffer.start_position_on_read = curr_position_on_read;
@@ -362,7 +363,7 @@ namespace BGIQD{
                         curr_position_on_ref += ref_move ;
                         info_buffer.len =  ref_move;
                     }
-
+                    
                     detail.infos.push_back(info_buffer);
                 };
 

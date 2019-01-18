@@ -44,25 +44,25 @@ int main()
     std::cerr<<"total query   "<<querys.size()<<std::endl;
     std::cerr<<"total matched "<<matched.size()<<std::endl;
     std::cerr<<"total self matched "<<cache_data.size()<<std::endl;
-    float idy = 0.0f ;
-    float missmatch = 0.0f ;
-    float in_f ;
-    float del_f ;
+    double idy = 0.0f ;
+    double missmatch = 0.0f ;
+    double in_f ;
+    double del_f ;
     
-    float m_base = 0.0f ;
-    float in_base = 0.0f ;
-    float clip_base = 0.0f ;
+    double m_base = 0.0f ;
+    double in_base = 0.0f ;
+    double clip_base = 0.0f ;
     for( const auto & pair : cache_data )
     {
         const auto & info = pair.second.at(0);
-        idy+= info.md_data.IDY(info.total_match_len());
-        missmatch +=  float(info.total_match_len() - info.md_data.total_same ) /(float) info.total_result_len();
-        in_f = float( info.total_in_len() ) / (float) info.total_result_len();
-        del_f = float( info.total_del_len() ) /(float) info.total_result_len();
+        idy+= info.md_data.IDY(info.total_result_len());
+        missmatch +=  double(info.total_match_len() - info.md_data.total_same ) /(double) info.total_result_len();
+        in_f = double( info.total_in_len() ) / (double) info.total_result_len();
+        del_f = double( info.total_del_len() ) /(double) info.total_result_len();
 
-        m_base +=  (float)(pair.second[0].total_match_len()) / (float)(pair.second[0].read_len) ;
-        in_base +=  (float)(pair.second[0].total_indel_len()) / (float)(pair.second[0].read_len) ;
-        clip_base +=  (float)(pair.second[0].total_clip_len()) / (float)(pair.second[0].read_len) ;
+        m_base +=  (double)(pair.second[0].total_match_len()) / (double)(pair.second[0].read_len) ;
+        in_base +=  (double)(pair.second[0].total_indel_len()) / (double)(pair.second[0].read_len) ;
+        clip_base +=  (double)(pair.second[0].total_clip_len()) / (double)(pair.second[0].read_len) ;
     }
     idy= idy/ cache_data.size() ;
     clip_base= clip_base/ cache_data.size() ;
