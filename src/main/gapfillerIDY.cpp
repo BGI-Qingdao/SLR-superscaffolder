@@ -9,6 +9,7 @@
 std::map<long , std::vector<BGIQD::SAM::MatchData> >   cache_data;
 
 std::set<long> querys;
+std::set<long> matched;
 
 int main()
 {
@@ -19,8 +20,10 @@ int main()
         if( parse.IsVaid() && ! parse.IsHead() )
         {
             auto match_data = parse.ParseAsMatchData() ;
-            long query_num = std::stoi(match_data.ref_name) ;
+            long query_num = std::stoi(match_data.read_name) ;
             querys.insert(query_num);
+            if( match_data.ref_name != "*" )
+                matched.insert(query_num);
             if( match_data.ref_name != match_data.read_name )
                 continue ;
             cache_data[query_num].push_back(match_data);
@@ -39,7 +42,8 @@ int main()
             std::sort( pair.second.rbegin() , pair.second.rend() , less );
     }
     std::cerr<<"total query   "<<querys.size()<<std::endl;
-    std::cerr<<"total matched "<<cache_data.size()<<std::endl;
+    std::cerr<<"total matched "<<matched.size()<<std::endl;
+    std::cerr<<"total self matched "<<cache_data.size()<<std::endl;
     float idy_total = 0.0f ;
     for( const auto & pair : cache_data )
     {

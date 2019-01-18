@@ -57,7 +57,7 @@ namespace BGIQD{
                     || x.type == CIGAR::I 
                   )
                 {
-                    ret += x.end_position_on_read - x.start_position_on_read ;
+                    ret += x.end_position_on_read - x.start_position_on_read +1 ;
                 }
             }
             return ret ;
@@ -73,7 +73,7 @@ namespace BGIQD{
                     || x.type == CIGAR::EQUAL
                   )
                 {
-                    ret += x.end_position_on_read - x.start_position_on_read ;
+                    ret += x.end_position_on_read - x.start_position_on_read +1 ;
                 }
             }
             return ret ;
