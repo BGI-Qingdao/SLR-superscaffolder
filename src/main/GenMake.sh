@@ -20,6 +20,7 @@ apps="Barcode2Gap\
  MinTree\
  MST\
  IDYtool\
+ IDYtool_paf\
  ONTGapCorrecter\
  ONTGapFiller\
  Overlap2Gap\
@@ -82,6 +83,7 @@ source_cpp =	../common/files/file_reader.cpp \\
 				../biocommon/fastq/fastq.cpp\\
 				../biocommon/seq/seq.cpp\\
 				../biocommon/paf/PAF.cpp\\
+                ../biocommon/align_common/align_result.cpp\\
 		   		../common/files/file_writer.cpp \\
 		   		../common/files/gzstream.cpp \\
 				../common/log/log.cpp\\

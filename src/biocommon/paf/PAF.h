@@ -2,6 +2,7 @@
 #define __BIOCOMMON_PAF_PAF_H__
 
 #include <string>
+#include "biocommon/align_common/align_result.h"
 
 namespace BGIQD {
     namespace PAF {
@@ -25,6 +26,10 @@ namespace BGIQD {
 
             // force map all read length onto target
             PAF_Item Flatten() const ;
+
+            BGIQD::ALIGN_COMMON::MatchDetail details;
+
+            BGIQD::ALIGN_COMMON::MDData md_data;
 
         };
     }

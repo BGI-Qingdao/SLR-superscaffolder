@@ -364,7 +364,7 @@ namespace BGIQD{
                         curr_position_on_ref += ref_move ;
                         info_buffer.len =  ref_move;
                     }
-                    
+
                     detail.infos.push_back(info_buffer);
                 };
 

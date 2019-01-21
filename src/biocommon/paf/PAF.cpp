@@ -10,6 +10,23 @@ namespace BGIQD {
             ist>>query_name>>query_len>>query_start>>query_end>>query_char;
             ist>>target_name>>target_len>>target_start>>target_end;
             ist>>len_query_match>>len_target_match>>quality;
+
+            std::string extra ;
+
+            while( ! ist.eof() )
+            {
+                ist>>extra ;
+                BGIQD::ALIGN_COMMON::ExtraInfo info ;
+                info.InitFromStr(extra);
+                if( info.name == "cg" )
+                {
+                    details.InitFromStr(info.content);
+                }
+                if( info.name == "MD" )
+                {
+                    md_data.InitFromStr(info.content);
+                }
+            }
         }
 
         PAF_Item PAF_Item::Flatten() const 
