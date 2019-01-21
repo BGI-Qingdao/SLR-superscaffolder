@@ -19,6 +19,7 @@ apps="Barcode2Gap\
  MergePEInfo\
  MinTree\
  MST\
+ IDYtool\
  ONTGapCorrecter\
  ONTGapFiller\
  Overlap2Gap\
