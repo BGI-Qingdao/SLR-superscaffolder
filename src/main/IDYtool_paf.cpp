@@ -38,7 +38,7 @@ int main()
             int m_base =     (info.total_match_len()) ;
             int in_base =    (info.total_in_len()) ;
             int clip_base =  (info.total_clip_len()) ;
-            assert( m_base + in_base + clip_base   == total_read_len );
+            //assert( m_base + in_base + clip_base   == total_read_len );
 
             std::cout<<idy<<'\t'
                 <<m_base<<'\t'
