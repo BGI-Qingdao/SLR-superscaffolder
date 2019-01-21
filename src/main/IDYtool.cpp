@@ -20,7 +20,7 @@ int main()
             std::string ref_name = match_data.ref_name;
             std::cout<<query_name<<'\t'
                 <<ref_name<<'\t';
-            if( match_data.ref_name != "*" )
+            if( match_data.ref_name == "*" )
             {
                 std::cout<<"0\t0\t0\t0\t0\t0\t0\n";
             }
