@@ -17,14 +17,19 @@ BGIQD::ALIGN::Schemes test_schemes{ 1 , 0 ,0 ,0 };
 //          {"ABCBDAB"};
 //          {"BDCABA"};
 //      ==>
-//          BCBA
+//          BCBA    1D1M1I1M1I1M2D1M1D
+//          BDAB    1D1M3D1M1I2M1I
+//          BCBA    1D1M1I1M1I1M1D1M1D
 //
 // example 2
 //      from
+//
+//                GTCG  T CG  GAAGCCGGCCGAA 
+//      ==>
 //          {"ACCGGTCGAGTGCGCGGAAGCCGGCCGAA"};
 //          {"GTCGTTCGGAATGCCGTTGCTCTGTAAA"};
 //      ==>
-//          G T C G T C G G A A G C C G G
+//            GTCGT CGGAA GCCG  GC C G  AA 
 //
 
 
@@ -39,11 +44,10 @@ TEST(SWTest01)
     test01.FillMutrix();
     auto path = test01.GetResult();
     auto m1 = test01.AlignedElementsRef(path);
-    auto m2 = test01.AlignedElementsRef(path);
+    auto m2 = test01.AlignedElementsQuery(path);
 
-    CHECK("BCBA" ,m1);
-    CHECK("BCBA" ,m2);
-
+    CHECK("BCAB" ,m1);
+    CHECK("BCAB" ,m2);
 }
 
 TEST(SWTest02)
@@ -57,8 +61,8 @@ TEST(SWTest02)
     test01.FillMutrix();
     auto path = test01.GetResult();
     auto m1 = test01.AlignedElementsRef(path);
-    auto m2 = test01.AlignedElementsRef(path);
+    auto m2 = test01.AlignedElementsQuery(path);
 
-    CHECK("GTCGTCGGAAGCCGG" ,m1);
-    CHECK("GTCGTCGGAAGCCGG" ,m2);
+    CHECK("GTCGTCGGAAGCCGGCCAA" ,m1);
+    CHECK("GTCGTCGGAAGCCGGCCAA" ,m2);
 }

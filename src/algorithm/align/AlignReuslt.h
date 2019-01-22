@@ -7,9 +7,10 @@ namespace BGIQD {
         enum ResultType
         {
             Unknow = 0 ,
-            LeftTop = 1 ,
-            Left = 2 ,
-            Top = 3 ,
+            LeftTop_Match = 1 ,
+            LeftTop_UnMatch = 2 ,
+            Left = 3 , // delete 
+            Top = 4 , // insert 
         };
 
         struct AlignResult

@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <stack>
+#include <cassert>
 
 namespace BGIQD {
     namespace ALIGN {
@@ -38,7 +39,7 @@ namespace BGIQD {
 
                 void InitAfterDataLoaded()
                 {
-                    the_matrix.Init( ref.size() , query.size() );
+                    the_matrix.Init(  query.size(), ref.size() );
                     for( int i = 0 ; i < the_matrix.Row() ; i++ )
                         the_matrix.Set(i,0,0);
                     for( int i = 0 ; i < the_matrix.Column() ; i++ )
@@ -50,14 +51,14 @@ namespace BGIQD {
 
                 void FillMutrix()
                 {
-                    for( int i = 1 ; i < the_matrix.Row() ; i++ )
-                        for( int j = 1 ; j< the_matrix.Column() ; j++ )
+                    for( int row = 1 ; row < the_matrix.Row() ; row++ )
+                        for( int column = 1 ; column< the_matrix.Column() ; column++ )
                         {
-                            int left_top =  the_matrix.Get(i-1,j-1);
-                            int left  =  the_matrix.Get(i,j-1);
-                            int top  =  the_matrix.Get(i-1,j);
-                            Item & cs = ref.at(i) ;
-                            Item & rs = query.at(i) ;
+                            int left_top =  the_matrix.Get(row-1,column-1);
+                            int left  =  the_matrix.Get(row,column-1);
+                            int top  =  the_matrix.Get(row-1,column);
+                            Item & cs = ref.at(column-1) ;
+                            Item & rs = query.at(row-1) ;
                             int from_lt = 0 ;
                             int from_l  = 0 ;
                             int from_t  = 0 ;
@@ -70,11 +71,12 @@ namespace BGIQD {
                             int tmp = std::max( from_l , from_t );
                             tmp = std::max( tmp , from_lt ) ;
                             tmp = std::max( tmp , 0 );
-                            the_matrix.Set( i , j , tmp );
+                            the_matrix.Set( row , column , tmp );
                             if( tmp > max_value )
                             {
-                                max_i = i ;
-                                max_j = j ;
+                                max_i = row ;
+                                max_j = column ;
+                                max_value= tmp ;
                             }
                         }
                 }
@@ -91,7 +93,7 @@ namespace BGIQD {
                     while( ! result.empty() )
                     {
                         auto i = result.top() ;
-                        if( i.type == BGIQD::ALIGN::ResultType::LeftTop )
+                        if( i.type == BGIQD::ALIGN::ResultType::LeftTop_Match )
                         {
                             ret.push_back( ref.at(i.column_id-1));
                         }
@@ -107,7 +109,7 @@ namespace BGIQD {
                     while( ! result.empty() )
                     {
                         auto i = result.top() ;
-                        if( i.type == BGIQD::ALIGN::ResultType::LeftTop )
+                        if( i.type == BGIQD::ALIGN::ResultType::LeftTop_Match )
                         {
                             ret.push_back( query.at(i.row_id-1));
                         }
@@ -122,40 +124,45 @@ namespace BGIQD {
                     int curr = max_value ;
                     int i = max_i ;
                     int j = max_j ;
-                    ret.push(
-                            {max_i , max_j 
-                            , BGIQD::ALIGN::ResultType::LeftTop} 
-                            );
-                    while( curr > 0 )
+                    while( curr > 0 && i >= 0 && j >= 0 )
                     {
                         int left_top =  the_matrix.Get(i-1,j-1);
                         int left  =  the_matrix.Get(i,j-1);
                         int top  =  the_matrix.Get(i-1,j);
-                        if( left >= top && left >= left_top )
+                        if( left + schemes.delete_score == curr  )
                         {
-                            j = j -1 ;
                             ret.push(
-                                    {i , j 
+                                    {i , j
                                     , BGIQD::ALIGN::ResultType::Left}
                                     );
+                            j = j -1 ;
                         }
-                        else if ( top >= left && top >= left_top )
+                        else if ( top + schemes.insert_score == curr  )
                         {
-                            i = i -1 ;
                             ret.push(
                                     {i , j 
                                     , BGIQD::ALIGN::ResultType::Top}
                                     );
+                            i = i -1 ;
                         }
                         else
                         {
+                            if(  left_top + schemes.match_score == curr )
+                            {
+                                ret.push(
+                                        {i , j 
+                                        , BGIQD::ALIGN::ResultType::LeftTop_Match}
+                                        );
+                            }
+                            else if ( left_top + schemes.mismatch_score == curr )
+                            {
+                                ret.push(
+                                        {i , j 
+                                        , BGIQD::ALIGN::ResultType::LeftTop_UnMatch}
+                                        );
+                            }
                             j = j -1 ;
                             i = i - 1 ;
-                            ret.push(
-                                    {i , j 
-                                    , BGIQD::ALIGN::ResultType::LeftTop}
-                                    );
-
                         }
                         curr = the_matrix.Get(i,j);
                     }

@@ -39,12 +39,12 @@ namespace BGIQD {
             //
             int Get( int row , int column ) const 
             {
-                return  data.at(row * Row() + column) ;
+                return  data.at(row * Column() + column) ;
             }
 
             void Set( int row , int column , int value)
             {
-                data[row * Row() + column] =  value ;
+                data.at(row * Column() + column) =  value ;
             }
 
             private:

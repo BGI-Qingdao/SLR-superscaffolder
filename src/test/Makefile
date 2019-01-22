@@ -12,30 +12,41 @@ DEUBG_CXX  =	${CXXFLAGS} -g
 RELEASE_CXX=	${CXXFLAGS}
 
 source_cpp =	../common/files/file_reader.cpp \
+		   		../biocommon/sam_bam/sam_parser.cpp\
+		   		../biocommon/pair/pair_sam_parser.cpp\
+				../biocommon/fasta/fasta.cpp\
+				../biocommon/fastq/fastq.cpp\
+				../biocommon/seq/seq.cpp\
+				../biocommon/paf/PAF.cpp\
+                ../biocommon/align_common/align_result.cpp\
 		   		../common/files/file_writer.cpp \
 		   		../common/files/gzstream.cpp \
 				../common/log/log.cpp\
 				../common/log/logfilter.cpp\
 				../common/time/timetools.cpp\
 				../common/string/stringtools.cpp\
-		   		../biocommon/sam_bam/sam_parser.cpp\
-		   		../biocommon/pair/pair_sam_parser.cpp\
-				../biocommon/fasta/fasta.cpp\
-				../biocommon/seq/seq.cpp\
 				../stLFR/barcodeId.cpp\
 				../stLFR/readName2Barcode.cpp\
 				../stLFR/barcodeOnContig.cpp\
 				../stLFR/ContigCluster.cpp\
+                ../stLFR/ScaffInfo.cpp\
 				../stLFR/LineGroup.cpp\
+                ../stLFR/contigPairInfo.cpp\
+                ../stLFR/ONT2Gap.cpp\
+				../stLFR/ContigOverlap.cpp\
 				../stLFR/CBB.cpp\
+				../stLFR/TagId.cpp\
+				../stLFR/StringIdCache.cpp\
 				../common/args/argsparser.cpp\
 				../soap2/contigGraph.cpp\
 				../soap2/contigFasta.cpp\
 				../soap2/contigType.cpp\
+				../soap2/contigIndex.cpp\
 
 test_cpp   =	test.cpp\
 				../biocommon/fasta/fasta_test.cpp\
 				../biocommon/seq/seq_test.cpp\
+				../algorithm/align/SmithWaterman_test.cpp\
 				../algorithm/interval/Interval_test.cpp\
 				../algorithm/distribution/distribution_test.cpp\
 				../algorithm/linear_fitting/Minimum_multiplication_test.cpp\
