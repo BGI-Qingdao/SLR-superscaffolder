@@ -1,26 +1,49 @@
 #ifndef __ALGORITHM_ALIGN_SMITHWATERMAN_H__
 #define __ALGORITHM_ALIGN_SMITHWATERMAN_H__
 
-#include "algorithm/align/ScoreSchemes.h"
 #include "algorithm/align/ScoreMatrix.h"
-#include "algorithm/align/AlignReuslt.h"
 
 #include <vector>
 #include <stack>
 #include <cassert>
 
 namespace BGIQD {
-    namespace ALIGN {
+    namespace stLFR {
 
+        struct  Schemes
+        {
+            int match_order_score ;
+            int match_orientation_score ;
+            int mismatch_score ;
+            int insert_score ;
+            int delete_score ;
+        };
+
+        enum ResultType
+        {
+            Unknow = 0 ,
+            LeftTop_Match_O = 1 ,
+            LeftTop_Match_OO = 5 ,
+            LeftTop_UnMatch = 2 ,
+            Left = 3 , // delete 
+            Top = 4 , // insert 
+        };
+
+        struct AlignResult
+        {
+            int row_id ;
+            int column_id ;
+            ResultType type ;
+        };
         template<class T , class V = std::vector<T> >
-            struct SmithWaterman 
+            struct SmithWaterman_OO
             {
                 typedef T Item;
                 typedef V DataContainer ;
                 DataContainer ref;              // column
                 DataContainer query;            // row
                 BGIQD::ALIGN::Matrix the_matrix ;
-                BGIQD::ALIGN::Schemes schemes;
+                Schemes schemes;
 
                 int  max_i ;
                 int  max_j ;
@@ -62,8 +85,10 @@ namespace BGIQD {
                             int from_lt = 0 ;
                             int from_l  = 0 ;
                             int from_t  = 0 ;
-                            if ( cs == rs )
-                                from_lt = left_top + schemes.match_score ;
+                            if ( cs.order == rs.order && cs.orientation != rs.orientation  )
+                                from_lt = left_top + schemes.match_order_score ;
+                            if ( cs.order == rs.order && cs.orientation == rs.orientation)
+                                from_lt = left_top + schemes.match_orientation_score ;
                             else 
                                 from_lt = left_top + schemes.mismatch_score ;
                             from_l = left + schemes.delete_score;
@@ -87,13 +112,14 @@ namespace BGIQD {
                 }
 
                 DataContainer AlignedElementsRef( 
-                        std::stack<BGIQD::ALIGN::AlignResult> result )
+                        std::stack<AlignResult> result )
                 {
                     DataContainer ret ;
                     while( ! result.empty() )
                     {
                         auto i = result.top() ;
-                        if( i.type == BGIQD::ALIGN::ResultType::LeftTop_Match )
+                        if( i.type == ResultType::LeftTop_Match_O 
+                        || i.type == ResultType::LeftTop_Match_OO )
                         {
                             ret.push_back( ref.at(i.column_id-1));
                         }
@@ -103,13 +129,14 @@ namespace BGIQD {
                 }
 
                 DataContainer AlignedElementsQuery( 
-                        std::stack<BGIQD::ALIGN::AlignResult> result )
+                        std::stack<AlignResult> result )
                 {
                     DataContainer ret ;
                     while( ! result.empty() )
                     {
                         auto i = result.top() ;
-                        if( i.type == BGIQD::ALIGN::ResultType::LeftTop_Match )
+                        if( i.type == ResultType::LeftTop_Match_O 
+                        || i.type == ResultType::LeftTop_Match_OO )
                         {
                             ret.push_back( query.at(i.row_id-1));
                         }
@@ -118,9 +145,9 @@ namespace BGIQD {
                     return ret ;
                 }
 
-                std::stack<BGIQD::ALIGN::AlignResult> GetResult() const
+                std::stack<AlignResult> GetResult() const
                 {
-                    std::stack<BGIQD::ALIGN::AlignResult> ret ;
+                    std::stack<AlignResult> ret ;
                     int curr = max_value ;
                     int i = max_i ;
                     int j = max_j ;
@@ -133,7 +160,7 @@ namespace BGIQD {
                         {
                             ret.push(
                                     {i , j
-                                    , BGIQD::ALIGN::ResultType::Left}
+                                    , ResultType::Left}
                                     );
                             j = j -1 ;
                         }
@@ -141,24 +168,32 @@ namespace BGIQD {
                         {
                             ret.push(
                                     {i , j 
-                                    , BGIQD::ALIGN::ResultType::Top}
+                                    , ResultType::Top}
                                     );
                             i = i -1 ;
                         }
                         else
                         {
-                            if(  left_top + schemes.match_score == curr )
+                            if(  left_top + schemes.match_order_score == curr )
                             {
                                 ret.push(
                                         {i , j 
-                                        , BGIQD::ALIGN::ResultType::LeftTop_Match}
+                                        , ResultType::LeftTop_Match_O}
+                                        );
+                            }
+                            else 
+                            if(  left_top + schemes.match_orientation_score == curr )
+                            {
+                                ret.push(
+                                        {i , j 
+                                        , ResultType::LeftTop_Match_OO}
                                         );
                             }
                             else if ( left_top + schemes.mismatch_score == curr )
                             {
                                 ret.push(
                                         {i , j 
-                                        , BGIQD::ALIGN::ResultType::LeftTop_UnMatch}
+                                        , ResultType::LeftTop_UnMatch}
                                         );
                             }
                             else

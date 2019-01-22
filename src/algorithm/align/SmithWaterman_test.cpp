@@ -63,6 +63,6 @@ TEST(SWTest02)
     auto m1 = test01.AlignedElementsRef(path);
     auto m2 = test01.AlignedElementsQuery(path);
 
-    CHECK("GTCGTCGGAAGCCGGCCAA" ,m1);
-    CHECK("GTCGTCGGAAGCCGGCCAA" ,m2);
+    CHECK("GTCGTCGGAAGCCGGCCGAA" ,m1);
+    CHECK("GTCGTCGGAAGCCGGCCGAA" ,m2);
 }
