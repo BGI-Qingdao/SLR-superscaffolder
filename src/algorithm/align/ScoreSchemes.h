@@ -11,7 +11,6 @@ namespace BGIQD {
             int insert_score ;
             int delete_score ;
         };
-
     }
 }
 

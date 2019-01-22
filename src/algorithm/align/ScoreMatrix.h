@@ -1,22 +1,52 @@
 #ifndef __ALGORITHM_ALIGN_SCOREMATRIX_H__
 #define __ALGORITHM_ALIGN_SCOREMATRIX_H__
 
+#include <vector>
+
 namespace BGIQD {
     namespace ALIGN {
 
         struct  Matrix
         {
-            void Init( int l1 , int l2 ) 
-            {
-                
-            }
-            int Len1() const  { return len1 +1 ;}
-            int Len2() const  { return len2 +1 ;}
+            // 
+            // Init memory .
+            //  will generate a array[row+1][column+1]
+            //
+            //  0   1   2   3   4   5
+            //
+            //  1
+            //
+            //  2
+            //
+            //  3
+            //
+            //  4
+            //
+            //  5
 
-            int Get( int x , int y ) const 
+
+            void Init( int row , int column ) 
             {
-                return  
+                len1 = row ;
+                len2 = column ; 
+                data.resize(Row() * Column());
             }
+            int Row() const  { return len1 +1 ;}
+            int Column() const  { return len2 +1 ;}
+
+            //
+            // the row & coloumn are all 0 base 
+            //
+            int Get( int row , int column ) const 
+            {
+                return  data.at(row * Row() + column) ;
+            }
+
+            void Set( int row , int column , int value)
+            {
+                data[row * Row() + column] =  value ;
+            }
+
             private:
             int len1;
             int len2;
