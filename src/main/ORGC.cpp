@@ -164,6 +164,9 @@ struct AppConfig
     std::string r2con_f ;
 
     BGIQD::LOG::logger loger;
+    BGIQD::FREQ::Freq<std::string> failed_reason_freq;
+    BGIQD::FREQ::Freq<int> common_size_freq;
+    BGIQD::FREQ::Freq<int> high_score_freq;
 
     void  Init()
     {
@@ -265,10 +268,13 @@ struct AppConfig
                 }
             }
         }
-        auto common_ont = SetUnion(ont_c1 , ont_c2 );
+        auto common_ont = SetIntersection(ont_c1 , ont_c2 );
         // step 2 , filter good ONT reads
         if( common_ont.empty() )
+        {
+            failed_reason_freq.Touch("no common");
             return false ;
+        }
         // step 3 , align c1 + c2 to ONT reads 
         std::map<std::string , TheSmithWaterman> align_cache ;
         for( const auto & ont : common_ont )
@@ -276,6 +282,8 @@ struct AppConfig
             const auto & common = ont_share_reads.at(ont) ;
             const auto & ont_reads_base = read2ont.at(ont).read_infos ;
             auto ont_common = MapperInfo::FilterCommon( ont_reads_base , common );
+
+            common_size_freq.Touch(ont_common.size());
 
             const auto & c1_reads_base = read2con.at(c1info.ref_id).read_infos;
             const auto & c2_reads_base = read2con.at(c2info.ref_id).read_infos;
@@ -296,7 +304,7 @@ struct AppConfig
             the_schemes.match_order_score = 2 ;
             the_schemes.delete_score = 0 ;
             the_schemes.insert_score = 0 ;
-            the_schemes.match_orientation_score = 0 ;
+            the_schemes.mismatch_score= 0 ;
 
             TheSmithWaterman tmp ;
             tmp.schemes = the_schemes ;
@@ -311,7 +319,7 @@ struct AppConfig
             tmp1.ref = ont_common ;
             tmp1.query = r2l ;
             tmp1.CheckLoadedData() ;
-            tmp.InitAfterDataLoaded();
+            tmp1.InitAfterDataLoaded();
             tmp1.FillMutrix() ;
 
             if( tmp.max_value > tmp1.max_value )
@@ -344,7 +352,11 @@ struct AppConfig
         }
         align_cache.clear() ;
         if( max_value < 1 )
+        {
+            failed_reason_freq.Touch(" no max value ");
             return  false ;
+        }
+        high_score_freq.Touch(max_value);
         // step 6 , estimate the gap size.
         auto path       = max_align.GetResult();
         auto path_ref   = max_align.AlignedElementsRef(path);
@@ -356,7 +368,10 @@ struct AppConfig
                 { return p.ref_id != n.ref_id ; } );
 
         if ( prev == path_query.end() )
-            return false ;
+        {
+            failed_reason_freq.Touch("all aligned in same contig ");
+            return  false ;
+        }
         auto prev_from_query = *prev ;
         auto next_from_query = *( prev +1 ) ;
         auto prev_from_ref = *(path_ref.begin() + ( prev - path_query.begin() ) );
@@ -404,6 +419,12 @@ struct AppConfig
                     <<" !"<<BGIQD::LOG::lend() ;
             }
         }
+        loger<<BGIQD::LOG::lstart()<<" Failed reason freq\n"
+            <<failed_reason_freq.ToString()<<BGIQD::LOG::lend() ;
+        loger<<BGIQD::LOG::lstart()<<" Common size freq\n"
+            <<common_size_freq.ToString()<<BGIQD::LOG::lend() ;
+        loger<<BGIQD::LOG::lstart()<<" Highest score freq\n"
+            <<high_score_freq.ToString()<<BGIQD::LOG::lend() ;
     }
 
     void PrintScaffInfos() 
@@ -421,7 +442,7 @@ int main(int argc , char **argv)
     DEFINE_ARG_REQUIRED(std::string , r2con, "read 2 contig data ");
     END_PARSE_ARGS
 
-        config.r2con_f = r2con.to_string() ;
+    config.r2con_f = r2con.to_string() ;
     config.r2ont_f = r2ont.to_string() ;
     config.Init() ;
     BGIQD::LOG::timer t(config.loger , "Main ");
