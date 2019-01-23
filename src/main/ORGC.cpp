@@ -104,12 +104,20 @@ struct MapperInfo
     static std::vector<ReadInfo> FilterCommon( const std::vector<ReadInfo> & base , 
             const std::set<std::string> & common )
     {
+        int total = 0 ;
         auto check = [&]( const ReadInfo & info) -> bool 
         {
-            return common.find( info.order) != common.end() ;
+            if( common.find( info.order) != common.end() )
+            {
+                total++ ;
+                return true ;
+            }
+            return false ;
         };
         std::vector<ReadInfo> ret ;
+        ret.resize(base.size() );
         std::copy_if( base.begin() , base.end() , ret.begin() , check) ;
+        ret.resize(total);
         return ret ;
     }
 };
@@ -165,7 +173,7 @@ struct AppConfig
 
     void  LoadR2ONT() 
     {
-        BGIQD::LOG::timer(loger,"LoadR2ONT");
+        BGIQD::LOG::timer t(loger,"LoadR2ONT");
         auto in = BGIQD::FILES::FileReaderFactory
             ::GenerateReaderFromFileName(r2ont_f);
         if( in == NULL )
@@ -181,7 +189,7 @@ struct AppConfig
     }
     void  LoadR2CON() 
     {
-        BGIQD::LOG::timer(loger,"LoadR2CON");
+        BGIQD::LOG::timer t(loger,"LoadR2CON");
         auto in = BGIQD::FILES::FileReaderFactory
             ::GenerateReaderFromFileName(r2con_f);
         if( in == NULL )
@@ -198,7 +206,7 @@ struct AppConfig
 
     void BuildR2ONTIndex()
     {
-        BGIQD::LOG::timer(loger,"BuildR2ONTIndex");
+        BGIQD::LOG::timer t(loger,"BuildR2ONTIndex");
         for( const auto & pair : read2ont )
         {
             for( const auto & read_i : pair.second.reads)
@@ -212,7 +220,7 @@ struct AppConfig
 
     void LoadScaffInfos()
     {
-        BGIQD::LOG::timer(loger,"LoadScaffInfos");
+        BGIQD::LOG::timer t(loger,"LoadScaffInfos");
         helper.LoadAllScaff(std::cin);
     }
 
@@ -374,7 +382,7 @@ struct AppConfig
 
     void ParseAllGaps()
     {
-        BGIQD::LOG::timer(loger,"ParseAllGaps");
+        BGIQD::LOG::timer t(loger,"ParseAllGaps");
         int succ = 0 ;
         int failed = 0 ;
         int total = 0 ;
@@ -400,7 +408,7 @@ struct AppConfig
 
     void PrintScaffInfos() 
     {
-        BGIQD::LOG::timer(loger,"PrintScaffInfos");
+        BGIQD::LOG::timer t(loger,"PrintScaffInfos");
         helper.PrintAllScaff(std::cout);
     }
 
@@ -416,7 +424,7 @@ int main(int argc , char **argv)
         config.r2con_f = r2con.to_string() ;
     config.r2ont_f = r2ont.to_string() ;
     config.Init() ;
-    BGIQD::LOG::timer(config.loger , "Main ");
+    BGIQD::LOG::timer t(config.loger , "Main ");
     config.LoadR2ONT() ;
     config.BuildR2ONTIndex() ;
     config.LoadR2CON();
