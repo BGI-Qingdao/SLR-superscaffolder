@@ -17,7 +17,6 @@
 #include <set>
 #include <algorithm>
 
-
 struct ReadInfo
 {
     std::string order;
@@ -156,8 +155,17 @@ struct AppConfig
     std::string r2ont_f ;
     std::string r2con_f ;
 
+    BGIQD::LOG::logger loger;
+
+    void  Init()
+    {
+        BGIQD::LOG::logfilter::singleton()
+            .get("ORGC",BGIQD::LOG::loglevel::INFO, loger);
+    }
+
     void  LoadR2ONT() 
     {
+        BGIQD::LOG::timer(loger,"LoadR2ONT");
         auto in = BGIQD::FILES::FileReaderFactory
             ::GenerateReaderFromFileName(r2ont_f);
         if( in == NULL )
@@ -173,6 +181,7 @@ struct AppConfig
     }
     void  LoadR2CON() 
     {
+        BGIQD::LOG::timer(loger,"LoadR2CON");
         auto in = BGIQD::FILES::FileReaderFactory
             ::GenerateReaderFromFileName(r2con_f);
         if( in == NULL )
@@ -189,6 +198,7 @@ struct AppConfig
 
     void BuildR2ONTIndex()
     {
+        BGIQD::LOG::timer(loger,"BuildR2ONTIndex");
         for( const auto & pair : read2ont )
         {
             for( const auto & read_i : pair.second.reads)
@@ -202,6 +212,7 @@ struct AppConfig
 
     void LoadScaffInfos()
     {
+        BGIQD::LOG::timer(loger,"LoadScaffInfos");
         helper.LoadAllScaff(std::cin);
     }
 
@@ -320,7 +331,7 @@ struct AppConfig
             if( pair.second.max_value > max_value )
             {
                 max_value = pair.second.max_value;
-                 max_align = pair.second ;
+                max_align = pair.second ;
             }
         }
         align_cache.clear() ;
@@ -334,7 +345,7 @@ struct AppConfig
         auto prev = std::adjacent_find(path_query.begin() 
                 , path_query.end() 
                 , [](const ReadInfo & p , const ReadInfo & n)
-                        { return p.ref_id != n.ref_id ; } );
+                { return p.ref_id != n.ref_id ; } );
 
         if ( prev == path_query.end() )
             return false ;
@@ -363,29 +374,49 @@ struct AppConfig
 
     void ParseAllGaps()
     {
+        BGIQD::LOG::timer(loger,"ParseAllGaps");
+        int succ = 0 ;
+        int failed = 0 ;
+        int total = 0 ;
         for( auto & pair : helper.all_scaff ) 
         {
             auto & a_scaff = pair.second.a_scaff ;
             for( int i = 0 ; i < (int) a_scaff.size() -1 ; i ++ )
             {
-                ParseAGap(a_scaff.at(i) , a_scaff.at(i+1));
+                total ++ ;
+                loger<<BGIQD::LOG::lstart()<<"start process gap "
+                    <<total<<" ..."<<BGIQD::LOG::lend() ;
+                if( ParseAGap(a_scaff.at(i) , a_scaff.at(i+1)) )
+                    succ++ ;
+                else
+                    failed++;
+                loger<<BGIQD::LOG::lstart()<<"end process gap "
+                    <<total<<BGIQD::LOG::lend() ;
+                loger<<BGIQD::LOG::lstart()<<"total succ is  "<<succ
+                    <<" !"<<BGIQD::LOG::lend() ;
             }
         }
     }
 
     void PrintScaffInfos() 
     {
+        BGIQD::LOG::timer(loger,"PrintScaffInfos");
         helper.PrintAllScaff(std::cout);
     }
+
 } config ;
 
 int main(int argc , char **argv)
 {
     START_PARSE_ARGS
         DEFINE_ARG_REQUIRED(std::string , r2ont, "read 2 ont data ");
-        DEFINE_ARG_REQUIRED(std::string , r2con, "read 2 contig data ");
+    DEFINE_ARG_REQUIRED(std::string , r2con, "read 2 contig data ");
     END_PARSE_ARGS
 
+        config.r2con_f = r2con.to_string() ;
+    config.r2ont_f = r2ont.to_string() ;
+    config.Init() ;
+    BGIQD::LOG::timer(config.loger , "Main ");
     config.LoadR2ONT() ;
     config.BuildR2ONTIndex() ;
     config.LoadR2CON();
