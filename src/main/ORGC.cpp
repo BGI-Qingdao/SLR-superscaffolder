@@ -23,7 +23,7 @@ struct ReadInfo
     std::string order;
     char orientation ;
     int pos ;
-
+    std::string ref_id ;
     //bool operator < ( const ReadInfo & o )
     //{
     //    if( read_id != o.read_id )
@@ -205,7 +205,7 @@ struct AppConfig
         helper.LoadAllScaff(std::cin);
     }
 
-    bool ParseAGap(const BGIQD::stLFR::ContigDetail & c1
+    bool ParseAGap(BGIQD::stLFR::ContigDetail & c1
             ,const BGIQD::stLFR::ContigDetail & c2 )
     {
         // step 1 , find all common ONT reads
@@ -232,6 +232,7 @@ struct AppConfig
                 }
             }
         }
+
         for( const auto & r1 : rc2 )
         {
             auto itr = read_on_ont.find(r1);
@@ -262,6 +263,11 @@ struct AppConfig
             auto r1_common = MapperInfo::FilterCommon(c1_reads_base,common);
             auto r2_common = MapperInfo::FilterCommon(c2_reads_base,common);
 
+            std::for_each(r1_common.begin() , r1_common.end() 
+                    ,[c1](ReadInfo & i){ i.ref_id = std::to_string(c1.contig_id) ; });
+            std::for_each(r2_common.begin() , r2_common.end() 
+                    ,[c2](ReadInfo & i){ i.ref_id = std::to_string(c2.contig_id) ; });
+
             auto l2r = MapperInfo::Add( r1_common, r2_common 
                     , c1.orientation , c2.orientation);
             auto r2l = MapperInfo::CompleteReverse( l2r );
@@ -278,6 +284,7 @@ struct AppConfig
             tmp.ref = ont_common ;
             tmp.query = l2r ;
             tmp.CheckLoadedData() ;
+            tmp.InitAfterDataLoaded();
             tmp.FillMutrix() ;
 
             TheSmithWaterman tmp1 ;
@@ -285,8 +292,8 @@ struct AppConfig
             tmp1.ref = ont_common ;
             tmp1.query = r2l ;
             tmp1.CheckLoadedData() ;
+            tmp.InitAfterDataLoaded();
             tmp1.FillMutrix() ;
-            tmp1.GetResult();
 
             if( tmp.max_value > tmp1.max_value )
             {
@@ -298,15 +305,78 @@ struct AppConfig
             }
         }
         // step 5 , choose the best ONT read 
-        
+        int max_value = 0;
+        TheSmithWaterman max_align ;
+        for(const auto & pair : align_cache )
+        {
+            auto path = pair.second.GetResult();
+            auto path_ref = pair.second.AlignedElementsRef(path);
+            auto path_query = pair.second.AlignedElementsRef(path);
+            BGIQD::FREQ::Freq<std::string> freq ;
+            std::for_each( path_query.begin() , path_query.end() ,
+                    [&freq]( ReadInfo & i ) { freq.Touch(i.ref_id) ; } );
+            if( freq.data.size() < 2 )
+                continue ;
+            if( pair.second.max_value > max_value )
+            {
+                max_value = pair.second.max_value;
+                 max_align = pair.second ;
+            }
+        }
+        align_cache.clear() ;
+        if( max_value < 1 )
+            return  false ;
+        // step 6 , estimate the gap size.
+        auto path       = max_align.GetResult();
+        auto path_ref   = max_align.AlignedElementsRef(path);
+        auto path_query = max_align.AlignedElementsRef(path);
+
+        auto prev = std::adjacent_find(path_query.begin() 
+                , path_query.end() 
+                , [](const ReadInfo & p , const ReadInfo & n)
+                        { return p.ref_id != n.ref_id ; } );
+
+        if ( prev == path_query.end() )
+            return false ;
+        auto prev_from_query = *prev ;
+        auto next_from_query = *( prev +1 ) ;
+        auto prev_from_ref = *(path_ref.begin() + ( prev - path_query.begin() ) );
+        auto next_from_ref = *(path_ref.begin() + ( prev - path_query.begin() +1 ) );
+        // gap = ref_gap - c1_tail - c2_tail
+        int ref_gap = std::abs( prev_from_ref.pos - next_from_ref.pos -1 );
+        int c1_tail = 0 ;
+        int c2_tail = 0 ;
+        if( prev_from_ref.ref_id == std::to_string( c1.contig_id) )
+        {
+            c1_tail = c1.contig_len - prev_from_query.pos ;
+            c2_tail = next_from_query.pos ;
+        }
+        else
+        {
+            c2_tail = c2.contig_len - prev_from_query.pos ;
+            c1_tail = next_from_query.pos ;
+        }
+        int gap = ref_gap - c1_tail - c2_tail ;
+        c1.gap_size = gap ;
         return true ;
     }
 
     void ParseAllGaps()
     {
-
+        for( auto & pair : helper.all_scaff ) 
+        {
+            auto & a_scaff = pair.second.a_scaff ;
+            for( int i = 0 ; i < (int) a_scaff.size() -1 ; i ++ )
+            {
+                ParseAGap(a_scaff.at(i) , a_scaff.at(i+1));
+            }
+        }
     }
 
+    void PrintScaffInfos() 
+    {
+        helper.PrintAllScaff(std::cout);
+    }
 } config ;
 
 int main(int argc , char **argv)
@@ -321,6 +391,6 @@ int main(int argc , char **argv)
     config.LoadR2CON();
     config.LoadScaffInfos();
     config.ParseAllGaps() ;
-
+    config.PrintScaffInfos();
     return 0;
 }

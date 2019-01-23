@@ -113,7 +113,7 @@ namespace BGIQD {
                 }
 
                 DataContainer AlignedElementsRef( 
-                        std::stack<AlignResult> result )
+                        std::stack<AlignResult> result ) const 
                 {
                     DataContainer ret ;
                     while( ! result.empty() )
@@ -130,7 +130,7 @@ namespace BGIQD {
                 }
 
                 DataContainer AlignedElementsQuery( 
-                        std::stack<AlignResult> result )
+                        std::stack<AlignResult> result ) const
                 {
                     DataContainer ret ;
                     while( ! result.empty() )
