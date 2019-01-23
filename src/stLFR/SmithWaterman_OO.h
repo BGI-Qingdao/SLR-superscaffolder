@@ -51,7 +51,8 @@ namespace BGIQD {
 
                 void CheckLoadedData()
                 {
-                    assert( schemes.match_score > 0 );
+                    assert( schemes.match_order_score > 0 );
+                    assert( schemes.match_orientation_score > 0 );
                     assert( schemes.insert_score <= 0 );
                     assert( schemes.delete_score<= 0 );
                     assert( schemes.mismatch_score<= 0 );
