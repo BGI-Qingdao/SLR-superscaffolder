@@ -338,7 +338,7 @@ struct AppConfig
         {
             auto path = pair.second.GetResult();
             auto path_ref = pair.second.AlignedElementsRef(path);
-            auto path_query = pair.second.AlignedElementsRef(path);
+            auto path_query = pair.second.AlignedElementsQuery(path);
             BGIQD::FREQ::Freq<std::string> freq ;
             std::for_each( path_query.begin() , path_query.end() ,
                     [&freq]( ReadInfo & i ) { freq.Touch(i.ref_id) ; } );
@@ -360,7 +360,7 @@ struct AppConfig
         // step 6 , estimate the gap size.
         auto path       = max_align.GetResult();
         auto path_ref   = max_align.AlignedElementsRef(path);
-        auto path_query = max_align.AlignedElementsRef(path);
+        auto path_query = max_align.AlignedElementsQuery(path);
 
         auto prev = std::adjacent_find(path_query.begin() 
                 , path_query.end() 
@@ -380,7 +380,8 @@ struct AppConfig
         int ref_gap = std::abs( prev_from_ref.pos - next_from_ref.pos -1 );
         int c1_tail = 0 ;
         int c2_tail = 0 ;
-        if( prev_from_ref.ref_id == std::to_string( c1.contig_id) )
+
+        if( prev_from_query.ref_id == std::to_string( c1.contig_id) )
         {
             c1_tail = c1.contig_len - prev_from_query.pos ;
             c2_tail = next_from_query.pos ;
