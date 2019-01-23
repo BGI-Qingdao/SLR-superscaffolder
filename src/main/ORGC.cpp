@@ -63,7 +63,7 @@ struct MapperInfo
         };
         std::vector<ReadInfo> ret ; 
         ret.resize(c1.size());
-        std::copy_backward(c1.begin(),c1.end(),ret.begin());
+        std::reverse_copy(c1.begin(),c1.end(),ret.begin());
         std::for_each(ret.begin() ,ret.end() , change_oo);
         return ret ;
     }
