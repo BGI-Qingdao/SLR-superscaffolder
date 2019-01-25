@@ -383,13 +383,27 @@ struct AppConfig
 
         if( prev_from_query.ref_id == std::to_string( c1.contig_id) )
         {
-            c1_tail = c1.contig_len - prev_from_query.pos ;
-            c2_tail = next_from_query.pos ;
+            // c1 == prev , c2== next
+            if( c1.orientation == true )
+                c1_tail = c1.contig_len - prev_from_query.pos ;
+            else 
+                c1_tail = prev_from_query.pos ;
+            if( c2.orientation == true )
+                c2_tail = next_from_query.pos ;
+            else 
+                c2_tail = c2.contig_len - next_from_query.pos ;
         }
         else
         {
-            c2_tail = c2.contig_len - prev_from_query.pos ;
-            c1_tail = next_from_query.pos ;
+            // c2 == prev , c1 == next
+            if( c1.orientation == false )
+                c1_tail = next_from_query.pos ;
+            else 
+                c1_tail = c1.contig_len - next_from_query.pos ;
+            if( c2.orientation == false )
+                c2_tail = c2.contig_len - prev_from_query.pos ;
+            else 
+                c2_tail = prev_from_query.pos ;
         }
         int gap = ref_gap - c1_tail - c2_tail ;
         c1.gap_size = gap ;
