@@ -14,12 +14,12 @@ check_output xxx.pe_graph
 
 check_input xxx.seeds xxx.barcodeOnContig
 try_backup_list xxx.barcodeOnBin
-BIN/ChopBin --prefix xxx --bin_size PE_BIN_SIZE   2>>log_chopbin_pe
+BIN/ChopBin --prefix xxx --bin_size 1000 --work_mode 3 2>>log_chopbin_pe
 check_output xxx.barcodeOnBin
 
 check_input xxx.barcodeOnBin
 try_backup_list xxx.cluster
-BIN/BinCluster --prefix xxx --thread THREADS --threshold PE_BIN_THRESHOLD 2>>log_bincluster_pe
+BIN/BinCluster --prefix xxx --threshold 1 --work_mode 2 --thread THREADS 2>>log_bincluster_pe
 check_output xxx.cluster
 
 check_input xxx.mintree_trunk_linear xxx.cluster
