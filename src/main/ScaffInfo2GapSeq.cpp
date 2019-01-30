@@ -147,7 +147,7 @@ struct AppConfig
 int main(int argc , char ** argv)
 {
     START_PARSE_ARGS
-        DEFINE_ARG_REQUIRED(std::string, prefix ,"prefix of files. Input xxx.scaff_infos; Output xxx.scaff_seqs");
+        DEFINE_ARG_REQUIRED(std::string, prefix ,"prefix of files. Input xxx.scaff_infos xxx.contig; Output xxx.scaff_seqs");
     END_PARSE_ARGS;
 
     config.Init( prefix.to_string() );

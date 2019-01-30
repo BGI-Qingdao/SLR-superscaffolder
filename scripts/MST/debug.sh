@@ -11,7 +11,8 @@ MACRO=" -D xxx=$PREFIX \
    -D HT_THRESHOLD=$HT_CLUSTER \
    -D MST_THRESHOLD=$MST_CLUSTER \
    -D MMCONTIG=$MIN_SCONTIG
-   -D KVALUE=$SOAP_K \
+   -D MIN_N=$MIN_N \
+   -D MIN_C=$MIN_C \
    -D R1=$R1 \
    -D R2=$R2 \
    -D RANK=$RANK \
