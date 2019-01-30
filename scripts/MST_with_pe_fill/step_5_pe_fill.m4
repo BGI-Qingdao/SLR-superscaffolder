@@ -24,7 +24,7 @@ check_output xxx.cluster
 
 check_input xxx.mintree_trunk_linear xxx.cluster
 try_backup_list xxx.seeds_cluster_seeds
-BIN/SeedCluster --prefix xxx  --threshold PE_BIN_THRESHOLD --strategy 1  --loop_num 1 2>>log_seed_cluster
+BIN/SeedCluster --prefix xxx  --threshold PE_MIN_B --strategy 1  --loop_num 1 2>>log_seed_cluster
 check_output xxx.seeds_cluster_seeds
 
 check_input xxx.seeds xxx.seeds_cluster_seeds xxx.pe_graph
