@@ -236,6 +236,12 @@ struct AppConfig
         const auto &  rc1 = c1info.reads ;
         const auto &  rc2 = c2info.reads ;
 
+        if( rc1.size() < 10 || rc2.size() <10 )
+        {
+            failed_reason_freq.Touch("contig_less_10_reads");
+            return false ;
+        }
+
         std::set<std::string> ont_c1 ;
         std::set<std::string> ont_c2 ;
 
@@ -284,11 +290,16 @@ struct AppConfig
             auto ont_common = MapperInfo::FilterCommon( ont_reads_base , common );
 
             common_size_freq.Touch(ont_common.size());
+            if( ont_common.size() <10 )
+                continue ;
 
             const auto & c1_reads_base = read2con.at(c1info.ref_id).read_infos;
             const auto & c2_reads_base = read2con.at(c2info.ref_id).read_infos;
             auto r1_common = MapperInfo::FilterCommon(c1_reads_base,common);
             auto r2_common = MapperInfo::FilterCommon(c2_reads_base,common);
+
+            if( r1_common.size() <4 ||  r2_common.size() <4 )
+                continue ;
 
             std::for_each(r1_common.begin() , r1_common.end() 
                     ,[c1](ReadInfo & i){ i.ref_id = std::to_string(c1.contig_id) ; });
@@ -313,6 +324,13 @@ struct AppConfig
             tmp.CheckLoadedData() ;
             tmp.InitAfterDataLoaded();
             tmp.FillMutrix() ;
+            auto path = tmp.GetResult();
+            auto path_query = tmp.AlignedElementsQuery(path);
+            BGIQD::FREQ::Freq<std::string> freq ;
+            std::for_each( path_query.begin() , path_query.end() ,
+                    [&freq]( ReadInfo & i ) { freq.Touch(i.ref_id) ; } );
+            if( freq.data.size() < 2 )
+                tmp.max_value = 0 ;
 
             TheSmithWaterman tmp1 ;
             tmp1.schemes = the_schemes ;
@@ -321,15 +339,24 @@ struct AppConfig
             tmp1.CheckLoadedData() ;
             tmp1.InitAfterDataLoaded();
             tmp1.FillMutrix() ;
+            auto path1 = tmp1.GetResult();
+            auto path_query1 = tmp1.AlignedElementsQuery(path1);
+            BGIQD::FREQ::Freq<std::string> freq1 ;
+            std::for_each( path_query1.begin() , path_query1.end() ,
+                    [&freq1]( ReadInfo & i ) { freq1.Touch(i.ref_id) ; } );
+            if( freq1.data.size() < 2 )
+                tmp1.max_value = 0 ;
 
-            if( tmp.max_value > tmp1.max_value )
+            if( tmp.max_value > tmp1.max_value && tmp.max_value != 0 )
             {
                 align_cache[ont]=tmp;
             }
-            else
+            else if( tmp1.max_value != 0 )
             {
                 align_cache[ont]=tmp1;
             }
+            else
+            {}
         }
         // step 5 , choose the best ONT read 
         int max_value = 0;
@@ -406,6 +433,8 @@ struct AppConfig
                 c2_tail = prev_from_query.pos ;
         }
         int gap = ref_gap - c1_tail - c2_tail ;
+        if( gap < -3000 )
+            gap = -3000 ;
         c1.gap_size = gap ;
         return true ;
     }
