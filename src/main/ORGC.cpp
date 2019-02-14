@@ -52,6 +52,22 @@ struct MapperInfo
         }
     }
 
+    void InitFromStr_WithFilter( const std::string & line , const std::set<std::string> & buf)
+    {
+        std::istringstream ist(line);
+        ist>>ref_id ;
+        ReadInfo tmp ;
+        while( ! ist.eof() )
+        {
+            ist>>tmp.order>>tmp.orientation>>tmp.pos;
+            if( buf.find(tmp.ref_id) != buf.end() )
+            {
+                read_infos.push_back(tmp);
+                reads.insert(tmp.order);
+            }
+        }
+    }
+
     static std::vector<ReadInfo> CompleteReverse( const std::vector<ReadInfo> & c1 )
     {
         auto change_oo =  [](ReadInfo & i)
@@ -168,6 +184,8 @@ struct AppConfig
     BGIQD::FREQ::Freq<int> common_size_freq;
     BGIQD::FREQ::Freq<int> high_score_freq;
 
+    std::set<std::string> ont_checked_reads;
+
     void  Init()
     {
         BGIQD::LOG::logfilter::singleton()
@@ -185,6 +203,8 @@ struct AppConfig
         {
             MapperInfo tmp ;
             tmp.InitFromStr(line);
+            for( auto x : tmp.reads )
+                ont_checked_reads.insert(x);
             read2ont[tmp.ref_id] = tmp ;
         };
         BGIQD::FILES::FileReaderFactory::EachLine(*in,parseline);
@@ -200,7 +220,7 @@ struct AppConfig
         auto parseline = [this]( const std::string & line ) 
         {
             MapperInfo tmp ;
-            tmp.InitFromStr(line);
+            tmp.InitFromStr_WithFilter(line,ont_checked_reads);
             read2con[tmp.ref_id] = tmp ;
         };
         BGIQD::FILES::FileReaderFactory::EachLine(*in,parseline);
@@ -227,6 +247,9 @@ struct AppConfig
         helper.LoadAllScaff(std::cin);
     }
 
+    int min_both_read_in_contig  ;
+    int min_both_read_in_ont  ;
+
     bool ParseAGap(BGIQD::stLFR::ContigDetail & c1
             ,const BGIQD::stLFR::ContigDetail & c2 )
     {
@@ -236,7 +259,7 @@ struct AppConfig
         const auto &  rc1 = c1info.reads ;
         const auto &  rc2 = c2info.reads ;
 
-        if( rc1.size() < 10 || rc2.size() <10 )
+        if( (int)rc1.size() < min_both_read_in_contig || (int)rc2.size() < min_both_read_in_contig )
         {
             failed_reason_freq.Touch("contig_less_10_reads");
             return false ;
@@ -290,7 +313,7 @@ struct AppConfig
             auto ont_common = MapperInfo::FilterCommon( ont_reads_base , common );
 
             common_size_freq.Touch(ont_common.size());
-            if( ont_common.size() <10 )
+            if( (int)ont_common.size() <min_both_read_in_ont )
                 continue ;
 
             const auto & c1_reads_base = read2con.at(c1info.ref_id).read_infos;
@@ -433,11 +456,15 @@ struct AppConfig
                 c2_tail = prev_from_query.pos ;
         }
         int gap = ref_gap - c1_tail - c2_tail ;
-        if( gap < -3000 )
-            gap = -3000 ;
+        if( gap < -max_overlap )
+            gap = -max_overlap ;
         c1.gap_size = gap ;
         return true ;
     }
+
+    int max_overlap ;
+
+
 
     void ParseAllGaps()
     {
@@ -483,11 +510,18 @@ int main(int argc , char **argv)
 {
     START_PARSE_ARGS
         DEFINE_ARG_REQUIRED(std::string , r2ont, "read 2 ont data ");
-    DEFINE_ARG_REQUIRED(std::string , r2con, "read 2 contig data ");
+        DEFINE_ARG_REQUIRED(std::string , r2con, "read 2 contig data ");
+        DEFINE_ARG_OPTIONAL(int , min_reads_from_contig , "min reads num from a contig that can start a align ","4");
+        DEFINE_ARG_OPTIONAL(int , min_reads_from_ont, "min reads num from a ont that can start a align ","10");
+        DEFINE_ARG_OPTIONAL(int , max_overlap, "max overlap that we can support(make sure positive num)","3000");
     END_PARSE_ARGS
 
+    config.min_both_read_in_ont = min_reads_from_ont.to_int() ;
+    config.min_both_read_in_contig = min_reads_from_contig.to_int() ;
+    config.max_overlap = max_overlap.to_int();
     config.r2con_f = r2con.to_string() ;
     config.r2ont_f = r2ont.to_string() ;
+
     config.Init() ;
     BGIQD::LOG::timer t(config.loger , "Main ");
     config.LoadR2ONT() ;
