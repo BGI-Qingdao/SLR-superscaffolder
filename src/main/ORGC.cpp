@@ -23,15 +23,22 @@ struct ReadNameMapper
         std::map<std::string , unsigned int > data ;
         unsigned int next = 0 ;
     public:
-        unsigned int GetId(const std::string & id )
+        unsigned int GetId(const std::string & id ,bool new_id = true  )
         {
             auto itr = data.find(id) ;
 
             if( itr == data.end() )
             {
-                next ++ ;
-                data[id]=next ;
-                return next ;
+                if( new_id )
+                {
+                    next ++ ;
+                    data[id]=next ;
+                    return next ;
+                }
+                else
+                {
+                    return 0 ;
+                }
             }
             return itr->second;
         }
@@ -74,14 +81,13 @@ struct MapperInfo
         while( ! ist.eof() )
         {
             ist>>tmp_name>>tmp.orientation>>tmp.pos;
-            tmp.order = maper.GetId(tmp_name);
+            tmp.order = maper.GetId(tmp_name, true );
             read_infos.push_back(tmp);
             reads.insert(tmp.order);
         }
     }
 
     void InitFromStr_WithFilter( const std::string & line
-            , const std::set<unsigned int > & buf
             , ReadNameMapper & maper )
     {
         std::istringstream ist(line);
@@ -91,8 +97,8 @@ struct MapperInfo
         while( ! ist.eof() )
         {
             ist>>tmp_name>>tmp.orientation>>tmp.pos;
-            tmp.order = maper.GetId(tmp_name);
-            if( buf.find(tmp.order) != buf.end() )
+            tmp.order = maper.GetId(tmp_name,false);
+            if( tmp.order != 0  )
             {
                 read_infos.push_back(tmp);
                 reads.insert(tmp.order);
@@ -238,8 +244,6 @@ struct AppConfig
         {
             MapperInfo tmp ;
             tmp.InitFromStr_ONT(line,stlfr_reads);
-            for( auto x : tmp.reads )
-                ont_checked_reads.insert(x);
             read2ont[tmp.ref_id] = tmp ;
         };
         BGIQD::FILES::FileReaderFactory::EachLine(*in,parseline);
@@ -255,7 +259,7 @@ struct AppConfig
         auto parseline = [this]( const std::string & line ) 
         {
             MapperInfo tmp ;
-            tmp.InitFromStr_WithFilter(line,ont_checked_reads,stlfr_reads);
+            tmp.InitFromStr_WithFilter(line,stlfr_reads);
             read2con[tmp.ref_id] = tmp ;
         };
         BGIQD::FILES::FileReaderFactory::EachLine(*in,parseline);
