@@ -60,7 +60,7 @@ struct MapperInfo
         while( ! ist.eof() )
         {
             ist>>tmp.order>>tmp.orientation>>tmp.pos;
-            if( buf.find(tmp.ref_id) != buf.end() )
+            if( buf.find(tmp.order) != buf.end() )
             {
                 read_infos.push_back(tmp);
                 reads.insert(tmp.order);
