@@ -17,12 +17,34 @@
 #include <set>
 #include <algorithm>
 
+struct ReadNameMapper
+{
+    private:
+        std::map<std::string , unsigned int > data ;
+        unsigned int next = 0 ;
+    public:
+        unsigned int GetId(const std::string & id )
+        {
+            auto itr = data.find(id) ;
+
+            if( itr == data.end() )
+            {
+                next ++ ;
+                data[id]=next ;
+                return next ;
+            }
+            return itr->second;
+        }
+};
+
+
 struct ReadInfo
 {
-    std::string order;
+    unsigned int order ;
+    //std::string order;
     char orientation ;
     int pos ;
-    std::string ref_id ;
+    int ref_id ;
     //bool operator < ( const ReadInfo & o )
     //{
     //    if( read_id != o.read_id )
@@ -36,30 +58,40 @@ typedef BGIQD::stLFR::SmithWaterman_OO<ReadInfo> TheSmithWaterman;
 
 struct MapperInfo
 {
-    std::string ref_id ;
+    static int ont_id ;
+    int ref_id ;
     std::vector<ReadInfo>  read_infos ;
 
-    void InitFromStr( const std::string & line )
+    void InitFromStr_ONT( const std::string & line
+            , ReadNameMapper & maper )
     {
+        ont_id ++ ;
+        ref_id = ont_id ;
+        std::string tmp_name ;
         std::istringstream ist(line);
-        ist>>ref_id ;
+        ist>>tmp_name ;
         ReadInfo tmp ;
         while( ! ist.eof() )
         {
-            ist>>tmp.order>>tmp.orientation>>tmp.pos;
+            ist>>tmp_name>>tmp.orientation>>tmp.pos;
+            tmp.order = maper.GetId(tmp_name);
             read_infos.push_back(tmp);
             reads.insert(tmp.order);
         }
     }
 
-    void InitFromStr_WithFilter( const std::string & line , const std::set<std::string> & buf)
+    void InitFromStr_WithFilter( const std::string & line
+            , const std::set<unsigned int > & buf
+            , ReadNameMapper & maper )
     {
         std::istringstream ist(line);
         ist>>ref_id ;
         ReadInfo tmp ;
+        std::string tmp_name;
         while( ! ist.eof() )
         {
-            ist>>tmp.order>>tmp.orientation>>tmp.pos;
+            ist>>tmp_name>>tmp.orientation>>tmp.pos;
+            tmp.order = maper.GetId(tmp_name);
             if( buf.find(tmp.order) != buf.end() )
             {
                 read_infos.push_back(tmp);
@@ -84,7 +116,7 @@ struct MapperInfo
         return ret ;
     }
 
-    std::set<std::string> reads ;
+    std::set<unsigned int> reads ;
 
     static std::vector<ReadInfo> Add( const std::vector<ReadInfo> & c1
             , const std::vector<ReadInfo> & c2 , bool o1 , bool o2  ) 
@@ -118,7 +150,7 @@ struct MapperInfo
     }
 
     static std::vector<ReadInfo> FilterCommon( const std::vector<ReadInfo> & base , 
-            const std::set<std::string> & common )
+            const std::set<unsigned int> & common )
     {
         int total = 0 ;
         auto check = [&]( const ReadInfo & info) -> bool 
@@ -138,30 +170,32 @@ struct MapperInfo
     }
 };
 
-std::set<std::string> SetUnion( const std::set<std::string> & s1 ,
-        const std::set<std::string> & s2 )
+int MapperInfo::ont_id = 0 ;
+
+std::set<unsigned int > SetUnion( const std::set<unsigned int> & s1 ,
+        const std::set<int> & s2 )
 {
-    std::set<std::string> dest1;
+    std::set<unsigned int> dest1;
     std::set_union(s1.begin(), s1.end(),
             s2.begin(), s2.end(),
             std::inserter(dest1,dest1.begin()));
     return dest1 ;
 }
 
-std::set<std::string> SetDiff( const std::set<std::string> & s1 ,
-        const std::set<std::string> & s2 )
+std::set<unsigned int > SetDiff( const std::set<unsigned int > & s1 ,
+        const std::set<unsigned int> & s2 )
 {
-    std::set<std::string> dest1;
+    std::set<unsigned int> dest1;
     std::set_difference(s1.begin(), s1.end(),
             s2.begin(), s2.end(),
             std::inserter(dest1,dest1.begin()));
     return dest1 ;
 }
 
-std::set<std::string> SetIntersection( const std::set<std::string> & s1 ,
-        const std::set<std::string> & s2 )
+std::set<unsigned int> SetIntersection( const std::set<unsigned int> & s1 ,
+        const std::set<unsigned int> & s2 )
 {
-    std::set<std::string> dest1;
+    std::set<unsigned int> dest1;
     std::set_intersection(s1.begin(), s1.end(),
             s2.begin(), s2.end(),
             std::inserter(dest1,dest1.begin()));
@@ -170,11 +204,11 @@ std::set<std::string> SetIntersection( const std::set<std::string> & s1 ,
 
 struct AppConfig 
 {
-    std::map<std::string , std::set<std::string> > read_on_ont;
+    std::map<int , std::set<unsigned int> > read_on_ont;
 
-    std::map<std::string , MapperInfo> read2ont ;
+    std::map<int , MapperInfo> read2ont ;
 
-    std::map<std::string , MapperInfo> read2con ;
+    std::map<int, MapperInfo> read2con ;
 
     std::string r2ont_f ;
     std::string r2con_f ;
@@ -184,7 +218,8 @@ struct AppConfig
     BGIQD::FREQ::Freq<int> common_size_freq;
     BGIQD::FREQ::Freq<int> high_score_freq;
 
-    std::set<std::string> ont_checked_reads;
+    std::set<unsigned int> ont_checked_reads;
+    ReadNameMapper stlfr_reads;
 
     void  Init()
     {
@@ -202,7 +237,7 @@ struct AppConfig
         auto parseline = [this]( const std::string & line ) 
         {
             MapperInfo tmp ;
-            tmp.InitFromStr(line);
+            tmp.InitFromStr_ONT(line,stlfr_reads);
             for( auto x : tmp.reads )
                 ont_checked_reads.insert(x);
             read2ont[tmp.ref_id] = tmp ;
@@ -220,7 +255,7 @@ struct AppConfig
         auto parseline = [this]( const std::string & line ) 
         {
             MapperInfo tmp ;
-            tmp.InitFromStr_WithFilter(line,ont_checked_reads);
+            tmp.InitFromStr_WithFilter(line,ont_checked_reads,stlfr_reads);
             read2con[tmp.ref_id] = tmp ;
         };
         BGIQD::FILES::FileReaderFactory::EachLine(*in,parseline);
@@ -254,8 +289,8 @@ struct AppConfig
             ,const BGIQD::stLFR::ContigDetail & c2 )
     {
         // step 1 , find all common ONT reads
-        const auto &  c1info = read2con.at(std::to_string(c1.contig_id)) ;
-        const auto &  c2info = read2con.at(std::to_string(c2.contig_id)) ;
+        const auto &  c1info = read2con.at((c1.contig_id)) ;
+        const auto &  c2info = read2con.at((c2.contig_id)) ;
         const auto &  rc1 = c1info.reads ;
         const auto &  rc2 = c2info.reads ;
 
@@ -265,10 +300,10 @@ struct AppConfig
             return false ;
         }
 
-        std::set<std::string> ont_c1 ;
-        std::set<std::string> ont_c2 ;
+        std::set<unsigned int> ont_c1 ;
+        std::set<unsigned int> ont_c2 ;
 
-        std::map<std::string , std::set<std::string> > ont_share_reads;
+        std::map<int , std::set<unsigned int> > ont_share_reads;
 
         for( const auto & r1 : rc1 )
         {
@@ -305,7 +340,7 @@ struct AppConfig
             return false ;
         }
         // step 3 , align c1 + c2 to ONT reads 
-        std::map<std::string , TheSmithWaterman> align_cache ;
+        std::map<int , TheSmithWaterman> align_cache ;
         for( const auto & ont : common_ont )
         {
             const auto & common = ont_share_reads.at(ont) ;
@@ -325,9 +360,9 @@ struct AppConfig
                 continue ;
 
             std::for_each(r1_common.begin() , r1_common.end() 
-                    ,[c1](ReadInfo & i){ i.ref_id = std::to_string(c1.contig_id) ; });
+                    ,[c1](ReadInfo & i){ i.ref_id = (c1.contig_id) ; });
             std::for_each(r2_common.begin() , r2_common.end() 
-                    ,[c2](ReadInfo & i){ i.ref_id = std::to_string(c2.contig_id) ; });
+                    ,[c2](ReadInfo & i){ i.ref_id = (c2.contig_id) ; });
 
             auto l2r = MapperInfo::Add( r1_common, r2_common 
                     , c1.orientation , c2.orientation);
@@ -349,7 +384,7 @@ struct AppConfig
             tmp.FillMutrix() ;
             auto path = tmp.GetResult();
             auto path_query = tmp.AlignedElementsQuery(path);
-            BGIQD::FREQ::Freq<std::string> freq ;
+            BGIQD::FREQ::Freq<int> freq ;
             std::for_each( path_query.begin() , path_query.end() ,
                     [&freq]( ReadInfo & i ) { freq.Touch(i.ref_id) ; } );
             if( freq.data.size() < 2 )
@@ -364,7 +399,7 @@ struct AppConfig
             tmp1.FillMutrix() ;
             auto path1 = tmp1.GetResult();
             auto path_query1 = tmp1.AlignedElementsQuery(path1);
-            BGIQD::FREQ::Freq<std::string> freq1 ;
+            BGIQD::FREQ::Freq<int> freq1 ;
             std::for_each( path_query1.begin() , path_query1.end() ,
                     [&freq1]( ReadInfo & i ) { freq1.Touch(i.ref_id) ; } );
             if( freq1.data.size() < 2 )
@@ -389,7 +424,7 @@ struct AppConfig
             auto path = pair.second.GetResult();
             auto path_ref = pair.second.AlignedElementsRef(path);
             auto path_query = pair.second.AlignedElementsQuery(path);
-            BGIQD::FREQ::Freq<std::string> freq ;
+            BGIQD::FREQ::Freq<int> freq ;
             std::for_each( path_query.begin() , path_query.end() ,
                     [&freq]( ReadInfo & i ) { freq.Touch(i.ref_id) ; } );
             if( freq.data.size() < 2 )
@@ -431,7 +466,7 @@ struct AppConfig
         int c1_tail = 0 ;
         int c2_tail = 0 ;
 
-        if( prev_from_query.ref_id == std::to_string( c1.contig_id) )
+        if( prev_from_query.ref_id == (int) c1.contig_id )
         {
             // c1 == prev , c2== next
             if( c1.orientation == true )
