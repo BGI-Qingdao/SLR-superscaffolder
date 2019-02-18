@@ -83,7 +83,7 @@ struct MapperInfo
             ist>>tmp_name>>tmp.orientation>>tmp.pos;
             tmp.order = maper.GetId(tmp_name, true );
             read_infos.push_back(tmp);
-            reads.insert(tmp.order);
+            //reads.insert(tmp.order);
         }
     }
 
@@ -101,7 +101,7 @@ struct MapperInfo
             if( tmp.order != 0  )
             {
                 read_infos.push_back(tmp);
-                reads.insert(tmp.order);
+                //reads.insert(tmp.order);
             }
         }
     }
@@ -122,7 +122,17 @@ struct MapperInfo
         return ret ;
     }
 
-    std::set<unsigned int> reads ;
+
+    std::set<unsigned int> reads() const 
+    {
+        std::set<unsigned int> ret;
+        for( const auto & i :read_infos )
+        {
+            ret.insert(i.order);
+        }
+        return ret ;
+    }
+    //std::set<unsigned int> reads ;
 
     static std::vector<ReadInfo> Add( const std::vector<ReadInfo> & c1
             , const std::vector<ReadInfo> & c2 , bool o1 , bool o2  ) 
@@ -271,7 +281,8 @@ struct AppConfig
         BGIQD::LOG::timer t(loger,"BuildR2ONTIndex");
         for( const auto & pair : read2ont )
         {
-            for( const auto & read_i : pair.second.reads)
+            auto reads = pair.second.reads();
+            for( const auto & read_i : reads)
             {
                 read_on_ont[read_i].insert(pair.first) ;
             }
@@ -295,8 +306,8 @@ struct AppConfig
         // step 1 , find all common ONT reads
         const auto &  c1info = read2con.at((c1.contig_id)) ;
         const auto &  c2info = read2con.at((c2.contig_id)) ;
-        const auto &  rc1 = c1info.reads ;
-        const auto &  rc2 = c2info.reads ;
+        const auto  rc1 = c1info.reads() ;
+        const auto  rc2 = c2info.reads() ;
 
         if( (int)rc1.size() < min_both_read_in_contig || (int)rc2.size() < min_both_read_in_contig )
         {
