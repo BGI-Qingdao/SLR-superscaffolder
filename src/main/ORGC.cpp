@@ -303,7 +303,20 @@ struct AppConfig
     bool ParseAGap(BGIQD::stLFR::ContigDetail & c1
             ,const BGIQD::stLFR::ContigDetail & c2 )
     {
+        // step 0 , check
+        if( read2con.find( c1.contig_id ) == read2con.end() )
+        {
+            failed_reason_freq.Touch("contig_less_10_reads");
+            return false ;
+        }
+        if( read2con.find( c2.contig_id ) == read2con.end() )
+        {
+            failed_reason_freq.Touch("contig_less_10_reads");
+            return false ;
+        }
+
         // step 1 , find all common ONT reads
+
         const auto &  c1info = read2con.at((c1.contig_id)) ;
         const auto &  c2info = read2con.at((c2.contig_id)) ;
         const auto  rc1 = c1info.reads() ;
