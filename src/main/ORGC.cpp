@@ -541,9 +541,10 @@ struct AppConfig
                 total ++ ;
                 loger<<BGIQD::LOG::lstart()<<"start process gap "
                     <<total<<" ..."<<BGIQD::LOG::lend() ;
-                multi.AddJob([&]()
+                multi.AddJob([& , i]()
                         {
-                            if( ParseAGap(a_scaff.at(i) , a_scaff.at(i+1)) )
+                            int the_index = i ;
+                            if( ParseAGap(a_scaff.at(the_index) , a_scaff.at(the_index+1)) )
                             {
                                 std::lock_guard<std::mutex> locker(the_mutex);
                                 succ++ ;
