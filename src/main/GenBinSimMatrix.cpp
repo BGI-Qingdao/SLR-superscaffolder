@@ -65,6 +65,7 @@ int main(int argc , char **argv )
                 std::cout<<'\n';
         }
     }
+    delete array ;
     return 0 ;
 }
 
