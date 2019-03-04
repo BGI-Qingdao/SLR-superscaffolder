@@ -5,6 +5,7 @@
 #include "common/log/log.h"
 #include "common/log/logfilter.h"
 #include "common/freq/freq.h"
+#include "common/multithread/MultiThread.h"
 
 #include "stLFR/ScaffInfo.h"
 #include "stLFR/SmithWaterman_OO.h"
@@ -16,6 +17,7 @@
 #include <map>
 #include <set>
 #include <algorithm>
+#include <thread>
 
 struct ReadNameMapper
 {
@@ -52,13 +54,6 @@ struct ReadInfo
     char orientation ;
     int pos ;
     int ref_id ;
-    //bool operator < ( const ReadInfo & o )
-    //{
-    //    if( read_id != o.read_id )
-    //        return read_id< o.read_id ;
-    //    else 
-    //        return pos < o.pos ;
-    //}
 };
 
 typedef BGIQD::stLFR::SmithWaterman_OO<ReadInfo> TheSmithWaterman;
@@ -528,13 +523,16 @@ struct AppConfig
     int max_overlap ;
 
 
-
+    int thread_num ;
     void ParseAllGaps()
     {
         BGIQD::LOG::timer t(loger,"ParseAllGaps");
         int succ = 0 ;
         int failed = 0 ;
         int total = 0 ;
+        BGIQD::MultiThread::MultiThread multi;
+        std::mutex the_mutex ;
+        multi.Start(thread_num);
         for( auto & pair : helper.all_scaff ) 
         {
             auto & a_scaff = pair.second.a_scaff ;
@@ -543,16 +541,29 @@ struct AppConfig
                 total ++ ;
                 loger<<BGIQD::LOG::lstart()<<"start process gap "
                     <<total<<" ..."<<BGIQD::LOG::lend() ;
-                if( ParseAGap(a_scaff.at(i) , a_scaff.at(i+1)) )
-                    succ++ ;
-                else
-                    failed++;
-                loger<<BGIQD::LOG::lstart()<<"end process gap "
-                    <<total<<BGIQD::LOG::lend() ;
-                loger<<BGIQD::LOG::lstart()<<"total succ is  "<<succ
-                    <<" !"<<BGIQD::LOG::lend() ;
+                multi.AddJob([&]()
+                        {
+                            if( ParseAGap(a_scaff.at(i) , a_scaff.at(i+1)) )
+                            {
+                                std::lock_guard<std::mutex> locker(the_mutex);
+                                succ++ ;
+                            }
+                            else
+                            {
+                                std::lock_guard<std::mutex> locker(the_mutex);
+                                failed++;
+                                loger<<BGIQD::LOG::lstart()<<"end process gap "
+                                    <<total<<BGIQD::LOG::lend() ;
+                                loger<<BGIQD::LOG::lstart()<<"total succ is  "<<succ
+                                    <<" !"<<BGIQD::LOG::lend() ;
+                            }
+                        }
+                        );
             }
         }
+        multi.End();
+        multi.WaitingStop();
+
         loger<<BGIQD::LOG::lstart()<<" Failed reason freq\n"
             <<failed_reason_freq.ToString()<<BGIQD::LOG::lend() ;
         loger<<BGIQD::LOG::lstart()<<" Common size freq\n"
@@ -574,6 +585,7 @@ int main(int argc , char **argv)
     START_PARSE_ARGS
         DEFINE_ARG_REQUIRED(std::string , r2ont, "read 2 ont data ");
         DEFINE_ARG_REQUIRED(std::string , r2con, "read 2 contig data ");
+        DEFINE_ARG_REQUIRED(int , thread, " thread num ");
         DEFINE_ARG_OPTIONAL(int , min_reads_from_contig , "min reads num from a contig that can start a align ","4");
         DEFINE_ARG_OPTIONAL(int , min_reads_from_ont, "min reads num from a ont that can start a align ","10");
         DEFINE_ARG_OPTIONAL(int , max_overlap, "max overlap that we can support(make sure positive num)","3000");
@@ -581,6 +593,7 @@ int main(int argc , char **argv)
 
     config.min_both_read_in_ont = min_reads_from_ont.to_int() ;
     config.min_both_read_in_contig = min_reads_from_contig.to_int() ;
+    config.thread_num = thread.to_int() ;
     config.max_overlap = max_overlap.to_int();
     config.r2con_f = r2con.to_string() ;
     config.r2ont_f = r2ont.to_string() ;
