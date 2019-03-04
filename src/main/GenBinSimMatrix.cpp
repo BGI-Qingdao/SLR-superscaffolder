@@ -47,11 +47,11 @@ int main(int argc , char **argv )
     for( const auto & pair1 : bin_cache )
     {
         int i = pair1.first  ;
-        assert(i >= 0 );
+        assert(i>=0 );
         for( const auto & info : pair1.second.sims )
         {
             int j = info.second.binId  ;
-            assert(j >= 0 );
+            assert(j>=0 );
             array[i*bin_max+j] = info.second.simularity  ;
         }
     }
