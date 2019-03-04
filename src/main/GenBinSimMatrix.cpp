@@ -30,7 +30,7 @@ int main(int argc , char **argv )
         }
     }
 
-    float * array = (float*)malloc(sizeof(float) * bin_max * bin_max ) ;
+    float * const array = (float*)malloc(sizeof(float) * bin_max * bin_max ) ;
     for( int i = 0 ; i< bin_max ; i ++ )
     {
         for( int j = 0 ; j < bin_max ; j++ )
@@ -38,18 +38,17 @@ int main(int argc , char **argv )
             if( i == j )
                 array[i*bin_max+j] = 1.0f ;
             else 
-            {
                 array[i*bin_max+j] = 0.0f ;
-            }
         }
 
     }
+
     for( const auto & pair1 : bin_cache )
     {
-        int i = pair1.first -1 ;
+        int i = pair1.first  ;
         for( const auto & info : pair1.second.sims )
         {
-            int j = info.second.binId -1 ;
+            int j = info.second.binId  ;
             array[i*bin_max+j] = info.second.simularity  ;
         }
     }
@@ -65,7 +64,7 @@ int main(int argc , char **argv )
                 std::cout<<'\n';
         }
     }
-    delete array ;
+    free(array) ;
     return 0 ;
 }
 
