@@ -4,6 +4,7 @@
 #include "common/log/logfilter.h"
 #include "stLFR/CBB.h"
 #include <map>
+#include <cassert>
 
 int main(int argc , char **argv )
 {
@@ -29,7 +30,7 @@ int main(int argc , char **argv )
                 bin_max = tmp.binId ;
         }
     }
-
+    bin_max ++ ;
     float * const array = (float*)malloc(sizeof(float) * bin_max * bin_max ) ;
     for( int i = 0 ; i< bin_max ; i ++ )
     {
@@ -46,9 +47,11 @@ int main(int argc , char **argv )
     for( const auto & pair1 : bin_cache )
     {
         int i = pair1.first  ;
+        assert(i>=0 );
         for( const auto & info : pair1.second.sims )
         {
             int j = info.second.binId  ;
+            assert(j>=0 );
             array[i*bin_max+j] = info.second.simularity  ;
         }
     }
