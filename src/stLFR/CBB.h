@@ -83,9 +83,9 @@ namespace BGIQD{
 
         struct BinRelation
         {
-            int binIndex ;
+            int binIndex ; // bin index in all bins
             unsigned int contigId ;
-            int binId ;
+            int binId ; // bin id in contig
             std::map<unsigned int , BinSimularity> sims;
 
             int start ;

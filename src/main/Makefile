@@ -48,7 +48,7 @@ source_o		= ${source_cpp:%.cpp=%.o}
 .cpp.o:
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
-jobs =Barcode2Gap Barcode2Scaffold  BinCluster ChopBin ContigDlink CutContig ExternContigByPE FakePE2BC FCRFByTF FillContigRoad FillTrunkByPE FormatScaffInfo Gap_OAO gapfillerIDY ORGC LinearCDG MergeContig MergePEInfo MinTree MST IDYtool IDYtool_paf ONTGapCorrecter ONTGapFiller Overlap2Gap ParseContig2Read ParseRead2Contig ParseReadName PEGraph ReadName2Num Reads2Gap Sam2ReadOnContig ScaffInfo2Seq ScaffInfo2GapSeq SeedCluster SplitInfo SplitScaffWithReads StaticsticUnique SplitScaffSeq Trunk2Scaff Trunk2ScaffGap Trunk2ScaffInfo
+jobs =Barcode2Gap Barcode2Scaffold  BinCluster ChopBin ContigDlink CutContig ExternContigByPE FakePE2BC FCRFByTF FillContigRoad FillTrunkByPE FormatScaffInfo Gap_OAO gapfillerIDY GenBinSimMatrix ORGC LinearCDG MergeContig MergePEInfo MinTree MST IDYtool IDYtool_paf ONTGapCorrecter ONTGapFiller Overlap2Gap ParseContig2Read ParseRead2Contig ParseReadName PEGraph ReadName2Num Reads2Gap Sam2ReadOnContig ScaffInfo2Seq ScaffInfo2GapSeq SeedCluster SplitInfo SplitScaffWithReads StaticsticUnique SplitScaffSeq Trunk2Scaff Trunk2ScaffGap Trunk2ScaffInfo
 
 all :  ${jobs}
 
@@ -176,6 +176,15 @@ gapfillerIDY_cpp = gapfillerIDY.cpp
 gapfillerIDY_o = gapfillerIDY.o
 gapfillerIDY : clean ${gapfillerIDY_o} ${source_o} ../bin
 	${CXX} ${gapfillerIDY_o} ${source_o} ${DEUBG_CXX} -o gapfillerIDY
+	mv $@ ../bin/
+
+
+
+
+GenBinSimMatrix_cpp = GenBinSimMatrix.cpp
+GenBinSimMatrix_o = GenBinSimMatrix.o
+GenBinSimMatrix : clean ${GenBinSimMatrix_o} ${source_o} ../bin
+	${CXX} ${GenBinSimMatrix_o} ${source_o} ${DEUBG_CXX} -o GenBinSimMatrix
 	mv $@ ../bin/
 
 
@@ -431,7 +440,7 @@ Trunk2ScaffInfo : clean ${Trunk2ScaffInfo_o} ${source_o} ../bin
 	mv $@ ../bin/
 
 
-jobs_o=  ${Barcode2Gap_o} ${Barcode2Scaffold_o} ${BinCluster_o} ${ChopBin_o} ${ContigDlink_o} ${CutContig_o} ${ExternContigByPE_o} ${FakePE2BC_o} ${FCRFByTF_o} ${FillContigRoad_o} ${FillTrunkByPE_o} ${FormatScaffInfo_o} ${Gap_OAO_o} ${gapfillerIDY_o} ${ORGC_o} ${LinearCDG_o} ${MergeContig_o} ${MergePEInfo_o} ${MinTree_o} ${MST_o} ${IDYtool_o} ${IDYtool_paf_o} ${ONTGapCorrecter_o} ${ONTGapFiller_o} ${Overlap2Gap_o} ${ParseContig2Read_o} ${ParseRead2Contig_o} ${ParseReadName_o} ${PEGraph_o} ${ReadName2Num_o} ${Reads2Gap_o} ${Sam2ReadOnContig_o} ${ScaffInfo2Seq_o} ${ScaffInfo2GapSeq_o} ${SeedCluster_o} ${SplitInfo_o} ${SplitScaffWithReads_o} ${StaticsticUnique_o} ${SplitScaffSeq_o} ${Trunk2Scaff_o} ${Trunk2ScaffGap_o} ${Trunk2ScaffInfo_o}
+jobs_o=  ${Barcode2Gap_o} ${Barcode2Scaffold_o} ${BinCluster_o} ${ChopBin_o} ${ContigDlink_o} ${CutContig_o} ${ExternContigByPE_o} ${FakePE2BC_o} ${FCRFByTF_o} ${FillContigRoad_o} ${FillTrunkByPE_o} ${FormatScaffInfo_o} ${Gap_OAO_o} ${gapfillerIDY_o} ${GenBinSimMatrix_o} ${ORGC_o} ${LinearCDG_o} ${MergeContig_o} ${MergePEInfo_o} ${MinTree_o} ${MST_o} ${IDYtool_o} ${IDYtool_paf_o} ${ONTGapCorrecter_o} ${ONTGapFiller_o} ${Overlap2Gap_o} ${ParseContig2Read_o} ${ParseRead2Contig_o} ${ParseReadName_o} ${PEGraph_o} ${ReadName2Num_o} ${Reads2Gap_o} ${Sam2ReadOnContig_o} ${ScaffInfo2Seq_o} ${ScaffInfo2GapSeq_o} ${SeedCluster_o} ${SplitInfo_o} ${SplitScaffWithReads_o} ${StaticsticUnique_o} ${SplitScaffSeq_o} ${Trunk2Scaff_o} ${Trunk2ScaffGap_o} ${Trunk2ScaffInfo_o}
 
 dirty	   =${jobs_o} ${jobs} ${source_o}
 
