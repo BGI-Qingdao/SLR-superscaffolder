@@ -107,22 +107,37 @@ struct AppConfig
         result.end = bin.end;
         result.binIndex = i ;
         std::set<int> relates ;
-        for(auto pair : bin.collections)
+        if( ! same_bin_only )
         {
-            int barcode = pair.first ;
-            if( binOnBarcode[barcode].size() > 10000 )
+            for(auto pair : bin.collections)
             {
-                continue ;
-            }
-            for( auto index : binOnBarcode[barcode] )
-            {
-                if(! calc_same_contig && barcodeOnBin[index].contigId == bin.contigId )
+                int barcode = pair.first ;
+                if( binOnBarcode[barcode].size() > 10000 )
+                {
                     continue ;
-                if ( index > i )
-                    relates.insert(index);
+                }
+                for( auto index : binOnBarcode[barcode] )
+                {
+                    if(! calc_same_contig && barcodeOnBin[index].contigId == bin.contigId )
+                        continue ;
+                    if ( index > i )
+                        relates.insert(index);
+                }
             }
         }
-
+        else
+        {
+            // Only deal with same contig bin
+            for(auto pair : bin.collections)
+            {
+                int barcode = pair.first ;
+                for( auto index : binOnBarcode[barcode] )
+                {
+                    if ( barcodeOnBin[index].contigId == bin.contigId && index > i )
+                        relates.insert(index);
+                }
+            }
+        }
         for(auto index : relates)
         {
             auto & other = barcodeOnBin[index];
@@ -171,7 +186,7 @@ struct AppConfig
             auto & result = relations.at(i);
             for(auto pair : result.sims )
             {
-                if( pair.first <=(int) i )
+                if( (int)pair.first <=(int) i )
                     continue ;
                 auto & sinfo = pair.second ;
                 auto & another = relations.at(sinfo.binIndex);
@@ -225,6 +240,8 @@ struct AppConfig
         BGIQD::stLFR::PrintContigRelationArray(fName.cluster() , contig_relations);
     }
 
+    bool same_bin_only ; 
+
 } config;
 
 int main(int argc ,char **argv)
@@ -233,13 +250,15 @@ int main(int argc ,char **argv)
     DEFINE_ARG_REQUIRED(std::string , prefix, "prefix. Input xxx.barcodeOnBin ; Output xxx.bin_cluster && xxx.cluster");
     DEFINE_ARG_REQUIRED(float , threshold, "simularity threshold");
     DEFINE_ARG_OPTIONAL(int , thread, "thread num" ,"8");
-    DEFINE_ARG_OPTIONAL(int , work_mode, "1 for Jaccard value , 2 for join_barcode_num" ,"1");
+    DEFINE_ARG_OPTIONAL(int , work_mode, "1 for Jaccard value , 2 for join_barcode_num " ,"1");
     DEFINE_ARG_OPTIONAL(bool, pbc, "print bin cluster" ,"0");
     DEFINE_ARG_OPTIONAL(bool, bin_same_contig, "calc for bin on same contig ." ,"false");
+    DEFINE_ARG_OPTIONAL(bool, same_bin_only, "calc only for bin on same contig ." ,"false");
     //DEFINE_ARG_OPTIONAL(bool, del, "calc for bin on same contig ." ,"false");
     END_PARSE_ARGS
 
     config.work_mode = static_cast<AppConfig::WorkMode>(work_mode.to_int());
+    config.same_bin_only = same_bin_only.to_bool() ;
     config.Init(prefix.to_string() , threshold.to_float(), bin_same_contig.to_bool());
     config.del = false;// del.to_bool();
     BGIQD::LOG::timer t(config.lger,"BinCluster");
