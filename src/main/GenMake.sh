@@ -2,6 +2,7 @@
 
 apps="Barcode2Gap\
  Barcode2Scaffold \
+ BarcodeDepth \
  BinCluster\
  ChopBin\
  ContigDlink\
