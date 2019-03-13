@@ -12,7 +12,7 @@
 #include "soap2/soap2.h"
 #include "soap2/fileName.h"
 
-#include "stLFR/barcodeId.h"
+//#include "stLFR/barcodeId.h"
 #include "stLFR/readName2Barcode.h"
 #include "stLFR/EasySam.h"
 #include "stLFR/StringIdCache.h"
@@ -114,14 +114,14 @@ struct AppConfig
         delete b2r_out;
     }
 
-    void PrintBarcodeList()
-    {
-        // print barcodeList
-        if( barcode_2_num_file.empty() )
-        {
-            BGIQD::stLFR::BarcodeIdHelper::Print(fName.barcodeList());
-        }
-    }
+    //void PrintBarcodeList()
+    //{
+    //    // print barcodeList
+    //    if( barcode_2_num_file.empty() )
+    //    {
+    //        BGIQD::stLFR::BarcodeIdHelper::Print(fName.barcodeList());
+    //    }
+    //}
 
 }config;
 
