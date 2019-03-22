@@ -66,9 +66,8 @@ namespace BGIQD {
 
             // ChopBin
             DEFINE_SUFFIX(barcodeList, ".barcodeList");
-            DEFINE_SUFFIX(readNameList, ".readNameList");
-
             DEFINE_SUFFIX(barcodeFreq, ".barcodeFreq");
+            DEFINE_SUFFIX(readNameList, ".readNameList");
 
             DEFINE_SUFFIX(BarcodeOnBin, ".barcodeOnBin");
 

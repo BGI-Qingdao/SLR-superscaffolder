@@ -24,10 +24,7 @@ namespace BGIQD {
                 long  Id( const std::string & tag ) const ;
 
                 // Assign a number for a tag .
-                // Return false if assign fail.
-                //      like tag already exsist and number not match.
-                //          or number alread exsist and tag not match.
-                bool AssignTag( const std::string & tag , long number );
+                void AssignTag( const std::string & tag , long number );
 
                 // Print barcodeList into file
                 //  format is :
@@ -35,7 +32,7 @@ namespace BGIQD {
                 void Print(std::ostream & ost ) const;
             private:
                 std::map<std::string , long > m_tag2num;
-                std::map<long , std::string > m_num2tag;
+                //std::map<long , std::string > m_num2tag;
                 long curr ;
         };
 

@@ -5,6 +5,7 @@
 #include "common/log/log.h"
 #include "common/log/logfilter.h"
 #include "common/string/stringtools.h"
+#include "common/freq/freq.h"
 
 #include "soap2/fileName.h"
 #include "stLFR/StringIdCache.h"
@@ -19,7 +20,14 @@ struct AppConfig
     BGIQD::LOG::logger loger;
 
     BGIQD::stLFR::StringIdCache barcode_list;
+
     BGIQD::stLFR::StringIdCache unknow_barcode_list;
+
+    BGIQD::FREQ::Freq<std::string>  barcode_freq;
+
+    int min_pair_threshold ;
+
+    int max_pair_threshold ;
 
     std::string read1;
 
@@ -70,6 +78,7 @@ struct AppConfig
                 unknow_barcode_list.preload = true ;
                 unknow_barcode_list.Id(data.head.barcode_str);
             }
+            barcode_freq.Touch(data.head.barcode_str);
         }
         delete in ;
         delete out ;
@@ -99,23 +108,63 @@ struct AppConfig
         }
     }
 
+    void MaskTooLowBarcode()
+    {
+        for( const auto & pair : barcode_freq.data )
+        {
+            long num = pair.second ;
+            const std::string & barcode_str = pair.first ;
+            if( num < min_pair_threshold )
+                barcode_list.data.AssignTag(barcode_str,0);
+        }
+    }
+
+    void MaskTooHighBarcode()
+    {
+        for( const auto & pair : barcode_freq.data )
+        {
+            long num = pair.second ;
+            const std::string & barcode_str = pair.first ;
+            if( num > max_pair_threshold )
+                barcode_list.data.AssignTag(barcode_str,0);
+        }
+    }
+
+    void PrintBarcodeFreq()
+    {
+        auto bfreq = BGIQD::FILES::FileWriterFactory
+            ::GenerateWriterFromFileName(fNames.barcodeFreq());
+        if( bfreq == NULL )
+            FATAL(" failed to open xxx.barcodeFreq to write !!! ");
+
+        (*bfreq)<<barcode_freq.ToString();
+        delete bfreq ;
+    }
+
 }config;
 
 int main(int argc , char **argv )
 {
     START_PARSE_ARGS
         DEFINE_ARG_REQUIRED(std::string , read1 , "read 1 for parse ");
-        DEFINE_ARG_REQUIRED(std::string , prefix , "prefix . Output xxx.barcodeList xxx.readNameList");
+        DEFINE_ARG_REQUIRED(std::string , prefix , "prefix . Output xxx.barcodeList xxx.barcodeFreq xxx.readNameList");
+        DEFINE_ARG_OPTIONAL(int , min_pair_threshold , " the min_pair_threshold " , "10");
+        DEFINE_ARG_OPTIONAL(int , max_pair_threshold , " the max_pair_threshold " , "500");
     END_PARSE_ARGS
+
+    config.max_pair_threshold = max_pair_threshold.to_int() ;
+    config.min_pair_threshold = min_pair_threshold.to_int() ;
 
     config.Init(read1.to_string() , prefix.to_string());
     BGIQD::LOG::timer timer(config.loger,"ParseReadName");
 
-    config.ParseRead1();
+    config.ParseRead1() ;
+    config.MaskTooLowBarcode() ;
+    config.MaskTooHighBarcode() ;
 
-    if( config.barcode_list.preload)
+    if( config.barcode_list.preload )
     {
         config.PrintBarcodeList();
+        config.PrintBarcodeFreq();
     }
-
 }
