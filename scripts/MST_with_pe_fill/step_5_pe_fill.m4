@@ -14,7 +14,7 @@ check_output xxx.pe_graph
 
 check_input xxx.seeds xxx.barcodeOnContig
 try_backup_list xxx.barcodeOnBin
-BIN/ChopBin --prefix xxx --bin_size 1000 --work_mode 3 2>>log_chopbin_pe
+BIN/ChopBin --prefix xxx --bin_size 1000 --flatten --work_mode 3 2>>log_chopbin_pe
 check_output xxx.barcodeOnBin
 
 check_input xxx.barcodeOnBin

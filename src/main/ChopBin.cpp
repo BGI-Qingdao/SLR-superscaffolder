@@ -1,5 +1,4 @@
 #include "algorithm/interval/Interval.h"
-
 #include "common/files/file_reader.h"
 #include "common/files/file_writer.h"
 #include "common/args/argsparser.h"
@@ -17,6 +16,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <tuple>
 
 struct AppConfig
 {
@@ -31,6 +31,8 @@ struct AppConfig
     int del_at_tail;
 
     float bin_factor ;
+
+    bool flatten ;
 
     enum WorkingMode
     {
@@ -51,6 +53,34 @@ struct AppConfig
     BGIQD::SOAP2::FileNames fName;
 
     BGIQD::stLFR::BarcodeOnBinArray b2b_array;
+
+    std::tuple<bool , int > IsBarcodeInBin( const BinInterval & bin , int barcode_start_pos )
+    {
+        if( ! flatten )
+        {
+            bool in = bin.IsContain(barcode_start_pos);
+            int len = in ? 1 : 0 ;
+            return std::make_tuple( in , len );
+        }
+
+        if( barcode_start_pos >= bin.min && barcode_start_pos <= bin.max )
+        {
+            int total_in_bin = ( bin.max - barcode_start_pos + 1 ) > 100 ?
+                100 : ( bin.max - barcode_start_pos + 1 ) ;
+            return std::make_tuple(  true , total_in_bin );
+        }
+        else if ( barcode_start_pos <  bin.min && barcode_start_pos + 99 >= bin.min )
+        {
+            int right = barcode_start_pos + 99 ;
+            if (right > bin.max ) 
+                right = bin.max ;
+            return std::make_tuple( true , right - bin.min +1 );
+        }
+        else
+        {
+            return std::make_tuple( false , 0 );
+        }
+    }
 
     std::map<int ,BinInterval> MakeBin(int contig_len)
     {
@@ -201,11 +231,14 @@ struct AppConfig
             for( const auto & posData : contig.second.barcodesOnPos )
             {
                 int pos = posData.first ;
-                for( const auto & vv : posData.second)
+                for( const auto & vv : posData.second )
                 {
                     for( const auto & pair : bin_intervals )
                     {
-                        if(pair.second.IsContain(pos))
+                        bool in ; int in_len ;
+                        std::tie( in , in_len ) = IsBarcodeInBin( pair.second , pos ) ;
+                        //if(pair.second.IsContain(pos))
+                        if( in && in_len > 0 )
                         {
                             int binId = pair.first ;
                             auto & d = b2b[binId];
@@ -213,7 +246,7 @@ struct AppConfig
                             d.end = pair.second.max ;
                             d.contigId = contigId;
                             d.binId = binId ;
-                            d.collections.IncreaseElement(vv,1);
+                            d.collections.IncreaseElement(vv,in_len);
                         }
                     }
                 }
@@ -248,10 +281,12 @@ int main(int argc , char ** argv)
 
     DEFINE_ARG_OPTIONAL(float ,bin_factor , "factor of smallest bin in the middle", "0.5");
     DEFINE_ARG_OPTIONAL(int,  max_bin_size , "max_bin_size for head&tail mode" ,"15000");
+    DEFINE_ARG_OPTIONAL(bool,  flatten, "flatten mode " ,"false");
     END_PARSE_ARGS
 
     config.work_mode = static_cast<AppConfig::WorkingMode>(work_mode.to_int());
     config.max_bin_size = max_bin_size.to_int();
+    config.flatten = flatten.to_bool() ;
     config.Init( prefix.to_string() , bin_size.to_int() , bin_factor.to_float());
 
     BGIQD::LOG::timer t(config.log,"ChopBin");
