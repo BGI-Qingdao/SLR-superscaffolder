@@ -102,6 +102,11 @@ struct AppConfig
                 end1 = max_bin_size ;
                 start2 = contig_used_len - max_bin_size +1 ;
             }
+            if( end1 > bin_size )
+                end1 = bin_size ;
+            if( start2 < ( contig_used_len - bin_size +1) )
+                start2 = contig_used_len - bin_size +1 ;
+
             ret[0] = BinInterval( 1 , end1 );
             ret[1] = BinInterval( start2 , contig_used_len);
             return ret ;
