@@ -7,6 +7,8 @@
 #include "common/stl/mapHelper.h"
 #include "common/log/log.h"
 #include "common/log/logfilter.h"
+#include "common/middle_valiad/MiddleValid.h"
+#include "common/freq/freq.h"
 
 #include "soap2/soap2.h"
 #include "soap2/fileName.h"
@@ -106,6 +108,13 @@ struct AppConfig
         result.start = bin.start ;
         result.end = bin.end;
         result.binIndex = i ;
+        if( check_freq_valid )
+        {
+            if( (long)bin.collections.keysize() > biggest_freq
+            ||  (long)bin.collections.keysize() < smallest_freq )
+                return ;
+        }
+
         std::set<int> relates ;
         if( ! same_bin_only )
         {
@@ -141,6 +150,12 @@ struct AppConfig
         for(auto index : relates)
         {
             auto & other = barcodeOnBin[index];
+            if( check_freq_valid )
+            {
+                if( (long)other.collections.keysize() > biggest_freq
+                ||  (long)other.collections.keysize() < smallest_freq )
+                    continue ;
+            }
             float sim = 0 ;
             if( work_mode == WorkMode::Jaccard )
                 sim = BGIQD::stLFR::BarcodeCollection::Jaccard(bin.collections,other.collections);
@@ -240,6 +255,30 @@ struct AppConfig
         BGIQD::stLFR::PrintContigRelationArray(fName.cluster() , contig_relations);
     }
 
+    float del_fac ;
+    bool check_freq_valid ;
+    long biggest_freq ;
+    long smallest_freq ;
+    void BuildMiddleValid()
+    {
+        if( del_fac < 0.0000001f )
+        {
+            check_freq_valid = false ;
+            biggest_freq = 0 ;
+            smallest_freq = 0 ;
+            return ;
+        }
+        check_freq_valid = true ;
+        float valid = 1.0f - del_fac ;
+        BGIQD::FREQ::Freq<int> bin_size_freq ;
+        for( const auto & pair : barcodeOnBin )
+        {
+            bin_size_freq.Touch(pair.collections.keysize()) ;
+        }
+        std::tie(biggest_freq,smallest_freq ) = 
+            BGIQD::MIDDLE_VALID::MiddleValid(bin_size_freq.data,valid);
+    }
+
     bool same_bin_only ; 
 
 } config;
@@ -253,10 +292,11 @@ int main(int argc ,char **argv)
     DEFINE_ARG_OPTIONAL(int , work_mode, "1 for Jaccard value , 2 for join_barcode_num " ,"1");
     DEFINE_ARG_OPTIONAL(bool, pbc, "print bin cluster" ,"0");
     DEFINE_ARG_OPTIONAL(bool, bin_same_contig, "calc for bin on same contig ." ,"false");
-    DEFINE_ARG_OPTIONAL(bool, same_bin_only, "calc only for bin on same contig ." ,"false");
-    //DEFINE_ARG_OPTIONAL(bool, del, "calc for bin on same contig ." ,"false");
+    DEFINE_ARG_OPTIONAL(bool, same_bin_only, "only calc for bin on same contig." ,"false");
+    DEFINE_ARG_OPTIONAL(float, del_fac, "del_fac or too small or too big bin set ." ,"0.0f");
     END_PARSE_ARGS
 
+    config.del_fac = del_fac.to_float();
     config.work_mode = static_cast<AppConfig::WorkMode>(work_mode.to_int());
     config.same_bin_only = same_bin_only.to_bool() ;
     config.Init(prefix.to_string() , threshold.to_float(), bin_same_contig.to_bool());
@@ -268,6 +308,8 @@ int main(int argc ,char **argv)
     config.BuildBinIndexOnBarcode();
 
     config.AllocRelationArray();
+
+    config.BuildMiddleValid() ;
 
     config.RunAllJob(thread.to_int());
 
