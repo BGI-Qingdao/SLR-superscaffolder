@@ -20,6 +20,6 @@ BIN/BinCluster --prefix xxx --thread THREADS --middle_name oo  --work_mode 1 --t
 check_output xxx.oo.cluster xxx.oo.bin_cluster
 
 check_input xxx.mintree_trunk_linear xxx.oo.bin_cluster
-try_backup_list xxx.gap_oo xxx.gap_area
-BIN/Gap_OAO --prefix xxx --rank RANK  --calc_linear 2>>log_gap_oo
-check_output xxx.gap_oo xxx.gap_area
+try_backup_list xxx.gap_oo
+BIN/Orientation --prefix xxx --rank RANK   2>>log_gap_oo
+check_output xxx.gap_oo

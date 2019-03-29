@@ -534,10 +534,9 @@ struct AppConfig
    //     int gap ;
    // };
 
+    BGIQD::stLFR::ScaffInfoHelper helper ;
     void BuildScaff()
     {
-        //std::map<int , std::vector<ContigInScaffDetails> > scaff_details;
-        BGIQD::stLFR::ScaffInfoHelper helper ;
         int id = 0 ;
         for( const auto & a_scaff : scaffs )
         {
@@ -625,7 +624,46 @@ struct AppConfig
                 }
             }
         }
+    }
 
+    std::map< unsigned int , float > to_next_sim ;
+    void LoadGapSim()
+    {
+        auto in  = BGIQD::FILES::FileReaderFactory
+            ::GenerateReaderFromFileName(fName.gap_sim());
+        if( in == NULL )
+            WARN(" failed to open xxx.gap_sim for read!!! ");
+
+        if( in == NULL )
+        {
+            return ;
+        }
+        std::string line;
+        while( ! std::getline(*in,line).eof() )
+        {
+            int contig , sim ;
+            std::istringstream ist(line);
+            ist>>contig>>sim ;
+            to_next_sim[contig]= float(sim)/1000000.0f ;
+        }
+    }
+
+    void RewriteSim()
+    {
+        for( auto & a_scaff : scaffs )
+        {
+            for( auto & a_contig : a_scaff )
+            {
+                if( to_next_sim.find( a_contig.basic )
+                        ==  to_next_sim.end())
+                    continue ;
+                a_contig.cluster_value = to_next_sim.at(a_contig.basic) ;
+            }
+        }
+    }
+
+    void PrintScaffInfo()
+    {
         auto out1 = BGIQD::FILES::FileWriterFactory::
             GenerateWriterFromFileName(fName.scaff_infos());
         if( out1 == NULL )
@@ -667,9 +705,11 @@ int main(int argc, char **argv)
     config.LoadTrunk();
     config.LoadGapOO();
     config.LoadGapArea();
+    config.LoadGapSim();
     config.LoadPEFill();
     config.BuildContigOrientation();
+    config.RewriteSim();
     config.BuildScaff();
-
+    config.PrintScaffInfo() ;
     return 0 ;
 }

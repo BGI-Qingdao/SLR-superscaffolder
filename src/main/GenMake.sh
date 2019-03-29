@@ -14,6 +14,7 @@ apps="Barcode2Gap\
  FillTrunkByPE\
  FormatScaffInfo\
  Orientation\
+ GapSize\
  gapfillerIDY\
  GenBinSimMatrix\
  ORGC\

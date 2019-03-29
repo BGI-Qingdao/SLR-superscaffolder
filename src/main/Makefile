@@ -47,7 +47,7 @@ source_o		= ${source_cpp:%.cpp=%.o}
 .cpp.o:
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
-jobs =Barcode2Gap Barcode2Scaffold  BarcodeDepth  BinCluster ChopBin ContigDlink CutContig ExternContigByPE FakePE2BC FCRFByTF FillContigRoad FillTrunkByPE FormatScaffInfo Orientation gapfillerIDY GenBinSimMatrix ORGC LinearCDG MergeContig MergePEInfo MinTree MST IDYtool IDYtool_paf ONTGapCorrecter ONTGapFiller Overlap2Gap ParseContig2Read ParseRead2Contig ParseReadName PEGraph ReadName2Num Reads2Gap Sam2ReadOnContig ScaffInfo2Seq ScaffInfo2GapSeq SeedCluster SplitInfo SplitScaffWithReads StaticsticUnique SplitScaffSeq Trunk2Scaff Trunk2ScaffGap Trunk2ScaffInfo
+jobs =Barcode2Gap Barcode2Scaffold  BarcodeDepth  BinCluster ChopBin ContigDlink CutContig ExternContigByPE FakePE2BC FCRFByTF FillContigRoad FillTrunkByPE FormatScaffInfo Orientation GapSize gapfillerIDY GenBinSimMatrix ORGC LinearCDG MergeContig MergePEInfo MinTree MST IDYtool IDYtool_paf ONTGapCorrecter ONTGapFiller Overlap2Gap ParseContig2Read ParseRead2Contig ParseReadName PEGraph ReadName2Num Reads2Gap Sam2ReadOnContig ScaffInfo2Seq ScaffInfo2GapSeq SeedCluster SplitInfo SplitScaffWithReads StaticsticUnique SplitScaffSeq Trunk2Scaff Trunk2ScaffGap Trunk2ScaffInfo
 
 all :  ${jobs}
 
@@ -175,6 +175,15 @@ Orientation_cpp = Orientation.cpp
 Orientation_o = Orientation.o
 Orientation : clean ${Orientation_o} ${source_o} ../bin
 	${CXX} ${Orientation_o} ${source_o} ${DEUBG_CXX} -o Orientation
+	mv $@ ../bin/
+
+
+
+
+GapSize_cpp = GapSize.cpp
+GapSize_o = GapSize.o
+GapSize : clean ${GapSize_o} ${source_o} ../bin
+	${CXX} ${GapSize_o} ${source_o} ${DEUBG_CXX} -o GapSize
 	mv $@ ../bin/
 
 
@@ -448,7 +457,7 @@ Trunk2ScaffInfo : clean ${Trunk2ScaffInfo_o} ${source_o} ../bin
 	mv $@ ../bin/
 
 
-jobs_o=  ${Barcode2Gap_o} ${Barcode2Scaffold_o} ${BarcodeDepth_o} ${BinCluster_o} ${ChopBin_o} ${ContigDlink_o} ${CutContig_o} ${ExternContigByPE_o} ${FakePE2BC_o} ${FCRFByTF_o} ${FillContigRoad_o} ${FillTrunkByPE_o} ${FormatScaffInfo_o} ${Orientation_o} ${gapfillerIDY_o} ${GenBinSimMatrix_o} ${ORGC_o} ${LinearCDG_o} ${MergeContig_o} ${MergePEInfo_o} ${MinTree_o} ${MST_o} ${IDYtool_o} ${IDYtool_paf_o} ${ONTGapCorrecter_o} ${ONTGapFiller_o} ${Overlap2Gap_o} ${ParseContig2Read_o} ${ParseRead2Contig_o} ${ParseReadName_o} ${PEGraph_o} ${ReadName2Num_o} ${Reads2Gap_o} ${Sam2ReadOnContig_o} ${ScaffInfo2Seq_o} ${ScaffInfo2GapSeq_o} ${SeedCluster_o} ${SplitInfo_o} ${SplitScaffWithReads_o} ${StaticsticUnique_o} ${SplitScaffSeq_o} ${Trunk2Scaff_o} ${Trunk2ScaffGap_o} ${Trunk2ScaffInfo_o}
+jobs_o=  ${Barcode2Gap_o} ${Barcode2Scaffold_o} ${BarcodeDepth_o} ${BinCluster_o} ${ChopBin_o} ${ContigDlink_o} ${CutContig_o} ${ExternContigByPE_o} ${FakePE2BC_o} ${FCRFByTF_o} ${FillContigRoad_o} ${FillTrunkByPE_o} ${FormatScaffInfo_o} ${Orientation_o} ${GapSize_o} ${gapfillerIDY_o} ${GenBinSimMatrix_o} ${ORGC_o} ${LinearCDG_o} ${MergeContig_o} ${MergePEInfo_o} ${MinTree_o} ${MST_o} ${IDYtool_o} ${IDYtool_paf_o} ${ONTGapCorrecter_o} ${ONTGapFiller_o} ${Overlap2Gap_o} ${ParseContig2Read_o} ${ParseRead2Contig_o} ${ParseReadName_o} ${PEGraph_o} ${ReadName2Num_o} ${Reads2Gap_o} ${Sam2ReadOnContig_o} ${ScaffInfo2Seq_o} ${ScaffInfo2GapSeq_o} ${SeedCluster_o} ${SplitInfo_o} ${SplitScaffWithReads_o} ${StaticsticUnique_o} ${SplitScaffSeq_o} ${Trunk2Scaff_o} ${Trunk2ScaffGap_o} ${Trunk2ScaffInfo_o}
 
 dirty	   =${jobs_o} ${jobs} ${source_o}
 

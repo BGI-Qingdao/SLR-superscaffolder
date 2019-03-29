@@ -123,6 +123,7 @@ namespace BGIQD {
 
             DEFINE_SUFFIX(gap_oo,".gap_oo");
             DEFINE_SUFFIX(gap_area,".gap_area");
+            DEFINE_SUFFIX(gap_sim,".gap_sim");
 
             DEFINE_SUFFIX(scaff_seqs,".scaff_seqs");
             DEFINE_SUFFIX(scaff_infos,".scaff_infos");
