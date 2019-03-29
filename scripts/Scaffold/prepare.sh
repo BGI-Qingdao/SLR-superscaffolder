@@ -73,7 +73,7 @@ cp $DATA/__common_function.sh ./
 cp $DATA/run.sh run.sh
 m4 $MACRO $DATA/step_1_prepare_info.m4 >step_1_prepare_info.sh
 m4 $MACRO $DATA/step_2_order.m4 >step_2_order.sh
-m4 $MACRO $DATA/step_3_gap_oo.m4 >step_3_gap_oo.sh
+m4 $MACRO $DATA/step_3_orientation.m4 >step_3_orientation.sh
 m4 $MACRO $DATA/step_4_pe_fill.m4 >step_4_pe_fill.sh
 m4 $MACRO $DATA/step_5_gapsize.m4 >step_5_gapsize.sh
 m4 $MACRO $DATA/step_6_gen_seq.m4 >step_6_gen_seq.sh
