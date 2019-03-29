@@ -2,16 +2,16 @@ STEP="step_5 "
 
 source ./__common_function.sh || exit 1
 
-
-check_input xxx.pe_pair xxx.pe_info 
-try_backup_list xxx.pe_graph
-BIN/PEGraph --prefix xxx --max_is MAX_IS  2>>log_pe_graph
-check_output xxx.pe_graph
-
 check_input xxx.contig
 try_backup_list xxx.pe.seeds
 BIN/StaticsticUnique --prefix xxx --middle_name pe  --kvalue KVALUE --min PE_SEED_MIN 2>>log_staticsticunique
 check_output xxx.pe.seeds
+
+check_input xxx.pe_pair xxx.pe_info  xxx.pe.seeds
+try_backup_list xxx.pe_graph
+BIN/PEGraph --prefix xxx --max_is MAX_IS  2>>log_pe_graph
+check_output xxx.pe_graph
+
 
 check_input xxx.pe.seeds xxx.barcodeOnContig
 try_backup_list xxx.pe.barcodeOnBin
