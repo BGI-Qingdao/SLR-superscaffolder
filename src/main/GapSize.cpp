@@ -127,7 +127,7 @@ struct AppConfig
 
     void  LoadBinRelationArrayFromFile()
     {
-        BGIQD::stLFR::LoadBinRelationArray(fName.bin_cluster("oo"),bra);
+        BGIQD::stLFR::LoadBinRelationArray(fName.bin_cluster("gap"),bra);
         loger<<BGIQD::LOG::lstart() << "Load Bin cluster done "<<BGIQD::LOG::lend() ;
     }
 
