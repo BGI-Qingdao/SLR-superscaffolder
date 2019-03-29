@@ -1,4 +1,4 @@
-STEP="step_5 "
+STEP="step_4 "
 
 source ./__common_function.sh || exit 1
 

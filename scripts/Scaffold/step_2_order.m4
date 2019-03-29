@@ -19,7 +19,7 @@ try_backup_list xxx.mst.cluster
 BIN/BinCluster --prefix xxx --thread THREADS  --middle_name mst  --threshold MST_BIN_THRESHOLD --work_mode 1 2>>log_bincluster
 check_output xxx.mst.cluster
 
-check_input xxx.cluster
+check_input xxx.mst.cluster
 try_backup_list xxx.mintree_trunk_linear
 BIN/MST --prefix xxx --threshold MST_THRESHOLD --del_fac 0.95 --del_round 100 2>>log_mst
 check_output xxx.mintree_trunk_linear

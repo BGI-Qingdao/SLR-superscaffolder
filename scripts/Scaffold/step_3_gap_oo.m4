@@ -1,12 +1,12 @@
 #!/bin/bash
 
-STEP="step_4 "
+STEP="step_3 "
 
 source ./__common_function.sh || exit 1
 
 check_input xxx.contig
 try_backup_list xxx.oo.seeds
-BIN/StaticsticUnique --prefix xxx --kvalue KVALUE --middle_name  oo  --min MST_SEED_MIN 2>>log_staticsticunique
+BIN/StaticsticUnique --prefix xxx --kvalue KVALUE --middle_name  oo  --min MST_BIN_SIZE 2>>log_staticsticunique
 check_output xxx.oo.seeds
 
 check_input xxx.oo.seeds xxx.barcodeOnContig
