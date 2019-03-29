@@ -202,8 +202,9 @@ int main(int argc, char **argv)
     config.max_gap = max_gap.to_int() ;
     config.Init( prefix.to_string());
     config.LoadTrunk();
-    config.LoadBinRelationArrayFromFile();
     config.BuildNeighbors();
+    config.LoadBinRelationArrayFromFile();
+    config.LoadNextSim();
     config.PrintGapSim();
     config.CacheBinPos() ;
     config.LoadLinearCachce();

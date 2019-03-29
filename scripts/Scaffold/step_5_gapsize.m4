@@ -14,13 +14,13 @@ try_backup_list xxx.gap.barcodeOnBin
 BIN/ChopBin --prefix xxx --bin_size GAP_BIN_SIZE --middle_name gap  --work_mode 2 --max_bin_size 3000000 2>>gap_chopbin
 check_output xxx.gap.barcodeOnBin
 
-check_input xxx.gap.barcodeOnBin
-try_backup_list xxx.gap.bin_cluster  xxx.gap.bin_cluster xxx.mintree_trunk_linear
+check_input xxx.gap.barcodeOnBin  xxx.mintree_trunk_linear
+try_backup_list xxx.gap.bin_cluster  xxx.gap.bin_cluster 
 BIN/BinCluster --prefix xxx --thread THREADS  --middle_name gap  --threshold 0.01 --work_mode 1 --nb_only --bin_same_contig --pbc 2>>log_gapcluster
 check_output xxx.gap.cluster xxx.gap.bin_cluster
 
 check_input xxx.gap.bin_cluster  xxx.mintree_trunk_linear
-try_backup_list xxx.gap_erea xxx.gap_sim
+try_backup_list xxx.gap_area xxx.gap_sim
 BIN/GapSize --prefix xxx  2>>log_gap_size
-check_output xxx.gap_erea xxx.gap_sim
+check_output xxx.gap_area  xxx.gap_sim
 
