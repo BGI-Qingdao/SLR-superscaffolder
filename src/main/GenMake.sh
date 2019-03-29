@@ -13,7 +13,7 @@ apps="Barcode2Gap\
  FillContigRoad\
  FillTrunkByPE\
  FormatScaffInfo\
- Gap_OAO\
+ Orientation\
  gapfillerIDY\
  GenBinSimMatrix\
  ORGC\

@@ -545,7 +545,7 @@ int main(int argc, char **argv)
         //if( calc_linear_filter.to_bool() )
         //    config.ReLiner();
         //else
-            config.PrintGapArea();
+        config.PrintGapArea();
     }
     return 0;
 }
