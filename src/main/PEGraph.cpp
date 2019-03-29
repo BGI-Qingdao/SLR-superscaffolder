@@ -33,7 +33,7 @@ struct AppConfig
     void LoadSeeds()
     {
         BGIQD::LOG::timer t(loger,"LoadSeeds");
-        auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.seeds()) ;
+        auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.seeds("pe")) ;
         if( in == NULL )
             FATAL( "open .seeds file to read failed !!! " );
 
