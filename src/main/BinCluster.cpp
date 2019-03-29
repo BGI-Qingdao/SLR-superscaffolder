@@ -6,7 +6,9 @@
 #include "common/multithread/MultiThread.h"
 #include "common/stl/mapHelper.h"
 #include "common/log/log.h"
+#include "common/error/Error.h"
 #include "common/log/logfilter.h"
+#include "common/files/file_reader.h"
 #include "common/middle_valiad/MiddleValid.h"
 #include "common/freq/freq.h"
 
@@ -14,6 +16,7 @@
 #include "soap2/fileName.h"
 
 #include "stLFR/CBB.h"
+#include "stLFR/TrunkGap.h"
 
 #include <algorithm>
 #include <iostream>
@@ -37,7 +40,6 @@ struct AppConfig
 
     float thresold;
 
-    bool del;
 
     BGIQD::SOAP2::FileNames fName;
 
@@ -83,23 +85,15 @@ struct AppConfig
         for(size_t i = 0 ; i <barcodeOnBin.size() ; i++)
         {
             auto & b2b = barcodeOnBin.at(i);
-            if( del)
-            {
-                size_cache.push_back(b2b.collections.size());
-            }
             for( auto j : b2b.collections )
             {
                 int barcode = j.first ;
                 binOnBarcode[barcode].insert( i);
             }
         }
-        if( del )
-        {
-
-        }
     }
 
-    void Calc1Bin2All(int i )
+    void Calc1Bin2All( int i )
     {
         auto & bin = barcodeOnBin[i];
         auto & result = relations[i];
@@ -111,9 +105,21 @@ struct AppConfig
         if( ! IsBinMiddleValid( bin.collections ) )
             return ;
 
-        std::set<int> relates ;
         if( ! same_bin_only )
         {
+            CalcSimForAllRelateBin( bin , result , i );
+        }
+        else
+        {
+            CalcSimForSameBin( bin , result , i );
+        }
+    }
+
+    void CalcSimForAllRelateBin( const BGIQD::stLFR::BarcodeOnBin & bin 
+            , BGIQD::stLFR::BinRelation & result
+            , int i_index )
+    {
+            std::set<int> relates ;
             for(auto pair : bin.collections)
             {
                 int barcode = pair.first ;
@@ -125,29 +131,42 @@ struct AppConfig
                 {
                     if(! calc_same_contig && barcodeOnBin[index].contigId == bin.contigId )
                         continue ;
-                    if ( index > i )
+                    if ( index > i_index )
                         relates.insert(index);
                 }
             }
-        }
-        else
+            CalcSimWithRelates(bin,result,relates );
+    }
+
+    void CalcSimForSameBin( const BGIQD::stLFR::BarcodeOnBin & bin 
+            , BGIQD::stLFR::BinRelation & result
+            , int i_index )
+    {
+        std::set<int> relates ;
+        // Only deal with same contig bin
+        for(auto pair : bin.collections)
         {
-            // Only deal with same contig bin
-            for(auto pair : bin.collections)
+            int barcode = pair.first ;
+            for( auto index : binOnBarcode[barcode] )
             {
-                int barcode = pair.first ;
-                for( auto index : binOnBarcode[barcode] )
-                {
-                    if ( barcodeOnBin[index].contigId == bin.contigId && index > i )
-                        relates.insert(index);
-                }
+                if ( barcodeOnBin[index].contigId == bin.contigId && index > i_index )
+                    relates.insert(index);
             }
         }
+        CalcSimWithRelates(bin,result,relates );
+    }
+
+    void CalcSimWithRelates( const BGIQD::stLFR::BarcodeOnBin & bin 
+            , BGIQD::stLFR::BinRelation & result 
+            , const std::set<int> &  relates )
+    {
         for(auto index : relates)
         {
             auto & other = barcodeOnBin[index];
             if( ! IsBinMiddleValid( bin.collections ) )
                 continue;
+            if( neib_only && ( !IsNeibValid ( bin , other ) ) )
+                continue ;
             float sim = 0 ;
             if( work_mode == WorkMode::Jaccard )
                 sim = BGIQD::stLFR::BarcodeCollection::Jaccard(bin.collections,other.collections);
@@ -253,6 +272,7 @@ struct AppConfig
     long smallest_freq ;
     BGIQD::FREQ::Freq<int> bin_size_freq ;
 
+
     bool IsBinMiddleValid(
             const BGIQD::stLFR::BarcodeCollection & binc )
     {
@@ -287,28 +307,79 @@ struct AppConfig
 
     std::string middle_name ;
 
+    bool neib_only ;
+    // contig_id <--> index , used to find neighbors.
+    std::map<int , int > contig_indexs ;
+
+    void LoadNeighbors()
+    {
+        if( ! neib_only )
+            return ;
+
+        auto in  = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.mintreetrunklinear());
+        if( in == NULL )
+            FATAL(" failed to open xxx.mintree_trunk_linear for read!!! ");
+        typedef BGIQD::stLFR::TrunkGap<int> GapInfo;
+        std::map<int,std::vector<GapInfo>> gaps;
+        BGIQD::stLFR::Load_MST_Trunk_Linear(*in, gaps);
+        int i = 0 ;
+        for( const auto & pair : gaps )
+        {
+            i ++ ;
+            const auto & a_scaff = pair.second ;
+            bool start = true ;
+            for( const auto & a_gap : a_scaff )
+            {
+                if( start )
+                {
+                    i++ ;
+                    contig_indexs[a_gap.prev] = i ; 
+                    start = false ;
+                }
+                i ++ ;
+                contig_indexs[a_gap.next] = i ;
+            }
+        }
+        delete in ;
+    }
+
+
+    bool IsNeibValid(const BGIQD::stLFR::BarcodeOnBin bin 
+            , const BGIQD::stLFR::BarcodeOnBin other)
+    {
+        if( ! neib_only )
+            return true;
+        if( contig_indexs.find( bin.contigId ) == contig_indexs.end()) 
+            return false ;
+        if( contig_indexs.find( other.contigId ) == contig_indexs.end()) 
+            return false ;
+        return std::abs( contig_indexs.at(bin.contigId) -
+                contig_indexs.at(other.contigId) ) < 2;
+    }
+
 } config;
 
 int main(int argc ,char **argv)
 {
     START_PARSE_ARGS
     DEFINE_ARG_REQUIRED(std::string , prefix, "prefix. Input xxx.barcodeOnBin ; Output xxx.bin_cluster && xxx.cluster");
+    DEFINE_ARG_OPTIONAL(std::string,  middle_name, "the middle name of output suffix " ,"");
     DEFINE_ARG_REQUIRED(float , threshold, "simularity threshold");
     DEFINE_ARG_OPTIONAL(int , thread, "thread num" ,"8");
     DEFINE_ARG_OPTIONAL(int , work_mode, "1 for Jaccard value , 2 for join_barcode_num " ,"1");
+    DEFINE_ARG_OPTIONAL(float, del_fac, "del_fac or too small or too big bin set ." ,"0.0f");
     DEFINE_ARG_OPTIONAL(bool, pbc, "print bin cluster" ,"0");
     DEFINE_ARG_OPTIONAL(bool, bin_same_contig, "calc for bin on same contig ." ,"false");
+    DEFINE_ARG_OPTIONAL(bool,  nb_only, "only calc bin for neighbor contig " ,"");
     DEFINE_ARG_OPTIONAL(bool, same_bin_only, "only calc for bin on same contig." ,"false");
-    DEFINE_ARG_OPTIONAL(float, del_fac, "del_fac or too small or too big bin set ." ,"0.0f");
-    DEFINE_ARG_OPTIONAL(std::string,  middle_name, "the middle name of output suffix " ,"");
     END_PARSE_ARGS
 
     config.del_fac = del_fac.to_float();
+    config.neib_only = nb_only.to_bool() ;
     config.middle_name = middle_name.to_string() ;
     config.work_mode = static_cast<AppConfig::WorkMode>(work_mode.to_int());
     config.same_bin_only = same_bin_only.to_bool() ;
     config.Init(prefix.to_string() , threshold.to_float(), bin_same_contig.to_bool());
-    config.del = false;// del.to_bool();
     BGIQD::LOG::timer t(config.lger,"BinCluster");
 
     config.LoadB2BArray() ;
@@ -318,6 +389,8 @@ int main(int argc ,char **argv)
     config.AllocRelationArray();
 
     config.BuildMiddleValid() ;
+
+    config.LoadNeighbors() ;
 
     config.RunAllJob(thread.to_int());
 
