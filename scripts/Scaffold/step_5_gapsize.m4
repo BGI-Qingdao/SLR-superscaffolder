@@ -21,6 +21,6 @@ check_output xxx.gap.cluster xxx.gap.bin_cluster
 
 check_input xxx.gap.bin_cluster  xxx.mintree_trunk_linear
 try_backup_list xxx.gap_area xxx.gap_sim
-BIN/GapSize --prefix xxx  2>>log_gap_size
+BIN/GapSize --prefix xxx --max_gap 30000  2>>log_gap_size
 check_output xxx.gap_area  xxx.gap_sim
 
