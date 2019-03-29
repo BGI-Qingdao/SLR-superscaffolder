@@ -60,15 +60,22 @@ MACRO=" -D xxx=$PREFIX \
    -D R2=$R2 \
    -D RANK=$RANK \
    -D THREADS=$THREADS \
+   -D MAX_IS=$MAX_INSERT_SIZE\
+   -D PE_SEARCH_MAX=$PE_SEARCH_MAX \
+   -D PE_SEED_MIN=$PE_SEED_MIN \
+   -D PE_MIN_B=$PE_MIN_JOINBARCODES \
+   -D PE_MIN_COUNT=$PE_MIN_COUNT \
+   -D PE_FILL=$PE_FILL \
    -D BWA_K=$BWA_K"
 
 echo "Generate all scripts ..."
 cp $DATA/__common_function.sh ./
 cp $DATA/run.sh run.sh
 m4 $MACRO $DATA/step_1_prepare_info.m4 >step_1_prepare_info.sh
-m4 $MACRO $DATA/step_2_bin_cluster.m4 >step_2_bin_cluster.sh
-m4 $MACRO $DATA/step_3_oo.m4 >step_3_oo.sh
-m4 $MACRO $DATA/step_5_trunk2scaff.m4 >step_5_trunk2scaff.sh
+m4 $MACRO $DATA/step_2_order.m4 >step_2_order.sh
+m4 $MACRO $DATA/step_3_gap_oo.m4 >step_3_gap_oo.sh
+m4 $MACRO $DATA/step_4_pe_fill.m4 >step_4_pe_fill.sh
+m4 $MACRO $DATA/step_6_gen_seq.m4 >step_6_gen_seq.sh
 m4 $MACRO $DATA/clean_prepare.m4 >clean_prepare.sh
 
 chmod u+x *.sh 
