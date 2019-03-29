@@ -108,12 +108,8 @@ struct AppConfig
         result.start = bin.start ;
         result.end = bin.end;
         result.binIndex = i ;
-        if( check_freq_valid )
-        {
-            if( (long)bin.collections.keysize() > biggest_freq
-            ||  (long)bin.collections.keysize() < smallest_freq )
-                return ;
-        }
+        if( ! IsBinMiddleValid( bin.collections ) )
+            return ;
 
         std::set<int> relates ;
         if( ! same_bin_only )
@@ -150,12 +146,8 @@ struct AppConfig
         for(auto index : relates)
         {
             auto & other = barcodeOnBin[index];
-            if( check_freq_valid )
-            {
-                if( (long)other.collections.keysize() > biggest_freq
-                ||  (long)other.collections.keysize() < smallest_freq )
-                    continue ;
-            }
+            if( ! IsBinMiddleValid( bin.collections ) )
+                continue;
             float sim = 0 ;
             if( work_mode == WorkMode::Jaccard )
                 sim = BGIQD::stLFR::BarcodeCollection::Jaccard(bin.collections,other.collections);
@@ -259,6 +251,19 @@ struct AppConfig
     bool check_freq_valid ;
     long biggest_freq ;
     long smallest_freq ;
+    BGIQD::FREQ::Freq<int> bin_size_freq ;
+
+    bool IsBinMiddleValid(
+            const BGIQD::stLFR::BarcodeCollection & binc )
+    {
+        if( ! check_freq_valid )
+            return true ;
+        int freq = bin_size_freq.GetFreq(binc.keysize());
+        if( freq < smallest_freq || freq > biggest_freq )
+            return false ;
+        return true ;
+    }
+
     void BuildMiddleValid()
     {
         if( del_fac < 0.0000001f )
@@ -270,12 +275,11 @@ struct AppConfig
         }
         check_freq_valid = true ;
         float valid = 1.0f - del_fac ;
-        BGIQD::FREQ::Freq<int> bin_size_freq ;
         for( const auto & pair : barcodeOnBin )
         {
             bin_size_freq.Touch(pair.collections.keysize()) ;
         }
-        std::tie(biggest_freq,smallest_freq ) = 
+        std::tie(smallest_freq,biggest_freq) = 
             BGIQD::MIDDLE_VALID::MiddleValid(bin_size_freq.data,valid);
     }
 
