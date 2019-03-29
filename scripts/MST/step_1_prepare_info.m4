@@ -1,6 +1,6 @@
 #!/bin/bash
 
-STEP="step_0 "
+STEP="step_1 "
 
 source ./__common_function.sh || exit 1
 

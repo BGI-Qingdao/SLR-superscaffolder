@@ -80,7 +80,7 @@ struct AppConfig
 
     void PrintUniqueInfo()
     {
-        auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.seeds());
+        auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.seeds(middle_name));
         long index = 0 ;
         long index1 = 0 ;
         for( const auto &i : contigInfo)
@@ -98,7 +98,7 @@ struct AppConfig
         log<<BGIQD::LOG::lstart()<<index << " seed in "<<index1<<" candidate contigs"<< BGIQD::LOG::lend();
         delete out;
     }
-
+    std::string middle_name;
 } config;
 
 int main(int argc , char ** argv)
@@ -107,8 +107,10 @@ int main(int argc , char ** argv)
     DEFINE_ARG_REQUIRED(int ,kvalue,"K value");
     DEFINE_ARG_REQUIRED(int ,min ,"min length of seed contigs");
     DEFINE_ARG_REQUIRED(std::string ,prefix,"prefix . Input xxx.contig ; Output xxx.seeds");
+    DEFINE_ARG_OPTIONAL(std::string ,middle_name,"middle_name", "");
     END_PARSE_ARGS
 
+    config.middle_name = middle_name.to_string() ;
     config.Init(kvalue.to_int(),min.to_int(),prefix.to_string());
     BGIQD::LOG::timer t(config.log,"StaticsticUnique");
     config.LoadContigInfo();
