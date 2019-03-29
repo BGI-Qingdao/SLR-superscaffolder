@@ -6,7 +6,7 @@ source ./__common_function.sh || exit 1
 
 check_input xxx.contig
 try_backup_list xxx.mst.seeds
-BIN/StaticsticUnique --prefix xxx --kvalue KVALUE --middle_name mst  --min MST_SEED_MIN 2>>log_staticsticunique
+BIN/StaticsticUnique --prefix xxx --kvalue KVALUE --middle_name mst  --min MST_BIN_SIZE 2>>log_staticsticunique
 check_output xxx.mst.seeds
 
 check_input xxx.mst.seeds xxx.barcodeOnContig

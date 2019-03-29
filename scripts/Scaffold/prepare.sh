@@ -51,10 +51,10 @@ MACRO=" -D xxx=$PREFIX \
    -D KVALUE=$SOAP_K \
    -D MST_BIN_SIZE=$MST_BIN_SIZE \
    -D MST_BIN_THRESHOLD=$MST_BIN_CLUSTER \
-   -D MST_SEED_MIN=$MST_SEED_MIN \
    -D MST_THRESHOLD=$MST_CLUSTER \
    -D MMCONTIG=$MIN_SCONTIG \
    -D MIN_N=$MIN_N \
+   -D GAP_BIN_SIZE=$GAP_BIN_SIZE \
    -D MIN_C=$MIN_C \
    -D R1=$R1 \
    -D R2=$R2 \
@@ -75,6 +75,7 @@ m4 $MACRO $DATA/step_1_prepare_info.m4 >step_1_prepare_info.sh
 m4 $MACRO $DATA/step_2_order.m4 >step_2_order.sh
 m4 $MACRO $DATA/step_3_gap_oo.m4 >step_3_gap_oo.sh
 m4 $MACRO $DATA/step_4_pe_fill.m4 >step_4_pe_fill.sh
+m4 $MACRO $DATA/step_5_gapsize.m4 >step_5_gapsize.sh
 m4 $MACRO $DATA/step_6_gen_seq.m4 >step_6_gen_seq.sh
 m4 $MACRO $DATA/clean_prepare.m4 >clean_prepare.sh
 
