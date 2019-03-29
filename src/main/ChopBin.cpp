@@ -266,11 +266,11 @@ struct AppConfig
 
     void PrintBinInfo()
     {
-        BGIQD::stLFR::PrintBarcodeOnBinArray(fName.BarcodeOnBin(),b2b_array);
+        BGIQD::stLFR::PrintBarcodeOnBinArray(fName.BarcodeOnBin(middle_name),b2b_array);
     }
 
     int max_bin_size ;
-
+    std::string middle_name ;
 }config;
 
 int main(int argc , char ** argv)
@@ -287,11 +287,13 @@ int main(int argc , char ** argv)
     DEFINE_ARG_OPTIONAL(float ,bin_factor , "factor of smallest bin in the middle", "0.5");
     DEFINE_ARG_OPTIONAL(int,  max_bin_size , "max_bin_size for head&tail mode" ,"15000");
     DEFINE_ARG_OPTIONAL(bool,  flatten, "flatten mode " ,"false");
+    DEFINE_ARG_OPTIONAL(std::string,  middle_name, "the middle name of output suffix " ,"");
     END_PARSE_ARGS
 
     config.work_mode = static_cast<AppConfig::WorkingMode>(work_mode.to_int());
     config.max_bin_size = max_bin_size.to_int();
     config.flatten = flatten.to_bool() ;
+    config.middle_name = middle_name.to_string() ;
     config.Init( prefix.to_string() , bin_size.to_int() , bin_factor.to_float());
 
     BGIQD::LOG::timer t(config.log,"ChopBin");

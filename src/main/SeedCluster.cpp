@@ -90,7 +90,8 @@ struct AppConfig
 
     void LoadBinCluster()
     {
-        auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.cluster());
+        auto in = BGIQD::FILES::FileReaderFactory::
+            GenerateReaderFromFileName(fName.cluster("pe"));
         if( in == NULL )
             FATAL("failed to open xxx.cluster for read!!! ");
         auto parseline = [&](const std::string & line )

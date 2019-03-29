@@ -26,7 +26,18 @@ namespace BGIQD {
                 {\
                     return m_prefix + suffix +"_round_"+BGIQD::STRING::itos(round) ;\
                 }\
-            }
+            }\
+            std::string name(std::string middle) const \
+            {\
+                if( middle == "" )\
+                {\
+                    return name() ;\
+                }\
+                else\
+                {\
+                    return m_prefix + "." + middle+  suffix ;\
+                }\
+            }\
 
             // SOAP2
             DEFINE_SUFFIX(Arc,".Arc");

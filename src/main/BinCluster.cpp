@@ -69,7 +69,7 @@ struct AppConfig
 
     void LoadB2BArray( )
     {
-        BGIQD::stLFR::LoadBarcodeOnBinArray( fName.BarcodeOnBin() , barcodeOnBin);
+        BGIQD::stLFR::LoadBarcodeOnBinArray( fName.BarcodeOnBin(middle_name) , barcodeOnBin);
     }
 
     void AllocRelationArray()
@@ -208,7 +208,7 @@ struct AppConfig
 
     void PrintBinRelation()
     {
-        BGIQD::stLFR::PrintBinRelationArray(fName.bin_cluster() , relations);
+        BGIQD::stLFR::PrintBinRelationArray(fName.bin_cluster(middle_name) , relations);
     }
 
     void BuildContigRelation()
@@ -244,7 +244,7 @@ struct AppConfig
 
     void PrintContigRelation()
     {
-        BGIQD::stLFR::PrintContigRelationArray(fName.cluster() , contig_relations);
+        BGIQD::stLFR::PrintContigRelationArray(fName.cluster(middle_name) , contig_relations);
     }
 
     float del_fac ;
@@ -285,6 +285,8 @@ struct AppConfig
 
     bool same_bin_only ; 
 
+    std::string middle_name ;
+
 } config;
 
 int main(int argc ,char **argv)
@@ -298,9 +300,11 @@ int main(int argc ,char **argv)
     DEFINE_ARG_OPTIONAL(bool, bin_same_contig, "calc for bin on same contig ." ,"false");
     DEFINE_ARG_OPTIONAL(bool, same_bin_only, "only calc for bin on same contig." ,"false");
     DEFINE_ARG_OPTIONAL(float, del_fac, "del_fac or too small or too big bin set ." ,"0.0f");
+    DEFINE_ARG_OPTIONAL(std::string,  middle_name, "the middle name of output suffix " ,"");
     END_PARSE_ARGS
 
     config.del_fac = del_fac.to_float();
+    config.middle_name = middle_name.to_string() ;
     config.work_mode = static_cast<AppConfig::WorkMode>(work_mode.to_int());
     config.same_bin_only = same_bin_only.to_bool() ;
     config.Init(prefix.to_string() , threshold.to_float(), bin_same_contig.to_bool());

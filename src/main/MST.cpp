@@ -194,7 +194,7 @@ struct AppConf
     void LoadContigSimGraph()
     {
         graph.use_salas = false;
-        auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fNames.cluster());
+        auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fNames.cluster("mst"));
         if( in == NULL )
             FATAL("failed to open xxx.cluster for read!!! ");
         auto parseline = [&]( const std::string & line )
