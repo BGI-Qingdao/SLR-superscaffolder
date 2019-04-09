@@ -176,7 +176,7 @@ int main(int argc , char **argv)
         {
             if( n_prev )
             {
-                assert( !tmp.Empty() );
+                assert( tmp.Empty() );
                 tmp.start_pos = curr_pos ;
                 n_prev = false ;
             }
@@ -191,10 +191,15 @@ int main(int argc , char **argv)
     std::vector<SimScaff> scaffs;
     for( const auto & a_ref_contig : AllRefContig )
     {
-        int start_pos = 1 ;
-        auto a_scaff = SimScaff::GenSimScaff(a_ref_contig,start_pos,start_pos);
-        if( a_scaff.Valid() )
-            scaffs.push_back(a_scaff);
+        int start_pos = a_ref_contig.start_pos ;
+        while(1)
+        {
+            auto a_scaff = SimScaff::GenSimScaff(a_ref_contig,start_pos,start_pos);
+            if( a_scaff.Valid() )
+                scaffs.push_back(a_scaff);
+            else
+                break ;
+        }
     }
     // Print scaff
     int index = 0 ;
