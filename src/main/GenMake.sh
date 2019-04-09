@@ -12,6 +12,7 @@ apps="Barcode2Gap\
  FCRFByTF\
  FillContigRoad\
  FillTrunkByPE\
+ FakeRef2Scaff\
  FormatScaffInfo\
  Orientation\
  GapSize\
