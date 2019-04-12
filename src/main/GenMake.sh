@@ -18,6 +18,7 @@ apps="Barcode2Gap\
  GapSize\
  gapfillerIDY\
  GenBinSimMatrix\
+ GenSentieonScaff\
  ORGC\
  LinearCDG\
  MergeContig\
