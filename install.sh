@@ -49,7 +49,7 @@ cd  -
 echo "info  :   end compier ...   "
 
 echo "info  :   cp executive files to $path/bin "
-cp -r src/bin $path 
+cp -r src/bin $path
 echo "info  :   cp scripts to $path/scripts "
-cp -r scripts $path
+cp -r scripts/Scaffold $path
 
