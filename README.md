@@ -65,6 +65,7 @@ This pipeline need two input data : the stLFR reads and the contig .
 - the stLFR reads must have and only have 2 file :
     - your-prefix.read1.your-suffix
     - your-prefix.read2.your-suffix
+
 *If you only have the raw reads of stLFR technology, before run this pipeline , you need do format convert first, see all details from :*
 
 ```
@@ -74,8 +75,43 @@ This pipeline need two input data : the stLFR reads and the contig .
 - the contig must follow the SOAPdenovo contig format, which contain 2 files :
     - your-prefix.contig
     - your-prefix.ContigIndex
+
 *If you generate your contig by other contig assembler , you can easily convert your contig into SOAPdenovo format by:*
+
 ```
 YOUR-INSTALL-DIR/bin/FakeSOAPContig < your-contig-sequence-file 1>your-prefix.contig 2>your-prefix.ContigIndex
 ```
+
+### <a name=usage></a> General usage
+
+
+- Prepare the conf.ini
+
+```
+cd YOUR-PROJECT-DIR
+cp YOUR-INSTALL-DIR/Scaffold/conf.ini ./your-conf.ini
+vim conf.ini # and configure it!
+```
+
+- Generate the pipeline and working folder
+
+```
+YOUR-INSTALL-DIR/Scaffold/prepare.sh ./your-conf.ini
+```
+*This command will create the new working folder that contain all pipeline scripts.*
+
+*The working folder named by PROJECT_NAME from ./your-conf.ini*
+
+*Make sure the working folder is not exsit before running this command.*
+
+- Run the pipeline
+    - If your what to run the whole pipeline.
+```
+cd your-working-folder
+./run.sh >log_pipeline 2>&1 &
+```
+
+*Notice : assume some error happend and your command exit ,you re-run this command and it will automatic skip the finished steps.*
+*Notice : separate execution of each steps are supperted, but if you re-run step-n , you must also re-run step-[n+1 , 6] to get the correct output.*
+
 
