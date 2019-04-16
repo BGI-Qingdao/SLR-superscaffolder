@@ -14,6 +14,21 @@ else
     exit 1
 fi
 
+# check install dir
+INSTALL_DIR=$STLFR_ASSEMBLER_DIR
+EXEC_DIR=$INSTALL_DIR/bin
+DATA=$INSTALL_DIR/Scaffold
+
+# check target directory
+if [[ ! -d $EXEC_DIR || ! -e $EXEC_DIR/FakeSOAPContig ]] ; then 
+    echo $EXEC_DIR is not a valid stLFR Assembler bin dir . exit ..."
+    exit 1
+fi
+if [[ ! -d $DATA || ! -f $DATA/step_1_prepare_info.m4 ]] ; then 
+    echo $DATA is not a valid stLFR Assembler Scaffold dir . exit ..."
+    exit 1
+fi
+
 # check SOAP diectory
 SOAP=$SOAP_DIR
 Contig=$SOAP/$PREFIX".contig"
