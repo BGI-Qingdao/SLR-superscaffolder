@@ -2,51 +2,9 @@
 
 apps="Barcode2Gap\
  Barcode2Scaffold \
- BarcodeDepth \
- BinCluster\
- ChopBin\
- ContigDlink\
- CutContig\
- ExternContigByPE\
- FakePE2BC\
- FCRFByTF\
- FillContigRoad\
- FillTrunkByPE\
- FakeRef2Scaff\
- FormatScaffInfo\
- Orientation\
- GapSize\
- gapfillerIDY\
- GenBinSimMatrix\
- GenSentieonScaff\
- ORGC\
- LinearCDG\
- MergeContig\
- MergePEInfo\
- MinTree\
- MST\
- IDYtool\
- IDYtool_paf\
- ONTGapCorrecter\
- ONTGapFiller\
- Overlap2Gap\
- ParseContig2Read\
- ParseRead2Contig\
- ParseReadName\
- PEGraph\
  ReadName2Num\
  Reads2Gap\
- Sam2ReadOnContig\
- ScaffInfo2Seq\
  ScaffInfo2GapSeq\
- SeedCluster\
- SplitInfo\
- SplitScaffWithReads\
- StaticsticUnique\
- SplitScaffSeq\
- Trunk2Scaff\
- Trunk2ScaffGap\
- Trunk2ScaffInfo\
 "
 
 jobs_o=" "
