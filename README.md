@@ -1,18 +1,25 @@
 # stLFR Scaffold Assembler
 
-## <a name=intro>></a> Introduction
+## <a name=intro>Introduction</a>
 
-## <a name=contents></a> Table of Contents
+  This is a scaffold assembler pipeline for stLFR reads[1].
+It can use the link-reads information from stLFR reads to assembler contigs into scaffolds.
+
+## <a name=contents>Table of Contents</a>
 
 - [Introduction](#intro)
 - [Table of Contents](#contents)
 - [User's Guide](#user-guide)
     - [Installation](#install)
     - [Preliminary](#pre)
+    - [General usage](#usage)
+    - [Configuration](#conf)
+- [Miscellaneous](#misc)
+- [Reference](#ref)
 
-## <a name=user-guide></a> User's Guide
+## <a name=user-guide>User's Guide</a> 
 
-### <a name=install></a> Installation
+### <a name=install>Installation</a>
 
 - How to download the source codes.
 ```
@@ -58,7 +65,7 @@ cd YOUR-DOWNLOAD-DIR
     └── Trunk2ScaffInfo
 ```
 
-### <a name=pre></a> Preliminary
+### <a name=pre>Preliminary</a> 
 
 This pipeline need two input data : the stLFR reads and the contig .
 
@@ -76,16 +83,17 @@ This pipeline need two input data : the stLFR reads and the contig .
     - your-prefix.contig
     - your-prefix.ContigIndex
 
+*Your can use any contig assembler to assemble the contig first . Our recommend contig assembler is MaSuRCA[2].*
+
 *If you generate your contig by other contig assembler , you can easily convert your contig into SOAPdenovo format by:*
 
 ```
 YOUR-INSTALL-DIR/bin/FakeSOAPContig < your-contig-sequence-file 1>your-prefix.contig 2>your-prefix.ContigIndex
 ```
 
-### <a name=usage></a> General usage
+### <a name=usage>General usage</a>
 
-
-- Prepare the conf.ini
+- 1st. Prepare the conf.ini
 
 ```
 cd YOUR-PROJECT-DIR
@@ -93,7 +101,7 @@ cp YOUR-INSTALL-DIR/Scaffold/conf.ini ./your-conf.ini
 vim conf.ini # and configure it!
 ```
 
-- Generate the pipeline and working folder
+- 2nd. Generate the pipeline and working folder
 
 ```
 YOUR-INSTALL-DIR/Scaffold/prepare.sh ./your-conf.ini
@@ -104,14 +112,47 @@ YOUR-INSTALL-DIR/Scaffold/prepare.sh ./your-conf.ini
 
 *Make sure the working folder is not exsit before running this command.*
 
-- Run the pipeline
-    - If your what to run the whole pipeline.
+- 3rd. Run the pipeline
+
 ```
 cd your-working-folder
 ./run.sh >log_pipeline 2>&1 &
 ```
 
 *Notice : assume some error happend and your command exit ,you re-run this command and it will automatic skip the finished steps.*
-*Notice : separate execution of each steps are supperted, but if you re-run step-n , you must also re-run step-[n+1 , 6] to get the correct output.*
 
+*Notice : separate execution of each steps are supperted, but if you re-run step-n, you must also re-run step-[n+1 , 6] to get the correct output.*
+
+### <a name=conf>Configuration</a>
+
+```
+//TODO
+```
+## <a name=misc>Miscellaneous</a>
+
+- Requirements
+    - Linux system && Bash
+    - gcc ( with std11 support )
+    - make && m4 ( default for almost every linux distribution)
+- Dependency
+    - We use bwa[3] to map stLFR reads against contigs.
+        - you may replace this to any tools that can generate the correct SAM output.
+- Limitations
+    - We do hope a "not bad" contig, like N50 >= 15K and a "not bad" accuracy.
+- Resources
+    - The memory peak for human-like-genome-size is 150G.
+    - Some steps support multi-thread :
+        - bwa part .
+        - BinCluster part .
+
+## <a name=ref>Reference</a>
+
+[1] [Efficient and unique co-barcoding of second-generation sequencing reads from long DNA molecules enabling cost effective and accurate sequencing, haplotyping, and de novo assembly][11]
+ 
+[2] [Hybrid assembly of the large and highly repetitive genome of Aegilops tauschii, a progenitor of bread wheat, with the MaSuRCA mega-reads algorithm][22]
+[3] [Aligning sequence reads, clone sequences and assembly contigs with BWA-MEM][33]
+
+[11]: https://www.ncbi.nlm.nih.gov/pubmed/30940689 
+[22]: https://genome.cshlp.org/content/27/5/787 
+[33]: https://arxiv.org/abs/1303.3997
 
