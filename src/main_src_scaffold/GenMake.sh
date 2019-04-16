@@ -4,6 +4,7 @@ apps="\
  BinCluster\
  ChopBin\
  FillTrunkByPE\
+ FakeSOAPContig\
  GapSize\
  MST\
  Orientation\

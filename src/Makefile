@@ -1,16 +1,15 @@
 .PHONY: main clean dev_tools test
 
-main:
-	cd main && make
+
+scaffold:
+	cd main_src_scaffold && make
 
 test:
 	cd test && make 
 
-dev_tools:
-	cd dev_tools && make 
 
 clean:
-	cd main && make clean
-	cd dev_tools && make clean
+	cd main_src_scaffold && make clean
 	cd test && make clean
+	rm -rf bin
 

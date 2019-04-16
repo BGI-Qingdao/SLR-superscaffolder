@@ -47,7 +47,7 @@ source_o		= ${source_cpp:%.cpp=%.o}
 .cpp.o:
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
-jobs = BinCluster ChopBin FillTrunkByPE GapSize MST Orientation ParseReadName PEGraph Sam2ReadOnContig ScaffInfo2Seq SeedCluster SplitInfo StaticsticUnique Trunk2ScaffInfo
+jobs = BinCluster ChopBin FillTrunkByPE FakeSOAPContig GapSize MST Orientation ParseReadName PEGraph Sam2ReadOnContig ScaffInfo2Seq SeedCluster SplitInfo StaticsticUnique Trunk2ScaffInfo
 
 all :  ${jobs}
 
@@ -76,6 +76,15 @@ FillTrunkByPE_cpp = FillTrunkByPE.cpp
 FillTrunkByPE_o = FillTrunkByPE.o
 FillTrunkByPE : clean ${FillTrunkByPE_o} ${source_o} ../bin
 	${CXX} ${FillTrunkByPE_o} ${source_o} ${DEUBG_CXX} -o FillTrunkByPE
+	mv $@ ../bin/
+
+
+
+
+FakeSOAPContig_cpp = FakeSOAPContig.cpp
+FakeSOAPContig_o = FakeSOAPContig.o
+FakeSOAPContig : clean ${FakeSOAPContig_o} ${source_o} ../bin
+	${CXX} ${FakeSOAPContig_o} ${source_o} ${DEUBG_CXX} -o FakeSOAPContig
 	mv $@ ../bin/
 
 
@@ -178,7 +187,7 @@ Trunk2ScaffInfo : clean ${Trunk2ScaffInfo_o} ${source_o} ../bin
 	mv $@ ../bin/
 
 
-jobs_o=  ${BinCluster_o} ${ChopBin_o} ${FillTrunkByPE_o} ${GapSize_o} ${MST_o} ${Orientation_o} ${ParseReadName_o} ${PEGraph_o} ${Sam2ReadOnContig_o} ${ScaffInfo2Seq_o} ${SeedCluster_o} ${SplitInfo_o} ${StaticsticUnique_o} ${Trunk2ScaffInfo_o}
+jobs_o=  ${BinCluster_o} ${ChopBin_o} ${FillTrunkByPE_o} ${FakeSOAPContig_o} ${GapSize_o} ${MST_o} ${Orientation_o} ${ParseReadName_o} ${PEGraph_o} ${Sam2ReadOnContig_o} ${ScaffInfo2Seq_o} ${SeedCluster_o} ${SplitInfo_o} ${StaticsticUnique_o} ${Trunk2ScaffInfo_o}
 
 dirty	   =${jobs_o} ${jobs} ${source_o}
 

@@ -32,14 +32,7 @@ if [[ ! -e $path ]] ; then
 fi
 
 echo "info  :   start compier ...   "
-cd src/main && make >>../../log_make 2>&1 
-if [[ $? != 0 ]] ; then 
-    echo "error :   compier unfinish!!! please check log_make for details ."
-    cd  -
-    exit
-fi
-cd  -
-cd src/tools && make >>../../log_make 2>&1  
+cd src && make >>../../log_make 2>&1 
 if [[ $? != 0 ]] ; then 
     echo "error :   compier unfinish!!! please check log_make for details ."
     cd  -
