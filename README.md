@@ -2,8 +2,8 @@
 
 ## <a name=intro>Introduction</a>
 
-  This is a scaffold assembler pipeline for stLFR reads[1].
-It can use the link-reads information from stLFR reads to assembler contigs into scaffolds.
+  This is a scaffold assemble pipeline for stLFR reads[1].
+It can use the link-reads information from stLFR reads to assemble contigs into scaffolds.
 
 ## <a name=contents>Table of Contents</a>
 
@@ -73,10 +73,13 @@ This pipeline need two input data : the stLFR reads and the contig .
     - your-prefix.read1.your-suffix
     - your-prefix.read2.your-suffix
 
-*If you only have the raw reads of stLFR technology, before run this pipeline , you need do format convert first, see all details from :*
+*We assume your stLFR reads is the reads that after barcode splitted.*
+*The official barcode split step is the "1.fq_BarcodeSplit" step of stLFR_v1(https://github.com/MGI-tech-bioinformatics/stLFR_v1.git)*
+
+**The 1st line of fastq reads file that after barcode splitted looks like:**
 
 ```
-//TODO : the split barcode page
+@CL100050407L1C002R064_8855#514_1207_1392/1     7       1
 ```
 
 - the contig must follow the SOAPdenovo contig format, which contain 2 files :
@@ -126,7 +129,71 @@ cd your-working-folder
 ### <a name=conf>Configuration</a>
 
 ```
-//TODO
+###############################################################################
+# Project Settings.
+#
+PROJECT_NAME="work_dir"      #the name of work dirctory.
+THREADS=15                   #multi-thread-num
+
+###############################################################################
+# Toos settings 
+#
+STLFR_ASSEMBLER_DIR=YOUR-INTALL-DIR         # the stLFR Scaffold Assembler install directory 
+BWA_DIR=YOUR-BWA-DIR                        # the bwa install directory
+
+###############################################################################
+# Input data settings
+#   
+#   MAKE SURE ALL PATH ARE ABSOLUTELY PATH.
+#   DO NOT USE "../"  "~/" "./" !!!
+#
+## for input stLFR reads
+R1="/home/chr19/chr19_reads1.fq.clean.gz"   # the read1 of stLFR reads
+R2="/home/chr19/chr19_reads2.fq.clean.gz"   # the read2 of stLFR reads
+## for input contig
+SOAP_DIR="/home/soap_contig"                # the input contig directory
+SOAP_K=63                                   # the used-k-value of SOAPdenovo. If you are not use SOAPdenovo to assemble the input contig , keep it as 63. 
+PREFIX="chr19_soap2"                        # the prefix of you contig
+
+###############################################################################
+# Control parameter settings 
+#
+
+###################################################
+# for step 1 bwa mem
+BWA_K=53                                    # the mapping k-value for bwa
+
+###################################################
+# for step 2 order
+MST_BIN_SIZE=7000                           # the unit bin size for order
+MST_BIN_CLUSTER=0.1                         # the bin cluster threshold for order.
+MST_CLUSTER=0.1                             # the order detect threshold .
+
+###################################################
+# for step 3 orientation
+HT_BIN_SIZE=3500                            # the unit bin size for order
+HT_BIN_CLUSTER=0.05                         # the bin cluster threshold for orientation.
+RANK=4                                      # the orientaion detect rank.
+
+###################################################
+# for step 4 pe_fill
+# please make sure that SEED_MIN >= HT_BIN_SIZE * 2 
+MAX_INSERT_SIZE=5000                        # the max allowed insert size.
+PE_SEED_MIN=1000                            # the min contig size to fill
+PE_SEARCH_MAX=5000                          # the max search length before stop
+PE_MIN_JOINBARCODES=10                      # the min join barcode count 
+PE_MIN_COUNT=3                              # the min join PE count
+PE_FILL=5                                   # the N size between PE join contigs
+###################################################
+# for step 5 gap_size
+GAP_BIN_SIZE=4000                           # the unit bin size for gap
+
+###################################################
+# for step 6 .parameters for generate sequence 
+#
+MIN_SCONTIG=300                             # the min sequence length that allow to printed into the final scaffold
+MIN_N=10                                    # the min N size between 2 contig
+MIN_C=1                                     # the min N size when instead of have gap ,2 contig  actually have an overlap.
 ```
 ## <a name=misc>Miscellaneous</a>
 
@@ -150,6 +217,7 @@ cd your-working-folder
 [1] [Efficient and unique co-barcoding of second-generation sequencing reads from long DNA molecules enabling cost effective and accurate sequencing, haplotyping, and de novo assembly][11]
  
 [2] [Hybrid assembly of the large and highly repetitive genome of Aegilops tauschii, a progenitor of bread wheat, with the MaSuRCA mega-reads algorithm][22]
+
 [3] [Aligning sequence reads, clone sequences and assembly contigs with BWA-MEM][33]
 
 [11]: https://www.ncbi.nlm.nih.gov/pubmed/30940689 
