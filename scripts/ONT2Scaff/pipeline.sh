@@ -85,7 +85,7 @@ else
     fi
 fi
 
-# check paf or minmap2
+# check paf or minimap2
 if [[ $USE_PAF == "yes" ]] ; then
     if [[ ! -e $INPUT_PAF ]] ; then
         echo "5 $INPUT_PAF is not exsist exit ..."
@@ -111,9 +111,9 @@ if [[ $USE_PAF == "yes" ]] ; then
     ln -s $INPUT_PAF $OUT_PAF
 else
     if [[ $FQ == "yes" ]] ; then
-         $MINMAP -x ava-ont -t $CPU $INPUT_ONT_READ_FQ $OUT_CONTIG  1>$OUT_PAF 2>log_minmap2
+         $MINMAP -x ava-ont -t $CPU $INPUT_ONT_READ_FQ $OUT_CONTIG  1>$OUT_PAF 2>log_minimap2
     else
-         $MINMAP -x ava-ont -t $CPU $INPUT_ONT_READ_FA $OUT_CONTIG  1>$OUT_PAF 2>log_minmap2
+         $MINMAP -x ava-ont -t $CPU $INPUT_ONT_READ_FA $OUT_CONTIG  1>$OUT_PAF 2>log_minimap2
     fi
 fi
 
