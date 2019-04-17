@@ -35,7 +35,7 @@ cd YOUR-DOWNLOAD-DIR
 - Structure of files in YOUR-INSTALL-DIR
 
 ```
-├── Scaffold                    # The pipeline script folder.
+├── scaffold                    # The pipeline script folder.
 │   ├── __common_function.sh    # The utils script .
 │   ├── clean_prepare.m4        # The template clean script .
 │   ├── conf.ini                # The default configuration .
@@ -48,21 +48,25 @@ cd YOUR-DOWNLOAD-DIR
 │   ├── step_5_gapsize.m4       # The template step 5 script. Detect the gap size between those contigs in above scaffolds.
 │   └── step_6_gen_seq.m4       # The template step 6 script. Generate the scaffold sequences basic on all above information.
 └── bin                         # The bin folder. Below utils are all binary executable files that called by above scripts.
-    ├── BinCluster
-    ├── ChopBin
-    ├── FakeSOAPContig
-    ├── FillTrunkByPE
-    ├── GapSize
-    ├── MST
-    ├── Orientation
-    ├── PEGraph
-    ├── ParseReadName
-    ├── Sam2ReadOnContig
-    ├── ScaffInfo2Seq
-    ├── SeedCluster
-    ├── SplitInfo
-    ├── StaticsticUnique
-    └── Trunk2ScaffInfo
+│   ├── BinCluster
+│   ├── ChopBin
+│   ├── FakeSOAPContig
+│   ├── FillTrunkByPE
+│   ├── GapSize
+│   ├── MST
+│   ├── Orientation
+│   ├── PEGraph
+│   ├── ParseReadName
+│   ├── Sam2ReadOnContig
+│   ├── ScaffInfo2Seq
+│   ├── SeedCluster
+│   ├── SplitInfo
+│   ├── StaticsticUnique
+│   └── Trunk2ScaffInfo
+└── split_barcode               # a backup script for split barcode
+    ├── barcode_list.txt        # the barcode whitelist of stLFR
+    ├── split_barcode.pl        # the split barcode main script
+    └── split_barcode.sh        # a easy-to-use swap of split_barcode.pl
 ```
 
 ### <a name=pre>Preliminary</a> 
@@ -73,14 +77,22 @@ This pipeline need two input data : the stLFR reads and the contig .
     - your-prefix.read1.your-suffix
     - your-prefix.read2.your-suffix
 
-*We assume your stLFR reads is the reads that after barcode splitted.*
+  *We assume your stLFR reads is the reads that after barcode splitted.*
 *The official barcode split step is the "1.fq_BarcodeSplit" step of stLFR_v1(https://github.com/MGI-tech-bioinformatics/stLFR_v1.git)*
+
+  *If you don't want to download the stLFR_v1 package , you can try our split barcode script:*
+
+```
+# if your raw stLFR reads contain more than 1 lane, you need to cat the into 1 file first!
+YOUR-INSTALL-DIR/split_barcode/split_barcode.sh raw_read1.fq.gz raw_read2.fq.gz
+```
 
 **The 1st line of fastq reads file that after barcode splitted looks like:**
 
 ```
 @CL100050407L1C002R064_8855#514_1207_1392/1     7       1
 ```
+*the "#514_1207_1392" part is digital representation of original sequence barcode.*
 
 - the contig must follow the SOAPdenovo contig format, which contain 2 files :
     - your-prefix.contig
