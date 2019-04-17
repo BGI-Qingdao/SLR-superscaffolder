@@ -16,15 +16,6 @@ if [[ ! -f $raw_read1 || ! -f $raw_read2 ]] ; then
     exit 1
 fi
 
-if [[ ! -d $output_dir ]] ; then 
-    echo "Info : $output_dir is not exist , create it now ..."
-    mkdir $output_dir 
-    if [[ ! -d $output_dir ]] ; then 
-        echo "Error : failed to create $output_dir !!! exit ..."
-        exit 1 ;
-    fi
-fi
-
 ### 2nd. Check split_barcode_stLFR.pl && barcode_list.txt
 base_dir=`dirname $0`
 split_bc=$base_dir/split_barcode.pl
@@ -40,5 +31,5 @@ if [[ -f split_reads.1.fq.gz || -f split_reads.2.fq.gz ]] ; then
     echo "split_reads.1.fq.gz or split_reads.2.fq.gz exist !!! exit ..."
     exit 1
 fi
-perl $split_bc $barcode_list $raw_read1 $raw_read2 split_reads
+perl $split_bc $bc_list $raw_read1 $raw_read2 split_reads
 
