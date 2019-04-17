@@ -43,7 +43,7 @@ echo "info  :   end compier ...   "
 
 echo "info  :   cp executive files to $path/bin "
 cp -r src/bin $path
-echo "info  :   cp Scaffold to $path/Scaffold"
-cp -r scripts/Scaffold $path
+echo "info  :   cp scaffold to $path/Scaffold"
+cp -r scripts/scaffold $path
 echo "info  :   cp split_barcode to $path/split_barcode"
 cp -r scripts/split_barcode $path
