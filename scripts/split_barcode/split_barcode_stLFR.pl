@@ -4,7 +4,6 @@ use warnings;
 use FindBin qw($Bin);
 use Data::Dumper;
 use Getopt::Long;
-use lib "$Bin/../../lib/perl5";
 use MyModule::GlobalVar qw($REF_H_DBPATH);
 
 
