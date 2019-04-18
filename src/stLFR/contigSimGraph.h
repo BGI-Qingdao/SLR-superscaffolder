@@ -160,12 +160,19 @@ namespace BGIQD {
             void PrintAsDOT(std::ostream & out) const
             {
                 out<<Edge::DOTHead()<<std::endl;
+                std::set<int> multis;
                 for( const auto & e : edges )
                 {
-                    out<<"\t"<<e.ToString();
-                    //if( GetNode(e.from).EdgeNum() > 2 || GetNode(e.to).EdgeNum()>2 )
-                    //    out<<"\t+";
+                    out<<"\t"<<e.ToString()<<std::endl;
+                    if( GetNode(e.from).EdgeNum() > 2 )
+                        multis.insert(e.from);
+                    if(  GetNode(e.to).EdgeNum()>2 )
+                        multis.insert(e.to);
                     out<<std::endl;
+                }
+                for( int i : multis )
+                {
+                    out<<i<< " [ shape=doublecircle] ; "<<std::endl;
                 }
                 out<<"}"<<std::endl;
             }
