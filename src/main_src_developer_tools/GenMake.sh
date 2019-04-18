@@ -9,6 +9,7 @@ apps="\
  GenSentieonScaff\
  IDYtool\
  IDYtool_paf\
+ Cluster2MST2DOT
 "
 
 jobs_o=" "
@@ -23,15 +24,15 @@ echo """
 
 $AppName"_cpp 	=	"$AppName".cpp"
 $AppName"_o   =	"$AppName".o"
-$AppName" : clean \${"$AppName"_o} \${source_o} ../bin"
+$AppName" : clean \${"$AppName"_o} \${source_o} ../dev_bin"
 	\${CXX} \${$AppName"_o} \${source_o} \${DEUBG_CXX}  -o "$AppName
-	mv \$@ ../bin/
+	mv \$@ ../dev_bin/
 
 """>>Makefile
 
 }
 
-echo ".PHONY: all clean bin" >Makefile
+echo ".PHONY: all clean dev_bin" >Makefile
 echo """
 CC 		   =	gcc
 CXX 	   =	g++
@@ -94,8 +95,8 @@ echo "jobs_o=$jobs_o">>Makefile
 echo """
 dirty	   =\${jobs_o} \${jobs} \${source_o}
 
-../bin:
-	mkdir -p ../bin
+../dev_bin:
+	mkdir -p ../dev_bin
 
 clean:
 	rm -rf \${dirty}

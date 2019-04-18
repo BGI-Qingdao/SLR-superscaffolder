@@ -35,7 +35,8 @@ namespace BGIQD {
             std::string AttrString() const
             {
                 std::ostringstream ost;
-                ost<<" id= "<<id<<" sim= "<<sim;
+                //ost<<" id= "<<id<<" sim= "<<sim;
+                ost<<"label=\""<<sim<<"\" ]";
                 return ost.str();
             }
             std::string ToString() const
@@ -162,8 +163,8 @@ namespace BGIQD {
                 for( const auto & e : edges )
                 {
                     out<<"\t"<<e.ToString();
-                    if( GetNode(e.from).EdgeNum() > 2 || GetNode(e.to).EdgeNum()>2 )
-                        out<<"\t+";
+                    //if( GetNode(e.from).EdgeNum() > 2 || GetNode(e.to).EdgeNum()>2 )
+                    //    out<<"\t+";
                     out<<std::endl;
                 }
                 out<<"}"<<std::endl;

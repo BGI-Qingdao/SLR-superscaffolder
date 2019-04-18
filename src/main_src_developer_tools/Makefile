@@ -1,4 +1,4 @@
-.PHONY: all clean bin
+.PHONY: all clean dev_bin
 
 CC 		   =	gcc
 CXX 	   =	g++
@@ -47,7 +47,8 @@ source_o		= ${source_cpp:%.cpp=%.o}
 .cpp.o:
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
-jobs = BarcodeDepth bin_ref cpSpeed FakeRef2Scaff gapfillerIDY GenSentieonScaff IDYtool IDYtool_paf
+jobs = BarcodeDepth bin_ref cpSpeed FakeRef2Scaff gapfillerIDY GenSentieonScaff IDYtool IDYtool_paf Cluster2MST2DOT
+
 
 all :  ${jobs}
 
@@ -56,80 +57,89 @@ all :  ${jobs}
 
 BarcodeDepth_cpp = BarcodeDepth.cpp
 BarcodeDepth_o = BarcodeDepth.o
-BarcodeDepth : clean ${BarcodeDepth_o} ${source_o} ../bin
+BarcodeDepth : clean ${BarcodeDepth_o} ${source_o} ../dev_bin
 	${CXX} ${BarcodeDepth_o} ${source_o} ${DEUBG_CXX} -o BarcodeDepth
-	mv $@ ../bin/
+	mv $@ ../dev_bin/
 
 
 
 
 bin_ref_cpp = bin_ref.cpp
 bin_ref_o = bin_ref.o
-bin_ref : clean ${bin_ref_o} ${source_o} ../bin
+bin_ref : clean ${bin_ref_o} ${source_o} ../dev_bin
 	${CXX} ${bin_ref_o} ${source_o} ${DEUBG_CXX} -o bin_ref
-	mv $@ ../bin/
+	mv $@ ../dev_bin/
 
 
 
 
 cpSpeed_cpp = cpSpeed.cpp
 cpSpeed_o = cpSpeed.o
-cpSpeed : clean ${cpSpeed_o} ${source_o} ../bin
+cpSpeed : clean ${cpSpeed_o} ${source_o} ../dev_bin
 	${CXX} ${cpSpeed_o} ${source_o} ${DEUBG_CXX} -o cpSpeed
-	mv $@ ../bin/
+	mv $@ ../dev_bin/
 
 
 
 
 FakeRef2Scaff_cpp = FakeRef2Scaff.cpp
 FakeRef2Scaff_o = FakeRef2Scaff.o
-FakeRef2Scaff : clean ${FakeRef2Scaff_o} ${source_o} ../bin
+FakeRef2Scaff : clean ${FakeRef2Scaff_o} ${source_o} ../dev_bin
 	${CXX} ${FakeRef2Scaff_o} ${source_o} ${DEUBG_CXX} -o FakeRef2Scaff
-	mv $@ ../bin/
+	mv $@ ../dev_bin/
 
 
 
 
 gapfillerIDY_cpp = gapfillerIDY.cpp
 gapfillerIDY_o = gapfillerIDY.o
-gapfillerIDY : clean ${gapfillerIDY_o} ${source_o} ../bin
+gapfillerIDY : clean ${gapfillerIDY_o} ${source_o} ../dev_bin
 	${CXX} ${gapfillerIDY_o} ${source_o} ${DEUBG_CXX} -o gapfillerIDY
-	mv $@ ../bin/
+	mv $@ ../dev_bin/
 
 
 
 
 GenSentieonScaff_cpp = GenSentieonScaff.cpp
 GenSentieonScaff_o = GenSentieonScaff.o
-GenSentieonScaff : clean ${GenSentieonScaff_o} ${source_o} ../bin
+GenSentieonScaff : clean ${GenSentieonScaff_o} ${source_o} ../dev_bin
 	${CXX} ${GenSentieonScaff_o} ${source_o} ${DEUBG_CXX} -o GenSentieonScaff
-	mv $@ ../bin/
+	mv $@ ../dev_bin/
 
 
 
 
 IDYtool_cpp = IDYtool.cpp
 IDYtool_o = IDYtool.o
-IDYtool : clean ${IDYtool_o} ${source_o} ../bin
+IDYtool : clean ${IDYtool_o} ${source_o} ../dev_bin
 	${CXX} ${IDYtool_o} ${source_o} ${DEUBG_CXX} -o IDYtool
-	mv $@ ../bin/
+	mv $@ ../dev_bin/
 
 
 
 
 IDYtool_paf_cpp = IDYtool_paf.cpp
 IDYtool_paf_o = IDYtool_paf.o
-IDYtool_paf : clean ${IDYtool_paf_o} ${source_o} ../bin
+IDYtool_paf : clean ${IDYtool_paf_o} ${source_o} ../dev_bin
 	${CXX} ${IDYtool_paf_o} ${source_o} ${DEUBG_CXX} -o IDYtool_paf
-	mv $@ ../bin/
+	mv $@ ../dev_bin/
 
 
-jobs_o=  ${BarcodeDepth_o} ${bin_ref_o} ${cpSpeed_o} ${FakeRef2Scaff_o} ${gapfillerIDY_o} ${GenSentieonScaff_o} ${IDYtool_o} ${IDYtool_paf_o}
+
+
+Cluster2MST2DOT_cpp = Cluster2MST2DOT.cpp
+Cluster2MST2DOT_o = Cluster2MST2DOT.o
+Cluster2MST2DOT : clean ${Cluster2MST2DOT_o} ${source_o} ../dev_bin
+	${CXX} ${Cluster2MST2DOT_o} ${source_o} ${DEUBG_CXX} -o Cluster2MST2DOT
+	mv $@ ../dev_bin/
+
+
+jobs_o=  ${BarcodeDepth_o} ${bin_ref_o} ${cpSpeed_o} ${FakeRef2Scaff_o} ${gapfillerIDY_o} ${GenSentieonScaff_o} ${IDYtool_o} ${IDYtool_paf_o} ${Cluster2MST2DOT_o}
 
 dirty	   =${jobs_o} ${jobs} ${source_o}
 
-../bin:
-	mkdir -p ../bin
+../dev_bin:
+	mkdir -p ../dev_bin
 
 clean:
 	rm -rf ${dirty}
