@@ -168,7 +168,6 @@ namespace BGIQD {
                         multis.insert(e.from);
                     if(  GetNode(e.to).EdgeNum()>2 )
                         multis.insert(e.to);
-                    out<<std::endl;
                 }
                 for( int i : multis )
                 {
