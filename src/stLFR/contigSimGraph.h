@@ -36,7 +36,7 @@ namespace BGIQD {
             {
                 std::ostringstream ost;
                 //ost<<" id= "<<id<<" sim= "<<sim;
-                ost<<"label=\""<<sim<<"\" ]";
+                ost<<"label=\""<<sim<<"\"";
                 return ost.str();
             }
             std::string ToString() const
