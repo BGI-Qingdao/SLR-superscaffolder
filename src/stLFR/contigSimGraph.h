@@ -171,7 +171,7 @@ namespace BGIQD {
                 }
                 for( int i : multis )
                 {
-                    out<<i<< " [ shape=doublecircle] ; "<<std::endl;
+                    out<<i<< " [ shape=box]  "<<std::endl;
                 }
                 out<<"}"<<std::endl;
             }
