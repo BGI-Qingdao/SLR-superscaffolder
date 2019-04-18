@@ -9,7 +9,8 @@ apps="\
  GenSentieonScaff\
  IDYtool\
  IDYtool_paf\
- Cluster2MST2DOT
+ Cluster2MST2DOT\
+ Points4GapSize\
 "
 
 jobs_o=" "
