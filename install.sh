@@ -45,5 +45,5 @@ echo "info  :   cp executive files to $path/bin "
 cp -r src/bin $path
 echo "info  :   cp scaffold to $path/Scaffold"
 cp -r scripts/scaffold $path
-echo "info  :   cp split_barcode to $path/split_barcode"
-cp -r scripts/split_barcode $path
+echo "info  :   cp stLFR_barcode_split to $path/split_barcode"
+cp -r scripts/stLFR_barcode_split $path
