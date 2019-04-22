@@ -22,8 +22,17 @@ It can use the link-reads information from stLFR reads to assemble contigs into 
 ### <a name=install>Installation</a>
 
 - How to download the source codes.
+
+*Clone all codes in 1 step.*
+```
+git clone --recursive  https://github.com/BGI-QingDao/stLFR_Scaffold_Assembler.git YOUR-DOWNLOAD-DIR
+```
+*Clone step by step*
 ```
 git clone https://github.com/BGI-QingDao/stLFR_Scaffold_Assembler.git YOUR-DOWNLOAD-DIR
+cd YOUR-DOWNLOAD-DIR
+git submodule init
+git submodule update
 ```
 - How to compiler source codes and install executable files.
 ```
