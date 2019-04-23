@@ -30,8 +30,6 @@ source_cpp =	../common/files/file_reader.cpp \
 				../stLFR/ContigCluster.cpp\
                 ../stLFR/ScaffInfo.cpp\
 				../stLFR/LineGroup.cpp\
-                ../stLFR/contigPairInfo.cpp\
-                ../stLFR/ONT2Gap.cpp\
 				../stLFR/ContigOverlap.cpp\
 				../stLFR/CBB.cpp\
 				../stLFR/TagId.cpp\
@@ -47,7 +45,7 @@ source_o		= ${source_cpp:%.cpp=%.o}
 .cpp.o:
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
-jobs = BarcodeDepth bin_ref cpSpeed FakeRef2Scaff gapfillerIDY GenSentieonScaff IDYtool IDYtool_paf Cluster2MST2DOT Points4GapSize
+jobs = BarcodeDepth bin_ref cpSpeed FakeRef2Scaff gapfillerIDY GenSentieonScaff GenBinSimMatrix IDYtool IDYtool_paf Cluster2MST2DOT Points4GapSize
 
 all :  ${jobs}
 
@@ -108,6 +106,15 @@ GenSentieonScaff : clean ${GenSentieonScaff_o} ${source_o} ../dev_bin
 
 
 
+GenBinSimMatrix_cpp = GenBinSimMatrix.cpp
+GenBinSimMatrix_o = GenBinSimMatrix.o
+GenBinSimMatrix : clean ${GenBinSimMatrix_o} ${source_o} ../dev_bin
+	${CXX} ${GenBinSimMatrix_o} ${source_o} ${DEUBG_CXX} -o GenBinSimMatrix
+	mv $@ ../dev_bin/
+
+
+
+
 IDYtool_cpp = IDYtool.cpp
 IDYtool_o = IDYtool.o
 IDYtool : clean ${IDYtool_o} ${source_o} ../dev_bin
@@ -142,7 +149,7 @@ Points4GapSize : clean ${Points4GapSize_o} ${source_o} ../dev_bin
 	mv $@ ../dev_bin/
 
 
-jobs_o=  ${BarcodeDepth_o} ${bin_ref_o} ${cpSpeed_o} ${FakeRef2Scaff_o} ${gapfillerIDY_o} ${GenSentieonScaff_o} ${IDYtool_o} ${IDYtool_paf_o} ${Cluster2MST2DOT_o} ${Points4GapSize_o}
+jobs_o=  ${BarcodeDepth_o} ${bin_ref_o} ${cpSpeed_o} ${FakeRef2Scaff_o} ${gapfillerIDY_o} ${GenSentieonScaff_o} ${GenBinSimMatrix_o} ${IDYtool_o} ${IDYtool_paf_o} ${Cluster2MST2DOT_o} ${Points4GapSize_o}
 
 dirty	   =${jobs_o} ${jobs} ${source_o}
 
