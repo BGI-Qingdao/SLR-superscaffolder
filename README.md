@@ -16,6 +16,7 @@ It can use the link-reads information from stLFR reads to assemble contigs into 
     - [Configuration](#conf)
 - [Miscellaneous](#misc)
 - [Reference](#ref)
+- [Contact](#contact)
 
 ## <a name=user-guide>User's Guide</a> 
 
@@ -245,3 +246,10 @@ MIN_C=1                                     # the min N size when instead of hav
 [22]: https://genome.cshlp.org/content/27/5/787 
 [33]: https://arxiv.org/abs/1303.3997
 
+## <a name=contact>Contact</a>
+
+- for algrothim detail & discussion
+    - please contact dengli1@genomics.cn or xumengyang@genomics.cn
+- for code detail & bug report 
+    - please contact guolidong@genomics.cn 
+    - or please raise a issue in github.
