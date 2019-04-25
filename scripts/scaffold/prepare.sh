@@ -17,7 +17,7 @@ fi
 # check install dir
 INSTALL_DIR=$STLFR_ASSEMBLER_DIR
 EXEC_DIR=$INSTALL_DIR/bin
-DATA=$INSTALL_DIR/Scaffold
+DATA=$INSTALL_DIR/scaffold
 
 # check target directory
 if [[ ! -d $EXEC_DIR || ! -e $EXEC_DIR/FakeSOAPContig ]] ; then 
