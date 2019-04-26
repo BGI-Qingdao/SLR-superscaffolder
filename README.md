@@ -250,4 +250,4 @@ MIN_C=1                                     # the min N size between 2 overlaped
     - please contact dengli1@genomics.cn or xumengyang@genomics.cn
 - for code details & bug report 
     - please contact guolidong@genomics.cn 
-    - or please raise a issue in github.
+    - or please creat an issue in github.
