@@ -73,7 +73,7 @@ cd YOUR-DOWNLOAD-DIR
 │   ├── SplitInfo
 │   ├── StaticsticUnique
 │   └── Trunk2ScaffInfo
-└── split_barcode               # a backup script for splitting reads and obtain barcodes
+└── stLFR_barcode_split         # a backup script for splitting reads and obtain barcodes
     ├── barcode_list.txt        # the barcode whitelist of stLFR reads
     ├── split_barcode.pl        # the splitting main script
     └── split_barcode.sh        # a easy-to-use swap of split_barcode.pl
@@ -92,7 +92,7 @@ Two input data are required: the stLFR reads and the contigs.
   *If your data have not been splitted yet, then use the split barcode script below:*
 ```
 # if your raw stLFR reads contain more than 1 lane, you need to cat all lines into a single file first!
-YOUR-INSTALL-DIR/split_barcode/split_barcode.sh raw_read1.fq.gz raw_read2.fq.gz
+YOUR-INSTALL-DIR/stLFR_barcode_split/split_barcode.sh raw_read1.fq.gz raw_read2.fq.gz
 ```
 *Also, you can try "1.fq_BarcodeSplit" step from stLFR_v1(https://github.com/MGI-tech-bioinformatics/stLFR_v1.git)*
 
