@@ -229,7 +229,7 @@ MIN_C=1                                     # the min N size between 2 overlaped
     - We use bwa[3] to map stLFR reads against contigs.
         - you may replace this to any tools that can generate the correct SAM output.
 - Limitations
-    - We do hope a "not bad" contig, like N50 >= 15K and a "not bad" accuracy.
+    - We do hope "not bad" contigs, whose N50 >= 15K with "not bad" accuracy.
 - Resources
     - The memory peak for human-like-genome-size is 150G.
     - Some steps support multi-thread :
