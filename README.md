@@ -126,14 +126,14 @@ YOUR-INSTALL-DIR/bin/FakeSOAPContig < your-contig-sequence-file 1>your-prefix.co
 
 ```
 cd YOUR-PROJECT-DIR
-cp YOUR-INSTALL-DIR/Scaffold/conf.ini ./your-conf.ini
+cp YOUR-INSTALL-DIR/scaffold/conf.ini ./your-conf.ini
 vim conf.ini # and configure it!
 ```
 
 - 2nd. Generate the pipeline and work folder
 
 ```
-YOUR-INSTALL-DIR/Scaffold/prepare.sh ./your-conf.ini
+YOUR-INSTALL-DIR/scaffold/prepare.sh ./your-conf.ini
 ```
 *This command will create a new work folder named by PROJECT_NAME from ./your-conf.ini, which has all pipeline scripts.*
 
