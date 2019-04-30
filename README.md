@@ -5,6 +5,10 @@
   This is a scaffold assembler designed for stLFR reads[1].
 It uses the link-reads information from stLFR reads to assemble contigs to scaffolds.
 
+Here is an illustration of this pipeline: 
+
+![Pipeline](https://github.com/BGI-Qingdao/stLFR_Scaffold_Assembler/blob/master/image.png)
+
 ## <a name=contents>Table of Contents</a>
 
 - [Introduction](#intro)
