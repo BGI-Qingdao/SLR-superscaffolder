@@ -25,8 +25,8 @@ struct AppConfig
 
     int K;
     int min;
-    long total ;
-    float cov_all ;
+    long long total ;
+    double cov_all ;
     std::map<BGIQD::SOAP2::ContigId , ContigInfo> contigInfo;
     std::set<unsigned int> pass ;
     BGIQD::LOG::logger log;
@@ -72,7 +72,7 @@ struct AppConfig
 
     void CalcCov()
     {
-        Ecov = cov_all/(float) total;
+        Ecov = cov_all/(double) total;
         UniqueLow = 0.5f*Ecov;
         UniqueHigh = 1.5f*Ecov ;
         log<<BGIQD::LOG::lstart()<<"E(cov) = "<< Ecov<< " range ( "<<UniqueLow<<" , "<<UniqueHigh<<")"<< BGIQD::LOG::lend();
