@@ -135,7 +135,7 @@ struct AppConfig
         for( const auto & pair : scaff_helper.all_scaff)
         {
             BGIQD::AGP::Scaff2AGPItem s2a;
-            s2a.InitName(">scaffold_" + std::to_string(pair.first));
+            s2a.InitName("scaffold_" + std::to_string(pair.first));
             (*out)<<">scaffold_"<<pair.first<<'\n';
             std::string str ;
             for( const auto & i : pair.second.a_scaff) 
@@ -183,6 +183,7 @@ struct AppConfig
         if( fake == NULL )
             INFO_RETURN(" no fakesoap.name2index.map.txt file !!! ");
         delete fake ;
+        contig_name_cache.preload = true ;
         contig_name_cache.LoadStringIdCache("fakesoap.name2index.map.txt");
     }
 } config;

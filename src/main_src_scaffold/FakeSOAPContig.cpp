@@ -23,7 +23,7 @@ int main()
             {
                 std::cout<<">"<<count<<" length "<<curr_size<<" cvg_18.0_tip_0\n";
                 std::cerr<<count<<'\t'<<curr_size<<"\t1\n";
-                ofs<<count<<'\t'<<pre_name<<'\n';
+                ofs<<pre_name<<'\t'<<count<<'\n';
                 count+=2 ;
                 for(int i = 0 ; i < (int)cache.size() ;)
                 {

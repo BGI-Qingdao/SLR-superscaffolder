@@ -63,7 +63,7 @@ namespace BGIQD {
              char* dt = ctime(&now);
             // print comment first
             ost<<"##agp-version	2.0\n# ORGANISM: \n# TAX_ID: \n# ASSEMBLY NAME: \n";
-            ost<<"# ASSEMBLY DATE: "<<dt<<'\n';
+            ost<<"# ASSEMBLY DATE: "<<dt;//<<'\n'; //ctime string have a \n
             ost<<"# GENOME CENTER: \n# DESCRIPTION: \n";
             // print item line by line
             for( const auto & item : data )
