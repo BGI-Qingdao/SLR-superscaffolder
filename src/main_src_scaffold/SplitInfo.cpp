@@ -234,8 +234,6 @@ struct AppConfig
             delete in2 ;
         }
     }
-
-
 }config;
 
 int main(int argc , char ** argv)

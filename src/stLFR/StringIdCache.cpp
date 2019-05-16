@@ -49,13 +49,10 @@ namespace stLFR{
 
     std::string IdStringCache::Id(long id)
     {
-        try{
+        if( data.find(id) != data.end() )
             return data.at(id) ;
-        }
-        catch(...)
-        {
-            assert(0);
-        }
+        else
+            return std::to_string(id);
     }
 
     void IdStringCache::LoadStringIdCache( const std::string & file)
@@ -64,7 +61,7 @@ namespace stLFR{
             return ;
         auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(file);
         if( in == NULL )
-            FATAL( " open (barcodeList) file for read failed !!! " );
+            FATAL( " open \"string <--> id\" map  file for read failed !!! " );
         std::string line ;
         while(in &&!std::getline(*in,line).eof())
         {
@@ -75,8 +72,6 @@ namespace stLFR{
             delete in ;
 
     }
-
-
 
 }
 }

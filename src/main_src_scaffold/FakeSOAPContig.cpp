@@ -2,7 +2,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
-
+#include <fstream>
 int main()
 {
     int curr_size = 0 ;
@@ -10,7 +10,9 @@ int main()
     std::string line , cache ;
     std::cerr<<"Edge_num n n"<<'\n';
     std::cerr<<"index   length  reverseComplement"<<'\n';
-
+    std::ofstream ofs;
+    ofs.open("fakesoap.name2index.map.txt");
+    std::string pre_name ;
     while(! std::getline(std::cin,line).eof() )
     {
         if( line.empty() )
@@ -21,6 +23,7 @@ int main()
             {
                 std::cout<<">"<<count<<" length "<<curr_size<<" cvg_18.0_tip_0\n";
                 std::cerr<<count<<'\t'<<curr_size<<"\t1\n";
+                ofs<<count<<'\t'<<pre_name<<'\n';
                 count+=2 ;
                 for(int i = 0 ; i < (int)cache.size() ;)
                 {
@@ -32,6 +35,14 @@ int main()
                     }
                 }
                 curr_size = 0 ;
+                pre_name= "";
+            }
+            pre_name= "";
+            for( int i = 1 ; i <(int)line.size() ; i++ )
+            {
+                if( std::isblank(line[i] ) )
+                        break ;
+                pre_name+=line[i] ;
             }
             curr_size = 0 ;
             cache = "";
@@ -50,6 +61,7 @@ int main()
         {
             std::cout<<">"<<count<<" length "<<curr_size<<" cvg_18.0_tip_0\n";
             std::cerr<<count<<'\t'<<curr_size<<"\t1\n";
+            ofs<<count<<'\t'<<pre_name<<'\n';
             for(int i = 0 ; i <(int) cache.size() ;)
             {
                 std::cout<<cache[i];
@@ -65,6 +77,7 @@ int main()
         curr_size = 0 ;
         cache = "";
     }
+    ofs.close();
     return 0;
 }
 

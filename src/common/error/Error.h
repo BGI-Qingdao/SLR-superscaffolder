@@ -16,4 +16,11 @@
     {\
         std::cerr<<"WARN: "<<msg<<std::endl;\
     }
+
+#define INFO_RETURN( msg ) \
+    {\
+        std::cerr<<"INFO: "<<msg<<std::endl;\
+        return ;\
+    }
+
 #endif //__COMMON_ERROR_H__

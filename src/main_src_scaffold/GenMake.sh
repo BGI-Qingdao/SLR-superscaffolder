@@ -58,6 +58,7 @@ source_cpp =	../common/files/file_reader.cpp \\
 				../biocommon/fastq/fastq.cpp\\
 				../biocommon/seq/seq.cpp\\
 				../biocommon/paf/PAF.cpp\\
+                ../biocommon/agp/agp.cpp\\
                 ../biocommon/align_common/align_result.cpp\\
 		   		../common/files/file_writer.cpp \\
 		   		../common/files/gzstream.cpp \\
