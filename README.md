@@ -171,7 +171,7 @@ Your can remove the logs and tmps folder to free disk.
 The final output contains 2 files :
 
 ```
-YOUR-PREFIX.scaff_seq       # The final scaffold sequence file
+YOUR-PREFIX.scaff_seqs       # The final scaffold sequence file
 YOUR-PREFIX.scaff_agp       # Details about how we assemble INPUT into OUTPUT. in AGP[4] format.
 ```
 
@@ -268,7 +268,9 @@ MIN_C=1                                     # the min N size between 2 overlaped
 [2] [Hybrid assembly of the large and highly repetitive genome of Aegilops tauschii, a progenitor of bread wheat, with the MaSuRCA mega-reads algorithm][22]
 
 [3] [Aligning sequence reads, clone sequences and assembly contigs with BWA-MEM][33]
-[4] : https://www.ncbi.nlm.nih.gov/assembly/agp/AGP_Specification/
+[4] [AGP Specification][44]
+
+[44]:https://www.ncbi.nlm.nih.gov/assembly/agp/AGP_Specification
 [11]: https://www.ncbi.nlm.nih.gov/pubmed/30940689 
 [22]: https://genome.cshlp.org/content/27/5/787 
 [33]: https://arxiv.org/abs/1303.3997
