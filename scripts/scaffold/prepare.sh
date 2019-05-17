@@ -33,6 +33,7 @@ fi
 SOAP=$SOAP_DIR
 Contig=$SOAP/$PREFIX".contig"
 ContigIndex=$SOAP/$PREFIX".ContigIndex"
+NameMaper=$SOAP/"fakesoap.name2index.map.txt"
 if [[ ! -e $Contig || ! -e $ContigIndex  ]] ; then 
     echo "$SOAP/$PREFIX is not a valid SOAP prefix . exit ..."
     exit 1
@@ -54,6 +55,10 @@ echo "ln -s $Contig"
 ln -s $Contig
 echo "ln -s $ContigIndex"
 ln -s $ContigIndex
+if [[ -f $NameMaper ]] 
+    echo "ln -s $NameMaper"
+    ln -s $NameMaper
+fi
 chmod a-w $PREFIX*
 chmod a-x $PREFIX*
 # prepare scripts
