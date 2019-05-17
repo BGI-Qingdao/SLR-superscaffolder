@@ -31,7 +31,7 @@ Here is an illustration of this pipeline:
 
 *Clone all codes in 1 step.*
 ```
-git clone --recursive  https://github.com/BGI-QingDao/stLFR_Scaffold_Assembler.git YOUR-DOWNLOAD-DIR
+git clone --recursive  https://github.com/BGI-QingDao/stLFR_Scaffold_Assembler.git YOUR-DOWNLOAD-DIR --depth 10
 ```
 *Clone step by step*
 ```
