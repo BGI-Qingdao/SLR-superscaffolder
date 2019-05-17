@@ -4,7 +4,6 @@ mkdir output
 mkdir logs
 mkdir tmps
 
-mv xxx.scaff_infos output/ || echo xxx.scaff_infos is not exist!!!
 mv xxx.scaff_seqs output/ || echo xxx.scaff_seqs is not exist!!!
 mv xxx.scaff_agp output/ || echo xxx.scaff_seqs is not exist!!!
 

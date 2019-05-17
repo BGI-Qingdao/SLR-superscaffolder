@@ -55,7 +55,7 @@ echo "ln -s $Contig"
 ln -s $Contig
 echo "ln -s $ContigIndex"
 ln -s $ContigIndex
-if [[ -f $NameMaper ]] 
+if [[ -f $NameMaper ]] ; then
     echo "ln -s $NameMaper"
     ln -s $NameMaper
 fi

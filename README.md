@@ -17,6 +17,7 @@ Here is an illustration of this pipeline:
     - [Installation](#install)
     - [Preliminary](#pre)
     - [General usage](#usage)
+    - [Output results](#results)
     - [Configuration](#conf)
 - [Miscellaneous](#misc)
 - [Reference](#ref)
@@ -120,6 +121,9 @@ YOUR-INSTALL-DIR/stLFR_barcode_split/split_barcode.sh raw_read1.fq.gz raw_read2.
 YOUR-INSTALL-DIR/bin/FakeSOAPContig < your-contig-sequence-file 1>your-prefix.contig 2>your-prefix.ContigIndex
 ```
 
+*Notice : a file named "fakesoap.name2index.map.txt" will automatic generate that contains the mapping information about original name to new contig_id. Each re-run of FakeSOAPContig command will overwrite this file!*
+
+
 ### <a name=usage>General usage</a>
 
 - 1st. Prepare the conf.ini file
@@ -149,6 +153,27 @@ cd your-work-folder
 *Notice : If any error happens in the middle and the running exits upon the last step, you can re-run run.sh and it will automatically detect and skip all completed previous steps.*
 
 *Notice : Independent execution of each step is supperted. But to get the correct final output, you must re-run all subsequent steps.  That is, re-run step-[n+1 , 6] if you re-run step-n.*
+
+- 4th. Organize the final file structure for cleanning.
+
+*Notice : please do this ONLY after a sanity-check of everything and make sure the output is reasonable.*
+
+```
+./clean_prepare.sh
+```
+
+This command will store files in three categories : output , logs and tmps .
+
+Your can remove the logs and tmps folder to free disk.
+
+### <a name=results>Output Results</a>
+
+The final output contains 2 files :
+
+```
+YOUR-PREFIX.scaff_seq       # The final scaffold sequence file
+YOUR-PREFIX.scaff_agp       # Details about how we assemble INPUT into OUTPUT. in AGP[4] format.
+```
 
 ### <a name=conf>Configuration</a>
 
@@ -243,7 +268,7 @@ MIN_C=1                                     # the min N size between 2 overlaped
 [2] [Hybrid assembly of the large and highly repetitive genome of Aegilops tauschii, a progenitor of bread wheat, with the MaSuRCA mega-reads algorithm][22]
 
 [3] [Aligning sequence reads, clone sequences and assembly contigs with BWA-MEM][33]
-
+[4] : https://www.ncbi.nlm.nih.gov/assembly/agp/AGP_Specification/
 [11]: https://www.ncbi.nlm.nih.gov/pubmed/30940689 
 [22]: https://genome.cshlp.org/content/27/5/787 
 [33]: https://arxiv.org/abs/1303.3997
