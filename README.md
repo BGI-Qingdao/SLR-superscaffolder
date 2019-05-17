@@ -268,6 +268,7 @@ MIN_C=1                                     # the min N size between 2 overlaped
 [2] [Hybrid assembly of the large and highly repetitive genome of Aegilops tauschii, a progenitor of bread wheat, with the MaSuRCA mega-reads algorithm][22]
 
 [3] [Aligning sequence reads, clone sequences and assembly contigs with BWA-MEM][33]
+
 [4] [AGP Specification][44]
 
 [44]:https://www.ncbi.nlm.nih.gov/assembly/agp/AGP_Specification
