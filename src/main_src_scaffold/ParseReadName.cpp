@@ -60,6 +60,10 @@ struct AppConfig
         Fastq data;
         long next_id =1 ;
         std::set<std::string> barcodes;
+        barcodes.insert("0");
+        barcodes.insert("0_0");
+        barcodes.insert("0_0_0");
+        barcodes.insert("0_0_0_0");
         while( Reader::LoadNextFastq(*in , data))
         {
             (*out)<<data.head.readName<<'\t'<<index<<'\n';
