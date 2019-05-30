@@ -11,6 +11,8 @@
 #include "stLFR/StringIdCache.h"
 #include "biocommon/fastq/fastq.h"
 
+#include <set>
+
 struct AppConfig
 {
     typedef BGIQD::FASTQ::stLFRHeader::ReadType Type ;
@@ -56,6 +58,8 @@ struct AppConfig
         if ( in == NULL )
             FATAL( " failed to open read1 for read !!! ");
         Fastq data;
+        long next_id =1 ;
+        std::set<std::string> barcodes;
         while( Reader::LoadNextFastq(*in , data))
         {
             (*out)<<data.head.readName<<'\t'<<index<<'\n';
@@ -66,12 +70,24 @@ struct AppConfig
                     <<index<<" read... "<<BGIQD::LOG::lend();
             }
 
-            if( data.head.type == Type::readName_barcodeStr_index_barcodeNum )
+            
+            if( data.head.type ==
+                    Type::readName_barcodeStr_index_barcodeNum
+            ||  data.head.type ==  Type::readName_barcodeStr
+            ||  data.head.type == Type::readName_barcodeStr_index
+                    )
+
             {
                 barcode_list.preload = true ;
-                barcode_list.data.AssignTag(
-                        data.head.barcode_str,
-                        data.head.barcode_num);
+                if( barcodes.find(data.head.barcode_str)
+                 == barcodes.end() )
+                {
+                    barcode_list.data.AssignTag(
+                            data.head.barcode_str,
+                            next_id);
+                    next_id ++ ;
+                    barcodes.insert(data.head.barcode_str);
+                }
             }
             else
             {
