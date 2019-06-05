@@ -52,8 +52,8 @@ namespace BGIQD{
             PartB leftb ;
 
             std::string ToString() const;
-
-            void InitFromString() ;
+            static bool IsAGPStringValid( const std::string & str) ;
+            void InitFromString( const std::string & str) ;
         };
 
         struct AGPFile

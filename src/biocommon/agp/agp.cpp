@@ -118,5 +118,37 @@ namespace BGIQD {
             length += n_size;
             data.emplace_back(std::move(tmp));
         }
+
+        bool AGP_Item::IsAGPStringValid(const std::string &str) 
+        {
+            int tab_num = 0 ;
+            for( const char c : str ) if ( c == '\t' ) tab_num ++ ;
+            return tab_num == 8 ;
+        }
+        void AGP_Item::InitFromString(const std::string & str)
+        {
+//scaffold_1      1996387 1996396 172     N       10      scaffold        yes     map
+//scaffold_1      1996397 2012814 173     W       170_264 1       16418   -
+            int component_type_c ;
+            std::istringstream ist(str);
+            ist>>object>>object_beg>>object_end>>part_number>>component_type_c;
+            component_type = static_cast<ComponentType>(component_type_c);
+            if( component_type == ComponentType::N ||
+                    component_type == ComponentType::U )
+            {
+                std::string linkage_str ;
+                ist>>leftb.gap_length>>leftb.gap_type
+                    >>linkage_str>>leftb.linkage_evidence;
+                if( linkage_str == "yes")
+                    leftb.linkage = true ;
+                else 
+                    leftb.linkage = false ;
+            }
+            else
+            {
+                ist>>lefta.component_id>>lefta.component_beg
+                    >>lefta.component_end>>lefta.orientation ;
+            }
+        }
     }
 }
