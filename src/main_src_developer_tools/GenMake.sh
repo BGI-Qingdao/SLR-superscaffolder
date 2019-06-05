@@ -1,6 +1,7 @@
 #!/bin/bash
 
 apps="\
+ barcode2scaffold\
  BarcodeDepth\
  bin_ref\
  cpSpeed\
@@ -55,6 +56,7 @@ source_cpp =	../common/files/file_reader.cpp \\
 				../biocommon/seq/seq.cpp\\
 				../biocommon/paf/PAF.cpp\\
                 ../biocommon/align_common/align_result.cpp\\
+                ../biocommon/agp/agp.cpp\\
 		   		../common/files/file_writer.cpp \\
 		   		../common/files/gzstream.cpp \\
 				../common/log/log.cpp\\

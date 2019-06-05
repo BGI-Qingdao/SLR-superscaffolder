@@ -19,6 +19,7 @@ source_cpp =	../common/files/file_reader.cpp \
 				../biocommon/seq/seq.cpp\
 				../biocommon/paf/PAF.cpp\
                 ../biocommon/align_common/align_result.cpp\
+                ../biocommon/agp/agp.cpp\
 		   		../common/files/file_writer.cpp \
 		   		../common/files/gzstream.cpp \
 				../common/log/log.cpp\
@@ -45,9 +46,18 @@ source_o		= ${source_cpp:%.cpp=%.o}
 .cpp.o:
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
-jobs = BarcodeDepth bin_ref cpSpeed FakeRef2Scaff gapfillerIDY GenSentieonScaff GenBinSimMatrix IDYtool IDYtool_paf Cluster2MST2DOT Points4GapSize
+jobs = barcode2scaffold BarcodeDepth bin_ref cpSpeed FakeRef2Scaff gapfillerIDY GenSentieonScaff GenBinSimMatrix IDYtool IDYtool_paf Cluster2MST2DOT Points4GapSize
 
 all :  ${jobs}
+
+
+
+
+barcode2scaffold_cpp = barcode2scaffold.cpp
+barcode2scaffold_o = barcode2scaffold.o
+barcode2scaffold : clean ${barcode2scaffold_o} ${source_o} ../dev_bin
+	${CXX} ${barcode2scaffold_o} ${source_o} ${DEUBG_CXX} -o barcode2scaffold
+	mv $@ ../dev_bin/
 
 
 
@@ -149,7 +159,7 @@ Points4GapSize : clean ${Points4GapSize_o} ${source_o} ../dev_bin
 	mv $@ ../dev_bin/
 
 
-jobs_o=  ${BarcodeDepth_o} ${bin_ref_o} ${cpSpeed_o} ${FakeRef2Scaff_o} ${gapfillerIDY_o} ${GenSentieonScaff_o} ${GenBinSimMatrix_o} ${IDYtool_o} ${IDYtool_paf_o} ${Cluster2MST2DOT_o} ${Points4GapSize_o}
+jobs_o=  ${barcode2scaffold_o} ${BarcodeDepth_o} ${bin_ref_o} ${cpSpeed_o} ${FakeRef2Scaff_o} ${gapfillerIDY_o} ${GenSentieonScaff_o} ${GenBinSimMatrix_o} ${IDYtool_o} ${IDYtool_paf_o} ${Cluster2MST2DOT_o} ${Points4GapSize_o}
 
 dirty	   =${jobs_o} ${jobs} ${source_o}
 
