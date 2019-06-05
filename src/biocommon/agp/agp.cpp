@@ -129,7 +129,7 @@ namespace BGIQD {
         {
 //scaffold_1      1996387 1996396 172     N       10      scaffold        yes     map
 //scaffold_1      1996397 2012814 173     W       170_264 1       16418   -
-            int component_type_c ;
+            char component_type_c ;
             std::istringstream ist(str);
             ist>>object>>object_beg>>object_end>>part_number>>component_type_c;
             component_type = static_cast<ComponentType>(component_type_c);

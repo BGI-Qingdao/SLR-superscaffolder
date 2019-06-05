@@ -128,6 +128,7 @@ struct AppConf
                 <<barcode_id<<'\t'
                 <<contig_name<<'\t'
                 <<contig_id<<'\t'
+                <<contig_pos<<'\t'
                 <<scaff_name<<'\t'
                 <<scaff_pos<<'\n' ;
         else
