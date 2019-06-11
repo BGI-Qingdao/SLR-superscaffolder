@@ -17,7 +17,6 @@
 #include <stack>
 #include <sstream>
 
-
 struct AppConf
 {
 
@@ -109,7 +108,10 @@ struct AppConf
                 if( curr_log.junction_result.size() > 0 )
                 {
                     for( auto x : curr_log.junction_result )
+                    {
                         base_contig_sim_graph.RemoveNode(x);
+                        masked_nodes.insert(x);
+                    }
                 }
             }
             curr_log.mst_node_num = maximum_span_graph.nodes.size() ;
@@ -157,7 +159,10 @@ struct AppConf
             if( curr_log.junction_result.size() > 0 )
             {
                 for( auto x : curr_log.junction_result )
+                {
                     maximum_span_graph.RemoveNode(x);
+                    masked_nodes.insert(x);
+                }
             }
             auto splits = BGIQD::stLFR::ContigSimGraph::UnicomGraph(maximum_span_graph);
             for( auto & pair : splits)
@@ -168,6 +173,7 @@ struct AppConf
             }
             return ret ;
         }
+        std::set< BGIQD::stLFR::ContigSimGraph::NodeId > masked_nodes;
     };
 
     BGIQD::SOAP2::FileNames fNames ;
@@ -267,13 +273,9 @@ struct AppConf
             FATAL(" failed to open xxx.mst_error for write !!! ");
         for(const auto & pair : split_graphs)
         {
-            auto nodes = pair.second.GetAllJunctionResults();
-            for( auto & i: nodes )
+            for( auto & i: pair.second.masked_nodes)
             {
-                for( auto j : i )
-                {
-                    (*out3)<<j<<'\n';
-                }
+                (*out3)<<i<<'\n';
             }
         }
         delete out3;
