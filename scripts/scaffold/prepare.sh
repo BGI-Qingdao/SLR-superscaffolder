@@ -21,11 +21,11 @@ DATA=$INSTALL_DIR/scaffold
 
 # check target directory
 if [[ ! -d $EXEC_DIR || ! -e $EXEC_DIR/FakeSOAPContig ]] ; then 
-    echo $EXEC_DIR is not a valid stLFR Assembler bin dir . exit ..."
+    echo "$EXEC_DIR is not a valid stLFR Assembler bin dir . exit ..."
     exit 1
 fi
 if [[ ! -d $DATA || ! -f $DATA/step_1_prepare_info.m4 ]] ; then 
-    echo $DATA is not a valid stLFR Assembler Scaffold dir . exit ..."
+    echo "$DATA is not a valid stLFR Assembler Scaffold dir . exit ..."
     exit 1
 fi
 
