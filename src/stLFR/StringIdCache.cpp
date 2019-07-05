@@ -47,6 +47,13 @@ namespace stLFR{
         delete out;
     }
 
+    bool IdStringCache::HasId( long id ) 
+    {
+        if( data.find(id) != data.end() )
+            return true;
+        else
+            return false ;
+    }
     std::string IdStringCache::Id(long id)
     {
         if( data.find(id) != data.end() )

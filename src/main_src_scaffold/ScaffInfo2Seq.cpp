@@ -156,7 +156,10 @@ struct AppConfig
                         1,
                         pair.second.head.len,
                         '+');
-                (*out)<<pair.second.head.Head()<<'\n';
+                if( contig_name_cache.HasId(pair.second.head.contigId) )
+                    (*out)<<'>'<<contig_name_cache.Id(pair.second.head.contigId) <<'\n';
+                else
+                    (*out)<<pair.second.head.Head()<<'\n';
                 (*out)<<pair.second.seq.Seq(100);
                 agp_cache.data.push_back(*tmp.Items().begin());
             }

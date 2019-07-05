@@ -48,6 +48,8 @@ namespace BGIQD{
 
                 void LoadStringIdCache( const std::string & file);
 
+                bool HasId( long id ) ;
+
                 std::map<long , std::string > data;
         };
     } // namespace stLFR
