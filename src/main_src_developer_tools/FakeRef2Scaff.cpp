@@ -1,35 +1,13 @@
 #include "biocommon/fasta/fasta.h"
+
+#include "common/files/file_reader.h"
+#include "common/files/file_writer.h"
+#include "common/args/argsparser.h"
+#include "common/error/Error.h"
+
 #include <sstream>
 #include <string>
-
-bool checkArgs( int argc , char **argv )
-{
-    if( argc > 1 )
-    {
-        std::string argv1(argv[1]);
-        if( argv1  == "h" 
-                ||  argv1  == "-h"
-                ||  argv1  == "help"
-                ||  argv1  == "--help" )
-        {
-            std::cerr<<"Usage : \n\t"
-                <<argv[0]
-                <<" <ref.fa >xxx.sim.scaff"
-                <<std::endl;
-            return false ;
-        }
-        else
-        {
-            std::cerr<<"ERROR : argument is not needed !! "<<std::endl;
-            std::cerr<<"Usage : \n\t"
-                <<argv[0]
-                <<" <ref.fa >xxx.sim.scaff"
-                <<std::endl;
-            return false ;
-        }
-    }
-    return true ;
-}
+#include <cstdlib>
 
 typedef BGIQD::FASTA::Id_Desc_Head  Header ;
 typedef BGIQD::FASTA::Fasta<Header> Fa;
@@ -87,7 +65,7 @@ struct SimScaff
             assert(nlen() > 0 );
             Fa ret ;
             std::ostringstream ost;
-            ost <<">scaffold "<<index
+            ost <<">scaffold_"<<index
                 <<"\tL:"<<lstart<<','<<lend
                 <<"\tN:"<<nlen()
                 <<"\tR:"<<rstart<<','<<rend
@@ -102,12 +80,12 @@ struct SimScaff
         static SimScaff GenSimScaff( 
                 const RefContig & ref_contig ,
                 int start_pos ,
-                int & next_start_pos 
+                int & next_start_pos ,
+                int left_len ,
+                int right_len ,
+                int n_len_max 
                 )
         {
-            const int left_len = 2000 ;
-            const int right_len = 2000 ;
-            const int n_len_max = 1000 ;
 
             int need_space = left_len + right_len + n_len_max ;
             SimScaff ret ;
@@ -123,24 +101,54 @@ struct SimScaff
         }
 };
 
+int random_contig(int seed)
+{
+    if(seed != 0 )
+        return seed ;
+    else
+        return rand() % 29000 + 1000 ;
+}
+
+int random_gap(int seed)
+{
+    if(seed != 0 )
+        return seed ;
+    else
+        return rand() % 10000 +1;
+}
+int random_start(int seed)
+{
+    if(seed != 0 )
+        return seed ;
+    else
+        return rand() % 1000 ;
+}
 int main(int argc , char **argv)
 {
-    // Check parameters
-    if( !checkArgs( argc , argv ) )
-    {
-        return -1 ;
-    }
+    START_PARSE_ARGS
+        DEFINE_ARG_REQUIRED(std::string,input,"the input reference file");
+        DEFINE_ARG_REQUIRED(std::string,output,"the output scaffold file");
+        DEFINE_ARG_OPTIONAL(int , contig_len , "the length of contig , 0 means random from [1K~30K]","0");
+        DEFINE_ARG_OPTIONAL(int , gap_len , "the length of gap , 0 means random from [1~10K]","0");
+        DEFINE_ARG_OPTIONAL(int , start_scaffold, "the shift size for 1st scaffold, 0 means random from [0,1K]" ,"0");
+    END_PARSE_ARGS
 
+    if( contig_len.to_int() < 0 )
+        FATAL(" ERROR : contig_len < 0 !! ");
+    if( start_scaffold.to_int() < 0)
+        FATAL(" ERROR : contig_len < 0 !! ");
+    srand(time(0));
     // Load ref 
     std::vector<Fa> AllRef;
     BGIQD::FASTA::FastaReader<Fa> Reader ;
-    Reader.LoadAllFasta(std::cin ,AllRef); 
-
+    auto rin = BGIQD::FILES::FileReaderFactory
+        ::GenerateReaderFromFileName(input.to_string());
+    if( !rin)
+        FATAL( " ERROR : failed to open input file to read !!!" );
+    Reader.LoadAllFasta(*rin ,AllRef); 
+    delete rin ;
     if( AllRef.size() < 1 )
-    {
-        std::cerr<<"no ref sequence loaded !!! error !!! exit ... "<<std::endl;
-        return -1 ;
-    }
+        FATAL("no ref sequence loaded !!! error !!! exit ... ")
 
     if( AllRef.size() > 1 )
     {
@@ -191,25 +199,36 @@ int main(int argc , char **argv)
     std::vector<SimScaff> scaffs;
     for( const auto & a_ref_contig : AllRefContig )
     {
-        int start_pos = a_ref_contig.start_pos ;
+        int start_pos = a_ref_contig.start_pos + random_start(start_scaffold.to_int());
         while(1)
         {
-            auto a_scaff = SimScaff::GenSimScaff(a_ref_contig,start_pos,start_pos);
+
+            auto a_scaff = SimScaff::GenSimScaff(a_ref_contig,
+                    start_pos
+                    ,start_pos
+                    ,random_contig(contig_len.to_int())
+                    ,random_contig(contig_len.to_int())
+                    ,random_gap(gap_len.to_int())
+                    );
             if( a_scaff.Valid() )
                 scaffs.push_back(a_scaff);
             else
                 break ;
         }
     }
+    auto sout = BGIQD::FILES::FileWriterFactory
+        ::GenerateWriterFromFileName(output.to_string());
+    if(!sout)
+        FATAL("failed to open output file to write !!! ");
     // Print scaff
     int index = 0 ;
     for( const auto & a_scaff : scaffs )
     {
         index ++ ;
         auto scaff_fa = a_scaff.ToReal(the_ref,index);
-        std::cout<<scaff_fa.head.Head()<<std::endl;
-        std::cout<<scaff_fa.seq.Seq(100);
+        *sout<<scaff_fa.head.Head()<<std::endl;
+        *sout<<scaff_fa.seq.Seq(100);
     }
-
+    delete sout;
     return 0;
 }
