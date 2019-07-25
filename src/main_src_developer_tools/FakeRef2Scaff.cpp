@@ -94,7 +94,7 @@ struct SimScaff
                 return ret ;
             ret.lstart = start_pos ;
             ret.lend = start_pos + left_len -1 ;
-            ret.rstart = ret.lend + 1 + (std::rand() % n_len_max +1);
+            ret.rstart = ret.lend + 1 + n_len_max ;
             ret.rend = ret.rstart + right_len -1 ;
             next_start_pos = ret.rend +1 ;
             return ret ;
