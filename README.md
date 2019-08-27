@@ -1,5 +1,4 @@
-# stLFR Scaffold Assembler
-
+# SLR-superscaffolder
 ## <a name=intro>Introduction</a>
 
   This is a scaffold assembler designed for stLFR reads[1].
@@ -7,7 +6,7 @@ It uses the link-reads information from stLFR reads to assemble contigs to scaff
 
 Here is an illustration of this pipeline: 
 
-![Pipeline](https://github.com/BGI-Qingdao/stLFR_Scaffold_Assembler/blob/master/image.png)
+![Pipeline](https://github.com/BGI-Qingdao/SLR-superscaffolder/blob/master/image.png)
 
 ## <a name=contents>Table of Contents</a>
 
@@ -31,11 +30,11 @@ Here is an illustration of this pipeline:
 
 *Clone all codes in 1 step.*
 ```
-git clone --recursive  https://github.com/BGI-QingDao/stLFR_Scaffold_Assembler.git YOUR-DOWNLOAD-DIR --depth 10
+git clone --recursive  https://github.com/BGI-QingDao/SLR-superscaffolder.git YOUR-DOWNLOAD-DIR --depth 10
 ```
 *Clone step by step*
 ```
-git clone https://github.com/BGI-QingDao/stLFR_Scaffold_Assembler.git YOUR-DOWNLOAD-DIR
+git clone https://github.com/BGI-QingDao/SLR-superscaffolder.git YOUR-DOWNLOAD-DIR
 cd YOUR-DOWNLOAD-DIR
 git submodule init
 git submodule update
