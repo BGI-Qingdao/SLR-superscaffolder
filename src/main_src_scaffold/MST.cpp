@@ -127,7 +127,7 @@ struct AppConf
             return item.base_node_num < 4
                 || ( int(logs.size()) >= max_correct_loop_num )
                 || ( float(item.base_node_num-item.junction_result.size())  / float(item.base_basic_node_num) <= max_del_fac )
-                || ( item.tip_result.tip_num == 0 && item.junction_result.size() == 0 ) ;
+                || ( /*item.tip_result.tip_num == 0 &&*/ item.junction_result.size() == 0 ) ;
         }
 
         void CorrectGraph( )
