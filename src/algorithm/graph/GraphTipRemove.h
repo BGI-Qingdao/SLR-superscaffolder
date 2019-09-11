@@ -44,6 +44,7 @@ namespace BGIQD{
                     int tip_num ;
                     int tip_node_num ;
                     int base_left_node_num ;
+                    std::vector<unsigned int> tip_contigs;
 
                     void Init()
                     {
@@ -51,6 +52,7 @@ namespace BGIQD{
                         tip_num = 0;
                         tip_node_num = 0;
                         base_left_node_num = 0;
+                        tip_contigs.clear();
                     }
                 };
 
@@ -183,6 +185,7 @@ namespace BGIQD{
                             ret.tip_num ++ ;
                             ret.tip_node_num += x.size() ;
                             TipRemove( base , x);
+                            ret.tip_contigs.insert(ret.tip_contigs.begin(), x.begin(),x.end() );
                         }
 
                     }while( true );

@@ -286,7 +286,7 @@ int main(int argc , char ** argv)
                             3 for chop 1 bin for a contig ", "1");
 
     DEFINE_ARG_OPTIONAL(float ,bin_factor , "factor of smallest bin in the middle", "0.5");
-    DEFINE_ARG_OPTIONAL(int,  max_bin_size , "max_bin_size for head&tail mode" ,"15000");
+    DEFINE_ARG_OPTIONAL(int,  max_bin_size , "max bin area from head & tail " ,"15000");
     DEFINE_ARG_OPTIONAL(bool,  flatten, "flatten mode " ,"false");
     DEFINE_ARG_OPTIONAL(std::string,  middle_name, "the middle name of output suffix " ,"");
     END_PARSE_ARGS

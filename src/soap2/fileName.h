@@ -102,6 +102,7 @@ namespace BGIQD {
 
             DEFINE_SUFFIX(mintreetrunklinear, ".mintree_trunk_linear");
             DEFINE_SUFFIX(mst_error, ".mst_error");
+            DEFINE_SUFFIX(mst_tips, ".mst_tips");
 
             DEFINE_SUFFIX(bin_cluster, ".bin_cluster");
             // ContigDLink

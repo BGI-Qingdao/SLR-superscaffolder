@@ -195,7 +195,7 @@ int main(int argc, char **argv)
                                                     In \n\
                                                         xxx.mintree_trunk_linear; xxx.bin_cluster ;\n\
                                                     Out\n\
-                                                        xxx.gap_oo ; xxx.gap_area");
+                                                        xxx.gap_sim ; xxx.gap_area");
     DEFINE_ARG_OPTIONAL(int , max_gap , "the max gap size ", "15000"); 
     END_PARSE_ARGS;
 

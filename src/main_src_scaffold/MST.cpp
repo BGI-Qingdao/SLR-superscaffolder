@@ -280,12 +280,27 @@ struct AppConf
         }
         delete out3;
     }
+
+    void PrintTips()
+    {
+        auto out3 = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fNames.mst_tips());
+        if( out3 == NULL )
+            FATAL(" failed to open xxx.mst_tips for write !!! ");
+        for(const auto & pair : split_graphs)
+        {
+            for( auto & i: pair.second.curr_log.tip_result.tip_contigs)
+            {
+                (*out3)<<i<<'\n';
+            }
+        }
+        delete out3;
+    }
 }config;
 
 int main(int argc , char **argv )
 {
     START_PARSE_ARGS
-        DEFINE_ARG_REQUIRED(std::string , prefix , "prefix , Input xxx.cluster . Output xxx.minTree ");
+        DEFINE_ARG_REQUIRED(std::string , prefix , "prefix , Input xxx.cluster . Output xxx.mintree_trunk_linear && xxx.mst_error && xxx.mst_tips ");
         DEFINE_ARG_OPTIONAL(float , threshold, " threshold of simularity","0.1");
         DEFINE_ARG_OPTIONAL(float , del_fac, " threshold of del junction node","0.9");
         DEFINE_ARG_OPTIONAL(int, del_round, "maximum del round ","1000");
@@ -299,5 +314,6 @@ int main(int argc , char **argv )
     config.CorrectGraph();
     config.GenerateLinears();
     config.PrintJunctionNodes() ;
+    config.PrintTips();
     return 0 ;
 }
