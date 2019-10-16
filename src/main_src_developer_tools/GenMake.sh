@@ -13,6 +13,7 @@ apps="\
  IDYtool_paf\
  Cluster2MST2DOT\
  Points4GapSize\
+ filterPairFQ\
 "
 
 jobs_o=" "
