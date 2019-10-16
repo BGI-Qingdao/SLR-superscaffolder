@@ -1,5 +1,10 @@
 # How to run this test case . 
 
+## step 0 , install software
+
+```
+YOUR-DOWNLOAD-DIR/install.sh YOUR-INSTALL-DIR
+```
 
 ## step 1 , edit conf.ini
 
@@ -13,7 +18,7 @@ BWA_DIR=YOUR-BWA-DIR
 ## step 2 , prepare scripts
 
 ```
-YOUR-INSTALL-DIR/prepare.sh conf.ini
+YOUR-INSTALL-DIR/scaffold/prepare.sh conf.ini
 ```
 Above command will create a new folder *scaff_example* and put all scripts into it.
 
