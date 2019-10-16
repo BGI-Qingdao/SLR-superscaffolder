@@ -49,7 +49,7 @@ int main(int argc , char ** argv )
     delete i_r1 ;
     // Load read2
     Reader reader2;
-    reader2.LoadAllFastq(*i_r1,buffer);
+    reader2.LoadAllFastq(*i_r2,buffer);
     std::cerr<<" Load "<<buffer.size()<<" reads from read2. "<<std::endl;
     for( const auto & r : buffer )
     {
