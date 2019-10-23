@@ -83,7 +83,8 @@ struct SimScaff
                 int & next_start_pos ,
                 int left_len ,
                 int right_len ,
-                int n_len_max 
+                int n_len_max ,
+                int scaff_inter_gap 
                 )
         {
 
@@ -96,7 +97,7 @@ struct SimScaff
             ret.lend = start_pos + left_len -1 ;
             ret.rstart = ret.lend + 1 + n_len_max ;
             ret.rend = ret.rstart + right_len -1 ;
-            next_start_pos = ret.rend +1 ;
+            next_start_pos = ret.rend +scaff_inter_gap ;
             return ret ;
         }
 };
@@ -131,6 +132,7 @@ int main(int argc , char **argv)
         DEFINE_ARG_OPTIONAL(int , contig_len , "the length of contig , 0 means random from [1K~30K]","0");
         DEFINE_ARG_OPTIONAL(int , gap_len , "the length of gap , 0 means random from [1~10K]","0");
         DEFINE_ARG_OPTIONAL(int , start_scaffold, "the shift size for 1st scaffold, 0 means random from [0,1K]" ,"0");
+        DEFINE_ARG_OPTIONAL(int , scaffold_inter_gap, "the shift size for between scaffold" ,"1");
     END_PARSE_ARGS
 
     if( contig_len.to_int() < 0 )
@@ -209,6 +211,7 @@ int main(int argc , char **argv)
                     ,random_contig(contig_len.to_int())
                     ,random_contig(contig_len.to_int())
                     ,random_gap(gap_len.to_int())
+                    ,scaffold_inter_gap.to_int()
                     );
             if( a_scaff.Valid() )
                 scaffs.push_back(a_scaff);
