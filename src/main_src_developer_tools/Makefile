@@ -46,7 +46,7 @@ source_o		= ${source_cpp:%.cpp=%.o}
 .cpp.o:
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
-jobs = barcode2scaffold BarcodeDepth bin_ref cpSpeed FakeRef2Scaff gapfillerIDY GenSentieonScaff GenBinSimMatrix IDYtool IDYtool_paf Cluster2MST2DOT Points4GapSize filterPairFQ
+jobs = barcode2scaffold BarcodeDepth bin_ref cpSpeed FakeRef2Scaff gapfillerIDY GenSentieonScaff GenBinSimMatrix IDYtool IDYtool_paf Cluster2MST2DOT ContigSimAnalysis Points4GapSize filterPairFQ
 
 all :  ${jobs}
 
@@ -152,6 +152,15 @@ Cluster2MST2DOT : clean ${Cluster2MST2DOT_o} ${source_o} ../dev_bin
 
 
 
+ContigSimAnalysis_cpp = ContigSimAnalysis.cpp
+ContigSimAnalysis_o = ContigSimAnalysis.o
+ContigSimAnalysis : clean ${ContigSimAnalysis_o} ${source_o} ../dev_bin
+	${CXX} ${ContigSimAnalysis_o} ${source_o} ${DEUBG_CXX} -o ContigSimAnalysis
+	mv $@ ../dev_bin/
+
+
+
+
 Points4GapSize_cpp = Points4GapSize.cpp
 Points4GapSize_o = Points4GapSize.o
 Points4GapSize : clean ${Points4GapSize_o} ${source_o} ../dev_bin
@@ -168,7 +177,7 @@ filterPairFQ : clean ${filterPairFQ_o} ${source_o} ../dev_bin
 	mv $@ ../dev_bin/
 
 
-jobs_o=  ${barcode2scaffold_o} ${BarcodeDepth_o} ${bin_ref_o} ${cpSpeed_o} ${FakeRef2Scaff_o} ${gapfillerIDY_o} ${GenSentieonScaff_o} ${GenBinSimMatrix_o} ${IDYtool_o} ${IDYtool_paf_o} ${Cluster2MST2DOT_o} ${Points4GapSize_o} ${filterPairFQ_o}
+jobs_o=  ${barcode2scaffold_o} ${BarcodeDepth_o} ${bin_ref_o} ${cpSpeed_o} ${FakeRef2Scaff_o} ${gapfillerIDY_o} ${GenSentieonScaff_o} ${GenBinSimMatrix_o} ${IDYtool_o} ${IDYtool_paf_o} ${Cluster2MST2DOT_o} ${ContigSimAnalysis_o} ${Points4GapSize_o} ${filterPairFQ_o}
 
 dirty	   =${jobs_o} ${jobs} ${source_o}
 

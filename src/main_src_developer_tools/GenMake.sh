@@ -12,6 +12,7 @@ apps="\
  IDYtool\
  IDYtool_paf\
  Cluster2MST2DOT\
+ ContigSimAnalysis\
  Points4GapSize\
  filterPairFQ\
 "
