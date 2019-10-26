@@ -99,6 +99,7 @@ int parse_log_mst( std::istream  & ist )
     while( ! ist.eof() )
     {
         std::getline(ist,line);
+        if(line.empty() ) continue ;
         if( std::regex_match(line , rg) )
         {
             std::smatch rm;
@@ -121,6 +122,7 @@ int parse_contig_index( std::istream  & ist )
     {
         id =0 ; length = 0 ;
         std::getline(ist,line);
+        if(line.empty() ) continue ;
         std::istringstream isst(line);
         isst>>id>>length;
         if( length > 0 ) 
@@ -142,6 +144,7 @@ int parse_mst_seeds( std::istream  & ist )
     {
         id =0 ; length = 0 ;
         std::getline(ist,line);
+        if(line.empty() ) continue ;
         std::istringstream isst(line);
         isst>>id>>length;
         if( length > 0 && contigs.find(id) != contigs.end() )
@@ -161,6 +164,7 @@ int parse_sort_unique_contigs(std::istream & ist)
     while( ! ist.eof() )
     {
         std::getline(ist,line);
+        if(line.empty() ) continue ;
         QuastInfo tmp ;
         tmp.InitFromString(line);
         if( contigs.find(tmp.contig) != contigs.end() )
@@ -265,6 +269,7 @@ void parse_mst_cluster(std::istream & ist)
     while( ! ist.eof() )
     {
         std::getline(ist,line);
+        if(line.empty() ) continue ;
         BGIQD::stLFR::ContigRelation tmp;
         tmp.InitFromString(line);
         for( auto x : tmp.sims )
@@ -382,7 +387,7 @@ void test_mst_seeds()
 
 void test_sorted_unique_contigs()
 {
-    std::string test="\n\
+    std::string test="\
 107988  110691  1       2704    chr19   1_length_2704_cvg_18.0_tip_0        100.0           True\n\
 115453  117505  1380    1       chr19   3_length_2556_cvg_18.0_tip_0  96.74           True\n\
 242529  246906  1       4387    chr19   7_length_4387_cvg_18.0_tip_0 99.54           True\n\
