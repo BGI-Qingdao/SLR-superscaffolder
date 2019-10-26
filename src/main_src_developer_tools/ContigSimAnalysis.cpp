@@ -128,6 +128,7 @@ int parse_contig_index( std::istream  & ist )
         if( length > 0 ) 
         {   assert( contigs.find(id) == contigs.end() );
             contigs[id].init();
+            contigs[id].id = id ;
             contigs[id].length = length ;
             ret ++ ;
         }
