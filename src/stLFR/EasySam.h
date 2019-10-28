@@ -11,7 +11,7 @@ namespace BGIQD {
     {
         struct EasySam
         {
-            long read_id ;
+            long long read_id ;
             unsigned int contig_name ;
             int pos_1bp;
             int barcode ;
@@ -51,7 +51,7 @@ namespace BGIQD {
 
         struct PE_Single
         {
-            long  read1;
+            long long  read1;
             bool match_reverse1;
             unsigned int contig1;
             int pos_1bp1;
@@ -78,8 +78,8 @@ namespace BGIQD {
 
         struct PEInfo
         {
-            long  read1;
-            long  read2;
+            long long read1;
+            long long read2;
             bool match_reverse1;
             bool match_reverse2;
             unsigned int contig1;
@@ -145,7 +145,7 @@ namespace BGIQD {
 
         struct EasySam_V1
         {
-            long read_id ;
+            long long read_id ;
 
             int read_index;
 

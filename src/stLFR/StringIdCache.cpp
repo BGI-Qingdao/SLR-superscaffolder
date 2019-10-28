@@ -32,7 +32,9 @@ namespace stLFR{
         while(in &&!std::getline(*in,line).eof())
         {
             auto pair = BGIQD::STRING::split(line,"\t");
-            data.AssignTag(pair.at(0), std::stoi(pair.at(1)));
+            if(pair.size() <2 )
+                continue ;
+            data.AssignTag(pair.at(0), std::stoll(pair.at(1)));
         }
         if( in )
             delete in ;

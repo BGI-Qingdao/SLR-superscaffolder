@@ -44,7 +44,7 @@ struct AppConfig
 
     void ParseRead1()
     {
-        long index = 1 ;
+        long long index = 1 ;
         auto out = BGIQD::FILES::
             FileWriterFactory::GenerateWriterFromFileName
             (fNames.readNameList());

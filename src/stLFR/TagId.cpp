@@ -4,7 +4,7 @@
 namespace BGIQD{
     namespace stLFR{
 
-        long TagId::AddTag(const std::string & tag)
+        long long TagId::AddTag(const std::string & tag)
         {
             auto itr = m_tag2num.find(tag);
             if( itr != m_tag2num.end() )
@@ -15,7 +15,7 @@ namespace BGIQD{
             return curr - 1;
         }
 
-        long TagId::Id(const std::string & tag ) const 
+        long long TagId::Id(const std::string & tag ) const 
         {
             auto itr = m_tag2num.find(tag);
             if( itr != m_tag2num.end() )
@@ -23,7 +23,7 @@ namespace BGIQD{
             return -1;
         }
 
-        void TagId::AssignTag( const std::string &tag, long number )
+        void TagId::AssignTag( const std::string &tag,long long number )
         {
             m_tag2num[tag] = number;
         }
