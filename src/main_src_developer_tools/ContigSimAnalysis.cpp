@@ -6,7 +6,6 @@
   *
   ********************************************************/
 
-
 #include "common/files/file_reader.h"
 #include "common/files/file_writer.h"
 #include "common/args/argsparser.h"
@@ -239,7 +238,7 @@ float JS( unsigned int left ,unsigned int r )
     else
         return -1 ;
 }
-
+// count and print rank "step" 's simularity
 int processRank(int step)
 {
     unsigned int  ret = 0 ;
@@ -262,7 +261,104 @@ int processRank(int step)
     delete out;
     return ret ;
 }
+// count and print rank > "step" 's simularity
+int ProcessRankMoreThan(int step)
+{
+    unsigned int  ret = 0 ;
+    std::string file = output_dir+"/step_morethan_"+std::to_string(step)+"_sim.txt";
+    auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(file);
+    for( const auto & pair : JS_matrix )
+    {
+        unsigned int left = pair.first;
+        for( const auto & pair1 : pair.second ) 
+        {
+            unsigned int right = pair1.second ;
+            if( left > right ) 
+                continue ;
+            if( contigs.find( left ) == contigs.end() )
+                continue ;
+            if( contigs.find( right ) == contigs.end() )
+                continue ;
+            const auto & left_contig = contigs.at(left);
+            const auto & right_contig = contigs.at(right);
+            if( left_contig.ref == "" || right_contig.ref =="" ||  left_contig.ref != right_contig.ref )
+                continue ;
+            if( abs( left_contig.rank - right_contig.rank ) < step )
+                continue ;
+            if ( left_contig.rank > right_contig.rank )
+                std::swap(left,right);
+            {
+                ret ++ ;
+                (*out)<<left<<'\t'<<right<<'\t'<<pair1.second<<'\n';
+            }
+        }
+    }
+    delete out;
+    return ret ;
+}
+// count and print cross ref simularity
+int ProcessCrossRef()
+{
+    unsigned int  ret = 0 ;
+    std::string file = output_dir+"/cross_ref_sim.txt";
+    auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(file);
+    for( const auto & pair : JS_matrix )
+    {
+        unsigned int left = pair.first;
+        for( const auto & pair1 : pair.second ) 
+        {
+            unsigned int right = pair1.second ;
+            if( left > right ) 
+                continue ;
+            if( contigs.find( left ) == contigs.end() )
+                continue ;
+            if( contigs.find( right ) == contigs.end() )
+                continue ;
+            const auto & left_contig = contigs.at(left);
+            const auto & right_contig = contigs.at(right);
+            if( left_contig.ref == "" || right_contig.ref =="" ||  left_contig.ref == right_contig.ref )
+                continue ;
+            {
+                ret ++ ;
+                (*out)<<left<<'\t'<<right<<'\t'<<pair1.second<<'\n';
+            }
+        }
+    }
+    delete out;
+    return ret ;
+}
 
+// count and print cross ref simularity
+int ProcessNonSeeds()
+{
+    unsigned int  ret = 0 ;
+    std::string file = output_dir+"/non_seeds_sim.txt";
+    auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(file);
+    for( const auto & pair : JS_matrix )
+    {
+        unsigned int left = pair.first;
+        for( const auto & pair1 : pair.second ) 
+        {
+            unsigned int right = pair1.second ;
+            if( left > right ) 
+                continue ;
+            if( contigs.find( left ) == contigs.end() )
+                continue ;
+            if( contigs.find( right ) == contigs.end() )
+                continue ;
+            const auto & left_contig = contigs.at(left);
+            const auto & right_contig = contigs.at(right);
+            if( !(left_contig.ref == "" ||  right_contig.ref =="") )
+                continue ;
+            {
+                ret ++ ;
+                (*out)<<left<<'\t'<<right<<'\t'<<pair1.second<<'\n';
+            }
+        }
+    }
+    delete out;
+    return ret ;
+}
 
 void parse_mst_cluster(std::istream & ist)
 {
@@ -484,6 +580,9 @@ int main( int argc , char ** argv )
         report("# step 1 edge           :   "+std::to_string(processRank(1))+"\n");
         report("# step 2 edge           :   "+std::to_string(processRank(2))+"\n");
         report("# step 3 edge           :   "+std::to_string(processRank(3))+"\n");
+        report("# step >3 edge          :   "+std::to_string(ProcessRankMoreThan(3))+"\n");
+        report("# step cross_ref edge   :   "+std::to_string(ProcessCrossRef())+"\n");
+        report("# step non-seeds edge   :   "+std::to_string(ProcessNonSeeds())+"\n");
 
     report("############    Summary end    #####################\n");
     report("END");
