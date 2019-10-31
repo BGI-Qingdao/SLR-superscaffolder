@@ -272,7 +272,7 @@ int ProcessRankMoreThan(int step)
         unsigned int left = pair.first;
         for( const auto & pair1 : pair.second ) 
         {
-            unsigned int right = pair1.second ;
+            unsigned int right = pair1.first;
             if( left > right ) 
                 continue ;
             if( contigs.find( left ) == contigs.end() )
@@ -307,7 +307,7 @@ int ProcessCrossRef()
         unsigned int left = pair.first;
         for( const auto & pair1 : pair.second ) 
         {
-            unsigned int right = pair1.second ;
+            unsigned int right = pair1.first ;
             if( left > right ) 
                 continue ;
             if( contigs.find( left ) == contigs.end() )
@@ -339,7 +339,7 @@ int ProcessNonSeeds()
         unsigned int left = pair.first;
         for( const auto & pair1 : pair.second ) 
         {
-            unsigned int right = pair1.second ;
+            unsigned int right = pair1.first ;
             if( left > right ) 
                 continue ;
             if( contigs.find( left ) == contigs.end() )
@@ -531,6 +531,7 @@ int main( int argc , char ** argv )
         DEFINE_ARG_REQUIRED(std::string,mst_cluster," xxx.mst.cluster file .");
         DEFINE_ARG_REQUIRED(std::string,output_dir," output directoy name .");
         DEFINE_ARG_OPTIONAL(bool, test, "run self test","0");
+        DEFINE_ARG_OPTIONAL(int , step_max , "will print detail about step [1,step_max] ","5");
     END_PARSE_ARGS
 
     if( test.to_bool() )
@@ -551,38 +552,40 @@ int main( int argc , char ** argv )
     report("############    Summary report  #####################\n");
     { // log_mst
         auto mst = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(log_mst.to_string());
-        report("# contig-sim sub graph  :   "+std::to_string(parse_log_mst(*mst))+"\n");
+        report("# contig-sim sub graph  :   "+std::to_string(parse_log_mst(*mst)));
         delete mst ;
     }
     { // xxx.ContigIndex 
         auto index = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(contig_index.to_string());
-        report("# contigs               :   "+std::to_string(parse_contig_index(*index))+"\n");
+        report("# contigs               :   "+std::to_string(parse_contig_index(*index)));
         delete index ;
     }
     { // xxx.mst.seeds
         auto seeds = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(mst_seeds.to_string());
-        report("# seed-contigs          :   "+std::to_string(parse_mst_seeds(*seeds))+"\n");
+        report("# seed-contigs          :   "+std::to_string(parse_mst_seeds(*seeds)));
         delete seeds ;
     }
     { // sort_unique_contig.txt
         auto sorts = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(sorted_unique.to_string());
-        report("# unique-contigs        :   "+std::to_string(parse_sort_unique_contigs(*sorts))+"\n");
+        report("# unique-contigs        :   "+std::to_string(parse_sort_unique_contigs(*sorts)));
         delete sorts ;
     }
-        report("# unique-seeds          :   "+std::to_string(count_seeds_uniq())+"\n");
-        report("# non-unque-seeds       :   "+std::to_string(count_seeds_wrong())+"\n");
+        report("# unique-seeds          :   "+std::to_string(count_seeds_uniq()));
+        report("# non-unque-seeds       :   "+std::to_string(count_seeds_wrong()));
     prepare_ref_ranks();
     {//  xxx.mst.cluster
         auto cluster = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(mst_cluster.to_string());
         parse_mst_cluster(*cluster);
         delete cluster ;
     }
-        report("# step 1 edge           :   "+std::to_string(processRank(1))+"\n");
-        report("# step 2 edge           :   "+std::to_string(processRank(2))+"\n");
-        report("# step 3 edge           :   "+std::to_string(processRank(3))+"\n");
-        report("# step >3 edge          :   "+std::to_string(ProcessRankMoreThan(3))+"\n");
-        report("# step cross_ref edge   :   "+std::to_string(ProcessCrossRef())+"\n");
-        report("# step non-seeds edge   :   "+std::to_string(ProcessNonSeeds())+"\n");
+    int i = 0 ;
+    for(  i = 1 ; i<= step_max.to_int() ; i++ )
+        report("# step "+std::to_string(i)+" edge           :   "+std::to_string(processRank(i)));
+
+        report("# step >="+std::to_string(i)+" edge         :   "+std::to_string(ProcessRankMoreThan(i)));
+
+        report("# step cross_ref edge   :   "+std::to_string(ProcessCrossRef()));
+        report("# step non-seeds edge   :   "+std::to_string(ProcessNonSeeds()));
 
     report("############    Summary end    #####################\n");
     report("END");
