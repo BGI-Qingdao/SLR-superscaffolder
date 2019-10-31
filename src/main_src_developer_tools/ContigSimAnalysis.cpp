@@ -283,7 +283,7 @@ int ProcessRankMoreThan(int step)
             const auto & right_contig = contigs.at(right);
             if( left_contig.ref == "" || right_contig.ref =="" ||  left_contig.ref != right_contig.ref )
                 continue ;
-            if( abs( left_contig.rank - right_contig.rank ) < step )
+            if( abs( left_contig.rank - right_contig.rank ) <= step )
                 continue ;
             if ( left_contig.rank > right_contig.rank )
                 std::swap(left,right);
@@ -531,7 +531,7 @@ int main( int argc , char ** argv )
         DEFINE_ARG_REQUIRED(std::string,mst_cluster," xxx.mst.cluster file .");
         DEFINE_ARG_REQUIRED(std::string,output_dir," output directoy name .");
         DEFINE_ARG_OPTIONAL(bool, test, "run self test","0");
-        DEFINE_ARG_OPTIONAL(int , step_max , "will print detail about step [1,step_max] ","5");
+        DEFINE_ARG_OPTIONAL(int , step_max , "will print detail about step [1,step_max] ","3");
     END_PARSE_ARGS
 
     if( test.to_bool() )
@@ -582,7 +582,7 @@ int main( int argc , char ** argv )
     for(  i = 1 ; i<= step_max.to_int() ; i++ )
         report("# step "+std::to_string(i)+" edge           :   "+std::to_string(processRank(i)));
 
-        report("# step >="+std::to_string(i)+" edge         :   "+std::to_string(ProcessRankMoreThan(i)));
+        report("# step >="+std::to_string(i)+" edge         :   "+std::to_string(ProcessRankMoreThan(i-1)));
 
         report("# step cross_ref edge   :   "+std::to_string(ProcessCrossRef()));
         report("# step non-seeds edge   :   "+std::to_string(ProcessNonSeeds()));
