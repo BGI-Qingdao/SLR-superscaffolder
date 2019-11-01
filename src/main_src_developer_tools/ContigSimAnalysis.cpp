@@ -377,11 +377,11 @@ void PrintSortSims(int step)
                 continue ;
             const auto & left_contig = contigs.at(left);
             const auto & right_contig = contigs.at(right);
-            if( !(left_contig.ref == "" ||  right_contig.ref =="") )
+            if( left_contig.ref == "" ||  right_contig.ref =="" )
             {
                 step_sim_map[-1].push_back(pair1.second);
             }
-            else if ( left_contig.ref != right_contig.ref ) 
+            else if ( left_contig.ref != right_contig.ref )
             {
                 step_sim_map[-2].push_back(pair1.second);
             }
@@ -437,7 +437,107 @@ void PrintSortSims(int step)
             else end_column ++ ;
             (*out)<<" , ";
         }
+        index ++ ;
         (*out)<<"\n";
+    }
+    delete out ;
+}
+
+void PrintContigSims( int step )
+{
+    std::map< int , std::map< int , std::vector<float> > > contig_step_sim_map;
+    for( const auto & pair : JS_matrix )
+    {
+        unsigned int left = pair.first;
+        for( const auto & pair1 : pair.second ) 
+        {
+            unsigned int right = pair1.first ;
+            if( contigs.find( left ) == contigs.end() )
+                continue ;
+            if( contigs.find( right ) == contigs.end() )
+                continue ;
+            const auto & left_contig = contigs.at(left);
+            const auto & right_contig = contigs.at(right);
+            if( left_contig.ref == "" ||  right_contig.ref =="" )
+            {
+                contig_step_sim_map[left][-1] .push_back( pair1.second );
+                contig_step_sim_map[right][-1] .push_back( pair1.second );
+            }
+            else if ( left_contig.ref != right_contig.ref )
+            {
+                contig_step_sim_map[left][-2] .push_back(  pair1.second );
+                contig_step_sim_map[right][-2] .push_back( pair1.second );
+            }
+            else {
+                int curr_step = std::abs( left_contig.rank - right_contig.rank );
+                if( curr_step > step )
+                {
+                    contig_step_sim_map[left][-3] .push_back( pair1.second );
+                    contig_step_sim_map[right][-3] .push_back( pair1.second );
+                }
+                else
+                {
+                    contig_step_sim_map[left][curr_step] .push_back( pair1.second );
+                    contig_step_sim_map[right][curr_step] .push_back( pair1.second );
+                }
+            }
+        }
+    }
+    auto get_rank1 = [](const std::map< int , std::vector<float> > & buff , int step  ) -> float {
+        if( buff.find(step) == buff.end() ) return 0 ;
+        float ret = 0 ;
+        for( float x : buff.at(step) )
+            if( x > ret ) ret = x ;
+        return ret ;
+    };
+    //std::vector< std::tuple< float ,int > > index_buffer;
+    //for( const auto & pair : contig_step_sim_map )
+    //{
+    //    index_buffer.push_back( std::make_tuple( get_rank1(pair.second , 1 ) , pair.first ) ) ;
+    //}
+    //std::sort( index_buffer.rbegin() , index_buffer.rend() );
+
+    std::string file = output_dir+"/contig_id_sim.csv";
+    auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(file);
+    int total_column = 3 + step ;
+    // print header
+    (*out)<<"contig ,";
+    (*out)<<"rank > "<<step<<" , ";
+    (*out)<<"corss_ref ,";
+    (*out)<<"non_unique ,";
+    for( int i =0 ; i <step ; i++ )
+        (*out)<<"rank "<<i+1<<" ,";
+    (*out)<<'\n';
+    // print data matrix
+    int end_column = 0 ;
+    size_t index = 0 ;
+    for( const auto & pair : contig_step_sim_map )
+    {
+        int contig = pair.first ;
+        for( const auto & pair1 : pair.second  )
+        {
+            int type = pair1.first ;
+            for( float sim : pair1.second ) 
+            {
+                (*out)<<contig<<" , ";
+                if( type == -3 ){
+                    (*out)<<sim<<" , , , ";
+                    for( int i = 0 ; i < step ; i ++ ) (*out) << ", ";
+                } else if ( type == -2 ) {
+                    (*out)<<" , "<<sim<<" , , ";
+                    for( int i = 0 ; i < step ; i ++ ) (*out) << ", ";
+                } else if ( type == -1 ) {
+                    (*out)<<" , , "<<sim<<" , ";
+                    for( int i = 0 ; i < step ; i ++ ) (*out) << ", ";
+                } else {
+                    (*out)<<" , , ,  ";
+                    for( int i = 0 ; i < step ; i ++ ) {
+                        if( i == type -1 ) (*out) << sim <<"," ; else (*out) << ", ";
+                    }
+                }
+                (*out)<<'\n';
+            }
+        }
     }
     delete out ;
 }
@@ -671,5 +771,6 @@ int main( int argc , char ** argv )
     report("############    Summary end    #####################\n");
     report("END");
     PrintSortSims(step_max.to_int());
+    PrintContigSims(step_max.to_int());
     return 0 ;
 }
