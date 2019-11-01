@@ -360,6 +360,88 @@ int ProcessNonSeeds()
     return ret ;
 }
 
+void PrintSortSims(int step)
+{
+    std::map< int , std::vector<float> > step_sim_map;
+    for( const auto & pair : JS_matrix )
+    {
+        unsigned int left = pair.first;
+        for( const auto & pair1 : pair.second ) 
+        {
+            unsigned int right = pair1.first ;
+            if( left > right ) 
+                continue ;
+            if( contigs.find( left ) == contigs.end() )
+                continue ;
+            if( contigs.find( right ) == contigs.end() )
+                continue ;
+            const auto & left_contig = contigs.at(left);
+            const auto & right_contig = contigs.at(right);
+            if( !(left_contig.ref == "" ||  right_contig.ref =="") )
+            {
+                step_sim_map[-1].push_back(pair1.second);
+            }
+            else if ( left_contig.ref != right_contig.ref ) 
+            {
+                step_sim_map[-2].push_back(pair1.second);
+            }
+            else {
+                int curr_step = std::abs( left_contig.rank - right_contig.rank );
+                if( curr_step > step )
+                {
+                    step_sim_map[-3].push_back(pair1.second);
+                }
+                else
+                {
+                    step_sim_map[curr_step].push_back(pair1.second);
+                }
+            }
+        }
+    }
+    for( auto & pair : step_sim_map )
+    {
+        std::sort( pair.second.rbegin() , pair.second.rend() );
+    }
+    std::string file = output_dir+"/sorted_sim.csv";
+    auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(file);
+    int total_column = 0 ;;
+    // print header
+     for( const auto & pair : step_sim_map ) {
+        if( pair.first == -3 ) {
+            (*out)<<"rank > "<<step<<" , ";
+        }
+        else if ( pair.first == -2 ) {
+            (*out)<<"corss_ref ,";
+        }
+        else if ( pair.first == -1 ) {
+            (*out)<<"non_unique ,";
+        }
+        else {
+            (*out)<<"rank "<<pair.first<<" ,";
+        }
+        total_column ++ ;
+    }
+    (*out)<<'\n';
+    // print data matrix
+    int end_column = 0 ;
+    size_t index = 0 ;
+    while( end_column < total_column )
+    {
+        end_column = 0 ;
+        for( const auto & pair : step_sim_map )
+        {
+            if( pair.second.size() > index )
+            {
+                (*out)<<pair.second[index];
+            }
+            else end_column ++ ;
+            (*out)<<" , ";
+        }
+        (*out)<<"\n";
+    }
+    delete out ;
+}
+
 void parse_mst_cluster(std::istream & ist)
 {
     std::string line ;
@@ -578,16 +660,16 @@ int main( int argc , char ** argv )
         parse_mst_cluster(*cluster);
         delete cluster ;
     }
-    int i = 0 ;
-    for(  i = 1 ; i<= step_max.to_int() ; i++ )
+    for( int  i = 1 ; i<= step_max.to_int() ; i++ )
         report("# step "+std::to_string(i)+" edge           :   "+std::to_string(processRank(i)));
 
-        report("# step >="+std::to_string(i)+" edge         :   "+std::to_string(ProcessRankMoreThan(i-1)));
+        report("# step >="+std::to_string(step_max.to_int()+1)+" edge         :   "+std::to_string(ProcessRankMoreThan(step_max.to_int())) );
 
         report("# step cross_ref edge   :   "+std::to_string(ProcessCrossRef()));
         report("# step non-seeds edge   :   "+std::to_string(ProcessNonSeeds()));
 
     report("############    Summary end    #####################\n");
     report("END");
+    PrintSortSims(step_max.to_int());
     return 0 ;
 }
