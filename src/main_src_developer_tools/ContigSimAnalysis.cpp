@@ -550,6 +550,8 @@ void PrintContigSims( int step )
         for( const auto & pair1 : pair.second ) 
         {
             unsigned int right = pair1.first ;
+            if( left > right )
+                continue ;
             if( contigs.find( left ) == contigs.end() )
                 continue ;
             if( contigs.find( right ) == contigs.end() )
