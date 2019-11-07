@@ -227,7 +227,7 @@ unsigned int nib(const std::string & ref , int index , int step)
 {
     if( index + step < 0 )  return  0 ;
     if( ref_ranks.find( ref ) == ref_ranks.end() ) return 0; 
-    if( index + step >= ref_ranks[ref].size() ) return 0 ;
+    if( index + step >= (int)ref_ranks[ref].size() ) return 0 ;
     return std::get<1>(ref_ranks[ref][index+step]);
 }
 
@@ -246,7 +246,7 @@ int processRank(int step)
     auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(file);
     for( const auto & pair : ref_ranks ) 
     {
-        for( int i =step ; i< pair.second.size() ; i++ )
+        for( int i =step ; i< (int)pair.second.size() ; i++ )
         {
             int left = std::get<1>(pair.second.at(i-step));
             int r = std::get<1>(pair.second.at(i));
@@ -443,6 +443,104 @@ void PrintSortSims(int step)
     delete out ;
 }
 
+int printMaxSimInfo(int step)
+{
+    int ret = 0 ;
+    auto get_max_sims = []( const std::map<unsigned int , float> & sims ) {
+        assert(sims.size() > 0 ) ;
+        unsigned int right = -1 ; float max_sim = 0 ;
+        for( const auto & pair : sims )
+        {
+            if( pair.second > max_sim ){
+                right = pair.first ;
+                max_sim = pair.second ;
+            }
+        }
+        return std::make_pair(right,max_sim);
+    };
+    std::string file = output_dir+"/max_sim_by_rank_"+std::to_string(step)+"_.txt";
+    auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(file);
+    (*out)<<"contig_id\tJS\tparter_contig_id\n";
+    for( const auto & pair : JS_matrix )
+    {
+        unsigned int left = pair.first;
+        auto pair1 = get_max_sims(pair.second);
+        unsigned int right = pair1.first ;
+        if( contigs.find( left ) == contigs.end() )
+            continue ;
+        if( contigs.find( right ) == contigs.end() )
+            continue ;
+        const auto & left_contig = contigs.at(left);
+        const auto & right_contig = contigs.at(right);
+        if( left_contig.ref == "" ||  right_contig.ref =="" )
+            continue ;
+        else if ( left_contig.ref != right_contig.ref )
+            continue ;
+        else {
+            int curr_step = std::abs( left_contig.rank - right_contig.rank );
+            if( curr_step != step )
+                continue ;
+            ret ++ ;
+            (*out)<<left<<'\t'<<pair1.second<<'\t'<<right<<'\n';
+        }
+    }
+    delete out ;
+    return ret ;
+}
+
+int printMaxSimInfoNot12()
+{
+    int ret = 0 ;
+    auto get_max_sims = []( const std::map<unsigned int , float> & sims ) {
+        assert(sims.size() > 0 ) ;
+        unsigned int right = -1 ; float max_sim = 0 ;
+        for( const auto & pair : sims )
+        {
+            if( pair.second > max_sim ){
+                right = pair.first ;
+                max_sim = pair.second ;
+            }
+        }
+        return std::make_pair(right,max_sim);
+    };
+    std::string file = output_dir+"/max_sim_by_rank_not_1_2_.txt";
+    auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(file);
+    (*out)<<"contig_id\tJS\tparter_contig_id\n";
+    for( const auto & pair : JS_matrix )
+    {
+        unsigned int left = pair.first;
+        auto pair1 = get_max_sims(pair.second);
+        unsigned int right = pair1.first ;
+        if( contigs.find( left ) == contigs.end() )
+            continue ;
+        if( contigs.find( right ) == contigs.end() )
+            continue ;
+        const auto & left_contig = contigs.at(left);
+        const auto & right_contig = contigs.at(right);
+        if( left_contig.ref == "" ||  right_contig.ref =="" )
+        {
+            ret ++ ;
+            (*out)<<left<<'\t'<<pair1.second<<'\t'<<right<<'\n';
+            continue ;
+        }
+        else if ( left_contig.ref != right_contig.ref )
+        {
+            ret ++ ;
+            (*out)<<left<<'\t'<<pair1.second<<'\t'<<right<<'\n';
+            continue ;
+        }
+        else {
+            int curr_step = std::abs( left_contig.rank - right_contig.rank );
+            if( curr_step <= 2 )
+                continue ;
+            ret ++ ;
+            (*out)<<left<<'\t'<<pair1.second<<'\t'<<right<<'\n';
+        }
+    }
+    delete out ;
+    return ret ;
+}
+
 void PrintContigSims( int step )
 {
     std::map< int , std::map< int , std::vector<float> > > contig_step_sim_map;
@@ -483,13 +581,13 @@ void PrintContigSims( int step )
             }
         }
     }
-    auto get_rank1 = [](const std::map< int , std::vector<float> > & buff , int step  ) -> float {
-        if( buff.find(step) == buff.end() ) return 0 ;
-        float ret = 0 ;
-        for( float x : buff.at(step) )
-            if( x > ret ) ret = x ;
-        return ret ;
-    };
+    //auto get_rank1 = [](const std::map< int , std::vector<float> > & buff , int step  ) -> float {
+    //    if( buff.find(step) == buff.end() ) return 0 ;
+    //    float ret = 0 ;
+    //    for( float x : buff.at(step) )
+    //        if( x > ret ) ret = x ;
+    //    return ret ;
+    //};
     //std::vector< std::tuple< float ,int > > index_buffer;
     //for( const auto & pair : contig_step_sim_map )
     //{
@@ -499,7 +597,7 @@ void PrintContigSims( int step )
 
     std::string file = output_dir+"/contig_id_sim.csv";
     auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(file);
-    int total_column = 3 + step ;
+    //int total_column = 3 + step ;
     // print header
     (*out)<<"contig ,";
     (*out)<<"rank > "<<step<<" , ";
@@ -509,8 +607,8 @@ void PrintContigSims( int step )
         (*out)<<"rank "<<i+1<<" ,";
     (*out)<<'\n';
     // print data matrix
-    int end_column = 0 ;
-    size_t index = 0 ;
+    //int end_column = 0 ;
+    //size_t index = 0 ;
     for( const auto & pair : contig_step_sim_map )
     {
         int contig = pair.first ;
@@ -612,6 +710,7 @@ void check_file_write(const std::string & file_name)
     delete t;
 }
 
+
 /********************************************************
   *
   * test function
@@ -696,6 +795,7 @@ void test_mst_cluster()
     std::cerr<<"test mst_cluster pass!"<<std::endl;
 }
 
+
 /********************************************************
   *
   * main function
@@ -704,7 +804,6 @@ void test_mst_cluster()
 
 int main( int argc , char ** argv )
 {
-
     START_PARSE_ARGS
         DEFINE_ARG_REQUIRED(std::string,log_mst," log_mst file .");
         DEFINE_ARG_REQUIRED(std::string,contig_index," xxx.ContigIndex file .");
@@ -767,7 +866,9 @@ int main( int argc , char ** argv )
 
         report("# step cross_ref edge   :   "+std::to_string(ProcessCrossRef()));
         report("# step non-seeds edge   :   "+std::to_string(ProcessNonSeeds()));
-
+        report("# max sim rank 1 seed   :   "+std::to_string(printMaxSimInfo(1)));
+        report("# max sim rank 2 seed   :   "+std::to_string(printMaxSimInfo(2)));
+        report("# max sim rank !1/2 seed:   "+std::to_string(printMaxSimInfoNot12()));
     report("############    Summary end    #####################\n");
     report("END");
     PrintSortSims(step_max.to_int());
