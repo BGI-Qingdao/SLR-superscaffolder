@@ -94,7 +94,7 @@ struct AppConf
     void PrintMinTree(const std::string & output)
     {
         auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(output);
-        if(out)
+        if(out==NULL)
             FATAL(" can't open output file for write !");
         (*out) << "graph {"<<'\n';
         for( auto & pair : split_graphs)
