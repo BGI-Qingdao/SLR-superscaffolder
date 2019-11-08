@@ -42,7 +42,7 @@ namespace BGIQD {
             std::string ToString() const
             {
                 std::ostringstream ost;
-                ost<<from<<"\t--\t"<<to<<" [ "<<AttrString()<<" ]";
+                ost<<from<<"\t--\t"<<to ; //<<" [ "<<AttrString()<<" ]";
                 return ost.str();
             }
         };
@@ -157,23 +157,25 @@ namespace BGIQD {
             {
                 return TKHelper::LinearTrunk( mintree );
             }
-            void PrintAsDOT(std::ostream & out) const
+            void PrintDOTEdges(std::ostream & out) const
             {
-                out<<Edge::DOTHead()<<std::endl;
-                std::set<int> multis;
+                //out<<Edge::DOTHead()<<std::endl;
+                //std::set<int> multis;
                 for( const auto & e : edges )
                 {
-                    out<<"\t"<<e.ToString()<<std::endl;
-                    if( GetNode(e.from).EdgeNum() > 2 )
-                        multis.insert(e.from);
-                    if(  GetNode(e.to).EdgeNum()>2 )
-                        multis.insert(e.to);
+                    out<<"\t"<<e.ToString()<<'\n';
+                //    if( GetNode(e.from).EdgeNum() > 2 )
+                //        multis.insert(e.from);
+                //    if(  GetNode(e.to).EdgeNum()>2 )
+                //        multis.insert(e.to);
                 }
+                /*
                 for( int i : multis )
                 {
                     out<<i<< " [ shape=box]  "<<std::endl;
                 }
                 out<<"}"<<std::endl;
+                */
             }
         };
     }

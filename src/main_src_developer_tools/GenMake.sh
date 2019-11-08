@@ -5,6 +5,7 @@ apps="\
  BarcodeDepth\
  bin_ref\
  cpSpeed\
+ MST_only\
  FakeRef2Scaff\
  gapfillerIDY\
  GenSentieonScaff\
