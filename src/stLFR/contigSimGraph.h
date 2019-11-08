@@ -42,7 +42,7 @@ namespace BGIQD {
             std::string ToString() const
             {
                 std::ostringstream ost;
-                ost<<from<<"\t--\t"<<to ; //<<" [ "<<AttrString()<<" ]";
+                ost<<from<<"\t--\t"<<to<<" [ "<<AttrString()<<" ]";
                 return ost.str();
             }
         };
