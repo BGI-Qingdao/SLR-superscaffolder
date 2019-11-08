@@ -6,6 +6,7 @@ apps="\
  bin_ref\
  cpSpeed\
  MST_only\
+ MST_analysis\
  FakeRef2Scaff\
  gapfillerIDY\
  GenSentieonScaff\
