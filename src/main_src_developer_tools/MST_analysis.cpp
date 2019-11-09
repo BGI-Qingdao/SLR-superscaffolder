@@ -136,7 +136,7 @@ int parse_mintree( std::istream & ist )
         float sim ;
         std::istringstream isst(line);
         //17      --      2849 [ label="0.367841" ]
-        sscanf(line.c_str(), "%llu\t--\t%llu [ lable=\"%f\" ]",&from, &to,&sim);
+        sscanf(line.c_str(), "%llu\t--\t%llu [ label=\"%f\" ]",&from, &to,&sim);
         edges.push_back({ (unsigned int )from , (unsigned int)to , 0 , sim});
         nodes[from].AddEdge(from,edges.size()-1);
         nodes[to].AddEdge(to ,edges.size()-1);
@@ -685,6 +685,21 @@ void report(const std::string &  log)
     std::cout<<log<<'\n';
 }
 
+void print_edge_rank_violin_csv()
+{
+    auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(output_dir + "/edges_rank_violin.csv");
+    (*out)<<"type , js \n";
+    for( const auto & edge : edges ) 
+    {
+        if( edge.rank > 0 &&edge.rank < 4 )
+            (*out)<<"rank_"<<edge.rank<<'\t'<<edge.sim<<'\n';
+        else if ( edge.rank == 0 )
+            (*out)<<"non_unique\t"<<edge.sim<<'\n';
+        else
+            (*out)<<"rank_gt_3\t"<<edge.sim<<'\n';
+    }
+    delete out;
+}
 void print_edge_rank_csv()
 {
     std::vector<float> rank[5];
@@ -698,7 +713,7 @@ void print_edge_rank_csv()
     for( int i = 0 ; i < 5 ; i++ )
         std::sort(rank[i].rbegin(),rank[i].rend());
     auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(output_dir + "/edges_rank.csv");
-    (*out)<<"non-unique , rank-1 , rank-2 , rank-3 , rank>4\n";
+    (*out)<<"non_unique , rank_1 , rank_2 , rank_3 , rank_gt_3\n";
     int end_columns = 0 ;
     int index = 0 ;
     while(end_columns < 5 ) 
@@ -825,5 +840,6 @@ int main( int argc , char ** argv )
     report("############    Summary end    #####################\n");
     report("END");
     print_edge_rank_csv();
+    print_edge_rank_violin_csv();
     return 0 ;
 }
