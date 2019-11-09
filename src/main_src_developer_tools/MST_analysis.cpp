@@ -688,15 +688,17 @@ void report(const std::string &  log)
 void print_edge_rank_violin_csv()
 {
     auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(output_dir + "/edges_rank_violin.csv");
-    (*out)<<"type , js \n";
+    (*out)<<"id , type , js \n";
+    int index = 0 ;
     for( const auto & edge : edges ) 
     {
+        (*out)<<++index<<" ,";
         if( edge.rank > 0 &&edge.rank < 4 )
-            (*out)<<"rank_"<<edge.rank<<'\t'<<edge.sim<<'\n';
+            (*out)<<"rank_"<<edge.rank<<" ,"<<edge.sim<<'\n';
         else if ( edge.rank == 0 )
-            (*out)<<"non_unique\t"<<edge.sim<<'\n';
+            (*out)<<"non_unique , "<<edge.sim<<'\n';
         else
-            (*out)<<"rank_gt_3\t"<<edge.sim<<'\n';
+            (*out)<<"rank_gt_3 ,"<<edge.sim<<'\n';
     }
     delete out;
 }
