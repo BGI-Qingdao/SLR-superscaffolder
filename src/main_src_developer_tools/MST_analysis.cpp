@@ -684,6 +684,42 @@ void report(const std::string &  log)
     (*report_file) << log <<'\n';
     std::cout<<log<<'\n';
 }
+
+void print_edge_rank_csv()
+{
+    std::vector<float> rank[5];
+    for( const auto & edge : edges ) 
+    {
+        if( edge.rank < 4 )
+            rank[edge.rank].push_back(edge.sim);
+        else
+            rank[4].push_back(edge.sim);
+    }
+    for( int i = 0 ; i < 5 ; i++ )
+        std::sort(rank[i].rbegin(),rank[i].rend());
+    auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(output_dir + "/edges_rank.csv");
+    (*out)<<"non-unique , rank-1 , rank-2 , rank-3 , rank>4\n";
+    int end_columns = 0 ;
+    int index = 0 ;
+    while(end_columns < 5 ) 
+    {
+        end_columns = 0 ;
+        for( int i = 0 ; i < 5 ; i ++ )
+        {
+            if( (int)rank[i].size() > index )
+                (*out)<<rank[i][index]<<" , " ;
+            else 
+            {
+                (*out)<<" , " ;
+                end_columns ++ ; 
+            }
+        }
+        (*out)<<'\n';
+        index ++ ;
+    }
+    delete out ;
+}
+
 /********************************************************
   *
   * check params functions
@@ -714,16 +750,6 @@ void check_file_write(const std::string & file_name)
 }
 
 
-/********************************************************
-  *
-  * test function
-  *
-  ******************************************************/
-
-void test_parse_mintree()
-{
-
-}
 
 /********************************************************
   *
@@ -737,14 +763,8 @@ int main( int argc , char ** argv )
         DEFINE_ARG_REQUIRED(std::string,sorted_unique," sorted_unique_contigs.txt file .");
         DEFINE_ARG_REQUIRED(std::string,mintree," mintree.file .");
         DEFINE_ARG_REQUIRED(std::string,output_dir," output directoy name .");
-        DEFINE_ARG_OPTIONAL(bool, test, "run self test","0");
     END_PARSE_ARGS
 
-    if( test.to_bool() )
-    {
-        test_parse_mintree();
-        return 0;
-    }
     check_file_read(sorted_unique.to_string());
     check_file_read(mintree.to_string());
     create_output_dir(output_dir.to_string() );
@@ -804,6 +824,6 @@ int main( int argc , char ** argv )
         report("# non-unique edge       :   "+std::to_string(count_edge_rank(0)));
     report("############    Summary end    #####################\n");
     report("END");
-    //print_edge_rank_csv();
+    print_edge_rank_csv();
     return 0 ;
 }
