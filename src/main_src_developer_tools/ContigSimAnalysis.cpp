@@ -541,6 +541,25 @@ int printMaxSimInfoNot12()
     return ret ;
 }
 
+void PrintSeeds()
+{
+    std::string file = output_dir+"/seeds_type.txt";
+    auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(file);
+    (*out) << "id"<< '\t' <<"type\n";
+    for( const auto & pair : contigs )
+    {
+        const auto & c = pair.second ;
+        if( c.is_seed )
+        {
+            if( c.is_uniq )
+                (*out) << c.id << '\t' <<"is_unique\n";
+            else
+                (*out) << c.id << '\t' <<"not_unique\n";
+        }
+    }
+    delete out;
+}
+
 void PrintContigSims( int step )
 {
     std::map< int , std::map< int , std::vector<float> > > contig_step_sim_map;
@@ -875,5 +894,6 @@ int main( int argc , char ** argv )
     report("END");
     PrintSortSims(step_max.to_int());
     PrintContigSims(step_max.to_int());
+    PrintSeeds();
     return 0 ;
 }
