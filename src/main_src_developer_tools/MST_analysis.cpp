@@ -188,17 +188,19 @@ int  get_rank( unsigned int from , unsigned int to)
     const auto & to_node = nodes.at(to);
     if( ! from_node.is_unique  || from_node.ref == "" ) return 0 ;
     if( ! to_node.is_unique  || to_node.ref == "" ) return 0 ;
-    if( from_node.ref != to_node.ref )  return 0 ;
+    if( from_node.ref != to_node.ref )  return -2 ;
     return std::abs(from_node.rank  - to_node.rank );
 }
 
 int count_edge_rank(int num)
 {
     std::string file ;
-    if( num != 0 )
+    if( num > 0 )
         file = output_dir+"/edge_rank_"+std::to_string(num)+".txt";
-    else
+    else if (num == 0 )
         file = output_dir+"/edge_non_unique.txt";
+    else if (num == -2 )
+        file = output_dir+"/edge_cross_ref.txt";
     auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(file);
     int ret = 0 ;
     for( const auto & edge : edges )
@@ -697,31 +699,38 @@ void print_edge_rank_violin_csv()
             (*out)<<"rank_"<<edge.rank<<" ,"<<edge.sim<<'\n';
         else if ( edge.rank == 0 )
             (*out)<<"non_unique , "<<edge.sim<<'\n';
-        else
+        else if ( edge.rank >= 4 )
             (*out)<<"rank_gt_3 ,"<<edge.sim<<'\n';
+        else if ( edge.rank == -2 )
+            (*out)<<"cross_ref ,"<<edge.sim<<'\n';
+        else ;
     }
     delete out;
 }
 void print_edge_rank_csv()
 {
-    std::vector<float> rank[5];
+    std::vector<float> rank[6];
     for( const auto & edge : edges ) 
     {
-        if( edge.rank < 4 )
+        if( edge.rank < 4  && edge.rank >= 0)
             rank[edge.rank].push_back(edge.sim);
-        else
+        else if ( edge.rank >= 4 )
             rank[4].push_back(edge.sim);
+        else if (edge.rank == -2 )
+            rank[5].push_back(edge.sim);
+        else 
+            assert(0) ;
     }
-    for( int i = 0 ; i < 5 ; i++ )
+    for( int i = 0 ; i < 6 ; i++ )
         std::sort(rank[i].rbegin(),rank[i].rend());
     auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(output_dir + "/edges_rank.csv");
-    (*out)<<"non_unique , rank_1 , rank_2 , rank_3 , rank_gt_3\n";
+    (*out)<<"non_unique , rank_1 , rank_2 , rank_3 , rank_gt_3 , rank_cross_ref\n";
     int end_columns = 0 ;
     int index = 0 ;
-    while(end_columns < 5 ) 
+    while(end_columns < 6 ) 
     {
         end_columns = 0 ;
-        for( int i = 0 ; i < 5 ; i ++ )
+        for( int i = 0 ; i < 6 ; i ++ )
         {
             if( (int)rank[i].size() > index )
                 (*out)<<rank[i][index]<<" , " ;
@@ -839,6 +848,7 @@ int main( int argc , char ** argv )
         report("# rank 3 edge           :   "+std::to_string(count_edge_rank(3)));
         report("# rank>3 edge           :   "+std::to_string(count_edge_rank_gt(3)));
         report("# non-unique edge       :   "+std::to_string(count_edge_rank(0)));
+        report("# cross-ref edge        :   "+std::to_string(count_edge_rank(-2)));
     report("############    Summary end    #####################\n");
     report("END");
     print_edge_rank_csv();

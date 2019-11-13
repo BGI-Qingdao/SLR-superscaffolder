@@ -826,12 +826,12 @@ void test_mst_cluster()
 int main( int argc , char ** argv )
 {
     START_PARSE_ARGS
-        DEFINE_ARG_REQUIRED(std::string,log_mst," log_mst file .");
         DEFINE_ARG_REQUIRED(std::string,contig_index," xxx.ContigIndex file .");
         DEFINE_ARG_REQUIRED(std::string,mst_seeds," xxx.mst.seeds file .");
         DEFINE_ARG_REQUIRED(std::string,sorted_unique," sorted_unique_contigs.txt file .");
         DEFINE_ARG_REQUIRED(std::string,mst_cluster," xxx.mst.cluster file .");
         DEFINE_ARG_REQUIRED(std::string,output_dir," output directoy name .");
+        DEFINE_ARG_OPTIONAL(std::string,log_mst," log_mst file .","");
         DEFINE_ARG_OPTIONAL(bool, test, "run self test","0");
         DEFINE_ARG_OPTIONAL(int , step_max , "will print detail about step [1,step_max] ","3");
     END_PARSE_ARGS
@@ -852,6 +852,7 @@ int main( int argc , char ** argv )
     create_output_dir(output_dir.to_string() );
 
     report("############    Summary report  #####################\n");
+    if(log_mst.to_string().size() > 1 )
     { // log_mst
         auto mst = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(log_mst.to_string());
         report("# contig-sim sub graph  :   "+std::to_string(parse_log_mst(*mst)));
