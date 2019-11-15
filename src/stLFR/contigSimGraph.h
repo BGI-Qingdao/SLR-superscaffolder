@@ -177,6 +177,34 @@ namespace BGIQD {
                 out<<"}"<<std::endl;
                 */
             }
+            struct JunctionInfo {
+                bool valid ;
+                unsigned int junction_id ;
+                std::vector<unsigned int > neibs ;
+            };
+
+            JunctionInfo NextJunction() const
+            {
+                JunctionInfo ret ;
+                ret.valid = false ;
+                ret.junction_id = 0 ;
+                // node type 
+                for( const auto & pair : nodes )
+                {
+                    const auto & node = pair.second ;
+                    if( node.EdgeNum() > 2 )
+                    {
+                        ret.valid = true ;
+                        ret.junction_id = pair.first ;
+                        for(EdgeId id : node.edge_ids )
+                        {
+                            ret.neibs.push_back(GetEdge(id).OppoNode(pair.first));
+                        }
+                        break ;
+                    }
+                }
+                return ret ;
+            }
         };
     }
 }

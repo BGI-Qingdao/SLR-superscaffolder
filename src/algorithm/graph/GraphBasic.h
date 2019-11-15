@@ -25,13 +25,13 @@ namespace BGIQD {
                 NodeId      from ;
                 NodeId      to ;
 
-                bool operator == (const  IGraphEdgeBasic & i )
+                bool operator == (const  IGraphEdgeBasic & i ) const 
                 {
                     return ( (from == i.from && to == i.to ) 
                             || ( from == i.to && to == i.from ) ) ;
                 }
 
-                bool operator != ( const  IGraphEdgeBasic & i )
+                bool operator != ( const  IGraphEdgeBasic & i ) const 
                 {
                     return ! operator == ( i ) ;
                 }
@@ -90,12 +90,12 @@ namespace BGIQD {
                 typedef NodeId EdgeNodeId;
                 typedef EdgeId EdgeEdgeId;
 
-                bool operator == (const  IDigraphEdgeBase & i )
+                bool operator == (const  IDigraphEdgeBase & i ) const 
                 {
                     return ( (BaseType::from == i.from && BaseType::to == i.to ));
                 }
 
-                bool operator != ( const IDigraphEdgeBase & i )
+                bool operator != ( const IDigraphEdgeBase & i ) const 
                 {
                     return ! operator == ( i ) ;
                 }
@@ -246,7 +246,7 @@ namespace BGIQD {
                 {
                     return edges[id] ;
                 }
-                bool CheckEdge(const NodeId & from ,const  NodeId & to )
+                bool CheckEdge(const NodeId & from ,const  NodeId & to ) const
                 {
                     Edge tmp ;
                     tmp.from = from ;
@@ -261,7 +261,47 @@ namespace BGIQD {
                     }
                     return false ;
                 }
+                const Edge  & GetEdge(const NodeId & from ,const  NodeId & to ) const
+                {
+                    Edge tmp ;
+                    tmp.from = from ;
+                    tmp.to = to ;
+                    static Edge invalid ;
+                    if( ! HasNode( from ) || !HasNode(to) )
+                    {
+                        assert(0);
+                        return invalid ;
+                    }
+                    auto fNode = GetNode(from) ;
+                    for( const auto  & eId : fNode.edge_ids)
+                    {
+                        if(  GetEdge(eId) == tmp )
+                            return GetEdge(eId);
+                    }
+                    assert(0);
+                    return invalid ;
+                }
 
+                Edge  & GetEdge(const NodeId & from ,const  NodeId & to ) 
+                {
+                    Edge tmp ;
+                    tmp.from = from ;
+                    tmp.to = to ;
+                    static Edge invalid ;
+                    if( ! HasNode( from ) || !HasNode(to) )
+                    {
+                        assert(0);
+                        return invalid ;
+                    }
+                    auto fNode = GetNode(from) ;
+                    for( const auto  & eId : fNode.edge_ids)
+                    {
+                        if(  GetEdge(eId) == tmp )
+                            return GetEdge(eId);
+                    }
+                    assert(0);
+                    return invalid ;
+                }
                 size_t EdgesSize() const 
                 {
                     return edges.size();

@@ -7,6 +7,7 @@ apps="\
  FakeSOAPContig\
  GapSize\
  MST\
+ MST_v1\
  Orientation\
  ParseReadName\
  PEGraph\
