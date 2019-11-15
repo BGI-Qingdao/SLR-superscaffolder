@@ -15,6 +15,7 @@
 #include <set>
 #include <vector>
 #include <stack>
+#include <tuple>
 #include <sstream>
 
 struct AppConf
@@ -37,6 +38,36 @@ struct AppConf
 
         struct GraphG1 : public BGIQD::GRAPH::ListGraph<G1Node,G1Edge> 
         {
+            typedef BGIQD::Algorithm::DisJoin_Set<NodeId> DJ_Sets;
+            std::map<unsigned int , GraphG1 > UnicomGraph()  const 
+            {
+                std::map<NodeId , GraphG1 > ret;
+                DJ_Sets dj_sets;
+                for( const auto & edge : edges )
+                {
+                    if( edge.IsValid())
+                        dj_sets.AddConnect(edge.from , edge.to);
+                }
+                for( const auto & edge : edges )
+                {
+                    if( ! edge.IsValid() )
+                        continue;
+                    auto rep = dj_sets.GetGroup(edge.from);
+                    if( ! ret[rep].HasNode(edge.from) )
+                    {
+                        ret[rep].AddNode(GetNode(edge.from));
+                        ret[rep].GetNode(edge.from).edge_ids.clear();
+                    }
+                    if( ! ret[rep].HasNode(edge.to) )
+                    {
+                        ret[rep].AddNode(GetNode(edge.to));
+                        ret[rep].GetNode(edge.to).edge_ids.clear();
+                    }
+                    ret[rep].AddEdge(edge);
+                }
+                return ret ;
+            }
+
             typedef BGIQD::GRAPH::ListGraph<G1Node,G1Edge> Basic;
             void InitEdge( unsigned int from , unsigned int to )
             {
@@ -87,11 +118,12 @@ struct AppConf
             //TODO
             return ret ;
         }
-        bool ContainCircle( const GraphG1 & graph)
-        {
+
+        bool ContainCircle( const GraphG1 & graph){
             bool ret = false ;
             return ret ;
         }
+
         GraphG1 GetG1( const BGIQD::stLFR::ContigSimGraph::JunctionInfo & junction_info )
         {
             GraphG1 ret ;
@@ -111,9 +143,9 @@ struct AppConf
             return ret ;
         }
 
-
         BGIQD::stLFR::ContigSimGraph base_contig_sim_graph ;
-        BGIQD::stLFR::ContigSimGraph maximum_span_graph ;
+        BGIQD::stLFR::ContigSimGraph mst_v1;
+        BGIQD::stLFR::ContigSimGraph mst_v2;
         int min_common_barcode_type ;
         float min_53 ; 
 
@@ -131,23 +163,131 @@ struct AppConf
             min_common_barcode_type = mc ;
             base_num = base.NodesSize() ;
         }
+        static std::pair< int , GraphG1 > GetA_group( const GraphG1 & graph_g1 ) {
+            auto splits = graph_g1.UnicomGraph() ;
+            GraphG1 * the_one = NULL ;
+            int group_num = 0 ;
+            if( splits.size() > 1 ) {
+                for( auto & pair : splits ) {
+                    if( pair.second.NodesSize() > 1 ) {
+                        group_num ++ ;
+                        the_one = &pair.second ;
+                    }
+                }
+            }
+            assert(group_num > 0 && the_one != NULL );
+            return std::make_pair( group_num , *the_one ) ;
+        }
 
+        bool CanSimplify( const  GraphG1 & graph_g1 ) {
+            auto gret = GetA_group(graph_g1) ;
+            if( gret.first > 1  ) return false ;
+            const auto & tmp_g1 = gret.second ;
+            for( const auto & pair : tmp_g1.nodes ) {
+                if( pair.second.EdgeNum() > 2 )
+                    return true ;
+            }
+            return false;
+        }
+
+        bool IsLinear( const  GraphG1 & graph_g1) {
+            auto gret = GetA_group(graph_g1) ;
+            if( gret.first > 1  ) return false ;
+            const auto & tmp_g1 = gret.second ;
+            for( const auto & pair : tmp_g1.nodes ) {
+                if( pair.second.EdgeNum() > 2 )
+                    return false;
+            }
+            return tmp_g1.NodesSize() > 2 ;
+        }
+
+        bool Simplify(GraphG1 & graph_g1 ) {
+            if( ! CanSimplify(graph_g1) ) return IsLinear(graph_g1) ;
+            std::vector< std::tuple< int , unsigned int > > index ;
+            for( const auto & pair : graph_g1.nodes ) 
+                if( pair.second.EdgeNum() > 2 ) 
+                    index.push_back(std::make_tuple((int) pair.second.EdgeNum(),pair.first));
+            std::sort(index.rbegin() , index.rend());
+            for( const auto & tp : index )
+            {
+                unsigned int node_id = std::get<1>(tp);
+                const auto & node = graph_g1.GetNode(node_id) ;
+                if( node.EdgeNum() <= 2 ) 
+                    continue ;
+                std::vector<std::tuple< int , int > > edge_index ;
+                for( int edge_id :  node.edge_ids ) 
+                    edge_index.push_back( std::make_tuple( graph_g1.GetEdge(edge_id).weight , edge_id )) ; 
+                std::sort(edge_index.rbegin(),edge_index.rend());
+                if( std::get<0>(edge_index[1]) > std::get<0>(edge_index[2]) ) {
+                    for( int i = 2 ; i < (int)edge_index.size() ; i ++ )
+                        graph_g1.RemoveEdge(std::get<1>(edge_index[i]));
+                    if( IsLinear(graph_g1) ) 
+                        return true ;
+                } else {
+                    return false ;
+                }
+            }
+            return false ;
+        }
+
+        void UpdateSucc( const BGIQD::stLFR::ContigSimGraph::JunctionInfo & junction_info ,
+                const GraphG1 & graph_g1 ) 
+        {
+
+        }
+        void UpdateFailed( const BGIQD::stLFR::ContigSimGraph::JunctionInfo & junction_info ,
+                const GraphG1 & graph_g1 ) 
+        {
+
+        }
         void CorrectGraph()
         {
-            maximum_span_graph = base_contig_sim_graph.MinTree();
+            mst_v1 = base_contig_sim_graph.MinTree();
+            auto mst_mid = mst_v1;
             BGIQD::stLFR::ContigSimGraph::JunctionInfo junction_info 
-                = base_contig_sim_graph.NextJunction();
+                = mst_mid.NextJunction();
             while( junction_info.valid  )
             {
                 auto graph_g1 = GetG1(junction_info) ;
-
-                junction_info = base_contig_sim_graph.NextJunction() ;
+                if( Simplify( graph_g1 ) ) 
+                    UpdateSucc(junction_info , graph_g1);
+                else 
+                    UpdateFailed(junction_info , graph_g1);
+                junction_info = mst_mid.NextJunction() ;
             }
-            maximum_span_graph = base_contig_sim_graph.MinTree();
+            mst_v2 = base_contig_sim_graph.MinTree();
         }
 
         std::string log_str() const {
             return "";
+        }
+
+        std::vector<LinearOrder> GenerateLinear()
+        {
+            std::vector<LinearOrder> ret ;
+            auto mst_linear = mst_v2 ;
+            if( mst_v2.nodes.size() < 1 )
+                return ret ;
+            auto tip_result = BGIQD::stLFR::ContigSimGraph
+                ::RemoveTip_n2(mst_linear) ;
+            auto junction_result = BGIQD::stLFR::ContigSimGraph
+                ::DetectJunctions(mst_linear) ;
+
+            if( junction_result.size() > 0 )
+            {
+                for( auto x : junction_result )
+                {
+                    mst_linear.RemoveNode(x);
+                }
+            }
+            auto splits = BGIQD::stLFR::ContigSimGraph::UnicomGraph(mst_linear);
+            for( auto & pair : splits)
+            {
+                auto a_line = BGIQD::stLFR::ContigSimGraph::TrunkLinear(pair.second);
+                if( a_line.size() > 1)
+                    ret.push_back(a_line);
+            }
+            return ret ;
         }
     };
 
@@ -215,6 +355,30 @@ struct AppConf
         }
     }
 
+    void GenerateLinears()
+    {
+        BGIQD::FREQ::Freq<int>  trunk_freq;
+        int trunk_count = 1;
+        auto out3 = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fNames.mintreetrunklinear());
+        if( out3 == NULL )
+            FATAL(" failed to open xxx.mintree_trunk_linear for write !!! ");
+        for( auto & pair : split_graphs)
+        {
+            auto linears = pair.second.GenerateLinear();
+            for(const auto & linear : linears )
+            {
+                (*out3)<<"---\t"<<trunk_count<<"\t---"<<std::endl;
+                trunk_count ++ ;
+                trunk_freq.Touch(linear.size());
+                for(const auto x : linear )
+                {
+                    (*out3)<<x<<std::endl;
+                }
+            }
+        }
+        lger<<BGIQD::LOG::lstart() << "linear freq is :\n "<<trunk_freq.ToString()<<BGIQD::LOG::lend() ;
+        delete out3;
+    }
 
     void LoadBarcodeOnContig()
     {
@@ -241,6 +405,6 @@ int main(int argc , char **argv )
     config.LoadBarcodeOnContig();
     config.SplitGraph();
     config.CorrectGraph();
-    //config.GenerateLinears();
+    config.GenerateLinears();
     return 0 ;
 }
