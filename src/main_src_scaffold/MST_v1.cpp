@@ -232,6 +232,11 @@ struct AppConf
                         the_one = &pair.second ;
                     }
                 }
+            } else if ( splits.size() ==1 ) {
+                group_num = 1 ;
+                the_one = &(splits.begin()->second);
+            } else {
+                assert(0);
             }
             assert(group_num > 0 && the_one != NULL );
             return std::make_pair( group_num , *the_one ) ;
@@ -438,7 +443,6 @@ struct AppConf
         for( auto & pair : split_graphs)
         {
             pair.second.CorrectGraph();
-            lger<<BGIQD::LOG::lstart() << "CorrectLog\t"<<pair.second.log_str()<<BGIQD::LOG::lend() ;
         }
     }
     //Done
@@ -474,7 +478,6 @@ struct AppConf
         auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fNames.BarcodeOnContig());
         if(! in )
             FATAL( "failed to open xxx.barcodeOnContig to read !");
-        BGIQD::LOG::timer t(lger,"parse all input");
         std::string line;
         while(!std::getline(*in,line).eof())
         {
