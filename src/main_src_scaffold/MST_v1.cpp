@@ -238,6 +238,7 @@ struct AppConf
         }
         //Done
         static bool CanSimplify( const  GraphG1 & graph_g1 ) {
+            if( graph_g1.EdgesSize() < 2 ) return false ;
             auto gret = GetA_group(graph_g1) ;
             if( gret.first > 1  ) return false ;
             const auto & tmp_g1 = gret.second ;
@@ -249,6 +250,7 @@ struct AppConf
         }
         //Done
         static bool IsLinear( const  GraphG1 & graph_g1) {
+            if( graph_g1.EdgesSize() < 2 ) return false ;
             auto gret = GetA_group(graph_g1) ;
             if( gret.first > 1  ) return false ;
             const auto & tmp_g1 = gret.second ;
@@ -331,6 +333,7 @@ struct AppConf
                 DeleteJunctions( junction_info , mst_mid , base_contig_sim_graph );
                 if( Simplify( graph_g1 ) )
                     UpdateSucc( graph_g1 , mst_mid , base_contig_sim_graph );
+                junction_info = mst_mid.NextJunction();
             }
             mst_v2 = base_contig_sim_graph.MinTree();
         }
@@ -395,6 +398,7 @@ struct AppConf
     void LoadContigSimGraph()
     {
         graph.use_salas = false;
+        lger<<BGIQD::LOG::lstart() << "load contig sim graph start ..."<<BGIQD::LOG::lend() ;
         auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fNames.cluster("mst"));
         if( in == NULL )
             FATAL("failed to open xxx.mst.cluster for read!!! ");
@@ -466,6 +470,7 @@ struct AppConf
     // Done
     void LoadBarcodeOnContig()
     {
+        lger<<BGIQD::LOG::lstart() << "load barcodeOnContig start ..."<<BGIQD::LOG::lend() ;
         auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fNames.BarcodeOnContig());
         if(! in )
             FATAL( "failed to open xxx.barcodeOnContig to read !");
@@ -482,6 +487,7 @@ struct AppConf
                     contig_barcodes_map[tmp.contig_id].insert(barcode);
         }
         delete in;
+        lger<<BGIQD::LOG::lstart() << "load barcodeOnContig done"<<BGIQD::LOG::lend() ;
     }
     //      contig_id       barcodes set
     std::map<unsigned int , std::set<int> > contig_barcodes_map;
