@@ -287,19 +287,36 @@ struct AppConf
             }
             return false ;
         }
-
-        void UpdateSucc( const BGIQD::stLFR::ContigSimGraph::JunctionInfo & junction_info ,
-                const GraphG1 & graph_g1 ) 
-        {
-            //TODO
+        //Done
+        static std::vector<std::pair< int , int > > GetLinearFromG1(const GraphG1 & g1 ){
+            std::vector<std::pair<int ,int> > ret ;
+            auto gret = GetA_group(g1);
+            assert( gret.first == 1  );
+            const auto & a_graph = gret.second ;
+            for( const auto & edge :  a_graph.edges) 
+                ret.push_back( std::make_pair( edge.from, edge.to ) );
+            return ret ;
         }
-        void UpdateFailed( const BGIQD::stLFR::ContigSimGraph::JunctionInfo & junction_info ,
-                const GraphG1 & graph_g1 ,
+        //Done
+        static void UpdateSucc(  const GraphG1 & graph_g1 ,
+                BGIQD::stLFR::ContigSimGraph & mst ,
+                BGIQD::stLFR::ContigSimGraph & contig_sim
+                )
+        {
+            auto new_edges = GetLinearFromG1(graph_g1) ;
+            for( const auto & pair :new_edges ) 
+                contig_sim.AddEdgeSim(pair.first,pair.second,1);
+            for( const auto & pair :new_edges ) 
+                mst.AddEdgeSim(pair.first,pair.second,1);
+        }
+        //Done
+        void DeleteJunctions( const BGIQD::stLFR::ContigSimGraph::JunctionInfo & junction_info ,
                 BGIQD::stLFR::ContigSimGraph & mst ,
                 BGIQD::stLFR::ContigSimGraph & contig_sim
                 ) 
         {
-            
+            contig_sim.RemoveNode(junction_info.junction_id);
+            mst.RemoveNode(junction_info.junction_id);
         }
         //Done
         void CorrectGraph()
@@ -311,11 +328,9 @@ struct AppConf
             while( junction_info.valid  )
             {
                 auto graph_g1 = GetG1(junction_info) ;
-                if( Simplify( graph_g1 ) ) 
-                    UpdateSucc(junction_info , graph_g1);
-                else 
-                    UpdateFailed(junction_info , graph_g1, mst_mid , base_contig_sim_graph );
-                junction_info = mst_mid.NextJunction() ;
+                DeleteJunctions( junction_info , mst_mid , base_contig_sim_graph );
+                if( Simplify( graph_g1 ) )
+                    UpdateSucc( graph_g1 , mst_mid , base_contig_sim_graph );
             }
             mst_v2 = base_contig_sim_graph.MinTree();
         }
