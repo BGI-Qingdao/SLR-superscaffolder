@@ -5,7 +5,7 @@
 #include "common/log/log.h"
 #include "common/log/logfilter.h"
 #include "common/freq/freq.h"
-
+#include "common/stl/setHelper.h"
 #include "stLFR/CBB.h"
 #include "stLFR/contigSimGraph.h"
 #include "stLFR/CBB.h"
@@ -25,6 +25,7 @@ struct AppConf
 
     struct MST_correct_new 
     {
+        const std::map<unsigned int , std::set<int> > * contig_barcodes_map_ptr ;
         struct G1Edge : public BGIQD::GRAPH::IGraphEdgeBasic<unsigned int , int >
         {
             int weight;
@@ -92,13 +93,47 @@ struct AppConf
             unsigned int left ;
             unsigned int mid ;
             unsigned int right ;
+
         } ;
 
         struct NewRoad : public OldRoad {
             bool valid ;
 
         };
+        struct BarcodeTypeInfo : public OldRoad {
+            int left_only ;
+            int mid_only ;
+            int right_only ;
+            int common ;
+        };
 
+        // Done
+        BarcodeTypeInfo GetBarcodeDetail(const OldRoad & old_road ) {
+            BarcodeTypeInfo ret ;
+            const auto & left_set = contig_barcodes_map_ptr->at(old_road.left) ; 
+            const auto & mid_set = contig_barcodes_map_ptr->at(old_road.mid) ; 
+            const auto & right_set = contig_barcodes_map_ptr->at(old_road.right) ; 
+
+            auto comm1 = BGIQD::STL::set_common(left_set,mid_set);
+            auto comm = BGIQD::STL::set_common(comm1,right_set);
+            ret.common = comm.size() ;
+
+            auto left_diff1 = BGIQD::STL::set_diff_in_s1(left_set,mid_set);
+            auto left_diff = BGIQD::STL::set_diff_in_s1(left_diff1,right_set);
+            ret.left_only = left_diff.size();
+
+            auto mid_diff1 = BGIQD::STL::set_diff_in_s1(mid_set,left_set);
+            auto mid_diff = BGIQD::STL::set_diff_in_s1(mid_diff1,right_set);
+            ret.mid_only = mid_diff.size();
+
+            auto right_diff1 = BGIQD::STL::set_diff_in_s1(right_set,left_set);
+            auto right_diff = BGIQD::STL::set_diff_in_s1(right_diff1,mid_set);
+            ret.right_only = right_diff.size();
+
+            return ret ;
+        }
+
+        // Done
         std::vector<OldRoad> GetCandidateRoads(  const BGIQD::stLFR::ContigSimGraph::JunctionInfo & junction_info ) {
             std::vector<OldRoad> ret ;
             for( int i = 0 ; i < (int)junction_info.neibs.size() ; i ++ )
@@ -111,19 +146,38 @@ struct AppConf
             }
             return ret ;
         }
-
+        //Done
         NewRoad CheckRoad( const OldRoad & old_road ){
             NewRoad ret ;
             ret.valid = false ;
-            //TODO
+            auto barcode_type_info = GetBarcodeDetail(old_road);
+            if( barcode_type_info.common < min_common_barcode_type ) 
+                return ret ;
+            std::vector< std::tuple< int ,unsigned  int > > index ;
+            index.push_back(std::make_tuple( barcode_type_info.left_only , barcode_type_info.left) );
+            index.push_back(std::make_tuple( barcode_type_info.mid_only  , barcode_type_info.mid ) );
+            index.push_back(std::make_tuple( barcode_type_info.left_only , barcode_type_info.right) );
+            std::sort(index.rbegin() , index.rend());
+            if( std::get<0>(index[2]) <= 0 ) return ret ;
+            if( float(std::get<0>(index[1])) / float(std::get<0>(index[2])) < min_53 ) return ret ;
+            ret.valid = true ;
+            ret.left = std::get<1>(index[0]);
+            ret.mid  = std::get<1>(index[2]); // put the smallest in mid
+            ret.right = std::get<1>(index[1]);
             return ret ;
         }
-
+        //Done
         bool ContainCircle( const GraphG1 & graph){
-            bool ret = false ;
-            return ret ;
+            auto splits = graph.UnicomGraph() ;
+            for( const auto & pair : splits ){
+                const auto & a_graph = pair.second ;
+                if( a_graph.NodesSize() != a_graph.EdgesSize() +1 )
+                    return true;
+            }
+            return false ;
         }
 
+        //Done
         GraphG1 GetG1( const BGIQD::stLFR::ContigSimGraph::JunctionInfo & junction_info )
         {
             GraphG1 ret ;
@@ -156,13 +210,17 @@ struct AppConf
         int remain_tip_num ;
         int in_linear_num ;
 
-
-        void Init(const BGIQD::stLFR::ContigSimGraph & base , int mc , float m53 ) {
+        // Done
+        void Init(const BGIQD::stLFR::ContigSimGraph & base , int mc , float m53 ,
+                const std::map<unsigned int , std::set<int> > & map
+                ) {
             base_contig_sim_graph = base ;
             min_53 = m53 ;
             min_common_barcode_type = mc ;
-            base_num = base.NodesSize() ;
+            base_num = base.NodesSize() ; 
+            contig_barcodes_map_ptr = &map;
         }
+        //Done
         static std::pair< int , GraphG1 > GetA_group( const GraphG1 & graph_g1 ) {
             auto splits = graph_g1.UnicomGraph() ;
             GraphG1 * the_one = NULL ;
@@ -178,7 +236,7 @@ struct AppConf
             assert(group_num > 0 && the_one != NULL );
             return std::make_pair( group_num , *the_one ) ;
         }
-
+        //Done
         bool CanSimplify( const  GraphG1 & graph_g1 ) {
             auto gret = GetA_group(graph_g1) ;
             if( gret.first > 1  ) return false ;
@@ -189,7 +247,7 @@ struct AppConf
             }
             return false;
         }
-
+        //Done
         bool IsLinear( const  GraphG1 & graph_g1) {
             auto gret = GetA_group(graph_g1) ;
             if( gret.first > 1  ) return false ;
@@ -200,7 +258,7 @@ struct AppConf
             }
             return tmp_g1.NodesSize() > 2 ;
         }
-
+        //Done
         bool Simplify(GraphG1 & graph_g1 ) {
             if( ! CanSimplify(graph_g1) ) return IsLinear(graph_g1) ;
             std::vector< std::tuple< int , unsigned int > > index ;
@@ -233,13 +291,17 @@ struct AppConf
         void UpdateSucc( const BGIQD::stLFR::ContigSimGraph::JunctionInfo & junction_info ,
                 const GraphG1 & graph_g1 ) 
         {
-
+            //TODO
         }
         void UpdateFailed( const BGIQD::stLFR::ContigSimGraph::JunctionInfo & junction_info ,
-                const GraphG1 & graph_g1 ) 
+                const GraphG1 & graph_g1 ,
+                BGIQD::stLFR::ContigSimGraph & mst ,
+                BGIQD::stLFR::ContigSimGraph & contig_sim
+                ) 
         {
-
+            
         }
+        //Done
         void CorrectGraph()
         {
             mst_v1 = base_contig_sim_graph.MinTree();
@@ -252,16 +314,18 @@ struct AppConf
                 if( Simplify( graph_g1 ) ) 
                     UpdateSucc(junction_info , graph_g1);
                 else 
-                    UpdateFailed(junction_info , graph_g1);
+                    UpdateFailed(junction_info , graph_g1, mst_mid , base_contig_sim_graph );
                 junction_info = mst_mid.NextJunction() ;
             }
             mst_v2 = base_contig_sim_graph.MinTree();
         }
 
         std::string log_str() const {
+            //TODO
             return "";
         }
 
+        //Done
         std::vector<LinearOrder> GenerateLinear()
         {
             std::vector<LinearOrder> ret ;
@@ -302,15 +366,17 @@ struct AppConf
 
     float smallest ;
 
+    //Done
     void Init(const std::string & prefix, int min_c , float m53 , float min_js )
     {
         fNames.Init(prefix);
         smallest = min_js  ;
         min_53 = m53 ;
         min_common_barcode_type = min_c ;
-        BGIQD::LOG::logfilter::singleton().get("MST", BGIQD::LOG::loglevel::INFO,lger);
+        BGIQD::LOG::logfilter::singleton().get("MST_v1", BGIQD::LOG::loglevel::INFO,lger);
     }
 
+    // Done
     void LoadContigSimGraph()
     {
         graph.use_salas = false;
@@ -336,16 +402,18 @@ struct AppConf
         lger<<BGIQD::LOG::lstart() << "contig-sim graph edges : "<<graph.edges.size()<<BGIQD::LOG::lend() ;
     }
 
+    // Done
     void SplitGraph()
     {
         auto splits = graph.UnicomGraph(graph);
         for(const auto & pair : splits)
         {
-            split_graphs[pair.first].Init(pair.second,min_common_barcode_type ,min_53);
+            split_graphs[pair.first].Init(pair.second,min_common_barcode_type ,min_53,contig_barcodes_map);
         }
         lger<<BGIQD::LOG::lstart() << "split contig sim graph into "<<split_graphs.size()<<" sub graph"<<BGIQD::LOG::lend() ;
     }
 
+    //Done
     void CorrectGraph()
     {
         for( auto & pair : split_graphs)
@@ -354,7 +422,7 @@ struct AppConf
             lger<<BGIQD::LOG::lstart() << "CorrectLog\t"<<pair.second.log_str()<<BGIQD::LOG::lend() ;
         }
     }
-
+    //Done
     void GenerateLinears()
     {
         BGIQD::FREQ::Freq<int>  trunk_freq;
@@ -380,9 +448,25 @@ struct AppConf
         delete out3;
     }
 
+    // Done
     void LoadBarcodeOnContig()
     {
-
+        auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fNames.BarcodeOnContig());
+        if(! in )
+            FATAL( "failed to open xxx.barcodeOnContig to read !");
+        BGIQD::LOG::timer t(lger,"parse all input");
+        std::string line;
+        while(!std::getline(*in,line).eof())
+        {
+            BGIQD::stLFR::ContigBarcodeInfo tmp ;
+            tmp.InitFromString(line);
+            if( ! graph.HasNode( tmp.contig_id ) )
+                continue ;
+            for( const auto & pair : tmp.barcodesOnPos)
+                for( int barcode : pair.second)
+                    contig_barcodes_map[tmp.contig_id].insert(barcode);
+        }
+        delete in;
     }
     //      contig_id       barcodes set
     std::map<unsigned int , std::set<int> > contig_barcodes_map;
