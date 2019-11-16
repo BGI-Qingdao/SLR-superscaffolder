@@ -134,7 +134,7 @@ struct AppConf
         }
 
         // Done
-        std::vector<OldRoad> GetCandidateRoads(  const BGIQD::stLFR::ContigSimGraph::JunctionInfo & junction_info ) {
+        static std::vector<OldRoad> GetCandidateRoads(  const BGIQD::stLFR::ContigSimGraph::JunctionInfo & junction_info ) {
             std::vector<OldRoad> ret ;
             for( int i = 0 ; i < (int)junction_info.neibs.size() ; i ++ )
             {
@@ -167,7 +167,7 @@ struct AppConf
             return ret ;
         }
         //Done
-        bool ContainCircle( const GraphG1 & graph){
+        static bool ContainCircle( const GraphG1 & graph){
             auto splits = graph.UnicomGraph() ;
             for( const auto & pair : splits ){
                 const auto & a_graph = pair.second ;
@@ -237,7 +237,7 @@ struct AppConf
             return std::make_pair( group_num , *the_one ) ;
         }
         //Done
-        bool CanSimplify( const  GraphG1 & graph_g1 ) {
+        static bool CanSimplify( const  GraphG1 & graph_g1 ) {
             auto gret = GetA_group(graph_g1) ;
             if( gret.first > 1  ) return false ;
             const auto & tmp_g1 = gret.second ;
@@ -248,7 +248,7 @@ struct AppConf
             return false;
         }
         //Done
-        bool IsLinear( const  GraphG1 & graph_g1) {
+        static bool IsLinear( const  GraphG1 & graph_g1) {
             auto gret = GetA_group(graph_g1) ;
             if( gret.first > 1  ) return false ;
             const auto & tmp_g1 = gret.second ;
@@ -259,7 +259,7 @@ struct AppConf
             return tmp_g1.NodesSize() > 2 ;
         }
         //Done
-        bool Simplify(GraphG1 & graph_g1 ) {
+        static bool Simplify(GraphG1 & graph_g1 ) {
             if( ! CanSimplify(graph_g1) ) return IsLinear(graph_g1) ;
             std::vector< std::tuple< int , unsigned int > > index ;
             for( const auto & pair : graph_g1.nodes ) 
