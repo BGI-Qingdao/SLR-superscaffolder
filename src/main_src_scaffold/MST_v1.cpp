@@ -18,6 +18,15 @@
 #include <tuple>
 #include <sstream>
 
+BGIQD::FREQ::Freq<std::string>  Simplify_freq;
+BGIQD::FREQ::Freq<std::string>  Failed_reason_freq;
+BGIQD::FREQ::Freq<std::string>  Cant_reason_freq;
+std::string log_str() {
+	return "\nSimplify result:\n"+ Simplify_freq.ToString() + "\n" 
+		"Simplify failed reason:\n"+ Failed_reason_freq.ToString() + "\n"
+		"Can't Simplify reason:\n"+ Cant_reason_freq.ToString() + "\n";
+}
+
 struct AppConf
 {
 
@@ -113,7 +122,10 @@ struct AppConf
             const auto & left_set = contig_barcodes_map_ptr->at(old_road.left) ; 
             const auto & mid_set = contig_barcodes_map_ptr->at(old_road.mid) ; 
             const auto & right_set = contig_barcodes_map_ptr->at(old_road.right) ; 
-
+	
+            ret.left = old_road.left ;
+            ret.mid = old_road.mid;
+            ret.right = old_road.right;
             auto comm1 = BGIQD::STL::set_common(left_set,mid_set);
             auto comm = BGIQD::STL::set_common(comm1,right_set);
             ret.common = comm.size() ;
@@ -138,7 +150,7 @@ struct AppConf
             std::vector<OldRoad> ret ;
             for( int i = 0 ; i < (int)junction_info.neibs.size() ; i ++ )
             {
-                for( int j = 0 ; j < (int)junction_info.neibs.size() ; j ++ )
+                for( int j = i+1 ; j < (int)junction_info.neibs.size() ; j ++ )
                     ret.emplace_back( OldRoad{ junction_info.neibs.at(i) 
                             , junction_info.junction_id
                             , junction_info.neibs.at(j) } );
@@ -158,12 +170,17 @@ struct AppConf
             index.push_back(std::make_tuple( barcode_type_info.mid_only  , barcode_type_info.mid ) );
             index.push_back(std::make_tuple( barcode_type_info.left_only , barcode_type_info.right) );
             std::sort(index.rbegin() , index.rend());
-            if( std::get<0>(index[2]) <= 0 ) return ret ;
-            if( float(std::get<0>(index[1])) / float(std::get<0>(index[2])) < min_53 ) return ret ;
+            int tmp_bn1 , tmp_bn2 ,tmp_bn3 ;
+            unsigned int tmp_ci1 , tmp_ci2 , tmp_ci3 ;
+            std::tie(tmp_bn3 , tmp_ci3) = index[2] ;
+            std::tie(tmp_bn2 , tmp_ci2) = index[1] ;
+            std::tie(tmp_bn1 , tmp_ci1) = index[0] ;
+            if( tmp_bn3 <= 0 ) return ret ;
+            if( float(tmp_bn2) / float(tmp_bn3) < min_53 ) return ret ;
             ret.valid = true ;
-            ret.left = std::get<1>(index[0]);
-            ret.mid  = std::get<1>(index[2]); // put the smallest in mid
-            ret.right = std::get<1>(index[1]);
+            ret.left = tmp_ci1;
+            ret.mid  = tmp_ci3; // put the smallest in mid
+            ret.right = tmp_ci2  ;
             return ret ;
         }
         //Done
@@ -243,14 +260,21 @@ struct AppConf
         }
         //Done
         static bool CanSimplify( const  GraphG1 & graph_g1 ) {
-            if( graph_g1.EdgesSize() < 2 ) return false ;
+            if( graph_g1.EdgesSize() < 2 ) {
+                  Cant_reason_freq.Touch("Edge<2");
+                  return false ;
+            }
             auto gret = GetA_group(graph_g1) ;
-            if( gret.first > 1  ) return false ;
+            if( gret.first > 1  ) {
+               Cant_reason_freq.Touch("SubGraph>1");
+               return false ;
+            }
             const auto & tmp_g1 = gret.second ;
             for( const auto & pair : tmp_g1.nodes ) {
                 if( pair.second.EdgeNum() > 2 )
                     return true ;
             }
+            Cant_reason_freq.Touch("NoJunction");
             return false;
         }
         //Done
@@ -267,7 +291,10 @@ struct AppConf
         }
         //Done
         static bool Simplify(GraphG1 & graph_g1 ) {
-            if( ! CanSimplify(graph_g1) ) return IsLinear(graph_g1) ;
+            if( ! CanSimplify(graph_g1) ) {
+                Failed_reason_freq.Touch("Can't Simplify");
+                return IsLinear(graph_g1) ;
+            }
             std::vector< std::tuple< int , unsigned int > > index ;
             for( const auto & pair : graph_g1.nodes ) 
                 if( pair.second.EdgeNum() > 2 ) 
@@ -280,8 +307,10 @@ struct AppConf
                 if( node.EdgeNum() <= 2 ) 
                     continue ;
                 std::vector<std::tuple< int , int > > edge_index ;
-                for( int edge_id :  node.edge_ids ) 
-                    edge_index.push_back( std::make_tuple( graph_g1.GetEdge(edge_id).weight , edge_id )) ; 
+                for( int edge_id :  node.edge_ids ) {
+                    auto & edge = graph_g1.GetEdge(edge_id);
+                    edge_index.push_back( std::make_tuple( edge.weight , edge_id )) ; 
+                }
                 std::sort(edge_index.rbegin(),edge_index.rend());
                 if( std::get<0>(edge_index[1]) > std::get<0>(edge_index[2]) ) {
                     for( int i = 2 ; i < (int)edge_index.size() ; i ++ )
@@ -289,9 +318,11 @@ struct AppConf
                     if( IsLinear(graph_g1) ) 
                         return true ;
                 } else {
+                    Failed_reason_freq.Touch("Edge same weight");
                     return false ;
                 }
             }
+            Failed_reason_freq.Touch("Final Failed");
             return false ;
         }
         //Done
@@ -325,8 +356,6 @@ struct AppConf
             contig_sim.RemoveNode(junction_info.junction_id);
             mst.RemoveNode(junction_info.junction_id);
         }
-        BGIQD::FREQ::Freq<int>  Simplify_freq;
-        BGIQD::FREQ::Freq<int>  Failed_reason_freq;
         //Done
         void CorrectGraph()
         {
@@ -340,17 +369,13 @@ struct AppConf
                 DeleteJunctions( junction_info , mst_mid , base_contig_sim_graph );
                 if( Simplify( graph_g1 ) ) {
                     UpdateSucc( graph_g1 , mst_mid , base_contig_sim_graph );
-                    Simplify_freq.Touch(1);
+                    Simplify_freq.Touch("Simplify succ");
                 } else {
-                    Simplify_freq.Touch(0);
+                    Simplify_freq.Touch("Simplify failed");
                 }
                 junction_info = mst_mid.NextJunction();
             }
             mst_v2 = base_contig_sim_graph.MinTree();
-        }
-
-        std::string log_str() const {
-            return Simplify_freq.ToString();
         }
 
         //Done
@@ -448,8 +473,8 @@ struct AppConf
         for( auto & pair : split_graphs)
         {
             pair.second.CorrectGraph();
-            lger<<BGIQD::LOG::lstart() <<"Simplify a mst \n" <<pair.second.log_str()<<BGIQD::LOG::lend() ;
         }
+        lger<<BGIQD::LOG::lstart() <<"\n" <<log_str()<<BGIQD::LOG::lend() ;
     }
     //Done
     void GenerateLinears()
@@ -510,8 +535,8 @@ int main(int argc , char **argv )
         DEFINE_ARG_REQUIRED(std::string , prefix , "prefix .\n\
                         Input xxx.cluster ; xxx.barcodeOnContig ;\n\
                         Output xxx.mintree_trunk_linear && xxx.mst_base && xxx.mst_modified ");
-        DEFINE_ARG_OPTIONAL(int  , min_common_barcode_type , " min common barcode type to comfirm a road ","3");
-        DEFINE_ARG_OPTIONAL(float, min_53, "min 53 ","1.5");
+        DEFINE_ARG_OPTIONAL(int  , min_common_barcode_type , " min common barcode type to comfirm a road ","10");
+        DEFINE_ARG_OPTIONAL(float, min_53, "min 53 ","2");
         DEFINE_ARG_OPTIONAL(float, min_js, "min js threshold","0.1");
     END_PARSE_ARGS
     config.Init( prefix.to_string() , min_common_barcode_type.to_int() , min_53.to_float(), min_js.to_float() );
