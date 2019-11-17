@@ -325,6 +325,8 @@ struct AppConf
             contig_sim.RemoveNode(junction_info.junction_id);
             mst.RemoveNode(junction_info.junction_id);
         }
+        BGIQD::FREQ::Freq<int>  Simplify_freq;
+        BGIQD::FREQ::Freq<int>  Failed_reason_freq;
         //Done
         void CorrectGraph()
         {
@@ -336,16 +338,19 @@ struct AppConf
             {
                 auto graph_g1 = GetG1(junction_info) ;
                 DeleteJunctions( junction_info , mst_mid , base_contig_sim_graph );
-                if( Simplify( graph_g1 ) )
+                if( Simplify( graph_g1 ) ) {
                     UpdateSucc( graph_g1 , mst_mid , base_contig_sim_graph );
+                    Simplify_freq.Touch(1);
+                } else {
+                    Simplify_freq.Touch(0);
+                }
                 junction_info = mst_mid.NextJunction();
             }
             mst_v2 = base_contig_sim_graph.MinTree();
         }
 
         std::string log_str() const {
-            //TODO
-            return "";
+            return Simplify_freq.ToString();
         }
 
         //Done
@@ -443,6 +448,7 @@ struct AppConf
         for( auto & pair : split_graphs)
         {
             pair.second.CorrectGraph();
+            lger<<BGIQD::LOG::lstart() <<"Simplify a mst \n" <<pair.second.log_str()<<BGIQD::LOG::lend() ;
         }
     }
     //Done
