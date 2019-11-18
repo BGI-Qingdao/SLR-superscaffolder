@@ -356,6 +356,14 @@ struct AppConf
             contig_sim.RemoveNode(junction_info.junction_id);
             mst.RemoveNode(junction_info.junction_id);
         }
+        static void MaxMSTEdge(
+                BGIQD::stLFR::ContigSimGraph & mst ,
+                BGIQD::stLFR::ContigSimGraph & contig_sim
+                )
+        {
+            for( const auto & edge : mst.edges ) 
+                contig_sim.UpdateEdge(edge.from ,edge.to , 1.0 );
+        }
         //Done
         void CorrectGraph()
         {
@@ -375,6 +383,7 @@ struct AppConf
                 }
                 junction_info = mst_mid.NextJunction();
             }
+            MaxMSTEdge(mst_mid , base_contig_sim_graph );
             mst_v2 = base_contig_sim_graph.MinTree();
         }
 

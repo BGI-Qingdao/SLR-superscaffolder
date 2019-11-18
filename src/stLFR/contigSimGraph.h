@@ -77,6 +77,13 @@ namespace BGIQD {
                 tmp.sim = sim ;
                 Basic::AddEdge(tmp);
             }
+            void UpdateEdge(unsigned int from , unsigned int to , float sim ) {
+                bool has = Basic::CheckEdge(from,to) ;
+                if( has )
+                    Basic::GetEdge(from,to).sim = sim ;
+                else 
+                    assert(0);
+            }
 
             typedef BGIQD::GRAPH::MinTreeHelper<ContigSimGraph, float , EdgeAttr> MTHelper;
             typedef BGIQD::GRAPH::TrunkHelper< ContigSimGraph> TKHelper;
