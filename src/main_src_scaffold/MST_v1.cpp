@@ -332,7 +332,8 @@ struct AppConf
             assert( gret.first == 1  );
             const auto & a_graph = gret.second ;
             for( const auto & edge :  a_graph.edges) 
-                ret.push_back( std::make_pair( edge.from, edge.to ) );
+                if( edge.IsValid())
+                    ret.push_back( std::make_pair( edge.from, edge.to ) );
             return ret ;
         }
         //Done
@@ -362,7 +363,8 @@ struct AppConf
                 )
         {
             for( const auto & edge : mst.edges ) 
-                contig_sim.UpdateEdge(edge.from ,edge.to , 1.0 );
+                if( edge.IsValid())
+                    contig_sim.UpdateEdge(edge.from ,edge.to , 1.0 );
         }
         //Done
         void CorrectGraph()
@@ -461,8 +463,8 @@ struct AppConf
         BGIQD::FILES::FileReaderFactory::EachLine(*in,parseline);
         delete  in;
         lger<<BGIQD::LOG::lstart() << "load contig sim graph done "<<BGIQD::LOG::lend() ;
-        lger<<BGIQD::LOG::lstart() << "contig-sim graph nodes : "<<graph.nodes.size()<<BGIQD::LOG::lend() ;
-        lger<<BGIQD::LOG::lstart() << "contig-sim graph edges : "<<graph.edges.size()<<BGIQD::LOG::lend() ;
+        lger<<BGIQD::LOG::lstart() << "contig-sim graph nodes : "<<graph.NodesSize()<<BGIQD::LOG::lend() ;
+        lger<<BGIQD::LOG::lstart() << "contig-sim graph edges : "<<graph.EdgesSize()<<BGIQD::LOG::lend() ;
     }
 
     // Done

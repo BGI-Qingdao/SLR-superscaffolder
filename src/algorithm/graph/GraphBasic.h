@@ -304,7 +304,10 @@ namespace BGIQD {
                 }
                 size_t EdgesSize() const 
                 {
-                    return edges.size();
+                    size_t ret = 0 ;
+                    for(const auto & edge :  edges)
+                        if( edge.IsValid() ) ret ++ ;
+                    return ret ;
                 }
 
                 size_t NodesSize() const 
@@ -316,9 +319,8 @@ namespace BGIQD {
                 {
                     out<<Edge::DOTHead()<<std::endl;
                     for( const auto & e : edges )
-                    {
-                        out<<"\t"<<e.ToString()<<std::endl;
-                    }
+                        if( e.IsValid() )
+                            out<<"\t"<<e.ToString()<<std::endl;
                     out<<"}"<<std::endl;
                 }
             };

@@ -218,8 +218,8 @@ struct AppConf
         BGIQD::FILES::FileReaderFactory::EachLine(*in,parseline);
         delete  in;
         lger<<BGIQD::LOG::lstart() << "load contig sim graph done "<<BGIQD::LOG::lend() ;
-        lger<<BGIQD::LOG::lstart() << "contig-sim graph nodes : "<<graph.nodes.size()<<BGIQD::LOG::lend() ;
-        lger<<BGIQD::LOG::lstart() << "contig-sim graph edges : "<<graph.edges.size()<<BGIQD::LOG::lend() ;
+        lger<<BGIQD::LOG::lstart() << "contig-sim graph nodes : "<<graph.NodesSize()<<BGIQD::LOG::lend() ;
+        lger<<BGIQD::LOG::lstart() << "contig-sim graph edges : "<<graph.EdgesSize()<<BGIQD::LOG::lend() ;
     }
 
     void SplitGraph()

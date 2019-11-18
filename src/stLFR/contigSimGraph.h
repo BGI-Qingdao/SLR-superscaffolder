@@ -170,7 +170,8 @@ namespace BGIQD {
                 //std::set<int> multis;
                 for( const auto & e : edges )
                 {
-                    out<<"\t"<<e.ToString()<<'\n';
+                    if( e.IsValid() )
+                        out<<"\t"<<e.ToString()<<'\n';
                 //    if( GetNode(e.from).EdgeNum() > 2 )
                 //        multis.insert(e.from);
                 //    if(  GetNode(e.to).EdgeNum()>2 )
