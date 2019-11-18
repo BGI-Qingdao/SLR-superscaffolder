@@ -207,10 +207,10 @@ struct AppConf
                     ret.Add1Edge(new_road.right, new_road.mid ) ;
                 }
             }
-            if( ! ContainCircle(ret ) ) {
-            for( auto neib : junction_info.neibs )
-                ret.Add1Edge(neib,junction_info.junction_id);
-            }
+            //if( ! ContainCircle(ret ) ) {
+            //for( auto neib : junction_info.neibs )
+            //    ret.Add1Edge(neib,junction_info.junction_id);
+            //}
             return ret ;
         }
 
