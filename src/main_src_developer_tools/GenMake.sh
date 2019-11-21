@@ -7,6 +7,7 @@ apps="\
  cpSpeed\
  MST_only\
  MST_ideal\
+ MST_dbranchnode\
  MST_analysis\
  FakeRef2Scaff\
  gapfillerIDY\
