@@ -46,7 +46,7 @@ source_o		= ${source_cpp:%.cpp=%.o}
 .cpp.o:
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
-jobs = barcode2scaffold BarcodeDepth bin_ref cpSpeed MST_only MST_analysis FakeRef2Scaff gapfillerIDY GenSentieonScaff GenBinSimMatrix IDYtool IDYtool_paf Cluster2MST2DOT ContigSimAnalysis Points4GapSize filterPairFQ
+jobs = barcode2scaffold BarcodeDepth bin_ref cpSpeed MST_only MST_ideal MST_analysis FakeRef2Scaff gapfillerIDY GenSentieonScaff GenBinSimMatrix IDYtool IDYtool_paf Cluster2MST2DOT ContigSimAnalysis Points4GapSize filterPairFQ
 
 all :  ${jobs}
 
@@ -93,6 +93,15 @@ MST_only_cpp = MST_only.cpp
 MST_only_o = MST_only.o
 MST_only : clean ${MST_only_o} ${source_o} ../dev_bin
 	${CXX} ${MST_only_o} ${source_o} ${DEUBG_CXX} -o MST_only
+	mv $@ ../dev_bin/
+
+
+
+
+MST_ideal_cpp = MST_ideal.cpp
+MST_ideal_o = MST_ideal.o
+MST_ideal : clean ${MST_ideal_o} ${source_o} ../dev_bin
+	${CXX} ${MST_ideal_o} ${source_o} ${DEUBG_CXX} -o MST_ideal
 	mv $@ ../dev_bin/
 
 
@@ -195,7 +204,7 @@ filterPairFQ : clean ${filterPairFQ_o} ${source_o} ../dev_bin
 	mv $@ ../dev_bin/
 
 
-jobs_o=  ${barcode2scaffold_o} ${BarcodeDepth_o} ${bin_ref_o} ${cpSpeed_o} ${MST_only_o} ${MST_analysis_o} ${FakeRef2Scaff_o} ${gapfillerIDY_o} ${GenSentieonScaff_o} ${GenBinSimMatrix_o} ${IDYtool_o} ${IDYtool_paf_o} ${Cluster2MST2DOT_o} ${ContigSimAnalysis_o} ${Points4GapSize_o} ${filterPairFQ_o}
+jobs_o=  ${barcode2scaffold_o} ${BarcodeDepth_o} ${bin_ref_o} ${cpSpeed_o} ${MST_only_o} ${MST_ideal_o} ${MST_analysis_o} ${FakeRef2Scaff_o} ${gapfillerIDY_o} ${GenSentieonScaff_o} ${GenBinSimMatrix_o} ${IDYtool_o} ${IDYtool_paf_o} ${Cluster2MST2DOT_o} ${ContigSimAnalysis_o} ${Points4GapSize_o} ${filterPairFQ_o}
 
 dirty	   =${jobs_o} ${jobs} ${source_o}
 
