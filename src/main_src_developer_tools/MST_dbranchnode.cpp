@@ -369,22 +369,21 @@ struct AppConf
         //Done
         void CorrectGraph(const std::set<unsigned int> & uniques)
         {
+            mst_v1 = base_contig_sim_graph.MinTree();
             std::set<unsigned int> to_del ;
             std::map<unsigned int , int>  node_type ;
-            for( const auto & node : base_contig_sim_graph.nodes ) {
+            for( const auto & node : mst_v1.nodes ) {
                 node_type[node.first] = node.second.EdgeNum();
                 for( int edge_id : node.second.edge_ids ) {
-                    const auto & edge = base_contig_sim_graph.GetEdge(edge_id) ;
-                    const auto & oppo = base_contig_sim_graph.GetNode(edge.OppoNode(node.first));
+                    const auto & edge = mst_v1.GetEdge(edge_id) ;
+                    const auto & oppo = mst_v1.GetNode(edge.OppoNode(node.first));
                     if( (int)oppo.EdgeNum() > node_type[node.first] ) 
                         node_type[node.first] =oppo.EdgeNum() ;
                 }
             }
-            for( const auto & node : base_contig_sim_graph.nodes ) {
-                if( uniques.find(node.first) == uniques.end() ) { 
-                    if( node_type[node.first] >2 )
-                        to_del.insert(node.first);
-                }
+            for( const auto & pair : node_type ) {
+                if( pair.second > 2 && uniques.find(pair.first) == uniques.end() )
+                    to_del.insert(pair.first);
             }
             d_num += to_del.size();
             for( unsigned int id : to_del )
