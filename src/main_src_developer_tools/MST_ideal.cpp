@@ -17,7 +17,7 @@
 #include <stack>
 #include <tuple>
 #include <sstream>
-
+static int d_num = 0 ;
 BGIQD::FREQ::Freq<std::string>  Simplify_freq;
 BGIQD::FREQ::Freq<std::string>  Failed_reason_freq;
 BGIQD::FREQ::Freq<std::string>  Cant_reason_freq;
@@ -374,6 +374,7 @@ struct AppConf
                 if( uniques.find(node.first) == uniques.end() ) 
                     to_del.insert(node.first);
             }
+            d_num += to_del.size();
             for( unsigned int id : to_del )
                 base_contig_sim_graph.RemoveNode(id);
             mst_v2 = base_contig_sim_graph.MinTree();
@@ -553,15 +554,14 @@ int main(int argc , char **argv )
                         Input xxx.cluster ;\n\
                         Output xxx.mintreetrunklinear\n");
         DEFINE_ARG_REQUIRED(std::string, seeds_type , "seeds_types.txt");
-        DEFINE_ARG_OPTIONAL(int  , min_common_barcode_type , " min common barcode type to comfirm a road ","10");
-        DEFINE_ARG_OPTIONAL(float, min_53, "min 53 ","2");
         DEFINE_ARG_OPTIONAL(float, min_js, "min js threshold","0.1");
     END_PARSE_ARGS
-    config.Init( prefix.to_string() , min_common_barcode_type.to_int() , min_53.to_float(), min_js.to_float() );
+    config.Init( prefix.to_string() , 1,1, min_js.to_float() );
     config.LoadContigSimGraph();
     config.LoadContigType(seeds_type.to_string());
     config.SplitGraph();
     config.MST();
     config.GenerateLinears();
+    std::cerr<<"Total delete node : "<<d_num<<'\n';
     return 0 ;
 }
