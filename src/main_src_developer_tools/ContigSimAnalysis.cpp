@@ -844,7 +844,8 @@ int main( int argc , char ** argv )
         test_sorted_unique_contigs();
         return 0;
     }
-    check_file_read(log_mst.to_string());
+    if( log_mst.to_string() != "")
+        check_file_read(log_mst.to_string());
     check_file_read(contig_index.to_string());
     check_file_read(mst_seeds.to_string());
     check_file_read(sorted_unique.to_string());
