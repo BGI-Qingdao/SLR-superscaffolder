@@ -5,6 +5,7 @@
   *
   *
   ********************************************************/
+#include "algorithm/disjoin_set/disjoin_set.h"
 
 #include "common/files/file_reader.h"
 #include "common/files/file_writer.h"
@@ -27,6 +28,9 @@
   * basic structures
   *
   ******************************************************/
+
+typedef BGIQD::Algorithm::DisJoin_Set<unsigned int> DisJoin_Set;
+DisJoin_Set dis_joint_set;
 
 struct MST_AnalysisEdge {
     unsigned int from ;
@@ -140,6 +144,7 @@ int parse_mintree( std::istream & ist )
         edges.push_back({ (unsigned int )from , (unsigned int)to , 0 , sim});
         nodes[from].AddEdge(from,edges.size()-1);
         nodes[to].AddEdge(to ,edges.size()-1);
+        dis_joint_set.AddConnect(from , to );
         ret ++ ;
     }
     return ret ;
@@ -775,7 +780,15 @@ void check_file_write(const std::string & file_name)
     delete t;
 }
 
-
+int subgraphnum()
+{
+    std::set<unsigned int> reps ;
+    for( const auto & pair : nodes )
+    {
+        reps.insert(dis_joint_set.GetGroup(pair.first));
+    }
+    return reps.size();
+}
 
 /********************************************************
   *
@@ -799,6 +812,7 @@ int main( int argc , char ** argv )
         auto mst = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(mintree.to_string());
         report("#  edges                :   "+std::to_string(parse_mintree(*mst)));
         report("#  nodes                :   "+std::to_string(nodes.size()));
+        report("#  subgraph             :   "+std::to_string(subgraphnum()));
         delete mst ;
     }
     node_class_1();
