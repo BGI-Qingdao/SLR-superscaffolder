@@ -353,6 +353,6 @@ int main(int argc , char **argv )
     config.PrintJunctionNodes() ;
     config.PrintTips();
     config.PrintBaiscMST(prefix.to_string()+".mst_base");
-    config.PrintFinalMST(prefix.to_string()+".mst_base");
+    config.PrintFinalMST(prefix.to_string()+".mst_final");
     return 0 ;
 }
