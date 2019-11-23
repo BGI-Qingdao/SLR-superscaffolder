@@ -545,6 +545,19 @@ struct AppConf
     std::map<unsigned int , std::set<int> > contig_barcodes_map;
     float min_53 ;
     int min_common_barcode_type ;
+    void PrintMinTree(const std::string & output)
+    {
+        auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(output);
+        if(out==NULL)
+            FATAL(" can't open output file for write !");
+        (*out) << "graph {"<<'\n';
+        for( auto & pair : split_graphs)
+        {
+            pair.second.mst_v2.PrintDOTEdges(*out);
+        }
+        (*out) << "}\n";
+        delete out ;
+    }
 }config;
 
 int main(int argc , char **argv )
@@ -562,6 +575,7 @@ int main(int argc , char **argv )
     config.SplitGraph();
     config.MST();
     config.GenerateLinears();
+    config.PrintMinTree(prefix.to_string()+".mst_ideal");
     std::cerr<<"Total delete node : "<<d_num<<'\n';
     return 0 ;
 }
