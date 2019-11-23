@@ -60,6 +60,8 @@ struct AppConf
         BGIQD::stLFR::ContigSimGraph base_contig_sim_graph ;
 
         BGIQD::stLFR::ContigSimGraph maximum_span_graph ;
+        BGIQD::stLFR::ContigSimGraph mst_base ;
+        BGIQD::stLFR::ContigSimGraph mst_final;
 
         std::stack<simplify_log> logs;
 
@@ -132,12 +134,14 @@ struct AppConf
 
         void CorrectGraph( )
         {
+            mst_base= base_contig_sim_graph.MinTree();
             do {
                 RoundStart();
                 Simplify();
                 RoundEnd();
                 //config.GenerateMinTreeTrunks();
             } while( ! IsClean() ) ;
+            mst_final=base_contig_sim_graph.MinTree();
         }
 
         std::string log_str() const 
@@ -281,6 +285,33 @@ struct AppConf
         delete out3;
     }
 
+    void PrintBaiscMST(const std::string & output)
+    {
+        auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(output);
+        if(out==NULL)
+            FATAL(" can't open output file for write !");
+        (*out) << "graph {"<<'\n';
+        for(const auto & pair : split_graphs)
+        {
+            pair.second.mst_base.PrintDOTEdges(*out);
+        }
+        (*out) << "}\n";
+        delete out ;
+    }
+
+    void PrintFinalMST(const std::string & output)
+    {
+        auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(output);
+        if(out==NULL)
+            FATAL(" can't open output file for write !");
+        (*out) << "graph {"<<'\n';
+        for(const auto & pair : split_graphs)
+        {
+            pair.second.mst_final.PrintDOTEdges(*out);
+        }
+        (*out) << "}\n";
+        delete out ;
+    }
     void PrintTips()
     {
         auto out3 = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fNames.mst_tips());
@@ -300,7 +331,13 @@ struct AppConf
 int main(int argc , char **argv )
 {
     START_PARSE_ARGS
-        DEFINE_ARG_REQUIRED(std::string , prefix , "prefix , Input xxx.cluster . Output xxx.mintree_trunk_linear && xxx.mst_error && xxx.mst_tips ");
+        DEFINE_ARG_REQUIRED(std::string , prefix , "prefix , Input xxx.cluster .\n\
+                                Output xxx.mintree_trunk_linear \n\
+                                    && xxx.mst_error\n\
+                                    && xxx.mst_tips \n\
+                                    && xxx.mst_base \n\
+                                    && xxx.mst_final \n\
+                                    ");
         DEFINE_ARG_OPTIONAL(float , threshold, " threshold of simularity","0.1");
         DEFINE_ARG_OPTIONAL(float , del_fac, " threshold of del junction node","0.9");
         DEFINE_ARG_OPTIONAL(int, del_round, "maximum del round ","1000");
@@ -315,5 +352,7 @@ int main(int argc , char **argv )
     config.GenerateLinears();
     config.PrintJunctionNodes() ;
     config.PrintTips();
+    config.PrintBaiscMST(prefix.to_string()+".mst_base");
+    config.PrintFinalMST(prefix.to_string()+".mst_base");
     return 0 ;
 }
