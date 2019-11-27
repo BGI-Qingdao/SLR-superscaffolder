@@ -18,6 +18,7 @@ apps="\
  Cluster2MST2DOT\
  ContigSimAnalysis\
  Points4GapSize\
+ Order_ideal\
  filterPairFQ\
 "
 
