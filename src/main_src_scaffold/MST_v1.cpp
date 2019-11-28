@@ -397,7 +397,6 @@ struct AppConf
                 BGIQD::stLFR::ContigSimGraph & contig_sim
                 ) 
         {
-            masked_nodes.insert(junction_info.junction_id);
             contig_sim.RemoveNode(junction_info.junction_id);
             mst.RemoveNode(junction_info.junction_id);
         }
@@ -426,6 +425,7 @@ struct AppConf
                     Simplify_freq.Touch("Simplify succ");
                 } else {
                     Simplify_freq.Touch("Simplify failed");
+                    masked_nodes.insert(junction_info.junction_id);
                 }
                 junction_info = mst_mid.NextJunction();
             }
