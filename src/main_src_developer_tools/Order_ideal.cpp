@@ -43,6 +43,7 @@ struct Config {
         std::string ref ;
         unsigned int contig ;
         bool orient ;
+        int rank ;
         void InitFromString(const std::string & line )
         {
             std::string tmp1 ;
@@ -74,12 +75,14 @@ struct Config {
         if( in == NULL )
             FATAL(" failed to open sorted_unique for read!!! ");
         std::string line ;
+        unsigned int rank = 1 ;
         while( ! (*in).eof() )
         {
             std::getline((*in),line);
             if(line.empty() ) continue ;
             QuastInfo tmp ;
             tmp.InitFromString(line);
+            tmp.rank = rank ++ ;
             contigs[tmp.contig] = tmp;
         }
         delete in;
@@ -125,6 +128,8 @@ struct Config {
                     gap.data.gap_len = next_contig.ref_start - prev_contig.ref_end -1 ;
                     gap.data.gap_orient = 1 ;
                 }
+                if( std::abs(prev_contig.rank - next_contig.rank) > 2 && gap.data.gap_len > 30000 )
+                    gap.data.gap_len = 30000 ;
             }
         }
         loger<<BGIQD::LOG::lstart() << "ProcessPair done "<<BGIQD::LOG::lend() ;
@@ -135,7 +140,8 @@ struct Config {
         int scaff_id = 1 ;
         for( const auto & pair : gaps ){
             const auto & a_order = pair.second ;
-            auto & a_scaff_info = helper.all_scaff[scaff_id++];
+            auto & a_scaff_info = helper.all_scaff[scaff_id];
+            a_scaff_info.scaff_id = scaff_id ++ ;
             int scaff_order  = 0 ;
             for( const auto & gap : a_order ) 
                 scaff_order += gap.data.gap_orient;
