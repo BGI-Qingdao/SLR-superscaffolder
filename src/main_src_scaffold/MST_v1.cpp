@@ -21,10 +21,13 @@
 BGIQD::FREQ::Freq<std::string>  Simplify_freq;
 BGIQD::FREQ::Freq<std::string>  Failed_reason_freq;
 BGIQD::FREQ::Freq<std::string>  Cant_reason_freq;
+BGIQD::FREQ::Freq<std::string>  Road_result_freq;
+std::set<unsigned int> masked_nodes ;
 std::string log_str() {
-	return "\nSimplify result:\n"+ Simplify_freq.ToString() + "\n" 
-		"Simplify failed reason:\n"+ Failed_reason_freq.ToString() + "\n"
-		"Can't Simplify reason:\n"+ Cant_reason_freq.ToString() + "\n";
+	return "\nSimplify result:\n"+ Simplify_freq.ToString() + "\n" + 
+		"Simplify failed reason:\n"+ Failed_reason_freq.ToString() + "\n" + 
+		"Can't Simplify reason:\n"+ Cant_reason_freq.ToString() + "\n" + 
+        "Check path result : \n" +Road_result_freq.ToString() + "\n";
 }
 
 struct AppConf
@@ -163,8 +166,10 @@ struct AppConf
             NewRoad ret ;
             ret.valid = false ;
             auto barcode_type_info = GetBarcodeDetail(old_road);
-            if( barcode_type_info.common < min_common_barcode_type ) 
+            if( barcode_type_info.common < min_common_barcode_type ) {
+                Road_result_freq.Touch("No enough common");
                 return ret ;
+            }
             std::vector< std::tuple< int ,unsigned  int > > index ;
             index.push_back(std::make_tuple( barcode_type_info.left_only , barcode_type_info.left) );
             index.push_back(std::make_tuple( barcode_type_info.mid_only  , barcode_type_info.mid ) );
@@ -175,12 +180,19 @@ struct AppConf
             std::tie(tmp_bn3 , tmp_ci3) = index[2] ;
             std::tie(tmp_bn2 , tmp_ci2) = index[1] ;
             std::tie(tmp_bn1 , tmp_ci1) = index[0] ;
-            if( tmp_bn3 <= 0 ) return ret ;
-            if( float(tmp_bn2) / float(tmp_bn3) < min_53 ) return ret ;
+            if( tmp_bn3 <= 0 ) {
+                Road_result_freq.Touch("No monoply barcode");
+                return ret ;
+            }
+            if( float(tmp_bn2) / float(tmp_bn3) < min_53 ){
+                Road_result_freq.Touch("No enough differece of 2&3");
+                return ret ;
+            }
+            Road_result_freq.Touch("Succ");
             ret.valid = true ;
             ret.left = tmp_ci1;
             ret.mid  = tmp_ci3; // put the smallest in mid
-            ret.right = tmp_ci2  ;
+            ret.right = tmp_ci2 ;
             return ret ;
         }
         //Done
@@ -354,6 +366,7 @@ struct AppConf
                 BGIQD::stLFR::ContigSimGraph & contig_sim
                 ) 
         {
+            masked_nodes.insert(junction_info.junction_id);
             contig_sim.RemoveNode(junction_info.junction_id);
             mst.RemoveNode(junction_info.junction_id);
         }
@@ -538,6 +551,46 @@ struct AppConf
     std::map<unsigned int , std::set<int> > contig_barcodes_map;
     float min_53 ;
     int min_common_barcode_type ;
+
+    void PrintBaiscMST(const std::string & output)
+    {
+        auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(output);
+        if(out==NULL)
+            FATAL(" can't open output file for write !");
+        (*out) << "graph {"<<'\n';
+        for(const auto & pair : split_graphs)
+        {
+            pair.second.mst_v1.PrintDOTEdges(*out);
+        }
+        (*out) << "}\n";
+        delete out ;
+    }
+
+    void PrintFinalMST(const std::string & output)
+    {
+        auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(output);
+        if(out==NULL)
+            FATAL(" can't open output file for write !");
+        (*out) << "graph {"<<'\n';
+        for(const auto & pair : split_graphs)
+        {
+            pair.second.mst_v2.PrintDOTEdges(*out);
+        }
+        (*out) << "}\n";
+        delete out ;
+    }
+
+    void PrintJunctionNodes()
+    {
+        auto out3 = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fNames.mst_error());
+        if( out3 == NULL )
+            FATAL(" failed to open xxx.mst_error for write !!! ");
+        for( auto & i: masked_nodes)
+        {
+            (*out3)<<i<<'\n';
+        }
+        delete out3;
+    }
 }config;
 
 int main(int argc , char **argv )
@@ -545,7 +598,10 @@ int main(int argc , char **argv )
     START_PARSE_ARGS
         DEFINE_ARG_REQUIRED(std::string , prefix , "prefix .\n\
                         Input xxx.cluster ; xxx.barcodeOnContig ;\n\
-                        Output xxx.mintree_trunk_linear && xxx.mst_base && xxx.mst_modified ");
+                        Output      xxx.mintree_trunk_linear\n\
+                                    xxx.mst_base \n\
+                                    xxx.mst_modified \n\
+                                    xxx.mst_error");
         DEFINE_ARG_OPTIONAL(int  , min_common_barcode_type , " min common barcode type to comfirm a road ","10");
         DEFINE_ARG_OPTIONAL(float, min_53, "min 53 ","2");
         DEFINE_ARG_OPTIONAL(float, min_js, "min js threshold","0.1");
@@ -556,5 +612,8 @@ int main(int argc , char **argv )
     config.SplitGraph();
     config.CorrectGraph();
     config.GenerateLinears();
+    config.PrintBaiscMST(prefix.to_string()+".mst_v1");
+    config.PrintFinalMST(prefix.to_string()+".mst_v2");
+    config.PrintJunctionNodes();
     return 0 ;
 }
