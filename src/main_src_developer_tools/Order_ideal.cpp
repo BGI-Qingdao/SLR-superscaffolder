@@ -7,6 +7,7 @@
 #include "common/freq/freq.h"
 #include "soap2/fileName.h"
 #include "stLFR/TrunkGap.h"
+#include "stLFR/ScaffInfo.h"
 
 struct Config {
 
@@ -126,16 +127,63 @@ struct Config {
                 }
             }
         }
+        loger<<BGIQD::LOG::lstart() << "ProcessPair done "<<BGIQD::LOG::lend() ;
     }
 
+    BGIQD::stLFR::ScaffInfoHelper helper ;
     void GenScaffInfos() {
-
+        int scaff_id = 1 ;
+        for( const auto & pair : gaps ){
+            const auto & a_order = pair.second ;
+            auto & a_scaff_info = helper.all_scaff[scaff_id++];
+            int scaff_order  = 0 ;
+            for( const auto & gap : a_order ) 
+                scaff_order += gap.data.gap_orient;
+            if( scaff_order > 0 ) {
+                for( const auto & gap : a_order ) {
+                    BGIQD::stLFR::ContigDetail tmp ;
+                    tmp.contig_id = gap.prev ;
+                    tmp.gap_size = gap.data.gap_len ;
+                    tmp.orientation = gap.data.prev_positive ;
+                    a_scaff_info.a_scaff.push_back(tmp);
+                }
+                const auto & gap = *(a_order.rbegin()); 
+                BGIQD::stLFR::ContigDetail tmp ;
+                tmp.contig_id = gap.next ;
+                tmp.orientation = gap.data.next_positive ;
+                tmp.gap_size = 0 ;
+                a_scaff_info.a_scaff.push_back(tmp);
+            } else {
+                for( auto  itr = a_order.rbegin() ; itr != a_order.rend() ; itr++ ) {
+                    const auto & gap = *itr ;
+                    BGIQD::stLFR::ContigDetail tmp ;
+                    tmp.contig_id = gap.next ;
+                    tmp.gap_size = gap.data.gap_len ;
+                    tmp.orientation = gap.data.next_positive ;
+                    a_scaff_info.a_scaff.push_back(tmp);
+                }
+                const auto & gap = *(a_order.begin()); 
+                BGIQD::stLFR::ContigDetail tmp ;
+                tmp.contig_id = gap.prev ;
+                tmp.orientation = gap.data.prev_positive ;
+                tmp.gap_size = 0 ;
+                a_scaff_info.a_scaff.push_back(tmp);
+            }
+        }
+        loger<<BGIQD::LOG::lstart() << "GenScaffInfos done "<<BGIQD::LOG::lend() ;
     }
 
-    void PrintScaffInfos() {
-
+    void PrintScaffInfos(const std::string & file) {
+        auto  out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(file);
+        if( out == NULL )
+            FATAL(" failed to open scaff_infos for write!!! ");
+        helper.PrintAllScaff(*out);
+        delete out ;
     }
-
+    void Init() {
+        BGIQD::LOG::logfilter::singleton().get("Order_ideal"
+                ,BGIQD::LOG::loglevel::INFO,loger);
+    }
 } config;
 
 int main(int argc , char **argv )
@@ -143,11 +191,13 @@ int main(int argc , char **argv )
     START_PARSE_ARGS
         DEFINE_ARG_REQUIRED(std::string , linear , "xxx.mintreetrunklinear");
         DEFINE_ARG_REQUIRED(std::string , sorted_unique , "sorted_unique_contig.txt");
+        DEFINE_ARG_REQUIRED(std::string , scaff_infos , "xxx.scaff_infos");
     END_PARSE_ARGS
+    config.Init();
     config.LoadTrunk(linear.to_string());
     config.LoadSorted(sorted_unique.to_string());
     config.ProcessPair();
     config.GenScaffInfos();
-    config.PrintScaffInfos();
+    config.PrintScaffInfos(scaff_infos.to_string());
     return 0 ;
 }
