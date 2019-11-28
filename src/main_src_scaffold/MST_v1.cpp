@@ -120,7 +120,7 @@ struct AppConf
         };
 
         // Done
-        BarcodeTypeInfo GetBarcodeDetail(const OldRoad & old_road ) {
+        BarcodeTypeInfo GetBarcodeDetail(const OldRoad & old_road ) const {
             BarcodeTypeInfo ret ;
             const auto & left_set = contig_barcodes_map_ptr->at(old_road.left) ; 
             const auto & mid_set = contig_barcodes_map_ptr->at(old_road.mid) ; 
@@ -239,6 +239,37 @@ struct AppConf
         int remain_tip_num ;
         int in_linear_num ;
 
+        struct MSTLinear{
+            unsigned int mid ;
+            int common_barcode_num ;
+            float f23 ;
+        };
+        std::vector<MSTLinear> GetMSTLinearInfo() const {
+            std::vector<MSTLinear> ret;
+            for( const auto & pair : mst_v1.nodes ) {
+                const auto & node = pair.second ;
+                if ( node.EdgeNum() != 2 ) continue ;
+                std::vector<unsigned int > lr ;
+                for( int edge_id : node.edge_ids ) {
+                    const auto & edge = mst_v1.GetEdge(edge_id);
+                    const auto & anode = mst_v1.GetNode( edge.OppoNode(node.id) );
+                    if( anode.EdgeNum() == 2 ) lr.push_back( anode.id ) ;
+                }
+                if( lr.size() != 2 ) continue ;
+                OldRoad tmp ;
+                tmp.left = lr[0] ; tmp.mid = node.id ; tmp.right = lr[1] ;
+                auto detail = GetBarcodeDetail(tmp);
+                float f23 = 0.0f ;
+                std::vector<int> monopoly_barcode ;
+                monopoly_barcode.push_back(detail.left_only);
+                monopoly_barcode.push_back(detail.mid_only);
+                monopoly_barcode.push_back(detail.right_only);
+                std::sort(monopoly_barcode.rbegin() , monopoly_barcode.rend());
+                if( monopoly_barcode[2] != 2 ) f23 = float(monopoly_barcode[1]) / float(monopoly_barcode[2]) ;
+                ret.push_back( { node.id , detail.common , f23 } );
+            }
+            return ret ;
+        }
         // Done
         void Init(const BGIQD::stLFR::ContigSimGraph & base , int mc , float m53 ,
                 const std::map<unsigned int , std::set<int> > & map
@@ -501,7 +532,7 @@ struct AppConf
         lger<<BGIQD::LOG::lstart() <<"\n" <<log_str()<<BGIQD::LOG::lend() ;
     }
     //Done
-    void GenerateLinears()
+    void GenerateLinears() 
     {
         BGIQD::FREQ::Freq<int>  trunk_freq;
         int trunk_count = 1;
@@ -591,6 +622,19 @@ struct AppConf
         }
         delete out3;
     }
+
+    void PrintLinearInfo(const std::string & file ) {
+        auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(file);
+        if(out==NULL)
+            FATAL(" can't open output file for write !");
+        for( const auto & split : split_graphs ) {
+            auto ret = split.second.GetMSTLinearInfo() ;
+            for( const auto & i : ret ) 
+                (*out)<<i.mid<<'\t'<<i.common_barcode_num<<'\t'<<i.f23<<'\n';
+        }
+        delete out ;
+    }
+
 }config;
 
 int main(int argc , char **argv )
@@ -615,5 +659,6 @@ int main(int argc , char **argv )
     config.PrintBaiscMST(prefix.to_string()+".mst_v1");
     config.PrintFinalMST(prefix.to_string()+".mst_v2");
     config.PrintJunctionNodes();
+    config.PrintLinearInfo(prefix.to_string()+".mst_linear_info" );
     return 0 ;
 }
