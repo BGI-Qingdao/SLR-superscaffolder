@@ -87,9 +87,9 @@ struct Config {
                 info.prev = prev ;
                 info.next = now ;
                 gaps[id].push_back(info);
-            } else if (  now != (unsigned int )-1 )
+            }
+            if (  now != (unsigned int )-1 )
                 prev = now ;
-            else ;
         }
         delete in ;
         loger<<BGIQD::LOG::lstart() << "Load Trunk done "<<BGIQD::LOG::lend() ;
