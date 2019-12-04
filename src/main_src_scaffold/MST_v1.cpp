@@ -241,10 +241,12 @@ struct AppConf
 
         struct MSTLinear{
             unsigned int mid ;
+            char is_smallest ;
             int common_barcode_num ;
             float f23 ;
         };
-        std::vector<MSTLinear> GetMSTLinearInfo() const {
+        std::vector<MSTLinear> GetMSTLinearInfo() {
+            mst_v1 = base_contig_sim_graph.MinTree();
             std::vector<MSTLinear> ret;
             for( const auto & pair : mst_v1.nodes ) {
                 const auto & node = pair.second ;
@@ -260,13 +262,14 @@ struct AppConf
                 tmp.left = lr[0] ; tmp.mid = node.id ; tmp.right = lr[1] ;
                 auto detail = GetBarcodeDetail(tmp);
                 float f23 = 0.0f ;
-                std::vector<int> monopoly_barcode ;
-                monopoly_barcode.push_back(detail.left_only);
-                monopoly_barcode.push_back(detail.mid_only);
-                monopoly_barcode.push_back(detail.right_only);
-                std::sort(monopoly_barcode.rbegin() , monopoly_barcode.rend());
-                if( monopoly_barcode[2] != 2 ) f23 = float(monopoly_barcode[1]) / float(monopoly_barcode[2]) ;
-                ret.push_back( { node.id , detail.common , f23 } );
+                int lr_min = 0;
+                if(detail.left_only < detail.right_only ) 
+                    lr_min = detail.left_only ;
+                else
+                    lr_min = detail.right_only;
+                if ( detail.mid_only != 0 )
+                    f23 = float(lr_min) / float(detail.mid_only);
+                ret.push_back( { node.id ,(detail.mid_only<=lr_min ? 'Y':'N'), detail.common , f23 } );
             }
             return ret ;
         }
@@ -627,10 +630,10 @@ struct AppConf
         auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(file);
         if(out==NULL)
             FATAL(" can't open output file for write !");
-        for( const auto & split : split_graphs ) {
+        for( auto & split : split_graphs ) {
             auto ret = split.second.GetMSTLinearInfo() ;
             for( const auto & i : ret ) 
-                (*out)<<i.mid<<'\t'<<i.common_barcode_num<<'\t'<<i.f23<<'\n';
+                (*out)<<i.mid<<'\t'<<i.is_smallest<<'\t'<<i.common_barcode_num<<'\t'<<i.f23<<'\n';
         }
         delete out ;
     }
@@ -649,16 +652,20 @@ int main(int argc , char **argv )
         DEFINE_ARG_OPTIONAL(int  , min_common_barcode_type , " min common barcode type to comfirm a road ","10");
         DEFINE_ARG_OPTIONAL(float, min_53, "min 53 ","2");
         DEFINE_ARG_OPTIONAL(float, min_js, "min js threshold","0.1");
+        DEFINE_ARG_OPTIONAL(bool,  debug_linear, "print linear info and exit","No");
     END_PARSE_ARGS
     config.Init( prefix.to_string() , min_common_barcode_type.to_int() , min_53.to_float(), min_js.to_float() );
     config.LoadContigSimGraph();
     config.LoadBarcodeOnContig();
     config.SplitGraph();
+    if( debug_linear.to_bool() ) {
+        config.PrintLinearInfo(prefix.to_string()+".mst_linear_info" );
+        return 0 ;
+    }
     config.CorrectGraph();
     config.GenerateLinears();
     config.PrintBaiscMST(prefix.to_string()+".mst_v1");
     config.PrintFinalMST(prefix.to_string()+".mst_v2");
     config.PrintJunctionNodes();
-    config.PrintLinearInfo(prefix.to_string()+".mst_linear_info" );
     return 0 ;
 }
