@@ -24,16 +24,6 @@ struct Config {
     typedef BGIQD::stLFR::TrunkGap<GapExtra> GapInfo;
     std::map<int,std::vector<GapInfo>> gaps;
 
-    void LoadTrunk( const std::string & file )
-    {
-        auto in  = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(file);
-        if( in == NULL )
-            FATAL(" failed to open xxx.mintree_trunk_linear for read!!! ");
-        BGIQD::stLFR::Load_MST_Trunk_Linear(*in, gaps);
-        delete in ;
-        loger<<BGIQD::LOG::lstart() << "Load Trunk done "<<BGIQD::LOG::lend() ;
-    }
-
     struct QuastInfo
     {
         int ref_start ;
@@ -68,6 +58,44 @@ struct Config {
     };
 
     std::map<unsigned int ,QuastInfo > contigs ;
+    int masked_non_unique ;
+    void LoadTrunk( const std::string & file )
+    {
+        masked_non_unique = 0 ;
+        auto in  = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(file);
+        if( in == NULL )
+            FATAL(" failed to open xxx.mintree_trunk_linear for read!!! ");
+        std::string line ;
+        unsigned int prev = -1 ;
+        int id = 0;
+        while(! std::getline((*in),line).eof() )
+        {
+            if( line[0] == '-' )
+            {
+                id ++ ;
+                prev = -1 ;
+                continue ;
+            }
+            unsigned int now = std::stoul(line);
+            if( contigs.find(now) == contigs.end() ) {
+                masked_non_unique ++ ;
+                now = (unsigned int )-1 ;
+            }
+            if( prev != (unsigned int )-1 && now != (unsigned int )-1)
+            {
+                GapInfo info;
+                info.prev = prev ;
+                info.next = now ;
+                gaps[id].push_back(info);
+            } else if (  now != (unsigned int )-1 )
+                prev = now ;
+            else ;
+        }
+        delete in ;
+        loger<<BGIQD::LOG::lstart() << "Load Trunk done "<<BGIQD::LOG::lend() ;
+        loger<<BGIQD::LOG::lstart() << "Masked non-unique : "<<masked_non_unique<<BGIQD::LOG::lend() ;
+    }
+
 
     void LoadSorted(const std::string & file )
     {
@@ -200,8 +228,8 @@ int main(int argc , char **argv )
         DEFINE_ARG_REQUIRED(std::string , scaff_infos , "xxx.scaff_infos");
     END_PARSE_ARGS
     config.Init();
-    config.LoadTrunk(linear.to_string());
     config.LoadSorted(sorted_unique.to_string());
+    config.LoadTrunk(linear.to_string());
     config.ProcessPair();
     config.GenScaffInfos();
     config.PrintScaffInfos(scaff_infos.to_string());
