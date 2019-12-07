@@ -11,7 +11,7 @@
 #include "stLFR/CBB.h"
 
 #include "soap2/fileName.h"
-
+#include "soap2/contigIndex.h"
 #include <set>
 #include <vector>
 #include <stack>
@@ -29,7 +29,21 @@ std::string log_str() {
 		"Can't Simplify reason:\n"+ Cant_reason_freq.ToString() + "\n" + 
         "Check path result : \n" +Road_result_freq.ToString() + "\n";
 }
-
+std::map<unsigned int , float> lf_log ;
+std::map<unsigned int , float> rf_log ;
+std::map<unsigned int , float> mf_log ;
+void PrintSingloten( const std::string & file) {
+    auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(file);
+    if(out==NULL)
+        FATAL(" can't open singleton file for write !");
+    for( const auto & pair : lf_log) 
+        (*out)<<"L\t"<<pair.first<<'\t'<<pair.second<<'\n';
+    for( const auto & pair : mf_log) 
+        (*out)<<"M\t"<<pair.first<<'\t'<<pair.second<<'\n';
+    for( const auto & pair : rf_log) 
+        (*out)<<"R\t"<<pair.first<<'\t'<<pair.second<<'\n';
+    delete out ;
+}
 struct AppConf
 {
 
@@ -245,7 +259,7 @@ struct AppConf
             int common_barcode_num ;
             float f23 ;
         };
-        std::vector<MSTLinear> GetMSTLinearInfo() {
+        std::vector<MSTLinear> GetMSTLinearInfo( const std::map<unsigned int ,BGIQD::SOAP2::ContigIndex> & cls) {
             mst_v1 = base_contig_sim_graph.MinTree();
             std::vector<MSTLinear> ret;
             for( const auto & pair : mst_v1.nodes ) {
@@ -262,14 +276,21 @@ struct AppConf
                 tmp.left = lr[0] ; tmp.mid = node.id ; tmp.right = lr[1] ;
                 auto detail = GetBarcodeDetail(tmp);
                 float f23 = 0.0f ;
-                int lr_min = 0;
-                if(detail.left_only < detail.right_only ) 
-                    lr_min = detail.left_only ;
+                float lr_min = 0;
+                float lf , rf , mf ;
+                lf = float(detail.left_only) / float(cls.at(detail.left).length); 
+                rf = float(detail.right_only) / float(cls.at(detail.right).length); 
+                mf = float(detail.mid_only) / float(cls.at(detail.mid).length); 
+                lf_log[detail.left] = lf ;
+                rf_log[detail.right] = rf ;
+                mf_log[detail.mid] = mf ;
+                if( lf < rf ) 
+                    lr_min = lf ;
                 else
-                    lr_min = detail.right_only;
-                if ( detail.mid_only != 0 )
-                    f23 = float(lr_min) / float(detail.mid_only);
-                ret.push_back( { node.id ,(detail.mid_only<=lr_min ? 'Y':'N'), detail.common , f23 } );
+                    lr_min = rf;
+                if (  mf != 0 )
+                    f23 = lr_min / mf ;
+                ret.push_back( { node.id ,(mf<=lr_min ? 'Y':'N'), detail.common , f23 } );
             }
             return ret ;
         }
@@ -626,18 +647,33 @@ struct AppConf
         delete out3;
     }
 
+    std::map<unsigned int ,BGIQD::SOAP2::ContigIndex> seeds;
     void PrintLinearInfo(const std::string & file ) {
         auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(file);
         if(out==NULL)
             FATAL(" can't open output file for write !");
         for( auto & split : split_graphs ) {
-            auto ret = split.second.GetMSTLinearInfo() ;
+            auto ret = split.second.GetMSTLinearInfo(seeds) ;
             for( const auto & i : ret ) 
                 (*out)<<i.mid<<'\t'<<i.is_smallest<<'\t'<<i.common_barcode_num<<'\t'<<i.f23<<'\n';
         }
         delete out ;
     }
+    void LoadContigIndex(){
+        BGIQD::LOG::timer t(lger,"LoadContigIndex");
+        auto in = BGIQD::FILES::FileReaderFactory
+            ::GenerateReaderFromFileName(fNames.ContigIndex()) ;
+        if( in == NULL )
+            FATAL( "open .ContigIndex file to read failed !!! " );
 
+        std::string line ;
+        while( in && !std::getline(*in, line).eof() ){
+            BGIQD::SOAP2::ContigIndex tmp;
+            tmp.InitFromString(line);
+            seeds[tmp.contig] = tmp;
+        }
+        delete in ;
+    };
 }config;
 
 int main(int argc , char **argv )
@@ -659,7 +695,9 @@ int main(int argc , char **argv )
     config.LoadBarcodeOnContig();
     config.SplitGraph();
     if( debug_linear.to_bool() ) {
+        config.LoadContigIndex();
         config.PrintLinearInfo(prefix.to_string()+".mst_linear_info" );
+        PrintSingloten(prefix.to_string()+".singloten_factor");
         return 0 ;
     }
     config.CorrectGraph();
