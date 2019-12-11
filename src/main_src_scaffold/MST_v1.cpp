@@ -453,7 +453,7 @@ struct AppConf
             del_node = 0 ;
             round = 0 ;
             mst_v1 = base_contig_sim_graph.MinTree();
-            while( float(del_node)/ float(base_num) < del_fac  ||  round>= del_round  ) {
+            while( ( 1.0f - float(del_node)/ float(base_num) ) > del_fac && round<= del_round  ) {
                 round ++ ;
                 auto mst_mid = base_contig_sim_graph.MinTree();
                 BGIQD::stLFR::ContigSimGraph::RemoveTip_n2(mst_mid) ;
@@ -461,11 +461,12 @@ struct AppConf
                     = mst_mid.NextJunction();
                 while( junction_info.valid  )
                 {
-                    DeleteJunctions( junction_info , mst_mid , base_contig_sim_graph );
                     if( IsComplexJunction( mst_mid ,junction_info ) ) {
+                        DeleteJunctions( junction_info , mst_mid , base_contig_sim_graph );
                         del_node ++ ;
                         continue ;
                     }
+                    DeleteJunctions( junction_info , mst_mid , base_contig_sim_graph );
                     auto graph_g1 = GetG1(junction_info) ;
                     if( Simplify( graph_g1 ) ) {
                         UpdateSucc( graph_g1 , mst_mid , base_contig_sim_graph );
@@ -528,16 +529,17 @@ struct AppConf
                 = mst_linear.NextJunction();
             while( junction_info.valid  )
             {
-                DeleteJunctions( junction_info , mst_linear, base_contig_sim_graph );
+                auto ret = TipCheck( mst_linear , junction_info );
                 if( IsComplexJunction( mst_linear,junction_info ) ) {
+                    DeleteJunctions( junction_info , mst_linear, base_contig_sim_graph );
                     continue ;
                 }
+                DeleteJunctions( junction_info , mst_linear, base_contig_sim_graph );
                 auto graph_g1 = GetG1(junction_info) ;
                 if( Simplify( graph_g1 ) ) {
                     UpdateSucc( graph_g1 , mst_linear , base_contig_sim_graph );
                     Simplify_freq.Touch("Simplify succ");
                 } else {
-                    auto ret = TipCheck( mst_linear , junction_info );
                     if( ret.is_tip ) {
                         UpdateTip(junction_info.junction_id , ret , mst_linear);
                     }else {
