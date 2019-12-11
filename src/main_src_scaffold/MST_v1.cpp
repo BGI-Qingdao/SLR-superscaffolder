@@ -44,13 +44,18 @@ void PrintSingloten( const std::string & file) {
         (*out)<<"R\t"<<pair.first<<'\t'<<pair.second<<'\n';
     delete out ;
 }
+std::map<unsigned int ,BGIQD::SOAP2::ContigIndex> seeds;
 struct AppConf
 {
+
 
     typedef std::vector<BGIQD::stLFR::ContigSimGraph::NodeId> LinearOrder;
 
     struct MST_correct_new 
     {
+        float del_fac ;
+        int del_round ;
+
         const std::map<unsigned int , std::set<int> > * contig_barcodes_map_ptr ;
         struct G1Edge : public BGIQD::GRAPH::IGraphEdgeBasic<unsigned int , int >
         {
@@ -176,7 +181,7 @@ struct AppConf
             return ret ;
         }
         //Done
-        NewRoad CheckRoad( const OldRoad & old_road ){
+        NewRoad CheckRoad( const OldRoad & old_road ) {
             NewRoad ret ;
             ret.valid = false ;
             auto barcode_type_info = GetBarcodeDetail(old_road);
@@ -184,12 +189,16 @@ struct AppConf
                 Road_result_freq.Touch("No enough common");
                 return ret ;
             }
-            std::vector< std::tuple< int ,unsigned  int > > index ;
-            index.push_back(std::make_tuple( barcode_type_info.left_only , barcode_type_info.left) );
-            index.push_back(std::make_tuple( barcode_type_info.mid_only  , barcode_type_info.mid ) );
-            index.push_back(std::make_tuple( barcode_type_info.left_only , barcode_type_info.right) );
+            std::vector< std::tuple< float ,unsigned  int > > index ;
+            float lf , mf , rf ;
+            lf = float(barcode_type_info.left_only) / float(seeds.at(barcode_type_info.left).length); 
+            rf = float(barcode_type_info.right_only) / float(seeds.at(barcode_type_info.right).length); 
+            mf = float(barcode_type_info.mid_only) / float(seeds.at(barcode_type_info.mid).length); 
+            index.push_back(std::make_tuple( lf , barcode_type_info.left) );
+            index.push_back(std::make_tuple( mf , barcode_type_info.mid ) );
+            index.push_back(std::make_tuple( rf , barcode_type_info.right) );
             std::sort(index.rbegin() , index.rend());
-            int tmp_bn1 , tmp_bn2 ,tmp_bn3 ;
+            float tmp_bn1 , tmp_bn2 ,tmp_bn3 ;
             unsigned int tmp_ci1 , tmp_ci2 , tmp_ci3 ;
             std::tie(tmp_bn3 , tmp_ci3) = index[2] ;
             std::tie(tmp_bn2 , tmp_ci2) = index[1] ;
@@ -198,7 +207,7 @@ struct AppConf
                 Road_result_freq.Touch("No monoply barcode");
                 return ret ;
             }
-            if( float(tmp_bn2) / float(tmp_bn3) < min_53 ){
+            if( float(tmp_bn2) / float(tmp_bn3) < min_53 ) {
                 Road_result_freq.Touch("No enough differece of 2&3");
                 return ret ;
             }
@@ -252,7 +261,8 @@ struct AppConf
         int remain_junction_num ;
         int remain_tip_num ;
         int in_linear_num ;
-
+        int round ;
+        int del_node ;
         struct MSTLinear{
             unsigned int mid ;
             char is_smallest ;
@@ -433,27 +443,44 @@ struct AppConf
                 if( edge.IsValid())
                     contig_sim.UpdateEdge(edge.from ,edge.to , 1.0 );
         }
+        bool IsComplexJunction( 
+                const BGIQD::stLFR::ContigSimGraph & mst  ,
+                const BGIQD::stLFR::ContigSimGraph::JunctionInfo & i ) const {
+            const auto & node = mst.GetNode(i.junction_id) ;
+            return node.EdgeNum() >= 4 ;
+        }
         //Done
         void CorrectGraph()
         {
+            del_node = 0 ;
+            round = 0 ;
             mst_v1 = base_contig_sim_graph.MinTree();
-            auto mst_mid = mst_v1;
-            BGIQD::stLFR::ContigSimGraph::JunctionInfo junction_info 
-                = mst_mid.NextJunction();
-            while( junction_info.valid  )
-            {
-                auto graph_g1 = GetG1(junction_info) ;
-                DeleteJunctions( junction_info , mst_mid , base_contig_sim_graph );
-                if( Simplify( graph_g1 ) ) {
-                    UpdateSucc( graph_g1 , mst_mid , base_contig_sim_graph );
-                    Simplify_freq.Touch("Simplify succ");
-                } else {
-                    Simplify_freq.Touch("Simplify failed");
-                    masked_nodes.insert(junction_info.junction_id);
+            while( float(del_node)/ float(base_num) < del_fac  ||  round>= del_round  ) {
+                round ++ ;
+                auto mst_mid = base_contig_sim_graph.MinTree();
+                BGIQD::stLFR::ContigSimGraph::RemoveTip_n2(mst_mid) ;
+                BGIQD::stLFR::ContigSimGraph::JunctionInfo junction_info 
+                    = mst_mid.NextJunction();
+                while( junction_info.valid  )
+                {
+                    DeleteJunctions( junction_info , mst_mid , base_contig_sim_graph );
+                    if( IsComplexJunction( mst_mid ,junction_info ) ) {
+                        del_node ++ ;
+                        continue ;
+                    }
+                    auto graph_g1 = GetG1(junction_info) ;
+                    if( Simplify( graph_g1 ) ) {
+                        UpdateSucc( graph_g1 , mst_mid , base_contig_sim_graph );
+                        Simplify_freq.Touch("Simplify succ");
+                    } else {
+                        del_node ++ ;
+                        Simplify_freq.Touch("Simplify failed");
+                        masked_nodes.insert(junction_info.junction_id);
+                    }
+                    junction_info = mst_mid.NextJunction();
                 }
-                junction_info = mst_mid.NextJunction();
+                //MaxMSTEdge(mst_mid , base_contig_sim_graph );
             }
-            MaxMSTEdge(mst_mid , base_contig_sim_graph );
             mst_v2 = base_contig_sim_graph.MinTree();
         }
 
@@ -539,9 +566,11 @@ struct AppConf
     void SplitGraph()
     {
         auto splits = graph.UnicomGraph(graph);
-        for(const auto & pair : splits)
+        for( const auto & pair : splits )
         {
             split_graphs[pair.first].Init(pair.second,min_common_barcode_type ,min_53,contig_barcodes_map);
+            split_graphs[pair.first].del_fac = del_fac ;
+            split_graphs[pair.first].del_round = del_round ;
         }
         lger<<BGIQD::LOG::lstart() << "split contig sim graph into "<<split_graphs.size()<<" sub graph"<<BGIQD::LOG::lend() ;
     }
@@ -647,7 +676,6 @@ struct AppConf
         delete out3;
     }
 
-    std::map<unsigned int ,BGIQD::SOAP2::ContigIndex> seeds;
     void PrintLinearInfo(const std::string & file ) {
         auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(file);
         if(out==NULL)
@@ -674,6 +702,8 @@ struct AppConf
         }
         delete in ;
     };
+    float del_fac ;
+    int del_round ;
 }config;
 
 int main(int argc , char **argv )
@@ -689,13 +719,17 @@ int main(int argc , char **argv )
         DEFINE_ARG_OPTIONAL(float, min_53, "min 53 ","2");
         DEFINE_ARG_OPTIONAL(float, min_js, "min js threshold","0.1");
         DEFINE_ARG_OPTIONAL(bool,  debug_linear, "print linear info and exit","No");
+        DEFINE_ARG_OPTIONAL(float , del_fac, " threshold of del junction node","0.9");
+        DEFINE_ARG_OPTIONAL(int, del_round, "maximum del round ","1000");
     END_PARSE_ARGS
     config.Init( prefix.to_string() , min_common_barcode_type.to_int() , min_53.to_float(), min_js.to_float() );
+    config.del_fac = del_fac.to_float() ;
+    config.del_round = del_round.to_int() ;
+    config.LoadContigIndex();
     config.LoadContigSimGraph();
     config.LoadBarcodeOnContig();
     config.SplitGraph();
     if( debug_linear.to_bool() ) {
-        config.LoadContigIndex();
         config.PrintLinearInfo(prefix.to_string()+".mst_linear_info" );
         PrintSingloten(prefix.to_string()+".singloten_factor");
         return 0 ;
