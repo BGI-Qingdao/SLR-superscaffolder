@@ -47,8 +47,6 @@ void PrintSingloten( const std::string & file) {
 std::map<unsigned int ,BGIQD::SOAP2::ContigIndex> seeds;
 struct AppConf
 {
-
-
     typedef std::vector<BGIQD::stLFR::ContigSimGraph::NodeId> LinearOrder;
 
     struct MST_correct_new 
@@ -483,6 +481,40 @@ struct AppConf
             }
             mst_v2 = base_contig_sim_graph.MinTree();
         }
+        struct TipRmLinear {
+            bool is_tip ;
+            std::vector<unsigned int> linear_nib ;
+            std::vector<unsigned int> tip_nib ;
+            std::vector<unsigned int> junc_nib ;
+        };
+        static TipRmLinear TipCheck(
+                const BGIQD::stLFR::ContigSimGraph & mst  ,
+                const BGIQD::stLFR::ContigSimGraph::JunctionInfo & i ) {
+            TipRmLinear ret ;
+            const auto & node = mst.GetNode(i.junction_id);
+            for( int edge_id : node.edge_ids ) {
+                const auto & nib = mst.GetNode( mst.GetEdge(edge_id).OppoNode(node.id) );
+                if( nib.EdgeNum() == 1 ) ret.tip_nib.push_back(nib.id);
+                if( nib.EdgeNum() == 2 ) ret.linear_nib.push_back(nib.id);
+                if( nib.EdgeNum() >2 )   ret.junc_nib.push_back(nib.id);
+            }
+            if( ret.junc_nib.size() == 0 && ret.linear_nib.size() == 2 ) ret.is_tip = true ;
+            else ret.is_tip = false ;
+            return ret ;
+        }
+
+        //Done
+        static void UpdateTip( 
+                unsigned int junction_id ,
+                const TipRmLinear & tip,
+                BGIQD::stLFR::ContigSimGraph & mst
+                )
+        {
+            assert( tip.linear_nib.size() == 2 ) ;
+            for( const auto & nib : tip.linear_nib ) 
+                mst.AddEdgeSim(nib,junction_id,1.0f);
+        }
+
 
         //Done
         std::vector<LinearOrder> GenerateLinear()
@@ -491,18 +523,31 @@ struct AppConf
             auto mst_linear = mst_v2 ;
             if( mst_v2.nodes.size() < 1 )
                 return ret ;
-            auto tip_result = BGIQD::stLFR::ContigSimGraph
-                ::RemoveTip_n2(mst_linear) ;
-            auto junction_result = BGIQD::stLFR::ContigSimGraph
-                ::DetectJunctions(mst_linear) ;
 
-            if( junction_result.size() > 0 )
+            BGIQD::stLFR::ContigSimGraph::JunctionInfo junction_info 
+                = mst_linear.NextJunction();
+            while( junction_info.valid  )
             {
-                for( auto x : junction_result )
-                {
-                    mst_linear.RemoveNode(x);
+                DeleteJunctions( junction_info , mst_linear, base_contig_sim_graph );
+                if( IsComplexJunction( mst_linear,junction_info ) ) {
+                    continue ;
                 }
+                auto graph_g1 = GetG1(junction_info) ;
+                if( Simplify( graph_g1 ) ) {
+                    UpdateSucc( graph_g1 , mst_linear , base_contig_sim_graph );
+                    Simplify_freq.Touch("Simplify succ");
+                } else {
+                    auto ret = TipCheck( mst_linear , junction_info );
+                    if( ret.is_tip ) {
+                        UpdateTip(junction_info.junction_id , ret , mst_linear);
+                    }else {
+                        Simplify_freq.Touch("Simplify failed");
+                        masked_nodes.insert(junction_info.junction_id);
+                    }
+                }
+                junction_info = mst_linear.NextJunction();
             }
+
             auto splits = BGIQD::stLFR::ContigSimGraph::UnicomGraph(mst_linear);
             for( auto & pair : splits)
             {
