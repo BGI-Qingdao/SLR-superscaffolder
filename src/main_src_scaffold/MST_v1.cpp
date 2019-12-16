@@ -445,7 +445,7 @@ struct AppConf
                 const BGIQD::stLFR::ContigSimGraph & mst  ,
                 const BGIQD::stLFR::ContigSimGraph::JunctionInfo & i ) const {
             const auto & node = mst.GetNode(i.junction_id) ;
-            return node.EdgeNum() >= 4 ;
+            return node.EdgeNum() > 4 ;
         }
         //Done
         void CorrectGraph()
@@ -459,11 +459,15 @@ struct AppConf
                 BGIQD::stLFR::ContigSimGraph::RemoveTip_n2(mst_mid) ;
                 BGIQD::stLFR::ContigSimGraph::JunctionInfo junction_info 
                     = mst_mid.NextJunction();
+                bool change = false ;
                 while( junction_info.valid  )
                 {
+                    change = true ;
                     if( IsComplexJunction( mst_mid ,junction_info ) ) {
                         DeleteJunctions( junction_info , mst_mid , base_contig_sim_graph );
                         del_node ++ ;
+                        masked_nodes.insert(junction_info.junction_id);
+                        junction_info = mst_mid.NextJunction();
                         continue ;
                     }
                     DeleteJunctions( junction_info , mst_mid , base_contig_sim_graph );
@@ -478,7 +482,7 @@ struct AppConf
                     }
                     junction_info = mst_mid.NextJunction();
                 }
-                //MaxMSTEdge(mst_mid , base_contig_sim_graph );
+                if( ! change ) break ;
             }
             mst_v2 = base_contig_sim_graph.MinTree();
         }
@@ -530,8 +534,10 @@ struct AppConf
             while( junction_info.valid  )
             {
                 auto ret = TipCheck( mst_linear , junction_info );
-                if( IsComplexJunction( mst_linear,junction_info ) ) {
+                if( ! ret.is_tip && IsComplexJunction( mst_linear,junction_info ) ) {
                     DeleteJunctions( junction_info , mst_linear, base_contig_sim_graph );
+                    masked_nodes.insert(junction_info.junction_id);
+                    junction_info = mst_linear.NextJunction();
                     continue ;
                 }
                 DeleteJunctions( junction_info , mst_linear, base_contig_sim_graph );
