@@ -503,7 +503,8 @@ struct AppConf
                 if( nib.EdgeNum() == 2 ) ret.linear_nib.push_back(nib.id);
                 if( nib.EdgeNum() >2 )   ret.junc_nib.push_back(nib.id);
             }
-            if( ret.junc_nib.size() == 0 && ret.linear_nib.size() == 2 ) ret.is_tip = true ;
+            //if( ret.junc_nib.size() == 0 && ret.linear_nib.size() == 2 ) ret.is_tip = true ;
+            if( ret.linear_nib.size() == 2 ) ret.is_tip = true ;
             else ret.is_tip = false ;
             return ret ;
         }
