@@ -490,7 +490,7 @@ struct AppConf
             bool is_tip ;
             std::vector<unsigned int> linear_nib ;
             std::vector<unsigned int> tip_nib ;
-            std::vector<unsigned int> junc_nib ;
+            //std::vector<unsigned int> junc_nib ;
         };
         static TipRmLinear TipCheck(
                 const BGIQD::stLFR::ContigSimGraph & mst  ,
@@ -500,10 +500,8 @@ struct AppConf
             for( int edge_id : node.edge_ids ) {
                 const auto & nib = mst.GetNode( mst.GetEdge(edge_id).OppoNode(node.id) );
                 if( nib.EdgeNum() == 1 ) ret.tip_nib.push_back(nib.id);
-                if( nib.EdgeNum() == 2 ) ret.linear_nib.push_back(nib.id);
-                if( nib.EdgeNum() >2 )   ret.junc_nib.push_back(nib.id);
+                if( nib.EdgeNum() >1 ) ret.linear_nib.push_back(nib.id);
             }
-            //if( ret.junc_nib.size() == 0 && ret.linear_nib.size() == 2 ) ret.is_tip = true ;
             if( ret.linear_nib.size() == 2 ) ret.is_tip = true ;
             else ret.is_tip = false ;
             return ret ;
