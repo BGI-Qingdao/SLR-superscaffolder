@@ -20,6 +20,7 @@
 #include <sys/types.h>
 #include <string>
 #include <map>
+#include <set>
 #include <vector>
 #include <tuple>
 
@@ -39,10 +40,14 @@ struct MST_AnalysisEdge {
     float sim ;
 };
 
+struct MST_AnalysisNode ;
+
+MST_AnalysisNode & get_oppo( int edge_id , unsigned int node_id ) ;
+
 struct MST_AnalysisNode {
 
     unsigned int id ;
-
+    bool operator < ( const MST_AnalysisNode & i ) const { return id < i.id ; } 
     bool is_unique ;
 
     enum GraphType {
@@ -55,12 +60,31 @@ struct MST_AnalysisNode {
     enum JunctionType {
         UnknowJunction = 0 ,
         TipJunction = 1,
-        BrankJunction = 2 ,
-        MixedJunction = 3 ,
-        NeibJunction = 4 
+        LongJunction = 2
+        //BrankJunction = 2 ,
+        //MixedJunction = 3 ,
+        //NeibJunction = 4 
+    };
+
+    enum NodeL2 {
+        UnknowL2 = 0 ,
+        LowL2 = 1 ,
+        HighL2 = 2 
+    };
+
+    enum NeibType { 
+        UnknowNieb = 0 ,
+        SimpleNieb = 1 ,
+        Short_Long = 2 ,
+        Long_Log   = 3 ,
+        MaxNieb    = 4
     };
 
     JunctionType junction_type ;
+
+    NeibType nieb_type ;
+
+    NodeL2 l2_type ;
 
     std::vector<int> edges ; // only store the index of edges .
 
@@ -78,6 +102,31 @@ struct MST_AnalysisNode {
     std::string ref ;
     int pos;
     int rank ;
+
+            // id <-->      len
+    std::map<unsigned int , int >  branch_len_map ;
+    int max_branch_len ;
+    unsigned int max_branch_from_id ;
+
+    std::set<unsigned int> SendDepth() {
+        std::set<unsigned int> ret ;
+        for( auto x : edges ) {
+            auto & nieb_node = get_oppo(x,id);
+            if( nieb_node.id != max_branch_from_id ) 
+                if( nieb_node.UpdateMaxBranchNode(max_branch_len,id) )
+                    ret.insert(nieb_node.id);
+        }
+        return ret ;
+    }
+    bool UpdateMaxBranchNode(int len , unsigned int id ) {
+        branch_len_map[id] = len+1 ;
+        if( len+1 > max_branch_len ) {
+            max_branch_len = len +1;
+            max_branch_from_id = id ;
+            return true ;
+        }
+        return false ;
+    }
 };
 
 struct QuastInfo
@@ -171,9 +220,9 @@ int parse_sort_unique_contigs(std::istream & ist)
     return ret;
 }
 
-const MST_AnalysisNode & get_oppo( int edge_index , unsigned int self_id )
+MST_AnalysisNode & get_oppo( int edge_index , unsigned int self_id )
 {
-    const auto & the_edge = edges.at(edge_index) ;
+    auto & the_edge = edges.at(edge_index) ;
     if( the_edge.from == self_id ) 
         return nodes.at(the_edge.to);
     else if ( the_edge.to == self_id )
@@ -331,121 +380,33 @@ int count_long_junction()
     for( const auto & pair : nodes)
     {
         const auto & i = pair.second ;
-        if( i.junction_type == MST_AnalysisNode::JunctionType::BrankJunction  ) ret ++ ;
-    }
-    return ret ;
-}
-int count_long_junction_non_unique()
-{
-    int ret = 0 ;
-    for( const auto & pair : nodes)
-    {
-        const auto & i = pair.second ;
-        if( ! i.is_unique && i.junction_type == MST_AnalysisNode::JunctionType::BrankJunction  ) ret ++ ;
-    }
-    return ret ;
-}
-int count_long_junction_nib_non_unique()
-{
-    int ret = 0 ;
-    for( const auto & pair : nodes)
-    {
-        const auto & i = pair.second ;
-        if(  i.junction_type == MST_AnalysisNode::JunctionType::BrankJunction  ) 
-        {
-            for( int index : i.edges )
-                if( ! get_oppo(index,i.id).is_unique )
-                {
-                    ret ++ ;
-                    break ;
-                }
-        }
-    }
-    return ret ;
-}
-int count_long_junction_or_nib_non_unique()
-{
-    int ret = 0 ;
-    for( const auto & pair : nodes)
-    {
-        const auto & i = pair.second ;
-        if(  i.junction_type == MST_AnalysisNode::JunctionType::BrankJunction  ) 
-        {
-            if( ! i.is_unique )
-            {
-                ret ++ ;
-                continue ;
-            }
-            for( int index : i.edges )
-                if( ! get_oppo(index,i.id).is_unique )
-                {
-                    ret ++ ;
-                    break ;
-                }
-        }
+        if( i.junction_type == MST_AnalysisNode::JunctionType::LongJunction ) ret ++ ;
     }
     return ret ;
 }
 
+int count_long_junction_low()
+{
+    int ret = 0 ;
+    for( const auto & pair : nodes)
+    {
+        const auto & i = pair.second ;
+        if( i.junction_type == MST_AnalysisNode::JunctionType::LongJunction
+            && i.l2_type == MST_AnalysisNode::NodeL2::LowL2 
+                ) ret ++ ;
+    }
+    return ret ;
+}
 
-int count_mixed_junction()
+int count_long_junction_high()
 {
     int ret = 0 ;
     for( const auto & pair : nodes)
     {
         const auto & i = pair.second ;
-        if( i.junction_type == MST_AnalysisNode::JunctionType::MixedJunction) ret ++ ;
-    }
-    return ret ;
-}
-int count_mixed_junction_non_unique()
-{
-    int ret = 0 ;
-    for( const auto & pair : nodes)
-    {
-        const auto & i = pair.second ;
-        if( ! i.is_unique && i.junction_type == MST_AnalysisNode::JunctionType::MixedJunction) ret ++ ;
-    }
-    return ret ;
-}
-int count_mixed_junction_nib_non_unique()
-{
-    int ret = 0 ;
-    for( const auto & pair : nodes)
-    {
-        const auto & i = pair.second ;
-        if(  i.junction_type == MST_AnalysisNode::JunctionType::MixedJunction) 
-        {
-            for( int index : i.edges )
-                if( ! get_oppo(index,i.id).is_unique )
-                {
-                    ret ++ ;
-                    break ;
-                }
-        }
-    }
-    return ret ;
-}
-int count_mixed_junction_or_nib_non_unique()
-{
-    int ret = 0 ;
-    for( const auto & pair : nodes)
-    {
-        const auto & i = pair.second ;
-        if(  i.junction_type == MST_AnalysisNode::JunctionType::MixedJunction) 
-        {
-            if( ! i.is_unique )
-            {
-                ret ++ ;
-                continue ;
-            }
-            for( int index : i.edges )
-                if( ! get_oppo(index,i.id).is_unique )
-                {
-                    ret ++ ;
-                    break ;
-                }
-        }
+        if( i.junction_type == MST_AnalysisNode::JunctionType::LongJunction
+            && i.l2_type == MST_AnalysisNode::NodeL2::HighL2
+                ) ret ++ ;
     }
     return ret ;
 }
@@ -460,116 +421,28 @@ int count_tip_junction()
     }
     return ret ;
 }
-int count_tip_junction_non_unique()
-{
-    int ret = 0 ;
-    for( const auto & pair : nodes)
-    {
-        const auto & i = pair.second ;
-        if( ! i.is_unique && i.junction_type == MST_AnalysisNode::JunctionType::TipJunction  ) ret ++ ;
-    }
-    return ret ;
-}
-int count_tip_junction_nib_non_unique()
-{
-    int ret = 0 ;
-    for( const auto & pair : nodes)
-    {
-        const auto & i = pair.second ;
-        if(  i.junction_type == MST_AnalysisNode::JunctionType::TipJunction  ) 
-        {
-            for( int index : i.edges )
-                if( ! get_oppo(index,i.id).is_unique )
-                {
-                    ret ++ ;
-                    break ;
-                }
-        }
-    }
-    return ret ;
-}
-int count_tip_junction_or_nib_non_unique()
-{
-    int ret = 0 ;
-    for( const auto & pair : nodes)
-    {
-        const auto & i = pair.second ;
-        if(  i.junction_type == MST_AnalysisNode::JunctionType::TipJunction  ) 
-        {
-            if( ! i.is_unique )
-            {
-                ret ++ ;
-                continue ;
-            }
-            for( int index : i.edges )
-                if( ! get_oppo(index,i.id).is_unique )
-                {
-                    ret ++ ;
-                    break ;
-                }
-        }
-    }
-    return ret ;
-}
 
-int count_nieb_junction() 
+int count_tip_junction_low()
 {
     int ret = 0 ;
     for( const auto & pair : nodes)
     {
         const auto & i = pair.second ;
-        if( i.junction_type == MST_AnalysisNode::JunctionType::NeibJunction) ret ++ ;
+        if( i.junction_type == MST_AnalysisNode::JunctionType::TipJunction
+            && i.l2_type == MST_AnalysisNode::NodeL2::LowL2 
+                ) ret ++ ;
     }
     return ret ;
 }
-int count_nieb_junction_non_unique()
+int count_tip_junction_high()
 {
     int ret = 0 ;
     for( const auto & pair : nodes)
     {
         const auto & i = pair.second ;
-        if( ! i.is_unique && i.junction_type == MST_AnalysisNode::JunctionType::NeibJunction) ret ++ ;
-    }
-    return ret ;
-}
-int count_nieb_junction_nib_non_unique()
-{
-    int ret = 0 ;
-    for( const auto & pair : nodes)
-    {
-        const auto & i = pair.second ;
-        if(  i.junction_type == MST_AnalysisNode::JunctionType::NeibJunction) 
-        {
-            for( int index : i.edges )
-                if( ! get_oppo(index,i.id).is_unique )
-                {
-                    ret ++ ;
-                    break ;
-                }
-        }
-    }
-    return ret ;
-}
-int count_nieb_junction_or_nib_non_unique()
-{
-    int ret = 0 ;
-    for( const auto & pair : nodes)
-    {
-        const auto & i = pair.second ;
-        if(  i.junction_type == MST_AnalysisNode::JunctionType::NeibJunction) 
-        {
-            if( ! i.is_unique )
-            {
-                ret ++ ;
-                continue ;
-            }
-            for( int index : i.edges )
-                if( ! get_oppo(index,i.id).is_unique )
-                {
-                    ret ++ ;
-                    break ;
-                }
-        }
+        if( i.junction_type == MST_AnalysisNode::JunctionType::TipJunction
+            && i.l2_type == MST_AnalysisNode::NodeL2::HighL2
+                ) ret ++ ;
     }
     return ret ;
 }
@@ -583,6 +456,7 @@ int count_non_unique()
     }
     return ret ;
 }
+
 void prepare_ref_ranks()
 {
     // collect ref data
@@ -611,7 +485,29 @@ void prepare_ref_ranks()
         a_edge.rank = get_rank(a_edge.from,a_edge.to);
     }
 }
-
+void prepare_depth() {
+    std::set<unsigned int> updated ;
+    for( auto & pair : nodes ) {
+        pair.second.max_branch_len = 1 ;
+        pair.second.max_branch_from_id = pair.second.id;
+    }
+    for( auto & pair : nodes ) {
+        if( pair.second.edges.size() == 1 ) {
+            auto up  = pair.second.SendDepth() ;
+            for( auto x : up ) updated.insert(x);
+        }
+    }
+    do{
+        std::set<unsigned int> new_up ;
+        for( auto x : updated ) {
+            auto & node = nodes.at(x) ;
+            auto up  = node.SendDepth() ;
+            for( auto x : up ) new_up.insert(x);
+        }
+        updated.clear();
+        std::swap(new_up,updated);
+    }while( ! updated.empty() );
+}
 void node_class_1()
 {
     for(auto & pair : nodes )
@@ -628,29 +524,16 @@ void node_class_1()
     }
 }
 
+int oppo_branch_len(const MST_AnalysisNode & nieb , unsigned int id )
+{
+    int len = 0 ;
+    for( const auto & pair : nieb.branch_len_map ){
+        if( pair.first != id && pair.second > len ) 
+            len = pair.second ;
+    }
+    return len ;
+}
 
-struct JunctionTypeDetecter {
-    int tip ;
-    int linear ;
-    int junction ;
-    JunctionTypeDetecter() : tip(0) , linear(0) , junction(0) {}
-    void Add( MST_AnalysisNode::GraphType t)
-    {
-        if( t == MST_AnalysisNode::GraphType::JunctionNode ) junction ++ ;
-        else if ( t == MST_AnalysisNode::GraphType::LinearNode ) linear ++ ;
-        else if ( t == MST_AnalysisNode::GraphType::TipNode ) tip ++ ;
-        else assert(0);
-    }
-    MST_AnalysisNode::JunctionType get_type() const 
-    {
-        if( junction > 0 ) return MST_AnalysisNode::JunctionType::NeibJunction ;
-        if( linear <= 2 && tip >= 1 && junction == 0 ) return MST_AnalysisNode::JunctionType::TipJunction ;
-        if( linear > 2 && tip == 0 && junction == 0 ) return MST_AnalysisNode::JunctionType::BrankJunction ;
-        if( linear > 2 && tip > 0 && junction == 0 ) return MST_AnalysisNode::JunctionType::MixedJunction ;
-        assert(0);
-        return MST_AnalysisNode::JunctionType::UnknowJunction ;
-    }
-};
 void node_class_2()
 {
     for(auto & pair : nodes )
@@ -658,13 +541,62 @@ void node_class_2()
         auto & a_node = pair.second ;
         if( a_node.graph_type != MST_AnalysisNode::GraphType::JunctionNode ) 
             continue ;
-        JunctionTypeDetecter detecter;
+        int long_neib = 0 ;
         for( int index : a_node.edges )
         {
             const auto & oppo = get_oppo(index,a_node.id);
-            detecter.Add(oppo.graph_type);
+            if( oppo_branch_len( oppo , a_node.id ) > 3 ) long_neib ++ ; 
         }
-        a_node.junction_type = detecter.get_type();
+        if( long_neib >= 3 ) 
+            a_node.junction_type = MST_AnalysisNode::JunctionType::LongJunction ;
+        else
+            a_node.junction_type = MST_AnalysisNode::JunctionType::TipJunction;
+    }
+}
+
+void node_class_3()
+{
+    for(auto & pair : nodes )
+    {
+        auto & a_node = pair.second ;
+        if( a_node.graph_type != MST_AnalysisNode::GraphType::JunctionNode ) 
+            continue ;
+        if( a_node.edges.size() >= 5) 
+            a_node.l2_type = MST_AnalysisNode::NodeL2::HighL2 ;
+        else
+            a_node.l2_type = MST_AnalysisNode::NodeL2::LowL2;
+    }
+}
+void node_class_4()
+{
+    for(auto & pair : nodes )
+    {
+        auto & a_node = pair.second ;
+        if( a_node.graph_type != MST_AnalysisNode::GraphType::JunctionNode ) 
+            continue ;
+        int neib_linear = 0 ;
+        int neib_tip = 0 ;
+        int neib_long = 0 ;
+        for( int index : a_node.edges )
+        {
+            const auto & oppo = get_oppo(index,a_node.id);
+            if( oppo.graph_type != MST_AnalysisNode::GraphType::JunctionNode ) 
+                neib_linear ++ ;
+            else {
+                if ( oppo.junction_type == MST_AnalysisNode::JunctionType::TipJunction ) 
+                    neib_tip ++ ;
+                else 
+                    neib_long ++ ;
+            }
+        }
+        if( neib_long == 0 && neib_tip == 0 )
+            a_node.nieb_type = MST_AnalysisNode::NeibType::SimpleNieb ;
+        else if ( neib_long == 0 && neib_tip != 0 ) 
+            a_node.nieb_type = MST_AnalysisNode::NeibType::Short_Long;
+        else if ( neib_long != 0 && neib_tip == 0 ) 
+            a_node.nieb_type = MST_AnalysisNode::NeibType::Long_Log;
+        else 
+            a_node.nieb_type = MST_AnalysisNode::NeibType::MaxNieb;
     }
 }
 
@@ -690,6 +622,57 @@ void report(const std::string &  log)
     }
     (*report_file) << log <<'\n';
     std::cout<<log<<'\n';
+}
+bool nied_non_unique(const MST_AnalysisNode & node ) {
+    for( int index : node.edges )
+        if( ! get_oppo(index,node.id).is_unique )
+            return true ;
+    return false ;
+}
+
+void printNonUnique( std::set<MST_AnalysisNode> & node ) {
+    int nn = 0 , nu = 0 , un = 0 , uu = 0 ;
+    for( const auto & i : node ) {
+        bool nieb_unique =! nied_non_unique(i) ;
+        if( i.is_unique && nieb_unique ) uu ++ ;
+        if( ! i.is_unique && nieb_unique ) nu ++ ;
+        if( i.is_unique && ! nieb_unique ) un ++ ;
+        if( ! i.is_unique && !nieb_unique ) nn ++ ;
+    }
+    report("        # self-non-unique+nieb-non-unique   :" + std::to_string(nn));
+    report("        # self-unique+nieb-non-unique       :" + std::to_string(un));
+    report("        # self-non-unique+nieb-unique       :" + std::to_string(nu));
+    report("        # self-unique+nieb-unique           :" + std::to_string(uu));
+}
+
+typedef std::function<bool(const MST_AnalysisNode & node)> NodeFilter ;
+void printLeftInfo( const std::string & str ,NodeFilter f )
+{
+    std::set<MST_AnalysisNode> tmp_s;
+    std::set<MST_AnalysisNode> tmp_sl ;
+    std::set<MST_AnalysisNode> tmp_ll ;
+    std::set<MST_AnalysisNode> tmp_m ;
+    int total = 0 ;
+    for( const auto & pair : nodes)
+    {
+        const auto & i = pair.second ;
+        if( f(i) ) {
+            total++;
+            if( i.nieb_type == MST_AnalysisNode::NeibType::SimpleNieb ) tmp_s.insert(i);
+            if( i.nieb_type == MST_AnalysisNode::NeibType::Short_Long) tmp_sl.insert(i);
+            if( i.nieb_type == MST_AnalysisNode::NeibType::Long_Log ) tmp_ll.insert(i);
+            if( i.nieb_type == MST_AnalysisNode::NeibType::MaxNieb ) tmp_m.insert(i);
+        }
+    }
+    report("    #"+str+"    :" + std::to_string(total));
+    report("    #   "+str +" simple nieb    :" + std::to_string(tmp_s.size()));
+    printNonUnique(tmp_s);
+    report("    #   "+str +" short_long nieb    :" + std::to_string(tmp_sl.size()));
+    printNonUnique(tmp_sl);
+    report("    #   "+str +" long long nieb    :" + std::to_string(tmp_ll.size()));
+    printNonUnique(tmp_ll);
+    report("    #   "+str +" mixed nieb    :" + std::to_string(tmp_m.size()));
+    printNonUnique(tmp_m);
 }
 
 void print_edge_rank_violin_csv()
@@ -815,13 +798,36 @@ int main( int argc , char ** argv )
         report("#  subgraph             :   "+std::to_string(subgraphnum()));
         delete mst ;
     }
+    prepare_depth();
     node_class_1();
     node_class_2();
+    node_class_3();
+    node_class_4();
     { // sort_unique_contig.txt
         auto sorts = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(sorted_unique.to_string());
         report("# unique-nodes          :   "+std::to_string(parse_sort_unique_contigs(*sorts)));
         delete sorts ;
     }
+    auto tjl = [](const MST_AnalysisNode&i){ 
+        return i.graph_type == MST_AnalysisNode::GraphType::JunctionNode 
+        && i.junction_type == MST_AnalysisNode::JunctionType::TipJunction 
+        && i.l2_type == MST_AnalysisNode::NodeL2::LowL2 ;
+    }; 
+    auto tjh = [](const MST_AnalysisNode&i){ 
+        return i.graph_type == MST_AnalysisNode::GraphType::JunctionNode 
+        && i.junction_type == MST_AnalysisNode::JunctionType::TipJunction 
+        && i.l2_type == MST_AnalysisNode::NodeL2::HighL2 ;
+    }; 
+    auto ljl = [](const MST_AnalysisNode&i){ 
+        return i.graph_type == MST_AnalysisNode::GraphType::JunctionNode 
+        && i.junction_type == MST_AnalysisNode::JunctionType::LongJunction
+        && i.l2_type == MST_AnalysisNode::NodeL2::LowL2 ;
+    }; 
+    auto ljh = [](const MST_AnalysisNode&i){ 
+        return i.graph_type == MST_AnalysisNode::GraphType::JunctionNode 
+        && i.junction_type == MST_AnalysisNode::JunctionType::LongJunction
+        && i.l2_type == MST_AnalysisNode::NodeL2::HighL2 ;
+    }; 
     prepare_ref_ranks();
         report("# non-unique-nodes      :   "+std::to_string(count_non_unique()));
         report("# junction nodes        :   "+std::to_string(count_junction()));
@@ -831,24 +837,15 @@ int main( int argc , char ** argv )
         report("#   junction>4 nodes    :   "+std::to_string(count_junction_gt(4)));
         report("  ----------------------------------------");
         report("#   tip-junction nodes  :   "+std::to_string(count_tip_junction()));
-        report("#     tip-junction nodes or nibs non-unique :   "+std::to_string(count_tip_junction_or_nib_non_unique()));
-        report("#     tip-junction nodes non-unique         :   "+std::to_string(count_tip_junction_non_unique()));
-        report("#     tip-junction nodes nibs non-unique    :   "+std::to_string(count_tip_junction_nib_non_unique()));
-        report("      ------------------------------------");
+        report("#       low branches    :   "+std::to_string(count_tip_junction_low()));
+        printLeftInfo("" ,tjl);
+        report("#       high branches   :   "+std::to_string(count_tip_junction_high()));
+        printLeftInfo("" ,tjh);
         report("#   long-junction nodes :   "+std::to_string(count_long_junction()));
-        report("#     long-junction nodes or nibs non-unique:   "+std::to_string(count_long_junction_or_nib_non_unique()));
-        report("#     long-junction nodes non-unique        :   "+std::to_string(count_long_junction_non_unique()));
-        report("#     long-junction nodes nibs non-unique   :   "+std::to_string(count_long_junction_nib_non_unique()));
-        report("      ------------------------------------");
-        report("#   mixed-junction nodes:   "+std::to_string(count_mixed_junction()));
-        report("#     mixed-junction nodes or nibs non-unique:   "+std::to_string(count_mixed_junction_or_nib_non_unique()));
-        report("#     mixed-junction nodes non-unique        :   "+std::to_string(count_mixed_junction_non_unique()));
-        report("#     mixed-junction nodes nibs non-unique   :   "+std::to_string(count_mixed_junction_nib_non_unique()));
-        report("      ------------------------------------");
-        report("#   nieb-junction nodes :   "+std::to_string(count_nieb_junction()));
-        report("#     nieb-junction nodes or nibs non-unique:   "+std::to_string(count_nieb_junction_or_nib_non_unique()));
-        report("#     nieb-junction nodes non-unique        :   "+std::to_string(count_nieb_junction_non_unique()));
-        report("#     nieb-junction nodes nibs non-unique   :   "+std::to_string(count_nieb_junction_nib_non_unique()));
+        report("#       low branches    :   "+std::to_string(count_long_junction_low()));
+        printLeftInfo("" ,ljl);
+        report("#       high branches   :   "+std::to_string(count_long_junction_high()));
+        printLeftInfo("" ,ljh);
         report("  ----------------------------------------");
         report("#   junction unique     :   "+std::to_string(count_junction_unique()));
         report("#   junction non-unique :   "+std::to_string(count_junction_non_unique()));
