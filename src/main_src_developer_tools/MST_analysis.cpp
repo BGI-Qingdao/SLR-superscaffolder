@@ -652,19 +652,16 @@ void printLeftInfo( const std::string & str ,NodeFilter f )
     std::set<MST_AnalysisNode> tmp_sl ;
     std::set<MST_AnalysisNode> tmp_ll ;
     std::set<MST_AnalysisNode> tmp_m ;
-    int total = 0 ;
     for( const auto & pair : nodes)
     {
         const auto & i = pair.second ;
         if( f(i) ) {
-            total++;
             if( i.nieb_type == MST_AnalysisNode::NeibType::SimpleNieb ) tmp_s.insert(i);
             if( i.nieb_type == MST_AnalysisNode::NeibType::Short_Long) tmp_sl.insert(i);
             if( i.nieb_type == MST_AnalysisNode::NeibType::Long_Log ) tmp_ll.insert(i);
             if( i.nieb_type == MST_AnalysisNode::NeibType::MaxNieb ) tmp_m.insert(i);
         }
     }
-    report("    #"+str+"    :" + std::to_string(total));
     report("    #   "+str +" simple nieb    :" + std::to_string(tmp_s.size()));
     printNonUnique(tmp_s);
     report("    #   "+str +" short_long nieb    :" + std::to_string(tmp_sl.size()));
