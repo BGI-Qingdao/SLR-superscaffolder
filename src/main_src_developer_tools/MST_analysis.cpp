@@ -545,7 +545,7 @@ void node_class_2()
         for( int index : a_node.edges )
         {
             const auto & oppo = get_oppo(index,a_node.id);
-            if( oppo_branch_len( oppo , a_node.id ) > 3 ) long_neib ++ ; 
+            if( oppo_branch_len( oppo , a_node.id ) >= 3 ) long_neib ++ ; 
         }
         if( long_neib >= 3 ) 
             a_node.junction_type = MST_AnalysisNode::JunctionType::LongJunction ;
