@@ -616,7 +616,14 @@ void create_output_dir(const std::string & dirname )
     output_dir = dirname ;
 }
 
-void report(const std::string &  log)
+enum ReportLevel {
+    ReportLevel_Unknow = 0 ,
+    ReportLevel_Both = 1 ,
+    ReportLevel_ShowOnly = 2 ,
+    ReportLevel_FileOnly = 3
+};
+
+void report(const std::string &  log , ReportLevel  level = ReportLevel::ReportLevel_Both )
 {
     static std::ostream * report_file = NULL ;
     if( report_file == NULL )
@@ -626,8 +633,10 @@ void report(const std::string &  log)
         delete report_file ;
         return ;
     }
-    (*report_file) << log <<'\n';
-    std::cout<<log<<'\n';
+    if( level != ReportLevel::ReportLevel_ShowOnly )
+        (*report_file) << log <<'\n';
+    if( level != ReportLevel::ReportLevel_FileOnly )
+        std::cout<<log<<'\n';
 }
 bool nied_non_unique(const MST_AnalysisNode & node ) {
     for( int index : node.edges )
@@ -636,7 +645,7 @@ bool nied_non_unique(const MST_AnalysisNode & node ) {
     return false ;
 }
 
-void printNonUnique( std::set<MST_AnalysisNode> & node ) {
+void printNonUnique( const std::set<MST_AnalysisNode> & node , ReportLevel  level ) {
     int nn = 0 , nu = 0 , un = 0 , uu = 0 ;
     for( const auto & i : node ) {
         bool nieb_unique =! nied_non_unique(i) ;
@@ -645,37 +654,41 @@ void printNonUnique( std::set<MST_AnalysisNode> & node ) {
         if( i.is_unique && ! nieb_unique ) un ++ ;
         if( ! i.is_unique && !nieb_unique ) nn ++ ;
     }
-    report("        # self-non-unique+nieb-non-unique   :" + std::to_string(nn));
-    report("        # self-unique+nieb-non-unique       :" + std::to_string(un));
-    report("        # self-non-unique+nieb-unique       :" + std::to_string(nu));
-    report("        # self-unique+nieb-unique           :" + std::to_string(uu));
+    report("        # self-non-unique+nieb-non-unique   :" + std::to_string(nn) , level );
+    report("        # self-unique+nieb-non-unique       :" + std::to_string(un) , level );
+    report("        # self-non-unique+nieb-unique       :" + std::to_string(nu) , level );
+    report("        # self-unique+nieb-unique           :" + std::to_string(uu) , level );
 }
 
 typedef std::function<bool(const MST_AnalysisNode & node)> NodeFilter ;
-void printLeftInfo( const std::string & str ,NodeFilter f )
+void printLeftInfo( NodeFilter f  )
 {
     std::set<MST_AnalysisNode> tmp_s;
     std::set<MST_AnalysisNode> tmp_sl ;
     std::set<MST_AnalysisNode> tmp_ll ;
     std::set<MST_AnalysisNode> tmp_m ;
+    std::set<MST_AnalysisNode> tmp ;
     for( const auto & pair : nodes)
     {
         const auto & i = pair.second ;
         if( f(i) ) {
+            tmp.insert(i);
             if( i.nieb_type == MST_AnalysisNode::NeibType::SimpleNieb ) tmp_s.insert(i);
             if( i.nieb_type == MST_AnalysisNode::NeibType::Short_Long) tmp_sl.insert(i);
             if( i.nieb_type == MST_AnalysisNode::NeibType::Long_Log ) tmp_ll.insert(i);
             if( i.nieb_type == MST_AnalysisNode::NeibType::MaxNieb ) tmp_m.insert(i);
         }
     }
-    report("    #   "+str +" simple nieb    :" + std::to_string(tmp_s.size()));
-    printNonUnique(tmp_s);
-    report("    #   "+str +" short_long nieb    :" + std::to_string(tmp_sl.size()));
-    printNonUnique(tmp_sl);
-    report("    #   "+str +" long long nieb    :" + std::to_string(tmp_ll.size()));
-    printNonUnique(tmp_ll);
-    report("    #   "+str +" mixed nieb    :" + std::to_string(tmp_m.size()));
-    printNonUnique(tmp_m);
+
+    printNonUnique(tmp, ReportLevel::ReportLevel_Both );
+    report("    #    simple nieb    :" + std::to_string(tmp_s.size()) , ReportLevel::ReportLevel_FileOnly);
+    printNonUnique(tmp_s ,  ReportLevel::ReportLevel_FileOnly);
+    report("    #    short  nieb    :" + std::to_string(tmp_sl.size()), ReportLevel::ReportLevel_FileOnly);
+    printNonUnique(tmp_sl , ReportLevel::ReportLevel_FileOnly);
+    report("    #    long nieb      :" + std::to_string(tmp_ll.size()), ReportLevel::ReportLevel_FileOnly);
+    printNonUnique(tmp_ll , ReportLevel::ReportLevel_FileOnly);
+    report("    #    mixed nieb     :" + std::to_string(tmp_m.size()) , ReportLevel::ReportLevel_FileOnly);
+    printNonUnique(tmp_m  , ReportLevel::ReportLevel_FileOnly);
 }
 
 void print_edge_rank_violin_csv()
@@ -841,14 +854,14 @@ int main( int argc , char ** argv )
         report("  ----------------------------------------");
         report("#   tip-junction nodes  :   "+std::to_string(count_tip_junction()));
         report("#       low branches    :   "+std::to_string(count_tip_junction_low()));
-        printLeftInfo("" ,tjl);
+        printLeftInfo(tjl );
         report("#       high branches   :   "+std::to_string(count_tip_junction_high()));
-        printLeftInfo("" ,tjh);
+        printLeftInfo(tjh );
         report("#   long-junction nodes :   "+std::to_string(count_long_junction()));
         report("#       low branches    :   "+std::to_string(count_long_junction_low()));
-        printLeftInfo("" ,ljl);
+        printLeftInfo(ljl );
         report("#       high branches   :   "+std::to_string(count_long_junction_high()));
-        printLeftInfo("" ,ljh);
+        printLeftInfo(ljh );
         report("  ----------------------------------------");
         report("#   junction unique     :   "+std::to_string(count_junction_unique()));
         report("#   junction non-unique :   "+std::to_string(count_junction_non_unique()));
