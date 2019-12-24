@@ -560,7 +560,10 @@ void node_class_3()
     {
         auto & a_node = pair.second ;
         if( a_node.graph_type != MST_AnalysisNode::GraphType::JunctionNode ) 
+        {
+            a_node.l2_type = MST_AnalysisNode::NodeL2::UnknowL2;
             continue ;
+        }
         if( a_node.edges.size() >= 5) 
             a_node.l2_type = MST_AnalysisNode::NodeL2::HighL2 ;
         else
@@ -573,7 +576,10 @@ void node_class_4()
     {
         auto & a_node = pair.second ;
         if( a_node.graph_type != MST_AnalysisNode::GraphType::JunctionNode ) 
+        {
+            a_node.nieb_type = MST_AnalysisNode::NeibType::UnknowNieb;
             continue ;
+        }
         int neib_linear = 0 ;
         int neib_tip = 0 ;
         int neib_long = 0 ;
