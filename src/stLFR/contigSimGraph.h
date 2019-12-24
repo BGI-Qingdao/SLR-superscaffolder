@@ -190,7 +190,21 @@ namespace BGIQD {
                 unsigned int junction_id ;
                 std::vector<unsigned int > neibs ;
             };
-
+            JunctionInfo get_junction_info(unsigned int id) const {
+                JunctionInfo ret ;
+                ret.valid = true ;
+                const auto node = GetNode(id);
+                if( node.EdgeNum() > 2 )
+                    ret.valid = true ;
+                else 
+                    ret.valid = false;
+                ret.junction_id = id ;
+                for(EdgeId id : node.edge_ids )
+                {
+                    ret.neibs.push_back(GetEdge(id).OppoNode(id));
+                }
+                return ret;
+            }
             JunctionInfo NextJunction() const
             {
                 JunctionInfo ret ;

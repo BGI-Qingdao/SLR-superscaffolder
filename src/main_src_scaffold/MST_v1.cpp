@@ -18,6 +18,8 @@
 #include <tuple>
 #include <sstream>
 
+typedef BGIQD::GRAPH::TipRemoveHelper<BGIQD::stLFR::ContigSimGraph> TipHelper ;
+typedef TipHelper::TipRemoveResult TipRemoveResult;
 BGIQD::FREQ::Freq<std::string>  Simplify_freq;
 BGIQD::FREQ::Freq<std::string>  Failed_reason_freq;
 BGIQD::FREQ::Freq<std::string>  Cant_reason_freq;
@@ -519,21 +521,55 @@ struct AppConf
                 mst.AddEdgeSim(nib,junction_id,1.0f);
         }
 
+        void TryLinearTip( BGIQD::stLFR::ContigSimGraph & mintree )
+        {
+            TipHelper tip_helper ;
+            auto tip_checker = [](const TipHelper::tip & t ) -> bool
+            {
+                return t.size() < 2 ;
+            };
+            tip_helper.Init(tip_checker);
+            do
+            {
+                std::vector<TipHelper::tip> tips ;
+                tips = tip_helper.TipDetect( mintree);
+                if( tips.empty() )
+                {
+                    break;
+                }
+                for( const auto & x : tips )
+                {
+                    //TODO
+                    unsigned int id = *x.rbegin();
+                    unsigned int oppo = *(x.rbegin() + 1 );
+                    auto junction_info = mintree.get_junction_info(id) ;
+                    if( !junction_info.valid )
+                        continue ;
+                    DeleteJunctions( junction_info , mintree, base_contig_sim_graph );
+                    auto graph_g1 = GetG1(junction_info) ;
+                    if( Simplify( graph_g1 ) ) {
+                        UpdateSucc( graph_g1 , mintree, base_contig_sim_graph );
+                        Simplify_freq.Touch("Simplify succ");
+                    } else {
+                        //Force linear tip
+                    }
+                }
+            }while( true );
+        }
 
         //Done
         std::vector<LinearOrder> GenerateLinear()
         {
             std::vector<LinearOrder> ret ;
             auto mst_linear = mst_v2 ;
-            if( mst_v2.nodes.size() < 1 )
+            if( mst_linear.nodes.size() < 1 )
                 return ret ;
-
+            TryLinearTip(mst_linear);
             BGIQD::stLFR::ContigSimGraph::JunctionInfo junction_info 
                 = mst_linear.NextJunction();
             while( junction_info.valid  )
             {
-                auto ret = TipCheck( mst_linear , junction_info );
-                if( ! ret.is_tip && IsComplexJunction( mst_linear,junction_info ) ) {
+                if(  IsComplexJunction( mst_linear,junction_info ) ) {
                     DeleteJunctions( junction_info , mst_linear, base_contig_sim_graph );
                     masked_nodes.insert(junction_info.junction_id);
                     junction_info = mst_linear.NextJunction();
@@ -545,12 +581,8 @@ struct AppConf
                     UpdateSucc( graph_g1 , mst_linear , base_contig_sim_graph );
                     Simplify_freq.Touch("Simplify succ");
                 } else {
-                    if( ret.is_tip ) {
-                        UpdateTip(junction_info.junction_id , ret , mst_linear);
-                    }else {
-                        Simplify_freq.Touch("Simplify failed");
-                        masked_nodes.insert(junction_info.junction_id);
-                    }
+                    Simplify_freq.Touch("Simplify failed");
+                    masked_nodes.insert(junction_info.junction_id);
                 }
                 junction_info = mst_linear.NextJunction();
             }
@@ -773,6 +805,7 @@ int main(int argc , char **argv )
         DEFINE_ARG_OPTIONAL(bool,  debug_linear, "print linear info and exit","No");
         DEFINE_ARG_OPTIONAL(float , del_fac, " threshold of del junction node","0.9");
         DEFINE_ARG_OPTIONAL(int, del_round, "maximum del round ","1000");
+        //DEFINE_ARG_OPTIONAL(bool, deal_tip, "deal_tip  while linear order","false");
     END_PARSE_ARGS
     config.Init( prefix.to_string() , min_common_barcode_type.to_int() , min_53.to_float(), min_js.to_float() );
     config.del_fac = del_fac.to_float() ;
