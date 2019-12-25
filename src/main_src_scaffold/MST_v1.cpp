@@ -547,8 +547,8 @@ struct AppConf
                     const auto & tip_node = mintree.GetNode(tip_id);
                     unsigned int id = -1 ;
                     for( long edge_id : tip_node.edge_ids ) {
-                        const auto & edge = mst_v1.GetEdge(edge_id);
-                        const auto & anode = mst_v1.GetNode( edge.OppoNode(tip_node.id) );
+                        const auto & edge = mintree.GetEdge(edge_id);
+                        const auto & anode = mintree.GetNode( edge.OppoNode(tip_node.id) );
                         if( anode.EdgeNum() == 1 ) 
                             continue ;
                         if( anode.EdgeNum() >2 )
