@@ -199,9 +199,9 @@ namespace BGIQD {
                 else 
                     ret.valid = false;
                 ret.junction_id = id ;
-                for(EdgeId id : node.edge_ids )
+                for(EdgeId eid : node.edge_ids)
                 {
-                    ret.neibs.push_back(GetEdge(id).OppoNode(id));
+                    ret.neibs.push_back(GetEdge(eid).OppoNode(id));
                 }
                 return ret;
             }
