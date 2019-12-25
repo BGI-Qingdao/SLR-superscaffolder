@@ -25,6 +25,7 @@ BGIQD::FREQ::Freq<std::string>  Failed_reason_freq;
 BGIQD::FREQ::Freq<std::string>  Cant_reason_freq;
 BGIQD::FREQ::Freq<std::string>  Road_result_freq;
 std::set<unsigned int> masked_nodes ;
+std::set<unsigned int> tips_nodes;;
 std::string log_str() {
 	return "\nSimplify result:\n"+ Simplify_freq.ToString() + "\n" + 
 		"Simplify failed reason:\n"+ Failed_reason_freq.ToString() + "\n" + 
@@ -488,38 +489,39 @@ struct AppConf
             }
             mst_v2 = base_contig_sim_graph.MinTree();
         }
-        struct TipRmLinear {
-            bool is_tip ;
-            std::vector<unsigned int> linear_nib ;
-            std::vector<unsigned int> tip_nib ;
-            //std::vector<unsigned int> junc_nib ;
-        };
-        static TipRmLinear TipCheck(
-                const BGIQD::stLFR::ContigSimGraph & mst  ,
-                const BGIQD::stLFR::ContigSimGraph::JunctionInfo & i ) {
-            TipRmLinear ret ;
-            const auto & node = mst.GetNode(i.junction_id);
-            for( int edge_id : node.edge_ids ) {
-                const auto & nib = mst.GetNode( mst.GetEdge(edge_id).OppoNode(node.id) );
-                if( nib.EdgeNum() == 1 ) ret.tip_nib.push_back(nib.id);
-                if( nib.EdgeNum() >1 ) ret.linear_nib.push_back(nib.id);
-            }
-            if( ret.linear_nib.size() == 2 ) ret.is_tip = true ;
-            else ret.is_tip = false ;
-            return ret ;
-        }
 
-        //Done
-        static void UpdateTip( 
-                unsigned int junction_id ,
-                const TipRmLinear & tip,
-                BGIQD::stLFR::ContigSimGraph & mst
-                )
-        {
-            assert( tip.linear_nib.size() == 2 ) ;
-            for( const auto & nib : tip.linear_nib ) 
-                mst.AddEdgeSim(nib,junction_id,1.0f);
-        }
+        //struct TipRmLinear {
+        //    bool is_tip ;
+        //    std::vector<unsigned int> linear_nib ;
+        //    std::vector<unsigned int> tip_nib ;
+        //    //std::vector<unsigned int> junc_nib ;
+        //};
+        //static TipRmLinear TipCheck(
+        //        const BGIQD::stLFR::ContigSimGraph & mst  ,
+        //        const BGIQD::stLFR::ContigSimGraph::JunctionInfo & i ) {
+        //    TipRmLinear ret ;
+        //    const auto & node = mst.GetNode(i.junction_id);
+        //    for( int edge_id : node.edge_ids ) {
+        //        const auto & nib = mst.GetNode( mst.GetEdge(edge_id).OppoNode(node.id) );
+        //        if( nib.EdgeNum() == 1 ) ret.tip_nib.push_back(nib.id);
+        //        if( nib.EdgeNum() >1 ) ret.linear_nib.push_back(nib.id);
+        //    }
+        //    if( ret.linear_nib.size() == 2 ) ret.is_tip = true ;
+        //    else ret.is_tip = false ;
+        //    return ret ;
+        //}
+
+        ////Done
+        //static void UpdateTip( 
+        //        unsigned int junction_id ,
+        //        const TipRmLinear & tip,
+        //        BGIQD::stLFR::ContigSimGraph & mst
+        //        )
+        //{
+        //    assert( tip.linear_nib.size() == 2 ) ;
+        //    for( const auto & nib : tip.linear_nib ) 
+        //        mst.AddEdgeSim(nib,junction_id,1.0f);
+        //}
 
         void TryLinearTip( BGIQD::stLFR::ContigSimGraph & mintree )
         {
@@ -539,19 +541,35 @@ struct AppConf
                 }
                 for( const auto & x : tips )
                 {
-                    //TODO
-                    unsigned int id = *x.rbegin();
-                    unsigned int oppo = *(x.rbegin() + 1 );
+                    unsigned int tip_id = *x.rbegin();
+                    if( ! mintree.HasNode(tip_id) )
+                        continue ;
+                    const auto & tip_node = mintree.GetNode(tip_id);
+                    unsigned int id = -1 ;
+                    for( long edge_id : tip_node.edge_ids ) {
+                        const auto & edge = mst_v1.GetEdge(edge_id);
+                        const auto & anode = mst_v1.GetNode( edge.OppoNode(tip_node.id) );
+                        if( anode.EdgeNum() == 1 ) 
+                            continue ;
+                        if( anode.EdgeNum() >2 )
+                            id = anode.id;
+                    }
+                    if( id  == (unsigned int )-1 ) continue ;
                     auto junction_info = mintree.get_junction_info(id) ;
                     if( !junction_info.valid )
                         continue ;
-                    DeleteJunctions( junction_info , mintree, base_contig_sim_graph );
                     auto graph_g1 = GetG1(junction_info) ;
                     if( Simplify( graph_g1 ) ) {
+                        DeleteJunctions( junction_info , mintree, base_contig_sim_graph );
                         UpdateSucc( graph_g1 , mintree, base_contig_sim_graph );
                         Simplify_freq.Touch("Simplify succ");
                     } else {
-                        //Force linear tip
+                        // Just Remove tips
+                        for( auto tid : x ){
+                            mintree.RemoveNode(tid);
+                            base_contig_sim_graph.RemoveNode(tid);
+                            tips_nodes.insert(tid);
+                        }
                     }
                 }
             }while( true );
@@ -748,6 +766,18 @@ struct AppConf
         delete out ;
     }
 
+    void PrintTipsNodes()
+    {
+        auto out3 = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fNames.mst_tips());
+        if( out3 == NULL )
+            FATAL(" failed to open xxx.mst_error for write !!! ");
+        for( auto & i: tips_nodes)
+        {
+            (*out3)<<i<<'\n';
+        }
+        delete out3;
+    }
+
     void PrintJunctionNodes()
     {
         auto out3 = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fNames.mst_error());
@@ -824,5 +854,6 @@ int main(int argc , char **argv )
     config.PrintBaiscMST(prefix.to_string()+".mst_v1");
     config.PrintFinalMST(prefix.to_string()+".mst_v2");
     config.PrintJunctionNodes();
+    config.PrintTipsNodes();
     return 0 ;
 }
