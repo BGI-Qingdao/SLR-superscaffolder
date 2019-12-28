@@ -11,6 +11,7 @@ apps="\
  MST_analysis\
  MST_v1_A\
  MST_v1_B\
+ MST_v1_C\
  FakeRef2Scaff\
  gapfillerIDY\
  GenSentieonScaff\
