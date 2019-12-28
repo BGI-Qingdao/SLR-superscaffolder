@@ -9,6 +9,8 @@ apps="\
  MST_ideal\
  MST_dbranchnode\
  MST_analysis\
+ MST_v1_A\
+ MST_v1_B\
  FakeRef2Scaff\
  gapfillerIDY\
  GenSentieonScaff\
