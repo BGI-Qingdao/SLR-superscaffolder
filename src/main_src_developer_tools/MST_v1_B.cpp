@@ -525,10 +525,12 @@ struct AppConf
         bool IsClean() const 
         {
             if( d_size == 0 )
-                return false ;
-
-                return  ( d_round >= del_round )
-                || ( float(left_size) / float(base_num) <= del_fac) ;
+                return true;
+            if( d_round >= del_round )
+                return true ;
+            if ( float(left_size) / float(base_num) <= del_fac) 
+                return true ;
+            return false ;
         }
 
         void CorrectGraph( )
