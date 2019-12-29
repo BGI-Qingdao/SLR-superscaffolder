@@ -582,7 +582,8 @@ struct AppConf
             auto mst_linear = mst_v2 ;
             if( mst_linear.nodes.size() < 1 )
                 return ret ;
-            TryLinearTip(mst_linear);
+            //TryLinearTip(mst_linear);
+            BGIQD::stLFR::ContigSimGraph::RemoveTip_n2(mst_linear) ;
             BGIQD::stLFR::ContigSimGraph::JunctionInfo junction_info 
                 = mst_linear.NextJunction();
             while( junction_info.valid  )
