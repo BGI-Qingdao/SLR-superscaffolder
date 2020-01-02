@@ -522,7 +522,49 @@ struct AppConf
         //    for( const auto & nib : tip.linear_nib ) 
         //        mst.AddEdgeSim(nib,junction_id,1.0f);
         //}
+        bool CheckTipRoad( const OldRoad & road ) {
+            auto ret = CheckRoad(road) ;
+            if( ! ret.valid ) return false ;
+            if( ret.mid != road.mid ) return false ;
+            return true ;
+        }
+        struct TipInsertHelper {
+            OldRoad l1 ;
+            OldRoad l2 ;
+            OldRoad r1 ;
+            OldRoad r2 ;
+            unsigned int B ;             // ----A----B-----C-----
+            unsigned int A ;            //           |
+            unsigned int C ;            //          tip
+            unsigned int tip;
+            int A_score;
+            int C_score;
+            void Init ( const BGIQD::stLFR::ContigSimGraph::JunctionInfo & j_info  , unsigned int tip_id ) {
+                 B = j_info.junction_id ; 
+                 A = j_info.neibs[0];
+                 C = j_info.neibs[1];
+                 tip = j_info.neibs[2];
+                if( tip_id != tip ) std::swap(C,tip) ;
+                if( tip_id != tip ) std::swap(A,tip) ;
+                l1.left = A ; l1.mid = tip ; l1.right = B ;
+                              l2.left = tip ; l2.mid = B ; l2.right = C ;
+                r1.left = C ; r1.mid = tip ; r1.right = B ;
+                              r2.left = tip ; r2.mid = B ; r2.right = A ;
+            }
+        };
 
+        void DetectTipRoads(TipInsertHelper & h) {
+            h.A_score = 0 ; h.C_score = 0 ;
+            if( CheckTipRoad( h.l1 ) ) h.A_score ++ ; 
+            if( CheckTipRoad( h.l2 ) ) h.A_score ++ ; 
+            if( CheckTipRoad( h.r2 ) ) h.C_score ++ ; 
+            if( CheckTipRoad( h.r1 ) ) h.C_score ++ ; 
+        }
+        unsigned int TipWinner( const TipInsertHelper & h) {
+            if( h.A_score > h.C_score ) return h.A ;
+            if( h.A_score < h.C_score ) return h.C ;
+            return 0 ;
+        }
         void TryLinearTip( BGIQD::stLFR::ContigSimGraph & mintree )
         {
             TipHelper tip_helper ;
@@ -545,24 +587,28 @@ struct AppConf
                     if( ! mintree.HasNode(tip_id) )
                         continue ;
                     const auto & tip_node = mintree.GetNode(tip_id);
-                    unsigned int id = -1 ;
+                    unsigned int junc_id = -1 ;
                     for( long edge_id : tip_node.edge_ids ) {
                         const auto & edge = mintree.GetEdge(edge_id);
                         const auto & anode = mintree.GetNode( edge.OppoNode(tip_node.id) );
                         if( anode.EdgeNum() == 1 ) 
                             continue ;
                         if( anode.EdgeNum() >2 )
-                            id = anode.id;
+                            junc_id = anode.id;
                     }
-                    if( id  == (unsigned int )-1 ) continue ;
-                    auto junction_info = mintree.get_junction_info(id) ;
+                    if( junc_id  == (unsigned int )-1 ) continue ;
+                    auto junction_info = mintree.get_junction_info(junc_id) ;
                     if( !junction_info.valid )
                         continue ;
-                    auto graph_g1 = GetG1(junction_info) ;
-                    if( Simplify( graph_g1 ) ) {
-                        DeleteJunctions( junction_info , mintree, base_contig_sim_graph );
-                        UpdateSucc( graph_g1 , mintree, base_contig_sim_graph );
-                        Simplify_freq.Touch("Simplify succ");
+                    TipInsertHelper h;
+                    h.Init(junction_info , tip_id) ;
+                    DetectTipRoads(h);
+                    unsigned int winner = TipWinner(h) ;
+                    if( winner != 0 ) { // winner --tip-- junction
+                        mintree.RemoveEdge(mintree.GetEdge(winner,junc_id).id);
+                        mintree.RemoveEdge(mintree.GetEdge(tip_id,junc_id).id);
+                        mintree.AddEdgeSim(winner,tip_id, 1.0f);
+                        mintree.AddEdgeSim(tip_id,junc_id ,1.0f);
                     } else {
                         // Just Remove tips
                         for( auto tid : x ){
@@ -582,8 +628,8 @@ struct AppConf
             auto mst_linear = mst_v2 ;
             if( mst_linear.nodes.size() < 1 )
                 return ret ;
-            //TryLinearTip(mst_linear);
-            BGIQD::stLFR::ContigSimGraph::RemoveTip_n2(mst_linear) ;
+            TryLinearTip(mst_linear);
+            //BGIQD::stLFR::ContigSimGraph::RemoveTip_n2(mst_linear) ;
             BGIQD::stLFR::ContigSimGraph::JunctionInfo junction_info 
                 = mst_linear.NextJunction();
             while( junction_info.valid  )
