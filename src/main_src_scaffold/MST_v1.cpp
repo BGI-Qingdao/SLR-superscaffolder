@@ -595,6 +595,10 @@ struct AppConf
                 tip_linear_freq.Touch("1V0");
                 return h.A ;
             }
+            if( h.A_score == 0 && h.C_score == 0 ) {
+                tip_linear_freq.Touch("0V0");
+                return 0  ;
+            }
             assert(0);
             return 0 ;
         }
