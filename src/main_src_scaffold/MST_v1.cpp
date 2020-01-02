@@ -26,6 +26,8 @@ BGIQD::FREQ::Freq<std::string>  Cant_reason_freq;
 BGIQD::FREQ::Freq<std::string>  Road_result_freq;
 std::set<unsigned int> masked_nodes ;
 std::set<unsigned int> tips_nodes;;
+BGIQD::FREQ::Freq<std::string> tip_linear_freq;
+BGIQD::FREQ::Freq<std::string> tip_linear_result_freq;
 std::string log_str() {
 	return "\nSimplify result:\n"+ Simplify_freq.ToString() + "\n" + 
 		"Simplify failed reason:\n"+ Failed_reason_freq.ToString() + "\n" + 
@@ -561,8 +563,39 @@ struct AppConf
             if( CheckTipRoad( h.r1 ) ) h.C_score ++ ; 
         }
         unsigned int TipWinner( const TipInsertHelper & h) {
-            if( h.A_score > h.C_score ) return h.A ;
-            if( h.A_score < h.C_score ) return h.C ;
+            if( h.A_score == 2 && h.C_score == 2 ) {
+                tip_linear_freq.Touch("2V2");
+                return 0 ;
+            }
+            if( h.A_score == 1 && h.C_score == 2 ) {
+                tip_linear_freq.Touch("1V2");
+                return h.C ;
+            }
+            if( h.A_score == 0 && h.C_score == 2 ) {
+                tip_linear_freq.Touch("0V2");
+                return h.C ;
+            }
+            if( h.A_score == 2 && h.C_score == 1 ) {
+                tip_linear_freq.Touch("2V1");
+                return h.A ;
+            }
+            if( h.A_score == 2 && h.C_score == 0 ) {
+                tip_linear_freq.Touch("2V0");
+                return h.A ;
+            }
+            if( h.A_score == 1 && h.C_score == 1 ) {
+                tip_linear_freq.Touch("1V1");
+                return 0 ;
+            }
+            if( h.A_score == 0 && h.C_score == 1 ) {
+                tip_linear_freq.Touch("0V1");
+                return h.C ;
+            }
+            if( h.A_score == 1 && h.C_score == 0 ) {
+                tip_linear_freq.Touch("1V0");
+                return h.A ;
+            }
+            assert(0);
             return 0 ;
         }
         void TryLinearTip( BGIQD::stLFR::ContigSimGraph & mintree )
@@ -605,11 +638,13 @@ struct AppConf
                     DetectTipRoads(h);
                     unsigned int winner = TipWinner(h) ;
                     if( winner != 0 ) { // winner --tip-- junction
+                        tip_linear_result_freq.Touch("Succ");
                         mintree.RemoveEdge(mintree.GetEdge(winner,junc_id).id);
                         mintree.RemoveEdge(mintree.GetEdge(tip_id,junc_id).id);
                         mintree.AddEdgeSim(winner,tip_id, 1.0f);
                         mintree.AddEdgeSim(tip_id,junc_id ,1.0f);
                     } else {
+                        tip_linear_result_freq.Touch("Failed");
                         // Just Remove tips
                         for( auto tid : x ){
                             mintree.RemoveNode(tid);
@@ -756,6 +791,8 @@ struct AppConf
             }
         }
         lger<<BGIQD::LOG::lstart() << "linear freq is :\n "<<trunk_freq.ToString()<<BGIQD::LOG::lend() ;
+        lger<<BGIQD::LOG::lstart() << "tip linear result is :\n "<<tip_linear_result_freq.ToString()<<BGIQD::LOG::lend() ;
+        lger<<BGIQD::LOG::lstart() << "tip linear detail is :\n "<<tip_linear_freq.ToString()<<BGIQD::LOG::lend() ;
         delete out3;
     }
 
