@@ -24,6 +24,7 @@ BGIQD::FREQ::Freq<std::string>  Simplify_freq;
 BGIQD::FREQ::Freq<std::string>  Failed_reason_freq;
 BGIQD::FREQ::Freq<std::string>  Cant_reason_freq;
 BGIQD::FREQ::Freq<std::string>  Road_result_freq;
+BGIQD::FREQ::Freq<int>          tip_max_score_freq ;
 std::set<unsigned int> masked_nodes ;
 std::set<unsigned int> tips_nodes;;
 BGIQD::FREQ::Freq<std::string> tip_linear_freq;
@@ -524,23 +525,34 @@ struct AppConf
         //    for( const auto & nib : tip.linear_nib ) 
         //        mst.AddEdgeSim(nib,junction_id,1.0f);
         //}
-        bool CheckTipRoad( const OldRoad & road ) {
+        int CheckTipRoad( const OldRoad & road ) {
             auto ret = CheckRoad(road) ;
-            if( ! ret.valid ) return false ;
-            if( ret.mid != road.mid ) return false ;
-            return true ;
+            if( ! ret.valid ) return 0;
+            if( ret.mid != road.mid ) return -1;
+            return 1 ;
         }
         struct TipInsertHelper {
             OldRoad l1 ;
             OldRoad l2 ;
             OldRoad r1 ;
             OldRoad r2 ;
-            unsigned int B ;             // ----A----B-----C-----
-            unsigned int A ;            //           |
-            unsigned int C ;            //          tip
+            // step2 insert check .
+            OldRoad ll1 ;
+            OldRoad ll2 ;
+            OldRoad rr1 ;
+            OldRoad rr2 ;
+            unsigned int B ;            // -A1---A----B-----C----C1-
+            unsigned int A ;            //            |
+            unsigned int C ;            //           tip
+            unsigned int A1 ;
+            unsigned int C1 ;
             unsigned int tip;
             int A_score;
             int C_score;
+            int A1_score;
+            int C1_score;
+            bool A1_valid ;
+            bool C1_valid ;
             void Init ( const BGIQD::stLFR::ContigSimGraph::JunctionInfo & j_info  , unsigned int tip_id ) {
                  B = j_info.junction_id ; 
                  A = j_info.neibs[0];
@@ -548,60 +560,131 @@ struct AppConf
                  tip = j_info.neibs[2];
                 if( tip_id != tip ) std::swap(C,tip) ;
                 if( tip_id != tip ) std::swap(A,tip) ;
+                // target :  ---A---tip---B---C----
                 l1.left = A ; l1.mid = tip ; l1.right = B ;
                               l2.left = tip ; l2.mid = B ; l2.right = C ;
+                // target :  ---A---B---tip---C----
                 r1.left = C ; r1.mid = tip ; r1.right = B ;
                               r2.left = tip ; r2.mid = B ; r2.right = A ;
+                A1_valid = false ;
+                C1_valid = false ;
             }
         };
 
+        static void InitTipStep2( const BGIQD::stLFR::ContigSimGraph & mintree ,
+                TipInsertHelper & helper ) {
+            const auto &  nodeA = mintree.GetNode(helper.A) ;
+            if( nodeA.EdgeNum() == 2 ) {
+                for( auto edgeId : nodeA.edge_ids ) {
+                    const auto & edge = mintree.GetEdge(edgeId) ;
+                    if( edge.OppoNode(nodeA.id) != helper.B ) { 
+                        helper.A1 = edge.OppoNode(nodeA.id) ;
+                        helper.A1_valid = true ;
+                        break ;
+                    }
+                }
+            }
+            if( helper.A1_valid ) { //  target : ----A1 --- tip-----A ----B
+                helper.ll1.left = helper.A1 ; helper.ll1.mid = helper.tip ; helper.ll1.right = helper.A ;
+                helper.ll2.left = helper.tip ; helper.ll2.mid = helper.A ; helper.ll2.right = helper.B ;
+            }
+            const auto &  nodeC = mintree.GetNode(helper.C) ;
+            if( nodeC.EdgeNum() == 2 ) {
+                for( auto edgeId : nodeC.edge_ids ) {
+                    const auto & edge = mintree.GetEdge(edgeId) ;
+                    if( edge.OppoNode(nodeC.id) != helper.B ) { 
+                        helper.C1 = edge.OppoNode(nodeC.id) ;
+                        helper.C1_valid = true ;
+                        break ;
+                    }
+                }
+            }
+            if( helper.C1_valid ) { //  target : ----C1 --- tip-----C ----B
+                helper.rr1.left = helper.C1 ; helper.rr1.mid = helper.tip ; helper.rr1.right = helper.C ;
+                helper.rr2.left = helper.tip ; helper.rr2.mid = helper.C ; helper.rr2.right = helper.B  ;
+            }
+        }
+
         void DetectTipRoads(TipInsertHelper & h) {
-            h.A_score = 0 ; h.C_score = 0 ;
-            if( CheckTipRoad( h.l1 ) ) h.A_score ++ ; 
-            if( CheckTipRoad( h.l2 ) ) h.A_score ++ ; 
-            if( CheckTipRoad( h.r2 ) ) h.C_score ++ ; 
-            if( CheckTipRoad( h.r1 ) ) h.C_score ++ ; 
+            h.A_score = 0 ; h.C_score = 0 ; h.A_score = 0; h.C1_score = 0 ;
+            h.A_score += CheckTipRoad(h.l1 ) ;
+            h.A_score += CheckTipRoad(h.l2 ) ;
+            h.C_score += CheckTipRoad(h.r1 ) ;
+            h.C_score += CheckTipRoad(h.r2 ) ;
+            if( h.A1_valid ) {
+                h.A1_score += CheckTipRoad(h.ll1 ) ;
+                h.A1_score += CheckTipRoad(h.ll2 ) ;
+            }
+            if( h.C1_valid ) {
+                h.C1_score += CheckTipRoad(h.rr1 ) ;
+                h.C1_score += CheckTipRoad(h.rr2 ) ;
+            }
         }
-        unsigned int TipWinner( const TipInsertHelper & h) {
-            if( h.A_score == 2 && h.C_score == 2 ) {
-                tip_linear_freq.Touch("2V2");
-                return 0 ;
+
+        struct TipInsertDetail {  // break edges between tip--junc && left --right
+            unsigned int tip ;    // create new edge     left--tip && tip -- right
+            unsigned int junc;
+            unsigned int left ;
+            unsigned int right ;
+            bool valid ;
+            void updateMST( BGIQD::stLFR::ContigSimGraph & mintree ) const {
+                mintree.RemoveEdge(mintree.GetEdge(tip , junc ).id);
+                mintree.RemoveEdge(mintree.GetEdge(left , right ).id);
+                mintree.AddEdgeSim(left , tip , 1.0f);
+                mintree.AddEdgeSim(tip, right , 1.0f);
             }
-            if( h.A_score == 1 && h.C_score == 2 ) {
-                tip_linear_freq.Touch("1V2");
-                return h.C ;
+        };
+
+        TipInsertDetail TipWinner( const TipInsertHelper & h) {
+            TipInsertDetail ret ;
+            ret.valid = false ;
+            ret.junc = h.B ;
+            ret.tip  = h.tip ; 
+
+            int max_score = 0 ;
+            bool even = false ;
+            // find the biggest score !!!
+            if( h.A_score > max_score ) {
+                ret.left = h.A ;
+                ret.right = h.B ;
+                max_score = h.A_score ;
+                even = false ;
+            } 
+            else if ( h.A_score == max_score ) 
+                even = true ;
+
+            if( h.C_score > max_score ) {
+                ret.left = h.C ;
+                ret.right = h.B ;
+                max_score = h.C_score ;
+                even = false ;
+            } 
+            else if ( h.C_score == max_score ) 
+                even = true ;
+            if( h.A1_score > max_score ) {
+                ret.left = h.A ;
+                ret.right = h.A1 ;
+                max_score = h.A1_score ;
+                even = false ;
+            } 
+            else if ( h.A1_score == max_score ) 
+                even = true ;
+            if( h.C1_score > max_score ) {
+                ret.left = h.C ;
+                ret.right = h.C1 ;
+                max_score = h.C1_score ;
+                even = false ;
             }
-            if( h.A_score == 0 && h.C_score == 2 ) {
-                tip_linear_freq.Touch("0V2");
-                return h.C ;
-            }
-            if( h.A_score == 2 && h.C_score == 1 ) {
-                tip_linear_freq.Touch("2V1");
-                return h.A ;
-            }
-            if( h.A_score == 2 && h.C_score == 0 ) {
-                tip_linear_freq.Touch("2V0");
-                return h.A ;
-            }
-            if( h.A_score == 1 && h.C_score == 1 ) {
-                tip_linear_freq.Touch("1V1");
-                return 0 ;
-            }
-            if( h.A_score == 0 && h.C_score == 1 ) {
-                tip_linear_freq.Touch("0V1");
-                return h.C ;
-            }
-            if( h.A_score == 1 && h.C_score == 0 ) {
-                tip_linear_freq.Touch("1V0");
-                return h.A ;
-            }
-            if( h.A_score == 0 && h.C_score == 0 ) {
-                tip_linear_freq.Touch("0V0");
-                return 0  ;
-            }
-            assert(0);
-            return 0 ;
+            else if ( h.C1_score == max_score ) 
+                even = true ;
+
+            tip_max_score_freq.Touch(max_score);
+            if( even ) return ret ;
+            if( max_score <= 0 ) return ret ;
+            ret.valid = true ;
+            return ret ;
         }
+
         void TryLinearTip( BGIQD::stLFR::ContigSimGraph & mintree )
         {
             TipHelper tip_helper ;
@@ -639,14 +722,12 @@ struct AppConf
                         continue ;
                     TipInsertHelper h;
                     h.Init(junction_info , tip_id) ;
+                    InitTipStep2(mintree , h);
                     DetectTipRoads(h);
-                    unsigned int winner = TipWinner(h) ;
-                    if( winner != 0 ) { // winner --tip-- junction
+                    auto tip_linear_detail  = TipWinner(h) ;
+                    if( tip_linear_detail.valid  ) { // winner --tip-- junction
                         tip_linear_result_freq.Touch("Succ");
-                        mintree.RemoveEdge(mintree.GetEdge(winner,junc_id).id);
-                        mintree.RemoveEdge(mintree.GetEdge(tip_id,junc_id).id);
-                        mintree.AddEdgeSim(winner,tip_id, 1.0f);
-                        mintree.AddEdgeSim(tip_id,junc_id ,1.0f);
+                        tip_linear_detail.updateMST(mintree);
                     } else {
                         tip_linear_result_freq.Touch("Failed");
                         // Just Remove tips
@@ -796,7 +877,8 @@ struct AppConf
         }
         lger<<BGIQD::LOG::lstart() << "linear freq is :\n "<<trunk_freq.ToString()<<BGIQD::LOG::lend() ;
         lger<<BGIQD::LOG::lstart() << "tip linear result is :\n "<<tip_linear_result_freq.ToString()<<BGIQD::LOG::lend() ;
-        lger<<BGIQD::LOG::lstart() << "tip linear detail is :\n "<<tip_linear_freq.ToString()<<BGIQD::LOG::lend() ;
+        //lger<<BGIQD::LOG::lstart() << "tip linear detail is :\n "<<tip_linear_freq.ToString()<<BGIQD::LOG::lend() ;
+        lger<<BGIQD::LOG::lstart() << "tip max_score is :\n "<<tip_max_score_freq.ToString()<<BGIQD::LOG::lend() ;
         delete out3;
     }
 
