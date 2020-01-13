@@ -534,18 +534,24 @@ struct AppConf
         struct TipInsertHelper {
             OldRoad l1 ;
             OldRoad l2 ;
+            OldRoad l3 ;
             OldRoad r1 ;
             OldRoad r2 ;
+            OldRoad r3 ;
             // step2 insert check .
             OldRoad ll1 ;
             OldRoad ll2 ;
+            OldRoad ll3 ;
             OldRoad rr1 ;
             OldRoad rr2 ;
-            unsigned int B ;            // -A1---A----B-----C----C1-
-            unsigned int A ;            //            |
-            unsigned int C ;            //           tip
+            OldRoad rr3 ;
+            unsigned int B ;            // ---A2---A1---A----B-----C----C1---C2-------
+            unsigned int A ;            //                   |
+            unsigned int C ;            //                  tip
             unsigned int A1 ;
             unsigned int C1 ;
+            unsigned int A2 ;
+            unsigned int C2 ;
             unsigned int tip;
             int A_score;
             int C_score;
@@ -553,6 +559,8 @@ struct AppConf
             int C1_score;
             bool A1_valid ;
             bool C1_valid ;
+            bool A2_valid ;
+            bool C2_valid ;
             void Init ( const BGIQD::stLFR::ContigSimGraph::JunctionInfo & j_info  , unsigned int tip_id ) {
                  B = j_info.junction_id ; 
                  A = j_info.neibs[0];
@@ -560,64 +568,82 @@ struct AppConf
                  tip = j_info.neibs[2];
                 if( tip_id != tip ) std::swap(C,tip) ;
                 if( tip_id != tip ) std::swap(A,tip) ;
-                // target :  ---A---tip---B---C----
-                l1.left = A ; l1.mid = tip ; l1.right = B ;
-                              l2.left = tip ; l2.mid = B ; l2.right = C ;
-                // target :  ---A---B---tip---C----
-                r1.left = C ; r1.mid = tip ; r1.right = B ;
-                              r2.left = tip ; r2.mid = B ; r2.right = A ;
-                A1_valid = false ;
-                C1_valid = false ;
+                // target :  ---A1---A---tip---B---C----
+                l3.left = 0 ;l3.mid  = A ; l3.right = tip ;
+                             l1.left = A ; l1.mid = tip ; l1.right = B ;
+                                           l2.left = tip ; l2.mid = B ; l2.right = C ;
+                // target :       ---A---B---tip---C----C1---
+                r1.left = A ; r1.mid = B ; r1.right = tip ;
+                              r2.left = B ; r2.mid = tip ; r2.right = C ;
+                                            r3.left = tip ; r3.mid = C ; r3.right = 0 ;
+                A1_valid = false ;A2_valid = false ;
+                C1_valid = false ;C2_valid = false ;
             }
         };
 
+        static unsigned int GetOppoNeib( const BGIQD::stLFR::ContigSimGraph & mintree 
+                , unsigned int mid , unsigned int left , bool & valid  ) {
+
+            const auto &  mid_node = mintree.GetNode(mid) ;
+            if( mid_node.EdgeNum() == 2 ) {
+                for( auto edgeId : mid_node.edge_ids ) {
+                    const auto & edge = mintree.GetEdge(edgeId) ;
+                    if( edge.OppoNode(mid) != left ) { 
+                        valid = true ;
+                        return edge.OppoNode(mid) ;
+                    }
+                }
+            }
+            valid = false ;
+            return 0 ;
+        }
+
         static void InitTipStep2( const BGIQD::stLFR::ContigSimGraph & mintree ,
                 TipInsertHelper & helper ) {
-            const auto &  nodeA = mintree.GetNode(helper.A) ;
-            if( nodeA.EdgeNum() == 2 ) {
-                for( auto edgeId : nodeA.edge_ids ) {
-                    const auto & edge = mintree.GetEdge(edgeId) ;
-                    if( edge.OppoNode(nodeA.id) != helper.B ) { 
-                        helper.A1 = edge.OppoNode(nodeA.id) ;
-                        helper.A1_valid = true ;
-                        break ;
-                    }
-                }
-            }
-            if( helper.A1_valid ) { //  target : ----A1 --- tip-----A ----B
+            helper.A1 = GetOppoNeib( mintree , helper.A , helper.B , helper.A1_valid ) ;
+            if( helper.A1_valid ) {
+                helper.l3.left = helper.A1 ;
+                //  target : ---A2----A1 --- tip-----A ----B----
+                helper.ll3.left = 0 ;         helper.ll3.mid = helper.A1 ;  helper.ll3.right = helper.tip ;
                 helper.ll1.left = helper.A1 ; helper.ll1.mid = helper.tip ; helper.ll1.right = helper.A ;
                 helper.ll2.left = helper.tip ; helper.ll2.mid = helper.A ; helper.ll2.right = helper.B ;
+
+                helper.A2 = GetOppoNeib( mintree , helper.A1 , helper.A ,helper.A2_valid );
+                if(helper.A2_valid ) helper.ll3.left = helper.A2;
             }
-            const auto &  nodeC = mintree.GetNode(helper.C) ;
-            if( nodeC.EdgeNum() == 2 ) {
-                for( auto edgeId : nodeC.edge_ids ) {
-                    const auto & edge = mintree.GetEdge(edgeId) ;
-                    if( edge.OppoNode(nodeC.id) != helper.B ) { 
-                        helper.C1 = edge.OppoNode(nodeC.id) ;
-                        helper.C1_valid = true ;
-                        break ;
-                    }
-                }
-            }
-            if( helper.C1_valid ) { //  target : ----C1 --- tip-----C ----B
+            helper.C1 = GetOppoNeib( mintree , helper.C , helper.B , helper.C1_valid );
+            if( helper.C1_valid ) { 
+                helper.r3.right = helper.C1 ;
+                //  target : ---C2---C1 --- tip-----C ----B
                 helper.rr1.left = helper.C1 ; helper.rr1.mid = helper.tip ; helper.rr1.right = helper.C ;
                 helper.rr2.left = helper.tip ; helper.rr2.mid = helper.C ; helper.rr2.right = helper.B  ;
+                helper.rr3.left = helper.tip ; helper.rr3.mid = helper.C1 ; helper.rr3.right = 0 ;
+                helper.C2 = GetOppoNeib( mintree , helper.C1 , helper.C , helper.C2_valid ) ;
+                if( helper.C2_valid ) helper.rr3.right = helper.C2 ;
             }
         }
 
         void DetectTipRoads(TipInsertHelper & h) {
             h.A_score = 0 ; h.C_score = 0 ; h.A_score = 0; h.C1_score = 0 ;
+
             h.A_score += CheckTipRoad(h.l1 ) ;
             h.A_score += CheckTipRoad(h.l2 ) ;
-            h.C_score += CheckTipRoad(h.r1 ) ;
-            h.C_score += CheckTipRoad(h.r2 ) ;
             if( h.A1_valid ) {
+                h.A_score += CheckTipRoad(h.l3 ) ;
                 h.A1_score += CheckTipRoad(h.ll1 ) ;
                 h.A1_score += CheckTipRoad(h.ll2 ) ;
+                if( h.A2_valid ) 
+                    h.A1_score += CheckTipRoad(h.ll3) ;
             }
+
+            h.C_score += CheckTipRoad(h.r1 ) ;
+            h.C_score += CheckTipRoad(h.r2 ) ;
             if( h.C1_valid ) {
+                h.C_score += CheckTipRoad(h.r3 ) ;
                 h.C1_score += CheckTipRoad(h.rr1 ) ;
                 h.C1_score += CheckTipRoad(h.rr2 ) ;
+                if( h.C2_valid ) 
+                    h.C1_score += CheckTipRoad(h.rr3) ;
             }
         }
 
