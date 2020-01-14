@@ -202,8 +202,8 @@ struct AppConfig
     int min_shared ;
     float min_ration ;
     void VoteByNiebs( const std::vector<unsigned int > & scaff , int center_index ) {
-        // check left neibs
         unsigned int center_id =  scaff.at(center_index) ;
+        // check left neibs
         for( int i = center_index -1 ; i >= 0 ; i -- ) {
             auto check_ret = GetSupportInfo(scaff.at(i) , center_id, min_shared , min_ration );
             if( check_ret.weight == 1 ) 
@@ -212,7 +212,7 @@ struct AppConfig
                 break ;
         }
         // check right neibs
-        for( int i = center_index -1 ; i < (int)scaff.size() ; i ++ ) {
+        for( int i = center_index +1 ; i < (int)scaff.size() ; i ++ ) {
             auto check_ret = GetSupportInfo(scaff.at(i) , center_id, min_shared , min_ration );
             if( check_ret.weight == 1 ) 
                 oresults[center_id].AddRightProven(check_ret.direction) ;
