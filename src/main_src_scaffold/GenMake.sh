@@ -9,6 +9,7 @@ apps="\
  MST\
  MST_v1\
  Orientation\
+ Orientation_v1\
  ParseReadName\
  PEGraph\
  Sam2ReadOnContig\

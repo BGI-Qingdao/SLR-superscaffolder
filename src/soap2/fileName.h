@@ -122,6 +122,7 @@ namespace BGIQD {
             //ClusterSeeds
             DEFINE_SUFFIX(seeds_cluster_seeds,".seeds_cluster_seeds");
 
+            DEFINE_SUFFIX(orientation,".orientation");
             DEFINE_SUFFIX(gap_oo,".gap_oo");
             DEFINE_SUFFIX(gap_area,".gap_area");
             DEFINE_SUFFIX(gap_sim,".gap_sim");
