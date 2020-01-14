@@ -41,9 +41,9 @@ const ContigBarcodeSet & GetInfo( unsigned int id ) {
 }
 
 struct SupportInfo{
-    int direction ;     // -1 ; 0 ; 1     ==> suppert left ; none ; suppert right
-    int weight ;        //      0 ; 1     ==> none         ; support ;
-    bool is_terminal;   //    true; false ==> terminal     ; not terminal
+    int direction ;     // -1 ; 0 ; 1     ==> suppert left(B) ; none ; suppert right(C)
+    int weight ;        //      0 ; 1     ==> none            ; support ;
+    bool is_terminal;   //    true; false ==> terminal        ; not terminal
     void  Init(){
         weight = 0 ;
         direction = 0 ;
@@ -73,11 +73,11 @@ SupportInfo GetSupportInfo(
         float C2_ration = float(C2.size()) / float(center_info.all.size() ) ;
         if( B2_ration > C2_ration && B2_ration/C2_ration >= min_ration ) {
             ret.weight = 1 ;
-            ret.direction = -1 ;
+            ret.direction = 1 ;
         }
         if( C2_ration >B2_ration && C2_ration/B2_ration >= min_ration ) {
             ret.weight = 1 ;
-            ret.direction = 1 ;
+            ret.direction = -1 ;
         }
     }else {
         if( AB.size() > AC.size() ){
@@ -250,9 +250,13 @@ int main(int argc, char **argv)
                                                         xxx.mintree_trunk_linear; xxx.barcodeOnContig ;\n\
                                                     Out\n\
                                                         xxx.gap_oo ;");
+    DEFINE_ARG_OPTIONAL(int , min_shared , "min accepted share barcode types", "10");
+    DEFINE_ARG_OPTIONAL(float , min_ration , "min accepted mid_ration ", "1.2");
     END_PARSE_ARGS;
 
     config.Init( prefix.to_string());
+    config.min_shared = min_shared.to_int();
+    config.min_ration = min_ration.to_float();
     config.LoadContigIndexs();
     config.LoadTrunk();
     config.LoadBarcodeOnContig();
