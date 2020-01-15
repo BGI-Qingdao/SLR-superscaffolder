@@ -18,6 +18,7 @@ apps="\
  SplitInfo\
  StaticsticUnique\
  Trunk2ScaffInfo\
+ Trunk2ScaffInfo_v1\
 "
 
 jobs_o=" "

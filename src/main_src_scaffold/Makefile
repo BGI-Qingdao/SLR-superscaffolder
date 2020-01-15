@@ -46,7 +46,7 @@ source_o		= ${source_cpp:%.cpp=%.o}
 .cpp.o:
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
-jobs = BinCluster ChopBin FillTrunkByPE FakeSOAPContig GapSize MST MST_v1 Orientation Orientation_v1 ParseReadName PEGraph Sam2ReadOnContig ScaffInfo2Seq SeedCluster SplitInfo StaticsticUnique Trunk2ScaffInfo
+jobs = BinCluster ChopBin FillTrunkByPE FakeSOAPContig GapSize MST MST_v1 Orientation Orientation_v1 ParseReadName PEGraph Sam2ReadOnContig ScaffInfo2Seq SeedCluster SplitInfo StaticsticUnique Trunk2ScaffInfo Trunk2ScaffInfo_v1
 
 all :  ${jobs}
 
@@ -204,7 +204,16 @@ Trunk2ScaffInfo : clean ${Trunk2ScaffInfo_o} ${source_o} ../bin
 	mv $@ ../bin/
 
 
-jobs_o=  ${BinCluster_o} ${ChopBin_o} ${FillTrunkByPE_o} ${FakeSOAPContig_o} ${GapSize_o} ${MST_o} ${MST_v1_o} ${Orientation_o} ${Orientation_v1_o} ${ParseReadName_o} ${PEGraph_o} ${Sam2ReadOnContig_o} ${ScaffInfo2Seq_o} ${SeedCluster_o} ${SplitInfo_o} ${StaticsticUnique_o} ${Trunk2ScaffInfo_o}
+
+
+Trunk2ScaffInfo_v1_cpp = Trunk2ScaffInfo_v1.cpp
+Trunk2ScaffInfo_v1_o = Trunk2ScaffInfo_v1.o
+Trunk2ScaffInfo_v1 : clean ${Trunk2ScaffInfo_v1_o} ${source_o} ../bin
+	${CXX} ${Trunk2ScaffInfo_v1_o} ${source_o} ${DEUBG_CXX} -o Trunk2ScaffInfo_v1
+	mv $@ ../bin/
+
+
+jobs_o=  ${BinCluster_o} ${ChopBin_o} ${FillTrunkByPE_o} ${FakeSOAPContig_o} ${GapSize_o} ${MST_o} ${MST_v1_o} ${Orientation_o} ${Orientation_v1_o} ${ParseReadName_o} ${PEGraph_o} ${Sam2ReadOnContig_o} ${ScaffInfo2Seq_o} ${SeedCluster_o} ${SplitInfo_o} ${StaticsticUnique_o} ${Trunk2ScaffInfo_o} ${Trunk2ScaffInfo_v1_o}
 
 dirty	   =${jobs_o} ${jobs} ${source_o}
 
