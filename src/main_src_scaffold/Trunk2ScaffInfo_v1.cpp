@@ -454,17 +454,17 @@ struct AppConfig
                 const auto & fill_prev = gapfills[gap.prev];
                 const auto & fill_next = gapfills[gap.next];
                 a_scaff[i].cluster_value = 0.2f;// this will be re-writed!
-                if( fill_next.direction != 0 ) {
-                    unsigned int true_id = fill_next.contig_id ;
-                    if( fill_next.direction == -1 ) true_id++;
-                    a_scaff[i].SetValue(true_id,TrueContig::ValueType::SIM,TrueContig::ValueOrder::NEXT);
-                    a_scaff[i].SetWeight(1,TrueContig::ValueType::SIM,TrueContig::ValueOrder::NEXT);
-                }
                 if( fill_prev.direction != 0 ) {
                     unsigned int true_id = fill_prev.contig_id ;
                     if( fill_prev.direction == -1 ) true_id++;
-                    a_scaff[i+1].SetValue(true_id,TrueContig::ValueType::SIM,TrueContig::ValueOrder::PREV);
-                    a_scaff[i+1].SetWeight(1,TrueContig::ValueType::SIM,TrueContig::ValueOrder::PREV);
+                    a_scaff[i].SetValue(true_id,TrueContig::ValueType::SIM,TrueContig::ValueOrder::PREV);
+                    a_scaff[i].SetWeight(1,TrueContig::ValueType::SIM,TrueContig::ValueOrder::PREV);
+                }
+                if( fill_next.direction != 0 ) {
+                    unsigned int true_id = fill_next.contig_id ;
+                    if( fill_next.direction == -1 ) true_id++;
+                    a_scaff[i+1].SetValue(true_id,TrueContig::ValueType::SIM,TrueContig::ValueOrder::NEXT);
+                    a_scaff[i+1].SetWeight(1,TrueContig::ValueType::SIM,TrueContig::ValueOrder::NEXT);
                 }
                 if( pefills.find(gap.prev) != pefills.end() )
                 {
