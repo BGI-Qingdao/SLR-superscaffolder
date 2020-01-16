@@ -280,7 +280,11 @@ struct AppConfig
                         {
                             f_value = sim_next_ask ;
                         }
-                        Set_use_sim_weight();
+                        if( f_value == 0 ) {
+                            Set_use_basic();
+                            f_value = basic ;
+                        } else
+                            Set_use_sim_weight();
                     }
                 }
                 return ;
