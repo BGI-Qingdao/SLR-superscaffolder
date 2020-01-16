@@ -53,7 +53,7 @@ struct SupportInfo{
     }
 };
 
-SupportInfo GetSupportInfo( 
+SupportInfo GetSupportInfo(
         unsigned int neib 
         , unsigned int center
         , int min_shared 
@@ -222,6 +222,8 @@ struct AppConfig
                 oresults[center_id].AddLeftProven(check_ret.direction) ;
             if( check_ret.is_terminal ) 
                 break ;
+            if(  center_index -i  >= max_nieb )
+                break;
         }
         // check right neibs
         for( int i = center_index +1 ; i < (int)scaff.size() ; i ++ ) {
@@ -230,6 +232,8 @@ struct AppConfig
                 oresults[center_id].AddRightProven(check_ret.direction) ;
             if( check_ret.is_terminal ) 
                 break ;
+            if(  i - center_index >= max_nieb )
+                break;
         }
     };
     void GenOrientation() {
@@ -254,6 +258,7 @@ struct AppConfig
         }
         delete out3;
     }
+    int max_nieb ;
 } config;
 
 int main(int argc, char **argv)
@@ -266,11 +271,13 @@ int main(int argc, char **argv)
                                                         xxx.gap_oo ;");
     DEFINE_ARG_OPTIONAL(int , min_shared , "min accepted share barcode types", "10");
     DEFINE_ARG_OPTIONAL(float , min_ration , "min accepted mid_ration ", "1.2");
+    DEFINE_ARG_OPTIONAL(int , max_nieb , "max accepted nieb rank", "5");
     END_PARSE_ARGS;
 
     config.Init( prefix.to_string());
     config.min_shared = min_shared.to_int();
     config.min_ration = min_ration.to_float();
+    config.max_nieb   = max_nieb.to_int() ;
     config.LoadContigIndexs();
     config.LoadTrunk();
     config.LoadBarcodeOnContig();
