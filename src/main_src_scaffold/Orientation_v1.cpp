@@ -19,6 +19,8 @@
 #include <array>
 #include <algorithm>
 
+BGIQD::FREQ::Freq<std::string> VoteFreq;
+
 struct ContigBarcodeSet{
     unsigned int id ;
     std::set<int> left ;
@@ -72,24 +74,34 @@ SupportInfo GetSupportInfo(
         auto C2 = BGIQD::STL::set_diff_in_s1(center_info.right, center_info.left);
         float C2_ration = float(C2.size()) / float(center_info.all.size() ) ;
         if( B2_ration > C2_ration && B2_ration/C2_ration >= min_ration ) {
+            VoteFreq.Touch("RationVote");
             ret.weight = 1 ;
             ret.direction = 1 ;
         }
-        if( C2_ration >B2_ration && C2_ration/B2_ration >= min_ration ) {
+        else if( C2_ration >B2_ration && C2_ration/B2_ration >= min_ration ) {
+            VoteFreq.Touch("RationVote");
             ret.weight = 1 ;
             ret.direction = -1 ;
+        }
+        else {
+            VoteFreq.Touch("RationFailed");
         }
     }else {
         if( AB.size() > AC.size() ){
+            VoteFreq.Touch("NumVote");
             ret.weight = 1 ;
             ret.direction = -1 ;
         }
-        if( AB.size() < AC.size() ){
+        else if( AB.size() < AC.size() ){
+            VoteFreq.Touch("NumVote");
             ret.weight = 1 ;
             ret.direction = 1 ;
         }
-        if( AB.empty() && AC.empty() )
-            ret.is_terminal = true ;
+        else {
+            VoteFreq.Touch("NumFailed");
+            if( AB.empty() && AC.empty() )
+                ret.is_terminal = true ;
+        }
     }
     return ret ;
 }
@@ -221,6 +233,7 @@ struct AppConfig
         }
     };
     void GenOrientation() {
+        loger<<BGIQD::LOG::lstart() << "gen orientation start ..."<<BGIQD::LOG::lend() ;
         for( const auto & pair : scaffs ) {
             for( int i = 0 ; i < (int)pair.second.size() ; i++ ) {
                VoteByNiebs( pair.second ,i ); 
@@ -229,6 +242,7 @@ struct AppConfig
         for( auto & pair : oresults ) {
             pair.second.GenVoteReuslt();
         }
+        loger<<BGIQD::LOG::lstart() << "gen orientation vote freq ...\n"<<VoteFreq.ToString()<<BGIQD::LOG::lend() ;
     }
     void PrintOrientation() {
         auto out3 = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.orientation());
