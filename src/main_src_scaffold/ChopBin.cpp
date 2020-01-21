@@ -197,7 +197,7 @@ struct AppConfig
         log<<BGIQD::LOG::lstart()<<"Init finsish ..."<<BGIQD::LOG::lend();
 
         assert( int(work_mode) > 0 );
-        assert( int(work_mode) < 4 );
+        assert( int(work_mode) < 5 );
     }
 
     void LoadBarcodeOnContig()
@@ -247,20 +247,37 @@ struct AppConfig
                 int pos = posData.first ;
                 for( const auto & vv : posData.second )
                 {
-                    for( const auto & pair : bin_intervals )
-                    {
-                        bool in ; int in_len ;
-                        std::tie( in , in_len ) = IsBarcodeInBin( pair.second , pos ) ;
-                        //if(pair.second.IsContain(pos))
-                        if( in && in_len > 0 )
-                        {
-                            int binId = pair.first ;
+                    if ( work_mode == WorkingMode::OverlapBin ) {
+                        int begin = (pos - bin_size +1) ;
+                        if ( begin < 0 ) begin = 0 ;
+                        int start = begin /overlap_size ;
+                        int end = pos/overlap_size ;
+                        for( int i = start ; i<= end ; i++ ) {
+                            int binId = i ;
                             auto & d = b2b[binId];
-                            d.start = pair.second.min ;
-                            d.end = pair.second.max ;
+                            d.start = bin_intervals[i].min;
+                            d.end =  bin_intervals[i].max ;
                             d.contigId = contigId;
                             d.binId = binId ;
-                            d.collections.IncreaseElement(vv,in_len);
+                            d.collections.IncreaseElement(vv,bin_size);
+                        }
+                    }
+                    else {
+                        for( const auto & pair : bin_intervals )
+                        {
+                            bool in ; int in_len ;
+                            std::tie( in , in_len ) = IsBarcodeInBin( pair.second , pos ) ;
+                            //if(pair.second.IsContain(pos))
+                            if( in && in_len > 0 )
+                            {
+                                int binId = pair.first ;
+                                auto & d = b2b[binId];
+                                d.start = pair.second.min ;
+                                d.end = pair.second.max ;
+                                d.contigId = contigId;
+                                d.binId = binId ;
+                                d.collections.IncreaseElement(vv,in_len);
+                            }
                         }
                     }
                 }
