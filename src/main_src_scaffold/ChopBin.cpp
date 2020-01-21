@@ -39,7 +39,8 @@ struct AppConfig
         Unknow = 0 ,
         EqualBin = 1 ,
         Head_Tail = 2 ,
-        OneBin = 3 
+        OneBin = 3 ,
+        OverlapBin = 4
     };
 
     WorkingMode work_mode ;
@@ -82,6 +83,7 @@ struct AppConfig
         }
     }
 
+    int overlap_size  ;
     std::map<int ,BinInterval> MakeBin(int contig_len)
     {
         std::map<int , BinInterval > ret ;
@@ -90,6 +92,12 @@ struct AppConfig
         if( work_mode == WorkingMode::OneBin)
         {
             ret[0] = BinInterval(-100,contig_used_len+100);
+            return  ret ;
+        }
+        else if ( work_mode == WorkingMode::OverlapBin ) {
+            for( int i = 0 ; ( overlap_size * i + bin_size ) <= contig_len ; i++ ) {
+                ret[i] = BinInterval(overlap_size*i , overlap_size*i+bin_size-1);
+            }
             return  ret ;
         }
         else if ( work_mode == WorkingMode::Head_Tail)
@@ -283,14 +291,17 @@ int main(int argc , char ** argv)
     DEFINE_ARG_OPTIONAL(int , work_mode, " the work_mode for chopbin : \n\
                             1 for chop bin with equal bin size \n\
                             2 for chop bin only at contig head and tail \n\
-                            3 for chop 1 bin for a contig ", "1");
+                            3 for chop 1 bin for a contig \n\
+                            4 chop bin with certain overlaps "
+                            , "1");
 
     DEFINE_ARG_OPTIONAL(float ,bin_factor , "factor of smallest bin in the middle", "0.5");
     DEFINE_ARG_OPTIONAL(int,  max_bin_size , "max bin area from head & tail " ,"15000");
     DEFINE_ARG_OPTIONAL(bool,  flatten, "flatten mode " ,"false");
     DEFINE_ARG_OPTIONAL(std::string,  middle_name, "the middle name of output suffix " ,"");
+    DEFINE_ARG_OPTIONAL(int ,overlap_len, "overlap_len for mode 4", "100");
     END_PARSE_ARGS
-
+    config.overlap_size = overlap_len.to_int();
     config.work_mode = static_cast<AppConfig::WorkingMode>(work_mode.to_int());
     config.max_bin_size = max_bin_size.to_int();
     config.flatten = flatten.to_bool() ;
