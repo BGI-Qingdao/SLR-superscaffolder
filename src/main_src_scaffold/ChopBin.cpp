@@ -259,7 +259,7 @@ struct AppConfig
                             d.end =  bin_intervals[i].max ;
                             d.contigId = contigId;
                             d.binId = binId ;
-                            d.collections.IncreaseElement(vv,bin_size);
+                            d.collections.IncreaseElement(vv,1);
                         }
                     }
                     else {
