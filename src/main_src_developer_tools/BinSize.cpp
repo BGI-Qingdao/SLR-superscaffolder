@@ -50,7 +50,9 @@ struct AppConfig
         {
             auto & b2b = barcodeOnBin.at(i);
             std::cout<<b2b.contigId<<','<<b2b.binId<<','<<b2b.collections.keysize()<<'\n';
+            type_Freq.Touch(b2b.collections.keysize());
         }
+        std::cerr<<"barcode_type_on_bin_freq:\n"<<type_Freq.ToString();
     }
     std::string middle_name ;
 
