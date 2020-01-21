@@ -4,6 +4,7 @@ apps="\
  barcode2scaffold\
  BarcodeDepth\
  bin_ref\
+ BinSize\
  cpSpeed\
  FakeRef2Scaff\
  gapfillerIDY\
