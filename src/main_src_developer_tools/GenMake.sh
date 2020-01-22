@@ -14,6 +14,7 @@ apps="\
  IDYtool_paf\
  Cluster2MST2DOT\
  ContigSimAnalysis\
+ chr19_21_random_fragments\
  Points4GapSize\
  filterPairFQ\
 "
