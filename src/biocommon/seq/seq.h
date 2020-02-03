@@ -22,7 +22,7 @@ namespace BGIQD {
 
             int ValidLen() const ;
 
-            int NLen() const ;
+            int NLen() const { int ret = 0 ;for( char x: atcgs ) if ( x == 'n' || x == 'N' ) ret ++ ; return ret ;}
 
             int GCLen() const ;
 

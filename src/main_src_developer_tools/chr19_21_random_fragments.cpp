@@ -59,6 +59,7 @@ FragmentInfo fragment( const BGIQD::SEQ::seq & base , int len_min , int len_max 
     ret.len  = len ;
     ret.orient = true ;
     ret.seq.AddPartSeq(base.atcgs.substr(begin,len));
+    if( ret.seq.NLen() * 100 / ret.seq.Len() > 10 ) return fragment(base ,len_min,len_max) ;
     return ret ;
 }
 
@@ -102,32 +103,35 @@ int main() {
     delete chr21_ist; buffer1.clear();
     chr21 = buffer1[0].seq ;
     // generator random 10 50K framents earch 
-    std::vector<FragmentInfo> type_b ;
+    std::vector<FragmentInfo> type_b_19 ;
+    std::vector<FragmentInfo> type_b_21 ;
     for( int i = 0 ; i < 10 ; i++ ) {
         auto ret = fragment(chr19 ,49000,50000);
         ret.base = "chr19";
-        type_b.push_back(ret);
+        type_b_19.push_back(ret);
     }
     for( int i = 0 ; i < 10 ; i++ ) {
         auto ret = fragment(chr21 ,49000,50000);
         ret.base = "chr21";
-        type_b.push_back(ret);
+        type_b_21.push_back(ret);
     }
     // generate random 10  500~10000 fragments earch
-    std::vector<FragmentInfo> type_c ;
+    std::vector<FragmentInfo> type_c_19 ;
+    std::vector<FragmentInfo> type_c_21 ;
     for( int i = 0 ; i < 10 ; i++ ) {
         auto ret = fragment(chr19 ,500,10000);
         ret.base = "chr19";
-        type_c.push_back(ret);
+        type_c_19.push_back(ret);
     }
     for( int i = 0 ; i < 10 ; i++ ) {
         auto ret = fragment(chr21 ,500,10000);
         ret.base = "chr21";
-        type_c.push_back(ret);
+        type_c_21.push_back(ret);
     }
     // generate mis-assemble fragments
         // -- short short
-    std::vector<FragmentMergeInfo> type_d_ss ;
+    std::vector<FragmentMergeInfo> type_d_ss_19 ;
+    std::vector<FragmentMergeInfo> type_d_ss_21 ;
     for( int i = 0 ; i < 10 ; i++ ) {
         auto ret = fragment(chr19 ,500,10000);
         auto ret2 = fragment(chr19 ,500,10000);
@@ -136,7 +140,7 @@ int main() {
         FragmentMergeInfo tmp ;
         tmp.left = ret ;
         tmp.right = ret2 ;
-        type_d_ss.push_back(tmp);
+        type_d_ss_19.push_back(tmp);
     }
     for( int i = 0 ; i < 10 ; i++ ) {
         auto ret = fragment(chr21 ,500,10000);
@@ -146,10 +150,11 @@ int main() {
         FragmentMergeInfo tmp ;
         tmp.left = ret ;
         tmp.right = ret2 ;
-        type_d_ss.push_back(tmp);
+        type_d_ss_21.push_back(tmp);
     }
         // -- long -short
-    std::vector<FragmentMergeInfo> type_d_sl ;
+    std::vector<FragmentMergeInfo> type_d_sl_19 ;
+    std::vector<FragmentMergeInfo> type_d_sl_21 ;
     for( int i = 0 ; i < 10 ; i++ ) {
         auto ret = fragment(chr19 ,500,10000);
         auto ret2 = fragment(chr19 ,30000,40000);
@@ -158,7 +163,7 @@ int main() {
         FragmentMergeInfo tmp ;
         tmp.left = ret ;
         tmp.right = ret2 ;
-        type_d_sl.push_back(tmp);
+        type_d_sl_19.push_back(tmp);
     }
     for( int i = 0 ; i < 10 ; i++ ) {
         auto ret = fragment(chr21 ,500,10000);
@@ -168,10 +173,11 @@ int main() {
         FragmentMergeInfo tmp ;
         tmp.left = ret ;
         tmp.right = ret2 ;
-        type_d_sl.push_back(tmp);
+        type_d_sl_21.push_back(tmp);
     }
         // -- long -long 
-    std::vector<FragmentMergeInfo> type_d_ll ;
+    std::vector<FragmentMergeInfo> type_d_ll_19 ;
+    std::vector<FragmentMergeInfo> type_d_ll_21 ;
     for( int i = 0 ; i < 10 ; i++ ) {
         auto ret2 = fragment(chr19 ,30000,40000);
         auto ret = fragment(chr19 ,30000,40000);
@@ -180,7 +186,7 @@ int main() {
         FragmentMergeInfo tmp ;
         tmp.left = ret ;
         tmp.right = ret2 ;
-        type_d_ll.push_back(tmp);
+        type_d_ll_19.push_back(tmp);
     }
     for( int i = 0 ; i < 10 ; i++ ) {
         auto ret2 = fragment(chr21 ,30000,40000);
@@ -190,10 +196,11 @@ int main() {
         FragmentMergeInfo tmp ;
         tmp.left = ret ;
         tmp.right = ret2 ;
-        type_d_ll.push_back(tmp);
+        type_d_ll_21.push_back(tmp);
     }
         // -- inversion 
-    std::vector<FragmentMergeInfo> type_e ;
+    std::vector<FragmentMergeInfo> type_e_19 ;
+    std::vector<FragmentMergeInfo> type_e_21 ;
     for( int i = 0 ; i < 10 ; i++ ) {
         auto ret = fragment(chr19 ,30000,50000);
         ret.base = "chr19";
@@ -209,7 +216,7 @@ int main() {
         tmp.left = left;
         tmp.left.orient = false ;
         tmp.right = right;
-        type_e.push_back(tmp);
+        type_e_19.push_back(tmp);
     }
     for( int i = 0 ; i < 10 ; i++ ) {
         auto ret = fragment(chr21 ,30000,50000);
@@ -226,14 +233,21 @@ int main() {
         tmp.left = left;
         tmp.left.orient = false ;
         tmp.right = right;
-        type_e.push_back(tmp);
+        type_e_21.push_back(tmp);
     }
     // print all
-    print("type_b.fa",type_b);
-    print("type_c.fa",type_c);
-    print("type_d_ss.fa",type_d_ss);
-    print("type_d_sl.fa",type_d_sl);
-    print("type_d_ll.fa",type_d_ll);
-    print("type_e.fa",type_b);
+    print("chr19_type_b.fa",type_b_19);
+    print("chr19_type_c.fa",type_c_19);
+    print("chr19_type_d_ss.fa",type_d_ss_19);
+    print("chr19_type_d_sl.fa",type_d_sl_19);
+    print("chr19_type_d_ll.fa",type_d_ll_19);
+    print("chr19_type_e.fa",type_b_19);
+
+    print("chr21_type_b.fa",type_b_21);
+    print("chr21_type_c.fa",type_c_21);
+    print("chr21_type_d_ss.fa",type_d_ss_21);
+    print("chr21_type_d_sl.fa",type_d_sl_21);
+    print("chr21_type_d_ll.fa",type_d_ll_21);
+    print("chr21_type_e.fa",type_b_21);
     return 0 ;
 }
