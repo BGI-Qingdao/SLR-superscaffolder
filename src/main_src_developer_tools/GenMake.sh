@@ -17,6 +17,7 @@ apps="\
  chr19_21_random_fragments\
  Points4GapSize\
  filterPairFQ\
+ TriBin\
 "
 
 jobs_o=" "
