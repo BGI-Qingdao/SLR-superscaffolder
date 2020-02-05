@@ -92,16 +92,16 @@ int main() {
     BGIQD::FASTA::FastaReader<FA> reader ;
     reader.LoadAllFasta( *chr19_ist ,  buffer);
     assert(buffer.size() == 1 );
-    delete chr19_ist; buffer.clear();
     chr19 = buffer[0].seq ;
+    delete chr19_ist; buffer.clear();
     // load ref 21
     auto chr21_ist = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(chr21_file);
     std::vector<FA> buffer1;
     BGIQD::FASTA::FastaReader<FA> reader1 ;
     reader1.LoadAllFasta( *chr21_ist ,  buffer1);
     assert(buffer1.size() == 1 );
-    delete chr21_ist; buffer1.clear();
     chr21 = buffer1[0].seq ;
+    delete chr21_ist; buffer1.clear();
     // generator random 10 50K framents earch 
     std::vector<FragmentInfo> type_b_19 ;
     std::vector<FragmentInfo> type_b_21 ;
@@ -209,9 +209,14 @@ int main() {
             cut = std::rand() % ret.seq.Len() ;
         }
         FragmentInfo left = ret ;
-        FragmentInfo right= ret ;
         left.seq = subseq( ret.seq , 0 , cut ) ;
+	left.len = cut ;
+
+        FragmentInfo right= ret ;
+	right.from += cut ;
+	right.len -= cut ;
         right.seq = subseq( ret.seq , cut , ret.seq.Len() - cut +1 );
+
         FragmentMergeInfo tmp ;
         tmp.left = left;
         tmp.left.orient = false ;
@@ -225,10 +230,16 @@ int main() {
         while( cut < 1005 || ret.seq.Len() - cut +1 < 1005 ) {
             cut = std::rand() % ret.seq.Len() ;
         }
+
         FragmentInfo left = ret ;
-        FragmentInfo right= ret ;
         left.seq = subseq( ret.seq , 0 , cut ) ;
+	left.len = cut ;
+
+        FragmentInfo right= ret ;
+	right.from += cut ;
+	right.len -= cut ;
         right.seq = subseq( ret.seq , cut , ret.seq.Len() - cut +1 );
+
         FragmentMergeInfo tmp ;
         tmp.left = left;
         tmp.left.orient = false ;
@@ -241,13 +252,13 @@ int main() {
     print("chr19_type_d_ss.fa",type_d_ss_19);
     print("chr19_type_d_sl.fa",type_d_sl_19);
     print("chr19_type_d_ll.fa",type_d_ll_19);
-    print("chr19_type_e.fa",type_b_19);
+    print("chr19_type_e.fa",type_e_19);
 
     print("chr21_type_b.fa",type_b_21);
     print("chr21_type_c.fa",type_c_21);
     print("chr21_type_d_ss.fa",type_d_ss_21);
     print("chr21_type_d_sl.fa",type_d_sl_21);
     print("chr21_type_d_ll.fa",type_d_ll_21);
-    print("chr21_type_e.fa",type_b_21);
+    print("chr21_type_e.fa",type_e_21);
     return 0 ;
 }
