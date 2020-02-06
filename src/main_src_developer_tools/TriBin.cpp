@@ -18,6 +18,7 @@ struct AppConfig {
     BGIQD::SOAP2::FileNames fNames;
 
     struct BarcodeTypeInfo {
+        bool valid ;
         int A_only;
         int B_only;
         int C_only;
@@ -30,11 +31,12 @@ struct AppConfig {
     // Done
     BarcodeTypeInfo GetBarcodeDetail(int ref_id, int start_index ) const {
         BarcodeTypeInfo ret ;
+        ret.valid = false ;
         const auto & bbs = b2bs.at(ref_id);
-        assert(  bbs.find(start_index) != bbs.end() ) ;
-        assert(  bbs.find(start_index+1) != bbs.end() ) ;
-        assert(  bbs.find(start_index+2) != bbs.end() ) ;
-
+        if ( bbs.find(start_index) == bbs.end() ) return ret ;
+        if ( bbs.find(start_index+1) == bbs.end() ) return ret ;
+        if ( bbs.find(start_index+2) == bbs.end() ) return ret ;
+        ret.valid = true ;
         auto collection2set = [](const BGIQD::Collection::Collection<int> & c ) {
             std::set<int> ret ;
             for( const auto & pair : c.elements ) ret.insert(pair.first) ;
@@ -56,7 +58,7 @@ struct AppConfig {
         auto A_only = BGIQD::STL::set_diff_in_s1(A,B);
         A_only = BGIQD::STL::set_diff_in_s1(A_only,C);
         auto B_only = BGIQD::STL::set_diff_in_s1(B,A);
-        A_only = BGIQD::STL::set_diff_in_s1(B_only,C);
+        B_only = BGIQD::STL::set_diff_in_s1(B_only,C);
         auto C_only = BGIQD::STL::set_diff_in_s1(C,B);
         C_only = BGIQD::STL::set_diff_in_s1(C_only,A);
 
@@ -89,13 +91,14 @@ struct AppConfig {
         delete in;
     }
     void PrintTribinInfos() {
-        std::cout<<"ref_id,start_pos,n1,n2,n3,n4,n5,n6.n7\n";
+        std::cout<<"ref_id,start_pos,n1,n2,n3,n4,n5,n6,Sbar\n";
         for( const auto & pair : b2bs ) { 
             int ref_id = pair.first ;
             const auto & bbs = pair.second ;
             for ( int i = 0 ; i < ( (int)bbs.size() )- 2 ; i++ ) {
-                assert(  bbs.find(i) != bbs.end() ) ;
+                if( bbs.find(i) == bbs.end() ) continue ;
                 auto info = GetBarcodeDetail(ref_id,i);
+                if( ! info.valid ) continue ;
                 const auto & b2b = bbs.at(i) ;
                 std::cout<<ref_id<<','<<b2b.start
                     <<','<<info.A_only
