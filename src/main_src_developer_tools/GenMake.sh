@@ -2,6 +2,7 @@
 
 apps="\
  barcode2scaffold\
+ barcodeOnContig\
  BarcodeDepth\
  bin_ref\
  BinSize\
