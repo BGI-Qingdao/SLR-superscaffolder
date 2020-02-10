@@ -15,6 +15,7 @@ apps="\
  Cluster2MST2DOT\
  ContigSimAnalysis\
  chr19_21_random_fragments\
+ chr19_21_chopsubseq\
  Points4GapSize\
  filterPairFQ\
  TriBin\

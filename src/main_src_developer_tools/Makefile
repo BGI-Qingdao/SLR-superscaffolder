@@ -46,7 +46,7 @@ source_o		= ${source_cpp:%.cpp=%.o}
 .cpp.o:
 	${CXX} ${DEUBG_CXX} -c $< -o $@
 
-jobs = barcode2scaffold BarcodeDepth bin_ref BinSize cpSpeed FakeRef2Scaff gapfillerIDY GenSentieonScaff GenBinSimMatrix IDYtool IDYtool_paf Cluster2MST2DOT ContigSimAnalysis chr19_21_random_fragments Points4GapSize filterPairFQ TriBin
+jobs = barcode2scaffold BarcodeDepth bin_ref BinSize cpSpeed FakeRef2Scaff gapfillerIDY GenSentieonScaff GenBinSimMatrix IDYtool IDYtool_paf Cluster2MST2DOT ContigSimAnalysis chr19_21_random_fragments chr19_21_chopsubseq Points4GapSize filterPairFQ TriBin
 
 all :  ${jobs}
 
@@ -179,6 +179,15 @@ chr19_21_random_fragments : clean ${chr19_21_random_fragments_o} ${source_o} ../
 
 
 
+chr19_21_chopsubseq_cpp = chr19_21_chopsubseq.cpp
+chr19_21_chopsubseq_o = chr19_21_chopsubseq.o
+chr19_21_chopsubseq : clean ${chr19_21_chopsubseq_o} ${source_o} ../dev_bin
+	${CXX} ${chr19_21_chopsubseq_o} ${source_o} ${DEUBG_CXX} -o chr19_21_chopsubseq
+	mv $@ ../dev_bin/
+
+
+
+
 Points4GapSize_cpp = Points4GapSize.cpp
 Points4GapSize_o = Points4GapSize.o
 Points4GapSize : clean ${Points4GapSize_o} ${source_o} ../dev_bin
@@ -204,7 +213,7 @@ TriBin : clean ${TriBin_o} ${source_o} ../dev_bin
 	mv $@ ../dev_bin/
 
 
-jobs_o=  ${barcode2scaffold_o} ${BarcodeDepth_o} ${bin_ref_o} ${BinSize_o} ${cpSpeed_o} ${FakeRef2Scaff_o} ${gapfillerIDY_o} ${GenSentieonScaff_o} ${GenBinSimMatrix_o} ${IDYtool_o} ${IDYtool_paf_o} ${Cluster2MST2DOT_o} ${ContigSimAnalysis_o} ${chr19_21_random_fragments_o} ${Points4GapSize_o} ${filterPairFQ_o} ${TriBin_o}
+jobs_o=  ${barcode2scaffold_o} ${BarcodeDepth_o} ${bin_ref_o} ${BinSize_o} ${cpSpeed_o} ${FakeRef2Scaff_o} ${gapfillerIDY_o} ${GenSentieonScaff_o} ${GenBinSimMatrix_o} ${IDYtool_o} ${IDYtool_paf_o} ${Cluster2MST2DOT_o} ${ContigSimAnalysis_o} ${chr19_21_random_fragments_o} ${chr19_21_chopsubseq_o} ${Points4GapSize_o} ${filterPairFQ_o} ${TriBin_o}
 
 dirty	   =${jobs_o} ${jobs} ${source_o}
 
