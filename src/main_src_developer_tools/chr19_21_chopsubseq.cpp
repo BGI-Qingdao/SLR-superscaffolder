@@ -188,5 +188,9 @@ int main(int argc , char ** argv ) {
     print("chr21_correct.fa",correct_bin_21);
     print("chr19_merge.fa",mis_bin_chr19);
     print("chr21_merge.fa",mis_bin_chr21);
+    std::cerr<<"chr19 drop total n bin "<<chr19_correct_drop_total_n<<std::endl;
+    std::cerr<<"chr19 drop part n bin "<<chr19_correct_drop_part_n<<std::endl;
+    std::cerr<<"chr21 drop total n bin "<<chr21_correct_drop_total_n<<std::endl;
+    std::cerr<<"chr21 drop part n bin "<<chr21_correct_drop_part_n<<std::endl;
     return 0 ;
 }
