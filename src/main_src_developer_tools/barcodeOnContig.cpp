@@ -64,7 +64,7 @@ struct AppConfig
                     total++ ;
                 }
             }
-            std::cout<<b2b.contig_id<<','<<count.size()<<total<<'\n';
+            std::cout<<b2b.contig_id<<','<<count.size()<<','<<total<<'\n';
         }
     }
 

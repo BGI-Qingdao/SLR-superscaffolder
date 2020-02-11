@@ -118,18 +118,37 @@ int main(int argc , char ** argv ) {
     assert(buffer1.size() == 1 );
     chr21 = buffer1[0].seq ;
     delete chr21_ist; buffer1.clear();
+
+    int chr19_correct_drop_total_n = 0;
+    int chr19_correct_drop_part_n = 0;
+    int chr21_correct_drop_total_n= 0;
+    int chr21_correct_drop_part_n = 0;
     // gen correct seq in bin_size
     std::vector<FragmentInfo> correct_bin_19;
     std::vector<FragmentInfo> correct_bin_21;
     for( int i = 0 ; i < chr19.Len() ; i+=bin_size.to_int() ) {
         auto ret = subfrag(chr19 ,i,bin_size.to_int());
         ret.base = "chr19";
-        correct_bin_19.push_back(ret);
+        if( ret.seq.NLen() == 0 )
+            correct_bin_19.push_back(ret);
+        else {
+            if( ret.seq.NLen() != ret.seq.Len() )
+                chr19_correct_drop_part_n ++ ;
+            else
+                chr19_correct_drop_total_n ++ ;
+        }
     }
     for( int i = 0 ; i < chr21.Len() ; i+=bin_size.to_int() ) {
         auto ret = subfrag(chr21 ,i,bin_size.to_int());
         ret.base = "chr21";
-        correct_bin_21.push_back(ret);
+        if( ret.seq.NLen() == 0 )
+            correct_bin_21.push_back(ret);
+        else {
+            if( ret.seq.NLen() != ret.seq.Len() )
+                chr21_correct_drop_part_n ++ ;
+            else
+                chr21_correct_drop_total_n ++ ;
+        }
     }
     // gen merge mis-assmbly by bin_size/2 + bin_size/2
     std::vector<FragmentInfo> sub_bin_19;
@@ -137,12 +156,14 @@ int main(int argc , char ** argv ) {
     for( int i = 0 ; i < chr19.Len() ; i+=bin_size.to_int()/2 ) {
         auto ret = subfrag(chr19 ,i,bin_size.to_int()/2);
         ret.base = "chr19";
-        sub_bin_19.push_back(ret);
+        if( ret.seq.NLen() == 0 )
+            sub_bin_19.push_back(ret);
     }
     for( int i = 0 ; i < chr21.Len() ; i+=bin_size.to_int()/2 ) {
         auto ret = subfrag(chr21 ,i,bin_size.to_int()/2);
         ret.base = "chr21";
-        sub_bin_21.push_back(ret);
+        if( ret.seq.NLen() == 0 )
+            sub_bin_21.push_back(ret);
     }
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::shuffle(sub_bin_19.begin() , sub_bin_19.end() ,std::default_random_engine(seed));
