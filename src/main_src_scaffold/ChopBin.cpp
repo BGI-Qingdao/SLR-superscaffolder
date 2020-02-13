@@ -248,17 +248,27 @@ struct AppConfig
                 for( const auto & vv : posData.second )
                 {
                     if ( work_mode == WorkingMode::OverlapBin ) {
-                        int begin = (pos - bin_size +1) ;
-                        if ( begin < 0 ) begin = 0 ;
-                        int start = begin /overlap_size ;
-                        int end = pos/overlap_size ;
-                        for( int i = start ; i<= end ; i++ ) {
-                            int binId = i ;
-                            auto & d = b2b[binId];
+                        if( overlap_size < bin_size ) {
+                            int begin = (pos - bin_size +overlap_size) ;
+                            if ( begin < 0 ) begin = 0 ;
+                            int start = begin /overlap_size ;
+                            int end = pos/overlap_size ;
+                            for( int i = start ; i<= end ; i++ ) {
+                                int binId = i ;
+                                auto & d = b2b[binId];
+                                d.start = bin_intervals[i].min;
+                                d.end =  bin_intervals[i].max ;
+                                d.contigId = contigId;
+                                d.binId = binId ;
+                                d.collections.IncreaseElement(vv,1);
+                            }
+                        } else {
+                            int i = pos/overlap_size ;
+                            auto & d = b2b[i] ;
                             d.start = bin_intervals[i].min;
                             d.end =  bin_intervals[i].max ;
                             d.contigId = contigId;
-                            d.binId = binId ;
+                            d.binId = i;
                             d.collections.IncreaseElement(vv,1);
                         }
                     }
