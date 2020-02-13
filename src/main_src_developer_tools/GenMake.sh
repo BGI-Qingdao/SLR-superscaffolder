@@ -13,6 +13,7 @@ apps="\
  GenBinSimMatrix\
  IDYtool\
  IDYtool_paf\
+ NZoo\
  Cluster2MST2DOT\
  ContigSimAnalysis\
  chr19_21_random_fragments\
