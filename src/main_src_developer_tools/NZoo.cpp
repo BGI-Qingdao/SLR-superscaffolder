@@ -11,7 +11,7 @@ void printNBed(const Fasta & fa ){
     const std::string & seq = fa.seq.atcgs;
     bool N_start =false ;
     int prev = 0 ;
-    int index = 0 ;
+    int index = -1 ;
     for( char c: seq ){
         index ++ ;
         if(c!= 'n' && c!='N'){
@@ -19,7 +19,7 @@ void printNBed(const Fasta & fa ){
                 N_start = false ;
                 std::cout<<fa.head.Head()
                     <<'\t'<<prev
-                    <<'\t'<<(index-1)<<'\n';
+                    <<'\t'<<(index)<<'\n';
             }
         } else {
             if( ! N_start ){

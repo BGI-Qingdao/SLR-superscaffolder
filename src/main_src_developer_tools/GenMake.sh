@@ -5,6 +5,7 @@ apps="\
  barcodeOnContig\
  BarcodeDepth\
  bin_ref\
+ bin_ref_v2\
  BinSize\
  cpSpeed\
  FakeRef2Scaff\

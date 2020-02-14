@@ -163,7 +163,7 @@ namespace BGIQD{
                     return true ;
                 }
 
-                Interval Overlap( const Interval & other )
+                Interval Overlap( const Interval & other ) const
                 {
                     Interval ret ;
                     ret.max = 0 ;
