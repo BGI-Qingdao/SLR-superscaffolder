@@ -52,7 +52,7 @@ struct BinRef {
         bin_size = bin_size_ ;
         int index = 0 ;
         for( int i = start ; i < total_len  ; i+= bin_size ) {
-            bins[index].pos.min = start ;
+            bins[index].pos.min = i;
             bins[index].pos.max = i+bin_size;
             bins[index].n_marker = false ;
             index ++ ;
@@ -123,7 +123,7 @@ struct AppConfig {
     }
 
     void ClacAndPrint() {
-        std::cout<<"A_bt , B_bt , AUB_bt , ANB_bt , A_bn , B_bn ,AUB_bn ,ANB_bn\n";
+        std::cout<<"A_bt\tB_bt\tAUB_bt\tANB_bt\tA_bn\tB_bn\tAUB_bn\tANB_bn\n";
         int i ; int jump = 0 ;
         for( i = 0 ; i < from.size() ; i ++ ) {
             if(!from.has(i) || ! to.has(i)) { jump++ ; continue ; }
