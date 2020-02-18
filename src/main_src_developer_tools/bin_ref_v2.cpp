@@ -71,6 +71,7 @@ struct BinRef {
         }
     }
     void assign( int pos , int barcode ) {
+        if( pos < start ) return ;
         auto & bin = getByPos(pos);
         bin.data.IncreaseElement(barcode);
     }
@@ -88,7 +89,7 @@ struct AppConfig {
 
     void Init( int ref_len , int bin_size , int dist ) {
         from.Init(0,bin_size,ref_len);
-        to.Init(dist,bin_size,ref_len);
+        to.Init(bin_size+dist,bin_size,ref_len);
     }
 
     void Loadread2contig(const std::string & file ) {
