@@ -6,6 +6,7 @@ apps="\
  BarcodeDepth\
  bin_ref\
  bin_ref_v2\
+ bin_ref_v3\
  BinSize\
  cpSpeed\
  FakeRef2Scaff\

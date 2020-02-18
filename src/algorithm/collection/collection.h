@@ -108,6 +108,16 @@ namespace BGIQD{
                     ret -= Intersection(c1,c2);
                     return ret ;
                 }
+                // element that in *this object but not in other object
+                Collection Diff( const Collection & other ) const {
+                    Collection ret ;
+                    for( const auto & pair : elements) {
+                        if( other.elements.find( pair.first ) 
+                                == other.elements.end()) {
+                            ret.IncreaseElement(pair.first,pair.second);
+                        }
+                    }
+                }
 
                 static float Jaccard(const Collection & c1 , const Collection & c2 )
                 {
