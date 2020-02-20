@@ -139,7 +139,7 @@ struct AppConfig {
         for( i = 0 ; i < bin1s.size() ; i ++ ) {
             if(!bin1s.has(i)
             || !bin2s.has(i)
-            || bin3s.has(i) )
+            || !bin3s.has(i) )
             { jump++ ; continue ; }
             const auto & A= bin1s.get(i).data;
             const auto & B= bin2s.get(i).data;
@@ -153,9 +153,9 @@ struct AppConfig {
             auto ABC      = BinData::Intersection(AB ,BC ) ;
             auto ABnC     = AB.Diff(C);
             auto ACnB     = AC.Diff(B);
-            auto BCnA     = AC.Diff(A);
-            float F23_bn  = B.size() == 0 ? 0 : ( float(std::min(A.size() ,C.size()) ) / float(B.size()) );
-            float F23_bt  = B.keysize() == 0 ? 0 : ( float(std::min(A.keysize() ,C.keysize()) ) / float(B.keysize()) );
+            auto BCnA     = BC.Diff(A);
+            float F23_bn  = B_only.size() == 0 ? 0 : ( float(std::min(A_only.size() ,C_only.size()) ) / float(B_only.size()) );
+            float F23_bt  = B_only.keysize() == 0 ? 0 : ( float(std::min(A_only.keysize() ,C_only.keysize()) ) / float(B_only.keysize()) );
             (*bn)<<A_only.size()
                 <<'\t'<<B_only.size()
                 <<'\t'<<C_only.size()

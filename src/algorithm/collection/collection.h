@@ -117,6 +117,7 @@ namespace BGIQD{
                             ret.IncreaseElement(pair.first,pair.second);
                         }
                     }
+                    return ret;
                 }
 
                 static float Jaccard(const Collection & c1 , const Collection & c2 )
