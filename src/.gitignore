@@ -1,4 +1,5 @@
 *.o
-tag
+tags
 bin
 dev_bin
+.ycm_extra_conf.py

@@ -17,6 +17,8 @@
 #include <map>
 #include <set>
 #include <tuple>
+#include <sstream>
+#include <random>
 
 struct AppConfig
 {
@@ -53,6 +55,8 @@ struct AppConfig
     BGIQD::SOAP2::FileNames fName;
 
     BGIQD::stLFR::BarcodeOnBinArray b2b_array;
+
+    float sample_fac ;
 
     std::tuple<bool , int > IsBarcodeInBin( const BinInterval & bin , int barcode_start_pos )
     {
@@ -176,6 +180,43 @@ struct AppConfig
         delete in ;
     }
 
+    bool ValidBarcode(unsigned int b) const {
+        if(sample_fac >= 1.0f ) return true ;
+        return valid_barcodes.find(b) != valid_barcodes.end();
+    }
+
+    std::set<unsigned int> valid_barcodes ;
+    void SampleBarcodes(){
+        if( sample_fac >= 1.0f ) return ;
+        std::set<unsigned int > all_barcodes;
+        // Load barcode list
+        auto in = BGIQD::FILES::FileReaderFactory::
+            GenerateReaderFromFileName(fName.barcodeList()) ;
+        if( in == NULL )
+            FATAL( "open xxx.barcodeList file to read failed !!! " );
+
+        std::string line ;
+        int total = 0 ; int sampled=0;
+        srand(0);
+        while( in && !std::getline(*in, line).eof() )
+        {
+            std::string name;
+            unsigned int id;
+            std::istringstream ist(line);
+            ist>>name>>id;
+            if( id == 0 ) continue ;
+            total ++ ;
+            float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+            if( r < sample_fac ) {
+                valid_barcodes.insert(id);
+                sampled ++ ;
+            }
+        }
+        std::cerr<<" Use minhash method , sample "<<sampled<<" barcode from total "<<total<<'\n';
+        delete in;
+        in = NULL;
+    }
+
     void Init(const std::string & prefix
             ,const  int bin 
             , float bin_f)
@@ -239,6 +280,7 @@ struct AppConfig
                 int pos = posData.first ;
                 for( const auto & vv : posData.second )
                 {
+                    if( ! ValidBarcode(vv) ) continue ;
                     for( const auto & pair : bin_intervals )
                     {
                         bool in ; int in_len ;
@@ -289,11 +331,13 @@ int main(int argc , char ** argv)
     DEFINE_ARG_OPTIONAL(int,  max_bin_size , "max bin area from head & tail " ,"15000");
     DEFINE_ARG_OPTIONAL(bool,  flatten, "flatten mode " ,"false");
     DEFINE_ARG_OPTIONAL(std::string,  middle_name, "the middle name of output suffix " ,"");
+    DEFINE_ARG_OPTIONAL(float ,sample_factor, "random sample barcodes to reduce cluster time. [0.1,1]", "1");
     END_PARSE_ARGS
 
     config.work_mode = static_cast<AppConfig::WorkingMode>(work_mode.to_int());
     config.max_bin_size = max_bin_size.to_int();
     config.flatten = flatten.to_bool() ;
+    config.sample_fac = sample_factor.to_float() ;
     config.middle_name = middle_name.to_string() ;
     config.Init( prefix.to_string() , bin_size.to_int() , bin_factor.to_float());
 
@@ -301,14 +345,16 @@ int main(int argc , char ** argv)
 
     config.LoadSeeds();
 
-    config.LoadBarcodeOnContig();
+    if( config.sample_fac < 0.1 )  config.sample_fac =0.1;
+    if( config.sample_fac > 1 )  config.sample_fac = 1;
+    if( config.sample_fac < 1 )
+        config.SampleBarcodes();
 
-    //if( p_b2c.to_bool() )
-    //    config.PrintBarcodeOnContig();
+    config.LoadBarcodeOnContig();
 
     config.ChopBin();
 
     config.PrintBinInfo();
-
+    
     return 0;
 }
