@@ -86,6 +86,7 @@ MACRO=" -D xxx=$PREFIX \
    -D PE_MIN_B=$PE_MIN_JOINBARCODES \
    -D PE_MIN_COUNT=$PE_MIN_COUNT \
    -D PE_FILL=$PE_FILL \
+   -D SAMPLING_RATIO=$SAMPLING_RATIO \
    -D BWA_K=$BWA_K"
 
 echo "Generate all scripts ..."

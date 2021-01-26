@@ -11,7 +11,7 @@ check_output xxx.oo.seeds
 
 check_input xxx.oo.seeds xxx.barcodeOnContig
 try_backup_list xxx.oo.barcodeOnBin
-BIN/ChopBin --prefix xxx --bin_size HT_BIN_SIZE --middle_name oo  --work_mode 2  2>>log_chopbin_ht
+BIN/ChopBin --prefix xxx --sample_factor SAMPLING_RATIO --bin_size HT_BIN_SIZE --middle_name oo  --work_mode 2  2>>log_chopbin_ht
 check_output xxx.oo.barcodeOnBin
 
 check_input xxx.oo.barcodeOnBin

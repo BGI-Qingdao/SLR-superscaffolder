@@ -11,7 +11,7 @@ check_output xxx.mst.seeds
 
 check_input xxx.mst.seeds xxx.barcodeOnContig
 try_backup_list xxx.mst.barcodeOnBin
-BIN/ChopBin --prefix xxx --bin_size MST_BIN_SIZE --middle_name mst  --work_mode 1 --max_bin_size 30000 2>>log_chopbin
+BIN/ChopBin --prefix xxx --sample_factor SAMPLING_RATIO  --bin_size MST_BIN_SIZE --middle_name mst  --work_mode 1 --max_bin_size 30000 2>>log_chopbin
 check_output xxx.mst.barcodeOnBin
 
 check_input xxx.mst.barcodeOnBin

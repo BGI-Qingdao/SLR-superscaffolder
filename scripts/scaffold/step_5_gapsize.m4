@@ -11,7 +11,7 @@ check_output xxx.gap.seeds
 
 check_input xxx.gap.seeds xxx.barcodeOnContig
 try_backup_list xxx.gap.barcodeOnBin
-BIN/ChopBin --prefix xxx --bin_size GAP_BIN_SIZE --middle_name gap  --work_mode 1 --max_bin_size 3000000 2>>gap_chopbin
+BIN/ChopBin --prefix xxx  --sample_factor SAMPLING_RATIO --bin_size GAP_BIN_SIZE --middle_name gap  --work_mode 1 --max_bin_size 3000000 2>>gap_chopbin
 check_output xxx.gap.barcodeOnBin
 
 check_input xxx.gap.barcodeOnBin  xxx.mintree_trunk_linear
