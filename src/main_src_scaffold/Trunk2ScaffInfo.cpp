@@ -10,7 +10,6 @@
 #include "common/flags/flags.h"
 
 #include "soap2/fileName.h"
-#include "soap2/contigFasta.h"
 #include "soap2/contigIndex.h"
 
 #include "stLFR/CBB.h"
@@ -31,7 +30,6 @@ struct AppConfig
     BGIQD::SOAP2::FileNames fName ;
     BGIQD::LOG::logger loger;
 
-    BGIQD::SOAP2::ContigFastAMap contig_fasta_map;
     BGIQD::FREQ::Freq<std::string> pfreq;
     BGIQD::FREQ::Freq<int>gapFreq;
     int gap_trunk ;

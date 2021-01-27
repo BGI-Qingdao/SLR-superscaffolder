@@ -25,7 +25,6 @@ source_cpp =	../common/files/file_reader.cpp \
 				../common/time/timetools.cpp\
 				../common/string/stringtools.cpp\
 				../stLFR/readName2Barcode.cpp\
-				../stLFR/barcodeOnContig.cpp\
 				../stLFR/ContigCluster.cpp\
                 ../stLFR/ScaffInfo.cpp\
 				../stLFR/LineGroup.cpp\
@@ -33,9 +32,6 @@ source_cpp =	../common/files/file_reader.cpp \
 				../stLFR/TagId.cpp\
 				../stLFR/StringIdCache.cpp\
 				../common/args/argsparser.cpp\
-				../soap2/contigGraph.cpp\
-				../soap2/contigFasta.cpp\
-				../soap2/contigType.cpp\
 				../soap2/contigIndex.cpp\
 
 source_o		= ${source_cpp:%.cpp=%.o}
