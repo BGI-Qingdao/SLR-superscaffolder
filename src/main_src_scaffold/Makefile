@@ -24,10 +24,8 @@ source_cpp =	../common/files/file_reader.cpp \
 				../common/log/logfilter.cpp\
 				../common/time/timetools.cpp\
 				../common/string/stringtools.cpp\
-				../stLFR/readName2Barcode.cpp\
 				../stLFR/ContigCluster.cpp\
                 ../stLFR/ScaffInfo.cpp\
-				../stLFR/LineGroup.cpp\
 				../stLFR/CBB.cpp\
 				../stLFR/TagId.cpp\
 				../stLFR/StringIdCache.cpp\

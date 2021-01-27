@@ -12,8 +12,6 @@
 #include "soap2/soap2.h"
 #include "soap2/fileName.h"
 
-//#include "stLFR/barcodeId.h"
-#include "stLFR/readName2Barcode.h"
 #include "stLFR/EasySam.h"
 #include "stLFR/StringIdCache.h"
 
@@ -73,7 +71,6 @@ struct AppConfig
             stLFRHeader header;
             header.Init(d.read_name);
             assert(header.type != stLFRHeader::ReadType::Unknow );
-            //tmp.barcode = BGIQD::stLFR::BarcodeIdHelper::Id(BGIQD::stLFR::readName2Barcode(d.read_name));
             tmp.barcode = barcodeIds.Id(header.barcode_str);
             tmp.read_id = readNameIds.Id(header.readName);
             tmp.is_p = d.IsP();
