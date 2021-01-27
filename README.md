@@ -132,6 +132,10 @@ cd YOUR-PROJECT-DIR
 cp YOUR-INSTALL-DIR/scaffold/conf.ini ./your-conf.ini
 vim conf.ini # and configure it!
 ```
+* As the input contig quality greatly influences the scaffolding, we recommend to use a high-quality contig set with larger N50 size (At least >10kb).
+* The default parameters for the bin size (MST_BIN_SIZE, HT_BIN_SIZ, GAP_BIN_SIZE) were optimized for contig N50 20kb-100kb. If your input contigs are shorter, please reduce the three bin sizes (MST_BIN_SIZE~ a half of contig N50, HT_BIN_SIZ~GAP_BIN_SIZE~ a half of MST_BIN_SIZE).
+* Other parameters have been optimized based on the stLFR co-barcoded sequencing platform, and do not need to be modified.
+ 
 
 - 2nd. Generate the pipeline and work folder
 
