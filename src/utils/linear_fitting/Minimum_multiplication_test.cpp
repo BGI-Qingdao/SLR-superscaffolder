@@ -1,5 +1,5 @@
-#include "algorithm/linear_fitting/Minimum_multiplication.h"
-#include "common/test/Test.h"
+#include "utils/linear_fitting/Minimum_multiplication.h"
+#include "utils/test/Test.h"
 
 TEST_MODULE_INIT(MMM)
 

@@ -2,14 +2,14 @@
 
 
 scaffold:
-	cd main_src_scaffold && make
+	cd main && make
 
 test:
 	cd test && make 
 
 
 clean:
-	cd main_src_scaffold && make clean
+	cd main && make clean
 	cd test && make clean
 	rm -rf bin
 
