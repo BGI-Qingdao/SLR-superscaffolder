@@ -21,9 +21,6 @@ namespace BGIQD {
                     return ( -b * y - c ) / a ;
                 }
             };
-
-
-
     }
 }
 

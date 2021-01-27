@@ -12,8 +12,6 @@
 #include "stLFR/CBB.h"
 #include "stLFR/TrunkGap.h"
 
-#include "algorithm/linear_fitting/Minimum_multiplication.h"
-#include "algorithm/statistics/common.h"
 
 #include <map>
 #include <vector>
@@ -22,59 +20,13 @@
 
 struct AppConfig
 {
-    typedef BGIQD::LINEARFITTING::Item<int,float> item;
-    typedef BGIQD::LINEARFITTING::Linear<int,float> LC;
-    LC lc;
     bool ptest;
-    std::vector<item> linear_cache;
     struct ContigBinPosSimHeadTail
     {
         int s1 , s2 , e1 ,e2 ;
         float sim ;
     };
     std::map<unsigned int , ContigBinPosSimHeadTail> BinPos;
-    void LoadLinearCachce()
-    {
-        for(int i = 0 ; i <(int) bra.size() ; i++ )
-        {
-            const auto & bin = bra[i];
-            unsigned int contig = bin.contigId ;
-            int binId = bin.binId ;
-            if( binId == 0 )
-            {
-                BinPos[contig].s1 = bin.start ;
-                BinPos[contig].e1 = bin.end ;
-                for( const auto & pair : bin.sims)
-                {
-                    if( pair.second.contigId == contig )
-                    {
-                        assert( pair.second.binId == 1);
-                        BinPos[contig].sim = pair.second.simularity ;
-                    }
-                }
-            }
-            else if ( binId == 1 )
-            {
-                BinPos[contig].s2 = bin.start ;
-                BinPos[contig].e2 = bin.end ;
-            }
-            else
-            {
-                assert(0&&" invalid binID ");
-            }
-        }
-
-        for(const auto & pair : BinPos)
-        {
-            int gap = pair.second.s2 - pair.second.e1 ;
-            float sim = pair.second.sim ;
-            if(ptest1 )
-                std::cout<<gap<<'\t'<<sim<<'\n';
-            gap_real_data.push_back( item { gap , sim } );
-        }
-        lc = BGIQD::LINEARFITTING::lineFit(gap_real_data);
-    }
-    std::vector<item> gap_real_data;
     bool ptest1 ;
     struct ScaffItem
     {
@@ -434,80 +386,7 @@ struct AppConfig
         delete out ;
     }
 
-    void ReLiner()
-    {
-        std::map<float,std::set<int>> clean_gap_sim ;
 
-        for( const auto & i : gap_real_data)
-        {
-            // Not a error point
-            if( i.x >= lc.getX(i.y) - 10000 )
-            {
-                clean_gap_sim[i.y].insert(i.x);
-            }
-        }
-
-        //std::vector<item> new_data;
-        std::map<int,std::set<float> > new_data;
-        for( const auto & i : clean_gap_sim )
-        {
-            for( auto x : i.second )
-            {
-                new_data[x].insert(i.first);
-            }
-        }
-        std::map<int,float> final_data;
-        for( const auto & i : new_data )
-        {
-            float average ;
-            BGIQD::Statistics::Average(i.second,average);
-            final_data[i.first] =  average ;
-        }
-
-        auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.gap_area());
-        if( out == NULL )
-            FATAL( "failed to open xxx.gap_area to write ");
-        for( const auto & i : final_data)
-        {
-            (*out)<<i.first <<'\t'<< i.second <<'\n';
-        }
-
-        delete out ;
-        return ;
-    }
-
-    void PrintGapArea()
-    {
-        auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.gap_area());
-        if( out == NULL )
-            FATAL( "failed to open xxx.gap_area to write ");
-        for( int i = 1 ; i < 30000 ; i++ )
-        {
-            (*out)<<i<<'\t'<<lc.getY(i)<<'\n';
-        }
-        delete out ;
-        return ;
-    }
-
-    void PrintGapOO()
-    {
-        auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.gap_oo());
-        if( out == NULL )
-            FATAL( " failed to open xxx.gap_oo for write ");
-        for( const auto & pairs: gaps )
-        {
-            for( const auto & gap : pairs.second )
-            {
-                (*out)<<gap.prev<<'\t'<<gap.next<<'\t'
-                    <<gap.data.true_prev<<'\t'
-                    <<gap.data.true_next<<'\t'
-                    <<int (gap.data.value >100 ? 10000 :  (gap.data.value * 100)) 
-                    <<'\t'<<int(gap.data.sim * 10000)
-                    <<'\n';
-            }
-        }
-        delete out ;
-    }
 } config;
 
 int main(int argc, char **argv)
@@ -520,10 +399,6 @@ int main(int argc, char **argv)
                                                     Out\n\
                                                         xxx.gap_oo ; xxx.gap_area");
     DEFINE_ARG_OPTIONAL( int , rank , " rank to detect gap ","3");
-    //DEFINE_ARG_OPTIONAL( bool , ptest , " print test data into STDOUT " , "false");
-    //DEFINE_ARG_OPTIONAL( bool , ptest1, " print gap_sim into STDOUT " , "false");
-    DEFINE_ARG_OPTIONAL( bool , calc_linear , "calc linear relationsship between simularity and gap length " , "false");
-    //DEFINE_ARG_OPTIONAL( bool , calc_linear_filter , "calc linear relationsship between simularity and gap length " , "false");
     END_PARSE_ARGS;
 
     config.Init( prefix.to_string());
@@ -533,19 +408,8 @@ int main(int argc, char **argv)
     config.LoadTrunk();
     config.LoadBinRelationArrayFromFile();
 
-    //config.GetGapSim();
     config.BuildSims();
-    //config.CalcAll();
     config.CalcAll1();
-    //config.PrintGapOO() ;
     config.PrintGapOO1() ;
-    if( calc_linear.to_bool() )//|| calc_linear_filter.to_bool())
-    {
-        config.LoadLinearCachce();
-        //if( calc_linear_filter.to_bool() )
-        //    config.ReLiner();
-        //else
-        config.PrintGapArea();
-    }
     return 0;
 }

@@ -8,9 +8,7 @@
 #include "common/stl/mapHelper.h"
 #include "common/freq/freq.h"
 
-#include "biocommon/sam_bam/sam_parser.h"
-
-#include "algorithm/distribution/distribution.h"
+#include "biocommon/sam/sam_parser.h"
 
 #include "stLFR/contigPEGraph.h"
 #include "stLFR/CBB.h"

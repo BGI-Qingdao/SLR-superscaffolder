@@ -9,15 +9,15 @@
 
 #include "soap2/fileName.h"
 #include "stLFR/StringIdCache.h"
-#include "biocommon/fastq/fastq.h"
+#include "biocommon/seq/fastq.h"
 
 #include <set>
 
 struct AppConfig
 {
-    typedef BGIQD::FASTQ::stLFRHeader::ReadType Type ;
-    typedef BGIQD::FASTQ::Fastq<BGIQD::FASTQ::stLFRHeader> Fastq;
-    typedef BGIQD::FASTQ::FastqReader<Fastq> Reader;
+    typedef BGIQD::SEQ::stLFRHeader::ReadType Type ;
+    typedef BGIQD::SEQ::Fastq<BGIQD::SEQ::stLFRHeader> Fastq;
+    typedef BGIQD::SEQ::FastqReader<Fastq> Reader;
 
     BGIQD::LOG::logger loger;
 

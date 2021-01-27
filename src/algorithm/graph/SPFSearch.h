@@ -5,7 +5,7 @@
 #include <iostream>
 #include <set>
 #include "algorithm/graph/Graph.h"
-#include "algorithm/fibheap/fib_heap.h"
+#include "algorithm/graph/fib_heap.h"
 
 namespace BGIQD{
     namespace GRAPH{

@@ -5,8 +5,8 @@
 #include "common/files/file_writer.h"
 #include "common/multithread/MultiThread.h"
 
-#include "biocommon/pair/pair_sam_parser.h"
-#include "biocommon/fastq/fastq.h"
+#include "biocommon/sam/pair_sam_parser.h"
+#include "biocommon/seq/fastq.h"
 
 
 #include "soap2/soap2.h"
@@ -28,7 +28,7 @@ struct AppConfig
     BGIQD::SOAP2::FileNames fName;
     bool has_barcode_in_read_name ;
 
-    typedef BGIQD::FASTQ::stLFRHeader stLFRHeader ;
+    typedef BGIQD::SEQ::stLFRHeader stLFRHeader ;
 
     void Init(const std::string & prefix  ,const std::string & b2n_f, bool b )
     {

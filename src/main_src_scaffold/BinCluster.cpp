@@ -9,7 +9,6 @@
 #include "common/error/Error.h"
 #include "common/log/logfilter.h"
 #include "common/files/file_reader.h"
-#include "common/middle_valiad/MiddleValid.h"
 #include "common/freq/freq.h"
 
 #include "soap2/soap2.h"
@@ -102,8 +101,6 @@ struct AppConfig
         result.start = bin.start ;
         result.end = bin.end;
         result.binIndex = i ;
-        if( ! IsBinMiddleValid( bin.collections ) )
-            return ;
 
         if( ! same_bin_only )
         {
@@ -163,8 +160,6 @@ struct AppConfig
         for(auto index : relates)
         {
             auto & other = barcodeOnBin[index];
-            if( ! IsBinMiddleValid( bin.collections ) )
-                continue;
             if( neib_only && ( !IsNeibValid ( bin , other ) ) )
                 continue ;
             float sim = 0 ;
@@ -266,42 +261,7 @@ struct AppConfig
         BGIQD::stLFR::PrintContigRelationArray(fName.cluster(middle_name) , contig_relations);
     }
 
-    float del_fac ;
-    bool check_freq_valid ;
-    long biggest_freq ;
-    long smallest_freq ;
     BGIQD::FREQ::Freq<int> bin_size_freq ;
-
-
-    bool IsBinMiddleValid(
-            const BGIQD::stLFR::BarcodeCollection & binc )
-    {
-        if( ! check_freq_valid )
-            return true ;
-        int freq = bin_size_freq.GetFreq(binc.keysize());
-        if( freq < smallest_freq || freq > biggest_freq )
-            return false ;
-        return true ;
-    }
-
-    void BuildMiddleValid()
-    {
-        if( del_fac < 0.0000001f )
-        {
-            check_freq_valid = false ;
-            biggest_freq = 0 ;
-            smallest_freq = 0 ;
-            return ;
-        }
-        check_freq_valid = true ;
-        float valid = 1.0f - del_fac ;
-        for( const auto & pair : barcodeOnBin )
-        {
-            bin_size_freq.Touch(pair.collections.keysize()) ;
-        }
-        std::tie(smallest_freq,biggest_freq) = 
-            BGIQD::MIDDLE_VALID::MiddleValid(bin_size_freq.data,valid);
-    }
 
     bool same_bin_only ; 
 
@@ -367,14 +327,12 @@ int main(int argc ,char **argv)
     DEFINE_ARG_REQUIRED(float , threshold, "simularity threshold");
     DEFINE_ARG_OPTIONAL(int , thread, "thread num" ,"8");
     DEFINE_ARG_OPTIONAL(int , work_mode, "1 for Jaccard value , 2 for join_barcode_num " ,"1");
-    DEFINE_ARG_OPTIONAL(float, del_fac, "del_fac or too small or too big bin set ." ,"0.0f");
     DEFINE_ARG_OPTIONAL(bool, pbc, "print bin cluster" ,"0");
     DEFINE_ARG_OPTIONAL(bool, bin_same_contig, "calc for bin on same contig ." ,"false");
     DEFINE_ARG_OPTIONAL(bool,  nb_only, "only calc bin for neighbor contig " ,"");
     DEFINE_ARG_OPTIONAL(bool, same_bin_only, "only calc for bin on same contig." ,"false");
     END_PARSE_ARGS
 
-    config.del_fac = del_fac.to_float();
     config.neib_only = nb_only.to_bool() ;
     config.middle_name = middle_name.to_string() ;
     config.work_mode = static_cast<AppConfig::WorkMode>(work_mode.to_int());
@@ -387,8 +345,6 @@ int main(int argc ,char **argv)
     config.BuildBinIndexOnBarcode();
 
     config.AllocRelationArray();
-
-    config.BuildMiddleValid() ;
 
     config.LoadNeighbors() ;
 

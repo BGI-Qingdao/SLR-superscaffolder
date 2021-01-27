@@ -5,7 +5,7 @@
 #include "common/files/file_reader.h"
 #include "common/error/Error.h"
 
-#include "biocommon/fasta/fasta.h"
+#include "biocommon/seq/fasta.h"
 #include "biocommon/seq/tool_func.h"
 #include "biocommon/agp/agp.h"
 
@@ -26,11 +26,9 @@ struct AppConfig
 
     BGIQD::stLFR::ScaffInfoHelper scaff_helper;
 
-    typedef BGIQD::FASTA::SOAP2ContigHead Header;
-
-    typedef BGIQD::FASTA::Fasta<Header> ContigFasta;
-
-    typedef BGIQD::FASTA::FastaReader<ContigFasta> Reader;
+    typedef BGIQD::SEQ::SOAP2ContigHead Header;
+    typedef BGIQD::SEQ::Fasta<Header> ContigFasta;
+    typedef BGIQD::SEQ::FastaReader<ContigFasta> Reader;
 
     std::map<unsigned int , ContigFasta> contigs;
 

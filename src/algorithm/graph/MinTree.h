@@ -1,7 +1,7 @@
 #ifndef __ALGORITHM_GRAPH_MINTREE_H__
 #define __ALGORITHM_GRAPH_MINTREE_H__
 
-#include "algorithm/fibheap/fib_heap.h"
+#include "algorithm/graph/fib_heap.h"
 #include <map>
 
 namespace BGIQD {

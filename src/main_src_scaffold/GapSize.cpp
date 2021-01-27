@@ -12,8 +12,7 @@
 #include "stLFR/CBB.h"
 #include "stLFR/TrunkGap.h"
 
-#include "algorithm/linear_fitting/Minimum_multiplication.h"
-#include "algorithm/statistics/common.h"
+#include "utils/linear_fitting/Minimum_multiplication.h"
 
 #include <map>
 #include <vector>

@@ -12,14 +12,12 @@ DEUBG_CXX  =	${CXXFLAGS} -g
 RELEASE_CXX=	${CXXFLAGS}
 
 source_cpp =	../common/files/file_reader.cpp \
-		   		../biocommon/sam_bam/sam_parser.cpp\
-		   		../biocommon/pair/pair_sam_parser.cpp\
-				../biocommon/fasta/fasta.cpp\
-				../biocommon/fastq/fastq.cpp\
+		   		../biocommon/sam/sam_parser.cpp\
+		   		../biocommon/sam/pair_sam_parser.cpp\
+				../biocommon/seq/fasta.cpp\
+				../biocommon/seq/fastq.cpp\
 				../biocommon/seq/seq.cpp\
-				../biocommon/paf/PAF.cpp\
                 ../biocommon/agp/agp.cpp\
-                ../biocommon/align_common/align_result.cpp\
 		   		../common/files/file_writer.cpp \
 		   		../common/files/gzstream.cpp \
 				../common/log/log.cpp\
@@ -31,7 +29,6 @@ source_cpp =	../common/files/file_reader.cpp \
 				../stLFR/ContigCluster.cpp\
                 ../stLFR/ScaffInfo.cpp\
 				../stLFR/LineGroup.cpp\
-				../stLFR/ContigOverlap.cpp\
 				../stLFR/CBB.cpp\
 				../stLFR/TagId.cpp\
 				../stLFR/StringIdCache.cpp\

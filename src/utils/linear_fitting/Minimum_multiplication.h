@@ -3,7 +3,8 @@
 
 #include <vector>
 #include <cmath>
-#include "algorithm/linear_fitting/Linear.h"
+#include "utils/linear_fitting/Linear.h"
+
 namespace BGIQD {
     namespace LINEARFITTING {
         template<class X , class Y>
