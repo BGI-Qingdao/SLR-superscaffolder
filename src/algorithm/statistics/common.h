@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <math.h>
+#include <numeric>
+#include <cassert>
 
 namespace BGIQD {
     namespace Statistics {
@@ -10,17 +12,15 @@ namespace BGIQD {
         template<class T, class Collection = std::vector<T> >
             void Average( const Collection & data, T & ret )
             {
+                assert( data.size() > 0 );
                 T total = 0 ;
-                for( const auto & d : data )
-                {
-                    total += d ;
-                }
-                ret = total / T(data.size());
+                ret = std::accumulate(data.begin(),data.end(),total) / T(data.size());
             }
 
         template <class T, class Collection = std::vector<T> >
             void SD(const Collection & data, const T average , T & ret)
             {
+                assert( data.size() > 0 );
                 T sd = 0 ;
                 for( const auto & d : data )
                 {
