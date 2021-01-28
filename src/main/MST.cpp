@@ -47,7 +47,7 @@ struct AppConf
                 tip_result.Init();
                 junction_result.clear();
             }
-        } ;
+        };
 
         void Init( const  BGIQD::stLFR::ContigSimGraph & basic , int mr , float df )
         {
