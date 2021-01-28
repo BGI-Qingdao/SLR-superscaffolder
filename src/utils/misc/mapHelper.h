@@ -3,7 +3,7 @@
 #include <map>
 
 namespace BGIQD{
-    namespace STL{
+    namespace MISC{
         template<class Map>
             struct MapHelper
             {

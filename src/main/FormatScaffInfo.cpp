@@ -3,7 +3,7 @@
 #include "utils/log/logfilter.h"
 #include "utils/files/file_writer.h"
 #include "utils/files/file_reader.h"
-#include "utils/error/Error.h"
+#include "utils/misc/Error.h"
 
 #include "stLFR/ScaffInfo.h"
 

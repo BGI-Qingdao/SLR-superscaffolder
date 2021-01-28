@@ -4,9 +4,9 @@
 #include "utils/files/file_writer.h"
 #include "utils/args/argsparser.h"
 #include "utils/multithread/MultiThread.h"
-#include "utils/stl/mapHelper.h"
+#include "utils/misc/mapHelper.h"
 #include "utils/log/log.h"
-#include "utils/error/Error.h"
+#include "utils/misc/Error.h"
 #include "utils/log/logfilter.h"
 #include "utils/files/file_reader.h"
 #include "utils/freq/freq.h"
@@ -233,7 +233,7 @@ struct AppConfig
             for(auto pair : result.sims )
             {
                 auto & sinfo = pair.second ;
-                BGIQD::STL::MapHelper<ContigSims::mapped_type>::UpdateAsBiggest(
+                BGIQD::MISC::MapHelper<ContigSims::mapped_type>::UpdateAsBiggest(
                         contigSims[result.contigId]
                     ,   sinfo.contigId
                     ,   sinfo.simularity );

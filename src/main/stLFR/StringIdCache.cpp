@@ -2,7 +2,7 @@
 #include "utils/files/file_reader.h"
 #include "utils/files/file_writer.h"
 #include "utils/string/stringtools.h"
-#include "utils/error/Error.h"
+#include "utils/misc/Error.h"
 
 #include <cassert>
 

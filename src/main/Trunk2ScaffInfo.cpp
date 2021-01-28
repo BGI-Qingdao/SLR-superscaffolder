@@ -4,12 +4,12 @@
 #include "utils/files/file_writer.h"
 #include "utils/files/file_reader.h"
 #include "utils/string/stringtools.h"
-#include "utils/error/Error.h"
-#include "utils/stl/mapHelper.h"
+#include "utils/misc/Error.h"
 #include "utils/freq/freq.h"
 #include "utils/flags/flags.h"
 
 #include "utils/misc/fileName.h"
+#include "utils/misc/mapHelper.h"
 #include "utils/soap2/contigIndex.h"
 
 #include "stLFR/CBB.h"
@@ -168,7 +168,7 @@ struct AppConfig
                 std::map<unsigned int,int> vs ;
                 int pe = 0 ;
                 int sim = 0 ;
-                BGIQD::STL::MapHelper< std::map<unsigned int,int> > Helper;
+                BGIQD::MISC::MapHelper< std::map<unsigned int,int> > Helper;
                 if( pe_next_ask != 0 )
                 {
                     Set_has_pe();

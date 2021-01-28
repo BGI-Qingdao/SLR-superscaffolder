@@ -4,8 +4,7 @@
 #include "utils/files/file_writer.h"
 #include "utils/files/file_reader.h"
 #include "utils/string/stringtools.h"
-#include "utils/error/Error.h"
-#include "utils/stl/mapHelper.h"
+#include "utils/misc/Error.h"
 #include "utils/freq/freq.h"
 
 #include "utils/sam/sam_parser.h"

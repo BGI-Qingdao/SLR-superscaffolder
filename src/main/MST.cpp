@@ -1,7 +1,7 @@
 #include "utils/args/argsparser.h"
 #include "utils/files/file_reader.h"
 #include "utils/files/file_writer.h"
-#include "utils/error/Error.h"
+#include "utils/misc/Error.h"
 #include "utils/log/log.h"
 #include "utils/log/logfilter.h"
 #include "utils/freq/freq.h"

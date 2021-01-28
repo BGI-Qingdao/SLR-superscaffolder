@@ -5,7 +5,7 @@
 #include "utils/log/log.h"
 #include "utils/log/logfilter.h"
 #include "utils/string/stringtools.h"
-#include "utils/error/Error.h"
+#include "utils/misc/Error.h"
 
 #include "utils/misc/fileName.h"
 #include "utils/soap2/contigIndex.h"
