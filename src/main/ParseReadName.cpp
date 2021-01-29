@@ -8,7 +8,7 @@
 #include "utils/misc/freq.h"
 
 #include "utils/misc/fileName.h"
-#include "stLFR/StringIdCache.h"
+#include "utils/misc/TagId.h"
 #include "utils/seq/fastq.h"
 
 #include <set>
@@ -21,9 +21,9 @@ struct AppConfig
 
     BGIQD::LOG::logger loger;
 
-    BGIQD::stLFR::StringIdCache barcode_list;
+    BGIQD::MISC::StringIdCache barcode_list;
 
-    BGIQD::stLFR::StringIdCache unknow_barcode_list;
+    BGIQD::MISC::StringIdCache unknow_barcode_list;
 
     BGIQD::MISC::Freq<std::string>  barcode_freq;
 

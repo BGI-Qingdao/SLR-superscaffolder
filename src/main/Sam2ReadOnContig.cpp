@@ -13,7 +13,7 @@
 #include "utils/misc/fileName.h"
 
 #include "stLFR/EasySam.h"
-#include "stLFR/StringIdCache.h"
+#include "utils/misc/TagId.h"
 
 #include <iostream>
 #include <string>
@@ -37,9 +37,9 @@ struct AppConfig
         has_barcode_in_read_name = ! b;
     }
 
-    BGIQD::stLFR::StringIdCache barcodeIds;
+    BGIQD::MISC::StringIdCache barcodeIds;
 
-    BGIQD::stLFR::StringIdCache readNameIds ;
+    BGIQD::MISC::StringIdCache readNameIds ;
 
     void LoadBarcode2Num()
     {

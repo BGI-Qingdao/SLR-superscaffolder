@@ -17,7 +17,7 @@ source_cpp =	../utils/files/file_reader.cpp \
 		   		../utils/files/gzstream.cpp \
 				../utils/log/log.cpp\
 				../utils/log/logfilter.cpp\
-				../utils/time/timetools.cpp\
+				../utils/log/timetools.cpp\
 				../utils/string/stringtools.cpp\
 				../utils/args/argsparser.cpp\
 		   		../utils/sam/sam_parser.cpp\
@@ -27,10 +27,9 @@ source_cpp =	../utils/files/file_reader.cpp \
 				../utils/seq/seq.cpp\
                 ../utils/agp/agp.cpp\
 				../utils/soap2/contigIndex.cpp\
+				../utils/misc/TagId.cpp\
                 stLFR/ScaffInfo.cpp\
 				stLFR/CBB.cpp\
-				stLFR/TagId.cpp\
-				stLFR/StringIdCache.cpp\
 
 source_o		= ${source_cpp:%.cpp=%.o}
 

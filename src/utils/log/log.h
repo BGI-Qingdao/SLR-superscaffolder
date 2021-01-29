@@ -4,7 +4,7 @@
 #include <string>
 #include <ostream>
 #include <sstream>
-#include "utils/time/timetools.h"
+#include "utils/log/timetools.h"
 
 namespace BGIQD{
 namespace LOG{

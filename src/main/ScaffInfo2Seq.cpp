@@ -12,7 +12,7 @@
 #include "utils/misc/fileName.h"
 
 #include "stLFR/ScaffInfo.h"
-#include "stLFR/StringIdCache.h"
+#include "utils/misc/TagId.h"
 
 #include <map>
 #include <set>
@@ -177,7 +177,7 @@ struct AppConfig
         delete out ;
     }
 
-    BGIQD::stLFR::IdStringCache contig_name_cache;
+    BGIQD::MISC::IdStringCache contig_name_cache;
     void LoadFakeSOAPNameMap()
     {
         auto fake = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName( "fakesoap.name2index.map.txt" );
