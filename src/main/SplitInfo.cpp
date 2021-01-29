@@ -5,7 +5,7 @@
 #include "utils/files/file_reader.h"
 #include "utils/string/stringtools.h"
 #include "utils/misc/Error.h"
-#include "utils/freq/freq.h"
+#include "utils/misc/freq.h"
 
 #include "utils/sam/sam_parser.h"
 
@@ -36,7 +36,7 @@ struct AppConfig
 
     std::map<unsigned int ,BGIQD::SOAP2::ContigIndex> seeds;
 
-    BGIQD::FREQ::Freq<int> ISFreq;
+    BGIQD::MISC::Freq<int> ISFreq;
 
     void Init(const std::string & prefix)
     {

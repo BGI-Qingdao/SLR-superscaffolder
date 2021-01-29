@@ -5,7 +5,7 @@
 #include "utils/log/log.h"
 #include "utils/log/logfilter.h"
 #include "utils/string/stringtools.h"
-#include "utils/freq/freq.h"
+#include "utils/misc/freq.h"
 
 #include "utils/misc/fileName.h"
 #include "stLFR/StringIdCache.h"
@@ -25,7 +25,7 @@ struct AppConfig
 
     BGIQD::stLFR::StringIdCache unknow_barcode_list;
 
-    BGIQD::FREQ::Freq<std::string>  barcode_freq;
+    BGIQD::MISC::Freq<std::string>  barcode_freq;
 
     int min_pair_threshold ;
 

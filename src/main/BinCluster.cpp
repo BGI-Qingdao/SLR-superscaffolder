@@ -9,7 +9,7 @@
 #include "utils/misc/Error.h"
 #include "utils/log/logfilter.h"
 #include "utils/files/file_reader.h"
-#include "utils/freq/freq.h"
+#include "utils/misc/freq.h"
 
 #include "utils/soap2/soap2.h"
 #include "utils/misc/fileName.h"
@@ -261,7 +261,7 @@ struct AppConfig
         BGIQD::stLFR::PrintContigRelationArray(fName.cluster(middle_name) , contig_relations);
     }
 
-    BGIQD::FREQ::Freq<int> bin_size_freq ;
+    BGIQD::MISC::Freq<int> bin_size_freq ;
 
     bool same_bin_only ; 
 

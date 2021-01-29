@@ -7,7 +7,7 @@
 #include <cassert>
 
 #include "utils/seq/seq.h"
-#include "utils/flags/flags.h"
+#include "utils/misc/flags.h"
 
 namespace BGIQD {
 

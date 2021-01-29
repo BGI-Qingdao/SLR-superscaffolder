@@ -5,7 +5,7 @@
 #include "utils/files/file_reader.h"
 #include "utils/string/stringtools.h"
 #include "utils/misc/Error.h"
-#include "utils/freq/freq.h"
+#include "utils/misc/freq.h"
 
 #include "stLFR/contigPEGraph.h"
 #include "stLFR/EasySam.h"
@@ -63,7 +63,7 @@ struct AppConfig
     void LoadPEPair()
     {
         BGIQD::LOG::timer t(loger,"LoadPECahce");
-        BGIQD::FREQ::Freq<int> ISFreq;
+        BGIQD::MISC::Freq<int> ISFreq;
         std::string line ;
 
         auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.pe_pairs());

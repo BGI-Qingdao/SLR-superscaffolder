@@ -5,8 +5,8 @@
 #include "utils/files/file_reader.h"
 #include "utils/string/stringtools.h"
 #include "utils/misc/Error.h"
-#include "utils/freq/freq.h"
-#include "utils/flags/flags.h"
+#include "utils/misc/freq.h"
+#include "utils/misc/flags.h"
 
 #include "utils/misc/fileName.h"
 #include "utils/misc/mapHelper.h"
@@ -30,8 +30,8 @@ struct AppConfig
     BGIQD::MISC::FileNames fName ;
     BGIQD::LOG::logger loger;
 
-    BGIQD::FREQ::Freq<std::string> pfreq;
-    BGIQD::FREQ::Freq<int>gapFreq;
+    BGIQD::MISC::Freq<std::string> pfreq;
+    BGIQD::MISC::Freq<int>gapFreq;
     int gap_trunk ;
     int gap_petrunk ;
     int gap_pe ;

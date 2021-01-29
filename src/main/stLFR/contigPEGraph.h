@@ -2,7 +2,7 @@
 #define __STLFR_CONTIGPEGRAPH_H__
 
 #include "utils/graph/GraphBasic.h"
-#include "utils/flags/flags.h"
+#include "utils/misc/flags.h"
 
 #include <sstream>
 

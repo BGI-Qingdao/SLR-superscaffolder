@@ -5,7 +5,7 @@
 #include "utils/files/file_reader.h"
 #include "utils/string/stringtools.h"
 #include "utils/misc/Error.h"
-#include "utils/freq/freq.h"
+#include "utils/misc/freq.h"
 
 #include "utils/misc/fileName.h"
 #include "stLFR/CBB.h"

@@ -4,7 +4,7 @@
 #include "utils/misc/Error.h"
 #include "utils/log/log.h"
 #include "utils/log/logfilter.h"
-#include "utils/freq/freq.h"
+#include "utils/misc/freq.h"
 
 #include "stLFR/CBB.h"
 #include "stLFR/contigSimGraph.h"
@@ -243,7 +243,7 @@ struct AppConf
 
     void GenerateLinears()
     {
-        BGIQD::FREQ::Freq<int>  trunk_freq;
+        BGIQD::MISC::Freq<int>  trunk_freq;
         int trunk_count = 1;
         auto out3 = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fNames.mintreetrunklinear());
         if( out3 == NULL )

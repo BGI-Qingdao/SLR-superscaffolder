@@ -5,7 +5,7 @@
 #include "utils/files/file_reader.h"
 #include "utils/string/stringtools.h"
 #include "utils/misc/Error.h"
-#include "utils/freq/freq.h"
+#include "utils/misc/freq.h"
 
 #include "utils/graph/Graph.h"
 #include "utils/graph/DepthSearch.h"
@@ -53,7 +53,7 @@ struct AppConfig
     std::vector<GapInfo> all_gaps;
     BGIQD::stLFR::ContigPEGraph pe_graph;
     std::map<unsigned int , int > contigLen_cache;
-    BGIQD::FREQ::Freq<int> fill_freq;
+    BGIQD::MISC::Freq<int> fill_freq;
     int is_max;
     int min_count ;
     bool use_all_pe_graph;

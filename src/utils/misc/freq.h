@@ -3,7 +3,7 @@
 #include <map>
 #include <sstream>
 namespace BGIQD{
-    namespace FREQ{
+    namespace MISC{
 
         template< class Key >
             class Freq
