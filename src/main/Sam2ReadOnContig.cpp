@@ -12,7 +12,7 @@
 #include "utils/misc/contigIndex.h"
 #include "utils/misc/fileName.h"
 
-#include "stLFR/EasySam.h"
+#include "utils/sam/EasySam.h"
 #include "utils/misc/TagId.h"
 
 #include <iostream>

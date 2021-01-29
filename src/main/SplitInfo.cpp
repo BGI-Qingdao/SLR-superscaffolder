@@ -11,7 +11,7 @@
 
 #include "stLFR/contigPEGraph.h"
 #include "stLFR/CBB.h"
-#include "stLFR/EasySam.h"
+#include "utils/sam/EasySam.h"
 
 #include "utils/misc/fileName.h"
 #include "utils/misc/contigIndex.h"

@@ -8,7 +8,7 @@
 #include "utils/misc/freq.h"
 
 #include "stLFR/contigPEGraph.h"
-#include "stLFR/EasySam.h"
+#include "utils/sam/EasySam.h"
 #include "utils/misc/fileName.h"
 
 struct AppConfig
