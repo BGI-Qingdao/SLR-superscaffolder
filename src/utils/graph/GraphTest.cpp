@@ -1,7 +1,6 @@
 #include "utils/graph/DepthSearch.h"
 #include "utils/graph/Graph.h"
-#include "soap2/contigGraph.h"
-#include "utils/test/Test.h"
+#include "utils/unittest/Test.h"
 
 TEST_MODULE_INIT(GraphDepthSearch)
 

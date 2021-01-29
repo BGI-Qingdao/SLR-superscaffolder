@@ -26,7 +26,7 @@ source_cpp =	../utils/files/file_reader.cpp \
 				../utils/seq/fastq.cpp\
 				../utils/seq/seq.cpp\
                 ../utils/agp/agp.cpp\
-				../utils/soap2/contigIndex.cpp\
+				../utils/misc/contigIndex.cpp\
 				../utils/misc/TagId.cpp\
                 stLFR/ScaffInfo.cpp\
 				stLFR/CBB.cpp\

@@ -14,7 +14,7 @@
 #include "stLFR/EasySam.h"
 
 #include "utils/misc/fileName.h"
-#include "utils/soap2/contigIndex.h"
+#include "utils/misc/contigIndex.h"
 
 struct AppConfig
 {

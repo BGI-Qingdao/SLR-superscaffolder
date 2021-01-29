@@ -1,7 +1,7 @@
 #ifndef __LFR_TEST_TEST_H__
 #define __LFR_TEST_TEST_H__
 
-#include "utils/test/Check.h"
+#include "utils/unittest/Check.h"
 #include <vector>
 #include <iostream>
 #include <string>

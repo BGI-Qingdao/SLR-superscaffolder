@@ -11,7 +11,7 @@
 #include "utils/files/file_reader.h"
 #include "utils/misc/freq.h"
 
-#include "utils/soap2/soap2.h"
+#include "utils/misc/contigIndex.h"
 #include "utils/misc/fileName.h"
 
 #include "stLFR/CBB.h"

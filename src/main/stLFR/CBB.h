@@ -3,7 +3,7 @@
 
 #include "utils/collection/collection.h"
 #include "utils/incr_array/incr_array.h"
-#include "utils/soap2/soap2.h"
+#include "utils/misc/contigIndex.h"
 #include <map>
 #include <set>
 

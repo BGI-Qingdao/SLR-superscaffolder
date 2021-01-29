@@ -5,7 +5,7 @@
 #include "utils/files/file_writer.h"
 
 #include "utils/misc/fileName.h"
-#include "utils/soap2/soap2.h"
+#include "utils/misc/contigIndex.h"
 
 #include <iostream>
 #include <set>

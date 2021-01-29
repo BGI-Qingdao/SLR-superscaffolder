@@ -1,4 +1,4 @@
-#include "utils/soap2/contigIndex.h"
+#include "utils/misc/contigIndex.h"
 
 #include <sstream>
 #include <cassert>

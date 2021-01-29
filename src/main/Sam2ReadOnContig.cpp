@@ -9,7 +9,7 @@
 #include "utils/seq/fastq.h"
 
 
-#include "utils/soap2/soap2.h"
+#include "utils/misc/contigIndex.h"
 #include "utils/misc/fileName.h"
 
 #include "stLFR/EasySam.h"

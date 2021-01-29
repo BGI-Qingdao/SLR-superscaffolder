@@ -10,7 +10,7 @@
 
 #include "utils/misc/fileName.h"
 #include "utils/misc/mapHelper.h"
-#include "utils/soap2/contigIndex.h"
+#include "utils/misc/contigIndex.h"
 
 #include "stLFR/CBB.h"
 #include "stLFR/TrunkGap.h"

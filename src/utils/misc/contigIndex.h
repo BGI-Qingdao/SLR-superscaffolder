@@ -8,6 +8,8 @@
 namespace BGIQD {
     namespace SOAP2 {
 
+        typedef unsigned int ContigId;
+
         struct ContigIndex
         {
             static int K ;

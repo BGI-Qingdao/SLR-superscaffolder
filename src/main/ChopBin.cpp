@@ -8,8 +8,8 @@
 #include "utils/misc/Error.h"
 
 #include "utils/misc/fileName.h"
-#include "utils/soap2/contigIndex.h"
-#include "utils/soap2/soap2.h"
+#include "utils/misc/contigIndex.h"
+#include "utils/misc/contigIndex.h"
 
 #include "stLFR/CBB.h"
 
