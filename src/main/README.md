@@ -68,5 +68,8 @@ Integrate previous result and construct the final scaffolding results.
 
 The final result include one agp format description file and one fasta sequence file.
 
+This two programs will be integrated in the future.
 
+
+_____END____
 Have fun!
