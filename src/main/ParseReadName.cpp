@@ -74,7 +74,6 @@ struct AppConfig
                     <<index<<" read... "<<BGIQD::LOG::lend();
             }
 
-            
             if( data.head.type ==
                     Type::readName_barcodeStr_index_barcodeNum
             ||  data.head.type ==  Type::readName_barcodeStr
@@ -104,6 +103,7 @@ struct AppConfig
         delete out ;
     }
 
+    // print barcode informations.
     void PrintBarcodeList()
     {
         if( barcode_list.preload == unknow_barcode_list.preload )
@@ -128,6 +128,7 @@ struct AppConfig
         }
     }
 
+    // mask low quality barcode as zero-barcode.
     void MaskTooLowBarcode()
     {
         for( const auto & pair : barcode_freq.data )
@@ -139,6 +140,7 @@ struct AppConfig
         }
     }
 
+    // mask too density barcode as zero-barcode because they may caused by barcode collision.
     void MaskTooHighBarcode()
     {
         for( const auto & pair : barcode_freq.data )
@@ -150,6 +152,7 @@ struct AppConfig
         }
     }
 
+    // print barcode informations.
     void PrintBarcodeFreq()
     {
         auto bfreq = BGIQD::FILES::FileWriterFactory
@@ -163,8 +166,15 @@ struct AppConfig
 
 }config;
 
+/**********************************************************
+ *
+ *  The main function
+ *
+ * ********************************************************/
+
 int main(int argc , char **argv )
 {
+    // parse parameters ...
     START_PARSE_ARGS
         DEFINE_ARG_REQUIRED(std::string , read1 , "read 1 for parse ");
         DEFINE_ARG_REQUIRED(std::string , prefix , "prefix . Output xxx.barcodeList xxx.barcodeFreq xxx.readNameList");
@@ -178,10 +188,14 @@ int main(int argc , char **argv )
     config.Init(read1.to_string() , prefix.to_string());
     BGIQD::LOG::timer timer(config.loger,"ParseReadName");
 
+    // load read1.fasta and parse all read names.
     config.ParseRead1() ;
+    // mask low quality barcode as zero-barcode.
     config.MaskTooLowBarcode() ;
+    // mask too density barcode as zero-barcode because they may caused by barcode collision.
     config.MaskTooHighBarcode() ;
 
+    // print barcode informations.
     if( config.barcode_list.preload )
     {
         config.PrintBarcodeList();
