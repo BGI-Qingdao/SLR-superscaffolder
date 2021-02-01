@@ -70,6 +70,11 @@ The final result include one agp format description file and one fasta sequence 
 
 This two programs will be integrated in the future.
 
+## the stLFR folder
 
-_____END____
-Have fun!
+Contain some structures special designed for this scaffolder. All of thoes structures are used in at least two applications.
+
+
+--------------------------
+
+Have fun
