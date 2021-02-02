@@ -1,64 +1,68 @@
 # Table of contents in main folder
 
-Each file in this folder will be compile as an standalone binary executable applicatiion in bin folder.
+Each file in this folder will be compiled as a standalone binary executable application in bin folder.
 
 ## FakeSOAPContig
 
-Convert other format of input genome into SOAPdenovo2's contig format.
+Convert other format of a input draft assembly into SOAPdenovo2's contig format.
 
 ## ParseReadName
 
-Parse read1.fastq.gz to
+Parse the text information of each read in read1.fastq.gz to a number and statistic the frequence of barcodes as:  
 
 * map long string read names into numbers.
 * map long string barcode names into numbers.
-* calulate barcode frequence and mask low quality barcode.
+* calulate the frequence of barcodes and mask barcodes with low frequence.
 
 ## Sam2ReadOnContig & SplitInfo
 
-Together they parse sam file and save data in custom format to reduce the CPU and Memory consumption in furture applications.
+Together they parse sam file and save data in the custom format to reduce the CPU and Memory consumption in subsequenct processes.
 
-notice : supplemental alignment or secondary algnment will be filtered.
+Notice : supplemental alignments or secondary alignments will be filtered.
 
 This two programs will be integrated in the future.
 
 ## StatisticUnique
 
-Choose seed contigs based on length and read coverage of each contig.
+Choose seed contigs based on the length and mapped read coverage of each contig.
 
 ## ChopBin
 
-Chop the co-barcoding information of contigs into bins.
+Chop contigs into bins with an equal size and assign barcodes into each bin.
 
 ## BinCluster
 
-Calculate the Jaccard similarity of each pair of bins.
+Calculate the Jaccard similarity of each pair of contigs as:
 
-Choose the highest JS from all pairs of bins in each pair of contigs to represent the correlation strength of them.
+* Calculate the Jaccard similarity (JS) of each pair of bins.
+* Choose the highest JS from all pairs of bins in each pair of contigs to represent the co-barcoding correlation strength of the paired contig.
 
 ## MST
 
-Construct the contig-correlation graph and simplify it.
+Determine the order between seed contigs as:
 
-Print the branches of Minimum-Spanning-Tree of simplified-contig-correlation graph as ordered chain of contigs.
+* Construct the co-barcoding correlation graph 
+* Simplify the graph by iteratively deleting the junctions in the Minimum-Spanning-Tree of the graph without tips.
+* Print the branches of the Minimum-Spanning-Tree of the simplified co-barcoding correlation graph as ordered chain of contigs.
 
 ## Orientation
 
-Detect the orientation of each pair of contigs in the already ordered chain.
+Determine the orientation of each contig in the already ordered chain.
 
 ## GapSize
 
-Fitting a linear-regression model by correlation strength of bins from same contigs.
+Evaluate the gap size between two neighboring contigs linked by co-barcoding information as:
 
-Use the fitted model to predict the gap size in final scaffolding genome.
+* Fit the relation between correlation strength and distance of two bins from the same contigs by a linear-regression model.
+* Use the fitted relation to predict the gap size.
 
 ## SeedCluster
 
-Cluster seed contig for local scaffolding when use PE information to fill gaps.
+Cluster contigs for local scaffolding with using PE information to fill gaps.
 
 ## PEGraph && FillTrunkByPE
 
-Construct PE graph and fill gap by local scaffolding.
+Construct PE scaffold graph and fill gaps by local scaffolding.
 
 This two programs will be integrated in the future.
 
@@ -66,13 +70,13 @@ This two programs will be integrated in the future.
 
 Integrate previous result and construct the final scaffolding results.
 
-The final result include one agp format description file and one fasta sequence file.
+Notice: The final results include one fasta sequence file and one agp format file for recording the scaffolding information.
 
 This two programs will be integrated in the future.
 
 ## the stLFR folder
 
-Contain some structures special designed for this scaffolder. All of thoes structures are used in at least two applications.
+Contain some structures special designed for this scaffolder. All of those structures are used in at least two applications.
 
 
 --------------------------
