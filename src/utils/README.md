@@ -16,7 +16,7 @@ Simply class to calculate union, intersection and Jaccard similarity for a weigh
 
 ## files
 
-Interfaces for read and write files.
+Interfaces for reading and writing files.
 One interface to read/write both normal files and gzip format files.
 
 ## graph
