@@ -8,7 +8,7 @@ Simple codes to save scaffold information in AGP format. See details of AGP form
 
 ## args
 
-Some custom macros  swap the ```getopt_long_only``` to parse command-line parameters and automaticly construct the usage.
+Some custom macros wrap the ```getopt_long_only``` to parse command-line parameters and automaticly construct the usage.
 
 ## collection
 
