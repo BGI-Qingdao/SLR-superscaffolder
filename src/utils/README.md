@@ -23,13 +23,13 @@ One interface to read/write both normal files and gzip format files.
 
 A simple vertex-edge graph implementation.
 
-support classic algorithm :
+Support classic algorithm :
 
 * Depth-First-Search 
 * Disjoint-Set
 * Minimum-Span-Tree
 
-other logic functions:
+Other logic functions:
 
 * Prune tip branches iteratively.
 
@@ -61,7 +61,7 @@ Classes for parsing SAM format. See details of SAM format by [downloading docume
 
 ## seq
 
-Classes for read/write files in FASTA/FASTQ format. I guess we all know FSATA/FASTQ format :) 
+Classes for reading/writing files in FASTA/FASTQ format. I guess we all know FSATA/FASTQ format :) 
 
 ## string
 
