@@ -7,12 +7,96 @@
 
 #include "utils/graph/GraphBasic.h"
 #include "utils/graph/mst/MinTree.h"
-#include "utils/graph/GraphTrunk.h"
 #include "utils/graph/DisJointSet.h"
 #include "utils/graph/GraphTipRemove.h"
 
 namespace BGIQD {
     namespace stLFR {
+
+        template<class TEdge>
+            struct TrunkNode
+            {
+                typedef typename TEdge::EdgeNodeId NodeId;
+                typedef typename TEdge::EdgeEdgeId EdgeId;
+                std::set<EdgeId> edges;
+
+                int level;
+                NodeId prev;
+                NodeId prev_2;
+                NodeId id;
+                bool marked;
+            };
+
+        template<class TListGraph ,
+            class TNode = TrunkNode<typename TListGraph::Edge> 
+                >
+                struct TrunkHelper
+                {
+                    typedef TListGraph ListGraph ;
+                    typedef TNode TrunkNode ;
+
+                    typedef typename TListGraph::Node Node;
+                    typedef typename TListGraph::Edge Edge;
+                    typedef typename Edge::EdgeEdgeId EdgeId;
+                    typedef typename Edge::EdgeNodeId NodeId;
+
+
+                    // Make sure input is a trunk
+                    static std::vector<NodeId> LinearTrunk(const ListGraph &  base )
+                    {
+                        std::vector<NodeId> ret ;
+                        NodeId starter ;
+                        for( const auto & pair : base.nodes )
+                        {
+                            auto & node = pair.second ;
+                            if( node.edge_ids.size() == 1 )
+                            {
+                                starter = node.id ;
+                                break;
+                            }
+                            else
+                            {
+                                assert( node.edge_ids.size() == 2 );
+                            }
+                        }
+                        ret.push_back( starter ) ;
+
+                        auto & node = base.GetNode(starter);;
+                        auto edge_id = *(node.edge_ids.begin());
+                        auto & edge = base.GetEdge(edge_id);
+                        NodeId next = edge.OppoNode(starter);
+                        NodeId curr = starter;
+                        while(1)
+                        {
+                            auto & next_node = base.GetNode(next) ;
+                            ret.push_back(next);
+                            if( next_node.edge_ids.size() == 1 )
+                            {
+                                break;
+                            }
+                            else
+                            {
+                                assert( next_node.edge_ids.size() == 2 );
+                                auto edge_id1 = *(next_node.edge_ids.begin());
+                                auto edge_id2 = *(std::next(next_node.edge_ids.begin()));
+                                auto &edge1 = base.GetEdge(edge_id1);
+                                auto &edge2 = base.GetEdge(edge_id2);
+                                if( edge1.OppoNode(next) != curr)
+                                {
+                                    curr = next ;
+                                    next = edge1.OppoNode(next) ;
+                                }
+                                else
+                                {
+                                    assert(edge2.OppoNode(next) != curr);
+                                    curr = next ;
+                                    next = edge2.OppoNode(next);
+                                }
+                            }
+                        }
+                        return ret ;
+                    }
+                };
 
         struct Node : public BGIQD::GRAPH::IGraphNodeBasic<unsigned int , long> 
         {
@@ -69,7 +153,7 @@ namespace BGIQD {
                 // Force make linear in salas strategy.
                 if( use_salas )
                     if( ( Basic::HasNode(from) && Basic::GetNode(from).edge_ids.size() >= 2) 
-                    || ( Basic::HasNode(to) &&Basic::GetNode(to).edge_ids.size()>=2) )
+                            || ( Basic::HasNode(to) &&Basic::GetNode(to).edge_ids.size()>=2) )
                         return ;
                 Edge tmp ;
                 tmp.from = from ;
@@ -79,11 +163,11 @@ namespace BGIQD {
             }
 
             typedef BGIQD::GRAPH::MinTreeHelper<ContigSimGraph, float , EdgeAttr> MTHelper;
-            typedef BGIQD::GRAPH::TrunkHelper< ContigSimGraph> TKHelper;
             typedef BGIQD::GRAPH::TipRemoveHelper<ContigSimGraph> TipHelper ;
             typedef TipHelper::TipRemoveResult TipRemoveResult;
 
             typedef BGIQD::Algorithm::DisJoin_Set<NodeId> DJ_Sets;
+            typedef TrunkHelper< ContigSimGraph> TKHelper;
 
 
             static TipRemoveResult RemoveTip_n2( ContigSimGraph & mintree )
@@ -119,11 +203,6 @@ namespace BGIQD {
                 MTHelper helper;
                 return helper.MinTree(*this , attr);
             };
-
-            ContigSimGraph TrunkFromMinTree(const ContigSimGraph & mintree)
-            {
-                return TKHelper::Trunk(mintree);
-            }
 
             static std::map<NodeId , ContigSimGraph>  UnicomGraph(const ContigSimGraph & mintree)
             {
