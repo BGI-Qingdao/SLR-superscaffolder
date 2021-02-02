@@ -8,20 +8,20 @@ Simple codes to save scaffold information in AGP format. See details of AGP form
 
 ## args
 
-Some custom macros  swap the ```getopt_long_only``` to parsing command-line parameters and automaticly construct usage.
+Some custom macros  swap the ```getopt_long_only``` to parse command-line parameters and automaticly construct the usage.
 
 ## collection
 
-Simply class to calculate union, intersection and jaccard similarity for weighted-set.
+Simply class to calculate union, intersection and Jaccard similarity for a weighted-set.
 
 ## files
 
-Interfaces for read and write file.
-One interface to read/write both normal file and gzip format file.
+Interfaces for read and write files.
+One interface to read/write both normal files and gzip format files.
 
 ## graph
 
-A simple vertex-edge graph implement.
+A simple vertex-edge graph implementation.
 
 support classic algorithm :
 
@@ -30,11 +30,13 @@ support classic algorithm :
 * Minimum-Span-Tree
 
 other logic functions:
-* iterator prune tip branches.
+
+* Prune tip branches iteratively.
 
 ## incr\_array
 
 A substitute for std::vector that based on list of const-size arrays.
+
 Use this container only when unknown but huge amount of items need to be loaded.
 
 ## interval
@@ -43,7 +45,7 @@ A simple class for interval detection like detecting contained relationship or o
 
 ## linear\_fitting
 
-Linear fitting with least sqrt method.
+Linear fitting with the least square method.
 
 ## log
 
@@ -51,7 +53,7 @@ A simple log class with a timer.
 
 ## multithread
 
-A simple multi-threads implementation follow threads-pool strategy.
+A simple multi-threads implementation follow the threads-pool strategy.
 
 ## sam
 
@@ -71,4 +73,4 @@ A simple unittest module.
 
 ## misc
 
-Some small and useful functions like report error and halt program.
+Some small and useful functions like reporting errors and halting the program.
