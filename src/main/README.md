@@ -18,9 +18,9 @@ Parse the text information of each read in read1.fastq.gz to a number and statis
 
 Together they parse sam file and save data in the custom format to reduce the CPU and Memory consumption in subsequenct processes.
 
-Notice : supplemental alignments or secondary alignments will be filtered.
+Notice: supplemental alignments or secondary alignments will be filtered.
 
-This two programs will be integrated in the future.
+Notice: This two programs will be integrated in the future.
 
 ## StatisticUnique
 
@@ -64,7 +64,7 @@ Cluster contigs for local scaffolding with using PE information to fill gaps.
 
 Construct PE scaffold graph and fill gaps by local scaffolding.
 
-This two programs will be integrated in the future.
+Notice: This two programs will be integrated in the future.
 
 ## Trunk2ScaffInfo && ScaffInfo2Seq
 
@@ -72,7 +72,7 @@ Integrate previous result and construct the final scaffolding results.
 
 Notice: The final results include one fasta sequence file and one agp format file for recording the scaffolding information.
 
-This two programs will be integrated in the future.
+Notice: This two programs will be integrated in the future.
 
 ## the stLFR folder
 
