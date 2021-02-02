@@ -21,8 +21,6 @@ namespace BGIQD {
             int count ;
             int len;
             long next ; // to use the SPFsearch code .
-            //FLAGS_INT 
-            //ADD_A_FLAG( 0 , R2R );
 
             std::string AttrString() const
             {

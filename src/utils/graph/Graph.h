@@ -8,40 +8,12 @@
 namespace BGIQD {
     namespace GRAPH {
 
-        template<class NodeId ,  class EdgeId >
-            struct GraphEdgeBase
-            {
-                typedef NodeId EdgeNodeId;
-                typedef EdgeId EdgeEdgeId;
-
-                EdgeId      id ;
-                EdgeId      next;
-
-                NodeId      from ;
-                NodeId      to ;
-
-                static const EdgeId invalid = -1 ;
-            } ;
-
-
-
-        template<class NodeId ,  class EdgeId >
-            struct GraphNodeBase
-            {
-                typedef NodeId NodeNodeId;
-                typedef EdgeId NodeEdgeId;
-
-                NodeId                          id ;
-                EdgeId                          edge_id;
-            };
-
-
         // Must be implement before use
         template<class BaseGraph 
-            , class NodeId 
-            , class EdgeId 
-            , class Node1 = GraphNodeBase<NodeId,EdgeId> 
-            , class Edge1 = GraphEdgeBase<NodeId,EdgeId> 
+            , class NodeId
+            , class EdgeId
+            , class Node1
+            , class Edge1
             >
             struct GraphAccessBase
             {
@@ -61,8 +33,8 @@ namespace BGIQD {
                 std::map<GraphNodeId , Edge > edges_ends;
 
                 template<class Value>
-                void GetAttr(const Node & , const Edge & ,
-                        const std::string & , Value & ) {assert(0);} 
+                    void GetAttr(const Node & , const Edge & ,
+                            const std::string & , Value & ) {assert(0);} 
 
             };
 
@@ -167,7 +139,6 @@ namespace BGIQD {
                 bool IsEnd() const { assert(0) ;} ;
 
             };
-
     } // namespace GRAPH
 } // namespace BGIQD
 
