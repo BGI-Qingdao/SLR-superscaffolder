@@ -1,6 +1,6 @@
 # Table of contents in utils folder
 
-This utils folder contain serveral standalone structures/functions/macros that used in this project and also can be used in other project without modification.
+This utils folder contains serveral standalone structures/functions/macros that used in this project and also can be used in other project without modification.
 
 ## agp
 
