@@ -2,7 +2,7 @@
 ## <a name=intro>Introduction</a>
 
   This is a scaffold assembler designed for stLFR reads[1].
-It uses the link-reads information from stLFR reads to assemble contigs to scaffolds.
+It uses the co-barcoding information from stLFR reads to assemble contigs to scaffolds.
 
 Here is an illustration of this pipeline: 
 
@@ -158,7 +158,7 @@ cd your-work-folder
 
 *Notice : If any error happens in the middle and the running exits upon the last step, you can re-run run.sh and it will automatically detect and skip all completed previous steps.*
 
-*Notice : Independent execution of each step is supperted. But to get the correct final output, you must re-run all subsequent steps.  That is, re-run step-[n+1 , 6] if you re-run step-n.*
+*Notice : Independent execution of each step is supported. But to get the correct final output, you must re-run all subsequent steps.  That is, re-run step-[n+1 , 6] if you re-run step-n.*
 
 - 4th. Organize the final file structure for cleanning.
 
@@ -170,7 +170,7 @@ cd your-work-folder
 
 This command will store files in three categories : output , logs and tmps .
 
-Your can remove the logs and tmps folder to free disk.
+Your can remove the logs and tmps folders to free disk.
 
 ### <a name=results>Output Results</a>
 
