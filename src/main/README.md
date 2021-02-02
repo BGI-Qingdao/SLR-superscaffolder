@@ -8,7 +8,7 @@ Convert other format of a input draft assembly into SOAPdenovo2's contig format.
 
 ## ParseReadName
 
-Parse the text information of each read in read1.fastq.gz to a number and statistic the frequence of barcodes as:  
+Parse the text information of readname of each read in read1.fastq.gz to a number and statistic the frequence of barcodes as:  
 
 * map long string read names into numbers.
 * map long string barcode names into numbers.
