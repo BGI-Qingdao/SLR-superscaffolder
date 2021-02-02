@@ -11,8 +11,11 @@
 #include <vector>
 
 namespace BGIQD{
+
+    // Define the classes for save scaffolding information by AGP format.
     namespace AGP {
 
+        // Define one row of AGP as AGP_Item
         struct AGP_Item
         {
             std::string object;     //column 1
@@ -33,6 +36,7 @@ namespace BGIQD{
                 Unknow = 0 
             }
             component_type ;        //column 5
+            // If this is a contig row.
             struct PartA
             {
                 std::string component_id;   // column 6a
@@ -40,6 +44,7 @@ namespace BGIQD{
                 long long component_end ;   // column 8a
                 std::string orientation ;   // column 9a
             };
+            // If this is a gap row.
             struct PartB
             {
                 int gap_length ;            // column 6b
@@ -56,31 +61,15 @@ namespace BGIQD{
             void InitFromString( const std::string & str) ;
         };
 
+        // Define rows of AGP_Items as AGPFile, and implement Print function.
         struct AGPFile
         {
             std::vector<AGP_Item> data;
 
+            // not implement yet.
             void Load( std::istream & ist );
+            // implement.
             void Print( std::ostream & ost ) const ;
-        };
-
-        struct Scaff2AGPItem
-        {
-            public:
-                void InitName(const std::string & n);
-                // sbegin && send is 1base index
-                void AddSeq(const std::string & sname ,
-                        int sbegin ,
-                        int send , 
-                        char orientation );
-                void AddN(int n_size);
-
-                const std::vector<AGP_Item> & Items() const { return data ; }
-            private:
-                long long length ;
-                int part_number ;
-                std::string scaff_name ;
-                std::vector<AGP_Item> data;
         };
     }
 }

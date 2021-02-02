@@ -13,9 +13,17 @@
 
 #include <set>
 
+
+/**********************************************************
+ *
+ *  Define a conf class to wrap all global variables and 
+ *  logical funtions.
+ *
+ * ********************************************************/
 struct AppConfig
 {
     typedef BGIQD::SEQ::stLFRHeader::ReadType Type ;
+    // only stLFR reads supported
     typedef BGIQD::SEQ::Fastq<BGIQD::SEQ::stLFRHeader> Fastq;
     typedef BGIQD::SEQ::FastqReader<Fastq> Reader;
 
@@ -42,6 +50,7 @@ struct AppConfig
         BGIQD::LOG::logfilter::singleton().get("ParseReadName",BGIQD::LOG::DEBUG,loger);
     }
 
+    // loading read1 line by line and parse the read names.
     void ParseRead1()
     {
         long long index = 1 ;

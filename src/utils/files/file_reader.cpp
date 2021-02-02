@@ -24,18 +24,6 @@ namespace FILES {
         return ret;
     }
 
-
-    void FileReaderFactory::ResizeBuff( std::istream & ist, size_t size )
-    {
-        char * buffer = (char *) calloc( sizeof(char) , size );
-        if( buffer == 0 )
-        {
-            std::cerr<<"Fatal buffer calloc failed . System has no more memory ."<<std::endl;
-            exit(1);
-        }
-        (ist.rdbuf())->pubsetbuf(buffer,size);
-    }
-
     void FileReaderFactory::EachLine(std::istream & ist , ParseLine parse)
     {
         std::string line;

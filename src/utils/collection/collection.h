@@ -7,6 +7,19 @@
 namespace BGIQD{
     namespace Collection{
 
+        /**************************************************
+         *
+         * Brief:
+         *      Simple class to calculate union, intersection
+         *      and Jaccard similarity for a weighted-sorted-set.
+         *
+         *      The weighted-sorted-set actually is std::map
+         *      with key as item in set and value as the weight for that item.
+         *
+         *      The weight for union is the bigger one from input.
+         *      The weight for interset is the smaller one from input.
+         * ***********************************************/
+
         // NOT THREAD SAFE!!!
 
         template<class T>

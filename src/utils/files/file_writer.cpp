@@ -2,6 +2,12 @@
 #include <fstream>
 #include "file_writer.h"
 
+/******************************************************************************
+ *
+ * This file provide user a module to open and write data from a file , without
+ * special care about file type like txt or gzip .
+ *
+ *****************************************************************************/
 namespace BGIQD{
 namespace FILES{
 
@@ -22,18 +28,6 @@ namespace FILES{
             ret = NULL;
         }
         return ret;
-    }
-
-
-    void FileWriterFactory::ResizeBuff( std::ostream & ist, size_t size )
-    {
-        char * buffer = (char *) calloc( sizeof(char) , size );
-        if( buffer == 0 )
-        {
-            std::cerr<<"Fatal buffer calloc failed . System has no more memory ."<<std::endl;
-            exit(1);
-        }
-        (ist.rdbuf())->pubsetbuf(buffer,size);
     }
 
 }

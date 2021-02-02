@@ -3,6 +3,30 @@
 #include <string>
 #include <algorithm>
 #include <fstream>
+
+/**********************************************************
+ * Brief :
+ *          Load a fasta format file and convert it into 
+ *          SOAPdenovo2 format.
+ *
+ * Usage :
+ *          ./FakeSOAPcontig <xxx.input.fa \
+ *                           1>xxx.contig  \
+ *                           2>xxx.ContigIndex
+ *
+ *          or
+ *
+ *          gzip -dc xxx.input.fa.gz | ./FakeSOAPcontig
+ *                           1>xxx.contig  \
+ *                           2>xxx.ContigIndex
+ *
+ * Output :
+ *          output SOAPdenovo2 format contig in STDOUT
+ *          output SOAPdenovo2 contigIndex in STDERR
+ *          output the mapping of old<--> new sequences 
+ *               names in "fakesoap.name2index.map.txt"
+ * *******************************************************/
+
 int main()
 {
     int curr_size = 0 ;

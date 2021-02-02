@@ -9,9 +9,43 @@
 #include <iostream>
 #include <getopt.h>
 
+/**********************************************************
+ * 
+ * Brief    :
+ *          define some macros to 
+ *           1. automaticly construct Usage.
+ *           2. parse command-line parameters.
+ *           3. detect the validataion of paramters.
+ * 
+ * Example  :
+ *
+ *          START_PARSE_ARGS
+ *              DEFINE_ARG_REQUIRED(int,   xxx1 ," explain xxx here1 ") 
+ *              DEFINE_ARG_OPTIONAL(float, xxx2 ," explain xxx here2 ", "0.0f")
+ *              ......
+ *          END_PARSE_ARGS
+ *
+ * Details :
+ *
+ *          support type of paramters:
+ *              * int
+ *              * bool
+ *              * float
+ *              * string
+ *              * vector<string>  
+ *
+ *          notice: 
+ *              * previous value will be overwrited by 
+ *                  call this parameters multi-times 
+ *                  except for vector<string>
+ *              * bool optional parameter will be setted as false.
+ *              * required parameter unsetted will halt the program and print Usage.
+ *
+ * ********************************************************/
+
 namespace BGIQD{
     namespace ARGS{
-
+        // define details of a parameter as args_union.
         struct args_union
         {
             enum type 
@@ -24,7 +58,8 @@ namespace BGIQD{
                 is_vector_string = 5,
             };
 
-            union data {
+            union data 
+            {
                 std::string *s;
                 std::vector<std::string> *vs;
                 bool b;
@@ -177,13 +212,13 @@ namespace BGIQD{
             }
         };
 
-
         template<class T>
             struct args_traits
             {
                 args_union::type type() ;
             };
 
+        //below partial specialization for detail types : 
         template<>
             struct args_traits<int>
             {
@@ -222,18 +257,20 @@ namespace BGIQD{
             };
 
 
+        // storage for parameters.
+        // notice : if those variable names also defined in application file, error may happen.
         static std::map<int,args_union*>  infos;
 
         static int arg_index = 0 ;
 
-        const int arg_max = 10 ;
+        const int arg_max = 100 ;
 
         static struct option long_options[arg_max];
 
     }//ARGS
 }//BGIQD
 
-
+// MARCO for automaticly constructing usage:
 #define __PRINT_USAGE \
     std::cerr<<"Usage : "<<argv[0]<< " args "<<std::endl;\
     for( const auto &i : BGIQD::ARGS::infos )\
@@ -250,6 +287,7 @@ namespace BGIQD{
     std::cerr<<std::endl;\
 }
 
+// MARCO for constructing long optional parameters by default value.
 #define __CONSTRUCT_LONG_OPTIONS\
     int max = 0 ;\
     for( const auto &i : BGIQD::ARGS::infos )\
@@ -275,6 +313,7 @@ namespace BGIQD{
     BGIQD::ARGS::long_options[i].val = 0;\
 }
 
+// MARCO for parsing parameters one by one:
 #define __PARSE_ARGS \
     int __curr_flag , __out = 0;\
     while( ( __curr_flag = getopt_long_only( argc , argv,"",BGIQD::ARGS::long_options, &__out  ) ) != EOF )\
@@ -285,7 +324,7 @@ namespace BGIQD{
     itr->second->setted = true ;\
     itr->second->set_value(optarg, false);\
 }\
-
+// MRCRO to print usage
 #define __PRINT_ARGS \
     std::cerr<<argv[0];\
     for( const auto &i : BGIQD::ARGS::infos ){\
@@ -295,6 +334,7 @@ namespace BGIQD{
     }\
     std::cerr<<std::endl;
 
+// MRCRO to detect whether all required paremeters are all setted.
 #define __CHECK_ARGS \
     bool pass = true ;\
     for( const auto &i : BGIQD::ARGS::infos )\
@@ -314,22 +354,25 @@ if( ! pass ){\
     __PRINT_ARGS \
 }
 
+// construct detail of parameters
 #define __DEFINE_ARG_DETAIL( typen , name , optional , d ,exp ) \
     BGIQD::ARGS::args_union name(BGIQD::ARGS::args_traits<typen>().type(),#name, optional,d,exp);\
     BGIQD::ARGS::infos[BGIQD::ARGS::arg_index]=&name;\
     BGIQD::ARGS::arg_index ++ \
-
+// reset storage
 #define START_PARSE_ARGS \
     BGIQD::ARGS::infos.clear();\
     BGIQD::ARGS::arg_index = 0 ;\
 
-
+// wrap for required paramters
 #define DEFINE_ARG_REQUIRED( typen , name , exp ) \
     __DEFINE_ARG_DETAIL( typen , name , false,"", exp)
 
+// wrap for optional paramters
 #define DEFINE_ARG_OPTIONAL(typen , name ,  exp , df)\
     __DEFINE_ARG_DETAIL( typen , name , true , df , exp);\
 
+// check help command
 #define __CHECK_HELP \
     if( argc < 2\
             || std::string(argv[1]) == "-h" \
@@ -339,7 +382,7 @@ if( ! pass ){\
         __PRINT_USAGE\
         return 0 ;\
     }
-
+// hook all actions here
 #define END_PARSE_ARGS \
     __CHECK_HELP\
     __CONSTRUCT_LONG_OPTIONS\

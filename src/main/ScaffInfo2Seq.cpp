@@ -18,6 +18,72 @@
 #include <set>
 #include <sstream>
 
+
+struct Scaff2AGPItem
+{
+    public:
+        void InitName(const std::string & n);
+        // sbegin && send is 1base index
+        void AddSeq(const std::string & sname ,
+                int sbegin ,
+                int send , 
+                char orientation );
+        void AddN(int n_size);
+
+        const std::vector<BGIQD::AGP::AGP_Item> & Items() const { return data ; }
+    private:
+        long long length ;
+        int part_number ;
+        std::string scaff_name ;
+        std::vector<BGIQD::AGP::AGP_Item> data;
+};
+void Scaff2AGPItem::InitName(const std::string & n)
+{
+    scaff_name = n ;
+    length = 1 ;
+    part_number = 0 ;
+}
+
+void Scaff2AGPItem::AddSeq(
+        const std::string & sname ,
+        int sbegin ,
+        int send , 
+        char orientation
+        )
+{
+    long long add_length = send - sbegin +1 ;
+    BGIQD::AGP::AGP_Item tmp ;
+    tmp.object = scaff_name ;
+    tmp.object_beg = length ;
+    tmp.object_end = length + add_length -1;
+    tmp.part_number = ++part_number ;
+    tmp.component_type = BGIQD::AGP::AGP_Item::ComponentType::W ;
+    tmp.lefta.component_id = sname ;
+    tmp.lefta.orientation = orientation ;
+    tmp.lefta.component_beg = sbegin ;
+    tmp.lefta.component_end = send ;
+
+    length += add_length ;
+    data.emplace_back(std::move(tmp));
+}
+
+void Scaff2AGPItem::AddN(int n_size)
+{
+    BGIQD::AGP::AGP_Item tmp ;
+    tmp.object = scaff_name ;
+    tmp.object_beg = length;
+    tmp.object_end = length + n_size -1;
+    tmp.part_number = ++part_number ;
+    tmp.component_type = BGIQD::AGP::AGP_Item::ComponentType::N ;
+    tmp.leftb.gap_length = n_size ;
+    tmp.leftb.gap_type = "scaffold";
+    tmp.leftb.linkage = true ;
+    tmp.leftb.linkage_evidence = "map";
+
+    length += n_size;
+    data.emplace_back(std::move(tmp));
+}
+
 struct AppConfig
 {
     BGIQD::MISC::FileNames fNames;
@@ -74,7 +140,7 @@ struct AppConfig
             ::GenerateWriterFromFileName(fNames.scaff_seqs()) ;
 
         auto get_atcg = [&] ( const BGIQD::stLFR::ContigDetail & detail
-                , BGIQD::AGP::Scaff2AGPItem & s2a ) -> std::string
+                , Scaff2AGPItem & s2a ) -> std::string
         {
             std::string str = contigs.at(detail.contig_id).seq.atcgs ;
             if( ! detail.orientation )
@@ -132,7 +198,7 @@ struct AppConfig
 
         for( const auto & pair : scaff_helper.all_scaff)
         {
-            BGIQD::AGP::Scaff2AGPItem s2a;
+            Scaff2AGPItem s2a;
             s2a.InitName("scaffold_" + std::to_string(pair.first));
             (*out)<<">scaffold_"<<pair.first<<'\n';
             std::string str ;
@@ -148,7 +214,7 @@ struct AppConfig
         {
             if( used.find( pair.first ) == used.end () )
             {
-                BGIQD::AGP::Scaff2AGPItem tmp ;
+                Scaff2AGPItem tmp ;
                 tmp.InitName(contig_name_cache.Id(pair.second.head.contigId));
                 tmp.AddSeq(contig_name_cache.Id(pair.second.head.contigId),
                         1,
