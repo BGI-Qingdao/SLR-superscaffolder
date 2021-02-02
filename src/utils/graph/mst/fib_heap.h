@@ -1,7 +1,7 @@
 #ifndef __ALGORITHM_FIBHEAP_H__
 #define __ALGORITHM_FIBHEAP_H__
 
-#include "utils/graph/bi_list.h"
+#include "utils/graph/mst/bi_list.h"
 #include <string>
 #include <algorithm>
 #include <vector>

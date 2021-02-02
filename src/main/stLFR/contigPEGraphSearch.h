@@ -1,8 +1,7 @@
 #ifndef __STLFR_CONTIGPEGRAPHSEARCH_H__
 #define __STLFR_CONTIGPEGRAPHSEARCH_H__
 
-#include "utils/graph/DepthSearch.h"
-#include "utils/graph/Graph.h"
+#include "utils/graph/DepthFirstSearch.h"
 #include "stLFR/contigPEGraph.h"
 
 #include <functional>

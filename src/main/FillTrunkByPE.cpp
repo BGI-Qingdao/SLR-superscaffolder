@@ -7,8 +7,7 @@
 #include "utils/misc/Error.h"
 #include "utils/misc/freq.h"
 
-#include "utils/graph/Graph.h"
-#include "utils/graph/DepthSearch.h"
+#include "utils/graph/DepthFirstSearch.h"
 
 #include "utils/misc/fileName.h"
 #include "stLFR/contigPEGraph.h"

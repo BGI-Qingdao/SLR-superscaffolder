@@ -1,9 +1,9 @@
 #ifndef __ALGORITHM_GRAPH_MINTREE_H__
 #define __ALGORITHM_GRAPH_MINTREE_H__
 
-#include "utils/graph/fib_heap.h"
+#include "utils/graph/mst/fib_heap.h"
 #include <map>
-
+#include <cassert>
 namespace BGIQD {
     namespace GRAPH {
 

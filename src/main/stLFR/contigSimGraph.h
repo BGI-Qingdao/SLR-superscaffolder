@@ -6,9 +6,9 @@
 #include <map>
 
 #include "utils/graph/GraphBasic.h"
-#include "utils/graph/MinTree.h"
+#include "utils/graph/mst/MinTree.h"
 #include "utils/graph/GraphTrunk.h"
-#include "utils/graph/disjoin_set.h"
+#include "utils/graph/DisJointSet.h"
 #include "utils/graph/GraphTipRemove.h"
 
 namespace BGIQD {
