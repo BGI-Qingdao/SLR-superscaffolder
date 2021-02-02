@@ -41,7 +41,7 @@ Calculate the Jaccard similarity of each pair of contigs as:
 
 Determine the order between seed contigs as:
 
-* Construct the co-barcoding correlation graph 
+* Construct the co-barcoding correlation graph. 
 * Simplify the graph by iteratively deleting the junctions in the Minimum-Spanning-Tree of the graph without tips.
 * Print the branches of the Minimum-Spanning-Tree of the simplified co-barcoding correlation graph as ordered chain of contigs.
 
