@@ -107,10 +107,10 @@ struct AppConfig
                 return BGIQD::stLFR::DepthEnder::NodeType::Others;
         };
 
-        typedef BGIQD::GRAPH::EdgeIterator<BGIQD::stLFR::ContigPEGraphAccess> EdgeItr;
+        typedef BGIQD::GRAPH::EdgeIterator<BGIQD::stLFR::ContigPEGraph> EdgeItr;
 
         typedef BGIQD::GRAPH::DepthSearch<
-            BGIQD::stLFR::ContigPEGraphAccess,
+            BGIQD::stLFR::ContigPEGraph,
             EdgeItr,
             BGIQD::stLFR::DepthEnder
                 > Searcher;
@@ -174,8 +174,7 @@ struct AppConfig
             //try 1 order
             {
                 Searcher searcher;
-                searcher.accesser.base = &sub_graph;
-                searcher.accesser.Init();
+                searcher.accesser = &sub_graph;
                 searcher.ender.Init(typer, searchMax );
                 searcher.DoDepthSearch(gap.prev,0);
                 if( searcher.nodes.find(gap.next) != searcher.nodes.end()  )
@@ -193,16 +192,15 @@ struct AppConfig
             }
             // try another order
             {
-                typedef BGIQD::GRAPH::EdgeIterator<BGIQD::stLFR::ContigPEGraphAccess> EdgeItr;
+                typedef BGIQD::GRAPH::EdgeIterator<BGIQD::stLFR::ContigPEGraph> EdgeItr;
 
                 typedef BGIQD::GRAPH::DepthSearch<
-                    BGIQD::stLFR::ContigPEGraphAccess,
+                    BGIQD::stLFR::ContigPEGraph,
                     EdgeItr,
                     BGIQD::stLFR::DepthEnder
                         > Searcher;
                 Searcher searcher;
-                searcher.accesser.base = &sub_graph;
-                searcher.accesser.Init();
+                searcher.accesser = &sub_graph;
                 searcher.ender.Init(typer, searchMax );
                 searcher.DoDepthSearch(gap.prev+1,0);
                 if( searcher.nodes.find(gap.next) != searcher.nodes.end()  )

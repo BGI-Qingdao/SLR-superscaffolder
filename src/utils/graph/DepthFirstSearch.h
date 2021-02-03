@@ -12,13 +12,86 @@
 namespace BGIQD{
     namespace GRAPH{
 
-        //        template<class Node>
-        //            class NodeToIterator
-        //            {
-        //                public:
-        //                    void 
-        //
-        //            };
+        template<class Graph>
+            struct EdgeIterator
+        {
+            public:
+
+                typedef typename Graph::EdgeId        Id;
+                typedef typename Graph::Edge          Edge;
+
+                EdgeIterator() : curr(NULL) ,accessor( NULL ) { }
+
+                EdgeIterator(const Edge & e , Graph & acc )
+                {
+                    node_id = e.from;
+                    if( e.id != Edge::invalid )
+                        curr = &e;
+                    else
+                        curr = NULL ;
+                    accessor = &acc ;
+                }
+
+                EdgeIterator( const EdgeIterator & ei )
+                {
+                    node_id = ei.node_id;
+                    curr = ei.curr ;
+                    accessor = ei.accessor ;
+                }
+
+                EdgeIterator & operator = ( const EdgeIterator & ei )
+                {
+                    if( &ei != this )
+                    {
+                        node_id = ei.node_id ;
+                        curr = ei.curr ;
+                        accessor = ei.accessor ;
+                    }
+                    return *this;
+                }
+
+                // ONLY detect curr.
+                // ONLY use == with End() .
+                bool operator == ( const EdgeIterator & ei )const
+                {
+                    return curr == ei.curr ;
+                }
+
+                // ONLY detect curr.
+                // ONLY use == with End() .
+                bool operator != ( const EdgeIterator & ei )const
+                {
+                    return curr != ei.curr ;
+                }
+
+                const Edge & operator*() const  { return *curr ; }
+
+                const Edge * operator->() const  { return curr ; }
+
+                EdgeIterator & operator ++() {
+                    if( curr != NULL && accessor != NULL )
+                    {
+                        Id next = curr->next ;
+                        if( next != Edge::invalid )
+                            curr = &(accessor->GetEdge(next));
+                        else
+                            curr = NULL ;
+                    }
+                    else
+                        curr = NULL ;
+                    return *this ;
+                }
+
+                static EdgeIterator & end() 
+                {
+                    static EdgeIterator end;
+                    return end ;
+                }
+                typename Edge::EdgeNodeId node_id ;
+            private:
+                const Edge * curr ;
+                Graph      * accessor ;
+        };
 
         enum DepthSearchEdgeType
         {
@@ -29,12 +102,11 @@ namespace BGIQD{
             EndPoint  = 3 ,
         };
 
-        template<class NodeBase>
+        template<class Node>
             struct DepthSearchNode
             {
-                typedef NodeBase                      Node;
-                typedef typename NodeBase::NodeNodeId NodeId;
-                typedef DepthSearchEdgeType           Type;
+                typedef typename Node::NodeNodeId   NodeId;
+                typedef DepthSearchEdgeType         Type;
                 Type                                type ;
 
                 NodeId                              id;
@@ -105,16 +177,16 @@ namespace BGIQD{
                 }
             };
 
-        template<class GraphAccess
+        template<class Graph
             , class EdgeItr
             , class PathEnder
-            , class DepthNode = DepthSearchNode<typename GraphAccess::Node > >
+            , class DepthNode = DepthSearchNode<typename Graph::Node > >
             struct DepthSearch
             {
-                typedef typename GraphAccess::GraphNodeId   NodeId;
-                typedef typename GraphAccess::GraphEdgeId   EdgeId;
-                typedef typename GraphAccess::Node          NodeBase;
-                typedef typename GraphAccess::Edge          EdgeBase;
+                typedef typename Graph::NodeId   NodeId;
+                typedef typename Graph::EdgeId   EdgeId;
+                typedef typename Graph::Node          NodeBase;
+                typedef typename Graph::Edge          EdgeBase;
                 typedef DepthNode                           Node;
                 //              typedef DepthSearchEdge<EdgeBase>           Edge;
 
@@ -123,7 +195,7 @@ namespace BGIQD{
                 std::map<NodeId , Node>                     nodes;
                 //std::map<EdgeId , Edge>                   edges;
                 std::stack<EdgeItr>                         path;
-                GraphAccess                                 accesser;
+                Graph                                       *accesser;
                 PathEnder                                   ender;
 
                 void PrintNodes() const
@@ -147,13 +219,12 @@ namespace BGIQD{
                 int DoDepthSearch(NodeId start , int s_step )
                 {
                     int step = s_step;
-                    NodeBase & root = accesser.AccessNode(start);
+                    NodeBase & root = accesser->GetNode(start);
                     Node & curr = nodes[start];
 
                     curr.InitRoot(root,step);
 
-                    path.push(EdgeItr(accesser.AccessEdge(root.edge_id , root.id) , accesser));
-                    //ender.AddEdge(accesser.AccessEdge(root.edge_id));
+                    path.push(EdgeItr(accesser->GetEdge(root.edge_id ) , *accesser));
                     ender.Start();
                     bool new_node_in_path = true ;
                     NodeId prev ;
@@ -200,7 +271,7 @@ namespace BGIQD{
                                 continue ;
                             }
 
-                            ender.AddNode(accesser.AccessNode(top.id),top);
+                            ender.AddNode(accesser->GetNode(top.id),top);
                             if( ender.IsEnd() )
                             {
                                 if( top.type == Node::Type::White )
@@ -225,7 +296,7 @@ namespace BGIQD{
                             {
                                 step ++ ;
                                 try {
-                                    top.ReSetParent( accesser.AccessNode(top.id) , nodes.at(prev), step );
+                                    top.ReSetParent( accesser->GetNode(top.id) , nodes.at(prev), step );
                                 }
                                 catch(...)
                                 {
@@ -244,7 +315,7 @@ namespace BGIQD{
                             step ++ ;
                             // white node alloc 
                             auto & next_node = nodes[next_node_id] ;
-                            next_node.Init( accesser.AccessNode(next_node_id) , top, step );
+                            next_node.Init( accesser->GetNode(next_node_id) , top, step );
                         }
                         else
                         {
@@ -267,11 +338,11 @@ namespace BGIQD{
                             }
                         }
                         prev = top.id ;
-                        auto & next_node = accesser.AccessNode( next_node_id) ;
+                        auto & next_node = accesser->GetNode( next_node_id) ;
                         EdgeId next_edge_id = next_node.edge_id;
-                        EdgeBase & next_edge = accesser.AccessEdge( next_edge_id ,next_node_id) ;
+                        EdgeBase & next_edge = accesser->GetEdge( next_edge_id) ;
                         //assert(path.size() == ender.nodes.size() );
-                        path.push(EdgeItr(next_edge, accesser));
+                        path.push(EdgeItr(next_edge, *accesser));
                         ender.AddEdge(next_edge);
 
                         new_node_in_path = true ;

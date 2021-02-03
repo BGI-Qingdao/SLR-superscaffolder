@@ -9,56 +9,13 @@
 namespace BGIQD{
     namespace stLFR{
 
-        struct  ContigPEGraphAccess  : public BGIQD::GRAPH::GraphAccessBase<
-                                BGIQD::stLFR::ContigPEGraph
-                                , unsigned int
-                                , long
-                                , BGIQD::stLFR::ContigNode
-                                , BGIQD::stLFR::PEEdge
-                                >
-            {
-
-                Node & AccessNode(const GraphNodeId & id) 
-                {
-                    return (*base).GetNode(id);
-                }
-
-                Edge invalid ;
-
-                void Init()
-                {
-                    invalid.id = Edge::invalid ;
-                }
-
-                Edge & AccessEdge(const GraphEdgeId & id, const GraphNodeId & nodeId)
-                {
-                    if( id == Edge::invalid )
-                    {
-                        invalid.from = nodeId ;
-                        return invalid ;
-                    }
-                    return (*base).GetEdge(id);
-                }
-
-            };
-
-        struct traits_search_node{};
-
-        struct DepthEnder:
-            public BGIQD::GRAPH::PathEndHelperBase<
-            ContigPEGraphAccess 
-            , traits_search_node
-            , BGIQD::GRAPH::DepthSearchNode<typename ContigPEGraphAccess::Node> 
-            >
+        struct DepthEnder
         {
-
-            typedef BGIQD::GRAPH::PathEndHelperBase<
-            ContigPEGraphAccess 
-            , traits_search_node
-            , BGIQD::GRAPH::DepthSearchNode<typename ContigPEGraphAccess::Node> 
-            > Basic;
             bool ender_flag ;
-            typedef typename Basic::NodeId NodeId;
+            typedef ContigPEGraph::NodeId NodeId;
+            typedef ContigPEGraph::Node   Node;
+            typedef ContigPEGraph::Edge   Edge;
+            typedef BGIQD::GRAPH::DepthSearchNode<Node> SNode;
 
             enum NodeType
             {
@@ -77,7 +34,7 @@ namespace BGIQD{
 
             int last_len ;
 
-            bool first_in  ;
+            bool first_in ;
 
             std::stack<const Node * > path;
 
