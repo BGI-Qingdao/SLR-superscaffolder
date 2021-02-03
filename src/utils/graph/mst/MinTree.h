@@ -4,10 +4,16 @@
 #include "utils/graph/mst/fib_heap.h"
 #include <map>
 #include <cassert>
+/**********************************************************
+ *
+ * @Brief :
+ *  The implement of Prim's minimum spanning tree algorithm which strict follow the book "Introduction to Algorithms".
+ *
+ * *******************************************************/
 namespace BGIQD {
     namespace GRAPH {
 
-        // User implement this :
+        // User implement this to get weight:
         template<class TNode,class TEdge, class Value>
             struct NodeAttr
             {

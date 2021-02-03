@@ -6,8 +6,6 @@
 namespace BGIQD {
     namespace stLFR {
 
-        const std::string ContigDetail::ONT_FILL = "ONT_FILL" ;
-
         void ContigDetail::InitFromString(const std::string &line)
         {
             std::istringstream ist(line);
@@ -20,14 +18,6 @@ namespace BGIQD {
                 >>scaff_index
                 >>scaff_id;
             orientation = ( pos == '+' );
-            std::string extra_item ;
-            while( ! ist.eof() )
-            {
-                ist>>extra_item ;
-                auto items = BGIQD::STRING::split(extra_item,"=");
-                assert(items.size() == 2 ) ;
-                extra[items[0]] = items[1] ;
-            }
         }
 
         std::string ContigDetail::ToString() const 
@@ -41,10 +31,6 @@ namespace BGIQD {
                 <<start_pos<<'\t'
                 <<scaff_index<<'\t'
                 <<scaff_id;
-            for( const auto & pair : extra )
-            {
-                ost<<'\t'<<pair.first<<'='<<pair.second ;
-            }
             return ost.str();
         }
 

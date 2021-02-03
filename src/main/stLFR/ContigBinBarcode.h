@@ -7,19 +7,19 @@
 #include <map>
 #include <set>
 
-//
-// file stLFR/ContigBinBarcode.h
-//
-// struct of Contig &  Bin  & Barcode ...
-//
-//
+/**********************************************************
+ *
+ * @Brief : 
+ *  Define some common data structures for store contig/bin/barcde
+ *  and their relationships.
+ *
+ * *******************************************************/
 
 namespace BGIQD{
     namespace stLFR {
 
-
-        typedef BGIQD::Collection::Collection<int> BarcodeCollection;
-
+        // The barcoding info for a contig
+        // Store the which barcode aligned on this contig at where.
         struct ContigBarcodeInfo
         {
             unsigned int contig_id ;
@@ -27,13 +27,17 @@ namespace BGIQD{
             std::map<int , std::set<unsigned int > > barcodesOnPos;
 
             std::string ToString() const ;
+
             void Touch( int pos , unsigned int barcode)
             {
                 barcodesOnPos[pos].insert(barcode);
             }
+
             void InitFromString(const std::string & line ) ;
         };
 
+        // Store all contigs that have overlap with one barcode.
+        // Use this index to avoid zero-Jaccard-similarity calculation.
         struct ContigOnBarcode
         {
             int barcode_id ;
@@ -54,6 +58,12 @@ namespace BGIQD{
 
         };
 
+        // A set of barcodes. atomic item to calculate Jaccard similarty.
+        typedef BGIQD::Collection::Collection<int> BarcodeCollection;
+
+        // A bin with it's information : 
+        //    + contig information
+        //    + barcode information
         struct BarcodeOnBin
         {
             BGIQD::SOAP2::ContigId contigId ;
@@ -73,6 +83,8 @@ namespace BGIQD{
             void InitFromString( const std::string & line ) ;
         };
 
+        // The JS for 2 bin.
+        // Only log the other bin's information because a bin always know itself.
         struct BinSimularity
         {
             int binIndex ;
@@ -81,11 +93,15 @@ namespace BGIQD{
             float simularity;
         };
 
+        // All JS for one bin
         struct BinRelation
         {
             int binIndex ; // bin index in all bins
+
             unsigned int contigId ;
+
             int binId ; // bin id in contig
+
             std::map<unsigned int , BinSimularity> sims;
 
             int start ;
@@ -99,12 +115,15 @@ namespace BGIQD{
             void InitFromString( const std::string & line ) ;
         };
 
+        // The JS for 2 contig.
+        // Only log the other contig because an contig always know itself.
         struct ContigSimularity
         {
             unsigned int contigId ;
             float simularity ;
-            //TODO : length , weight ...
         };
+
+        // All JS for one contig
         struct ContigRelation
         {
             unsigned int contigId ;
@@ -117,14 +136,21 @@ namespace BGIQD{
             void InitFromString( const std::string & line ) ;
         };
 
-        typedef  BGIQD::INCRARRAY::IncrArray<BarcodeOnBin>      BarcodeOnBinArray;
-        typedef  BGIQD::INCRARRAY::IncrArray<BinRelation>       BinRelationArray;
-        typedef  BGIQD::INCRARRAY::IncrArray<ContigRelation>    ContigRelationArray;
+        //
+        // 
+        // Below define some data matrix and their save and load functions :
+        //
+        //
 
+        typedef  BGIQD::INCRARRAY::IncrArray<BarcodeOnBin>      BarcodeOnBinArray;
         void LoadBarcodeOnBinArray( const std::string & file , BarcodeOnBinArray & data );
         void PrintBarcodeOnBinArray( const std::string & file , const BarcodeOnBinArray & data);
+
+        typedef  BGIQD::INCRARRAY::IncrArray<BinRelation>       BinRelationArray;
         void LoadBinRelationArray(const std::string & file , BinRelationArray & data);
         void PrintBinRelationArray(const std::string & file ,const BinRelationArray & data);
+
+        typedef  BGIQD::INCRARRAY::IncrArray<ContigRelation>    ContigRelationArray;
         void LoadContigRelationArray(const std::string & file ,ContigRelationArray & data);
         void PrintContigRelationArray(const std::string & file ,const ContigRelationArray & data);
 

@@ -1,92 +1,173 @@
 #ifndef __ALGORITHM_FIBHEAP_H__
 #define __ALGORITHM_FIBHEAP_H__
 
-#include "utils/graph/mst/bi_list.h"
 #include <string>
 #include <algorithm>
 #include <vector>
+#include <cassert>
+/**********************************************************
+ * @Brief:
+ *  A implement of Fibonacci heap to replace std::min
+ *
+ *  The codes belows are copy-and-paste from SOAPdenovo2
+ *  with little refinement to suit c++ style.
+ * *******************************************************/
 
 namespace BGIQD {
     namespace FIBHEAP {
 
-        template< class TKey , class TValue>
-            struct Node : public BGIQD::BILIST::BiList<Node<TKey,TValue> >
+        template<class T>
+            struct BIList
             {
-                typedef TKey Key;
+                typedef BIList * BiListPtr ;
+                typedef T *      ContainerPtr;
+                BiListPtr left;
+                BiListPtr right;
+                T * self;
 
-                typedef TValue Value ;
-
-                typedef BGIQD::BILIST::BiList<Node> BiList;
-
-                Node * father;
-
-                Node * son;
-
-                Key    key;
-
-                Value  value;
-
-                bool   mark;
-
-                int    degree ;
-
-                void Init() 
+                void Init(T * s) 
                 {
-                    father = NULL ;
-                    BiList::Init(this);
-                    son = NULL ;
-                    mark = false ;
-                    degree = 0 ;
+                    left = this;
+                    right = this;
+                    self = s ;
                 }
 
-                void AddChild(Node & child)
+                // first
+                //   * assume this as the root of bi-list ,
+                //   * assume left is the forward order ,
+                //   * so that the right node of this is the end of bi-list ,
+                //
+                // second
+                //
+                //   * always insert node at end of bi-list ,
+                // so
+                //   let node be the left of this's right node !
+                void Insert( BiListPtr node)
                 {
-                    assert( child.Single() ) ;
-                    degree ++ ;
-                    if( son == NULL )
-                        son = &child ;
-                    else
-                        son->Insert(child);
-                    child.father = this ;
+                    assert( node != NULL );
+                    assert( left != NULL && right != NULL );
+                    assert( node->left != NULL && node->right != NULL );
+
+                    auto A = this ;
+                    auto B = node ;
+                    auto ar = A->right ;
+                    auto br = B->right ;
+                    A->right->left = B ;
+                    B->right->left = A ;
+                    A->right = br ;
+                    B->right= ar ;
                 }
 
-                void RemoveChild( Node & child)
+                void DeleteMe() 
                 {
-                    assert( child.father == this );
-                    degree -- ;
-                    assert( degree >= 0 );
-                    if( son == &child )
+                    assert( left != NULL && right != NULL );
+                    if( left != this  && right != this )
                     {
-                        if( child.Single() ) 
-                            son = NULL ;
-                        else
-                            son = &child.Next();
+                        left->right = right ;
+                        right->left = left ;
                     }
-                    child.DeleteMe() ;
+                    else
+                    {
+                        assert( left == this && right == this );
+                    }
+                    Init(self);
                 }
 
-                Node & Next()
+                bool Single() const 
                 {
-                    return *(BiList::Forward()->self);
+                    return left == this && right == this ;
                 }
 
-                Node & Last()
+                BiListPtr Forward()
                 {
-                    return *(BiList::Backword()->self);
+                    return left;
                 }
 
-                void Insert( Node & node )
+                BiListPtr Backword()
                 {
-                    BiList::Insert(&node);
+                    return right;
                 }
+
             };
+
+        template< class TKey , class TValue>
+            struct Node : public BIList<Node<TKey,TValue> >
+        {
+            typedef TKey Key;
+
+            typedef TValue Value ;
+
+            typedef BIList<Node> BiList;
+
+            Node * father;
+
+            Node * son;
+
+            Key    key;
+
+            Value  value;
+
+            bool   mark;
+
+            int    degree ;
+
+            void Init() 
+            {
+                father = NULL ;
+                BiList::Init(this);
+                son = NULL ;
+                mark = false ;
+                degree = 0 ;
+            }
+
+            void AddChild(Node & child)
+            {
+                assert( child.Single() ) ;
+                degree ++ ;
+                if( son == NULL )
+                    son = &child ;
+                else
+                    son->Insert(child);
+                child.father = this ;
+            }
+
+            void RemoveChild( Node & child)
+            {
+                assert( child.father == this );
+                degree -- ;
+                assert( degree >= 0 );
+                if( son == &child )
+                {
+                    if( child.Single() ) 
+                        son = NULL ;
+                    else
+                        son = &child.Next();
+                }
+                child.DeleteMe() ;
+            }
+
+            Node & Next()
+            {
+                return *(BiList::Forward()->self);
+            }
+
+            Node & Last()
+            {
+                return *(BiList::Backword()->self);
+            }
+
+            void Insert( Node & node )
+            {
+                BiList::Insert(&node);
+            }
+        };
 
         /**
          *
          * This FibHeap DO NOT care where nodes are stored !!!
          * It is user's duty to make sure all nodes are valid !!!
          * */
-            template<class TNode> 
+        template<class TNode> 
             struct FibHeap
             {
                 typedef typename TNode::Key Key;
@@ -207,98 +288,98 @@ namespace BGIQD {
 
                 protected:
 
-                    void Cut(Node & son , Node & father)
+                void Cut(Node & son , Node & father)
+                {
+                    assert(min);
+                    father.RemoveChild(son);
+                    son.mark = false ;
+                    son.father = NULL ;
+                    min->Insert(son);
+                }
+
+                void CascadingCut(Node & father)
+                {
+                    if( father.father == NULL )
+                        return ;
+                    auto & z = *father.father ;
+                    if( father.mark == false )
+                        father.mark = true ;
+                    else 
                     {
-                        assert(min);
-                        father.RemoveChild(son);
-                        son.mark = false ;
-                        son.father = NULL ;
-                        min->Insert(son);
+                        Cut(father,z);
+                        CascadingCut(z);
                     }
+                }
+                // make a big D(n) as 100
+                // 1.618^100 = 790,408,728,675,299,400,000
+                static const int N = 100 ;
+                struct DelayHeapLinkInfo
+                {
+                    Node * y;
+                    Node * x;
+                };
 
-                    void CascadingCut(Node & father)
+                void Consolidate() 
+                {
+                    assert( min && min->father == NULL) ;
+                    Node * A[N] ;
+                    for( int i = 0 ; i < N ; i++ )
+                        A[i] = NULL ;
+                    if ( min->Single() )
+                        return ;
+                    Node * a_son = min ;
+                    Node * last = &(min->Last());
+
+                    std::vector<DelayHeapLinkInfo> delayinfos;
+                    do
                     {
-                        if( father.father == NULL )
-                            return ;
-                        auto & z = *father.father ;
-                        if( father.mark == false )
-                            father.mark = true ;
-                        else 
+                        Node * x = a_son ;
+                        a_son = &(x->Next());
+                        int d = x->degree ;
+                        assert( d < N );
+                        while( A[d] != NULL )
                         {
-                            Cut(father,z);
-                            CascadingCut(z);
-                        }
-                    }
-                    // make a big D(n) as 100
-                    // 1.618^100 = 790,408,728,675,299,400,000
-                    static const int N = 100 ;
-                    struct DelayHeapLinkInfo
-                    {
-                        Node * y;
-                        Node * x;
-                    };
-
-                    void Consolidate() 
-                    {
-                        assert( min && min->father == NULL) ;
-                        Node * A[N] ;
-                        for( int i = 0 ; i < N ; i++ )
-                            A[i] = NULL ;
-                        if ( min->Single() )
-                            return ;
-                        Node * a_son = min ;
-                        Node * last = &(min->Last());
-
-                        std::vector<DelayHeapLinkInfo> delayinfos;
-                        do
-                        {
-                            Node * x = a_son ;
-                            a_son = &(x->Next());
-                            int d = x->degree ;
-                            assert( d < N );
-                            while( A[d] != NULL )
+                            Node * y = A[d];
+                            if ( x->key > y->key )
                             {
-                                Node * y = A[d];
-                                if ( x->key > y->key )
-                                {
-                                    Node * tmp = x ;
-                                    x = y ;
-                                    y = tmp ;
-                                }
-                                //HeapLink(y,x);
-                                DelayHeapLinkInfo tmp{ y , x } ;
-                                delayinfos.push_back( tmp );
-                                A[d] = NULL ;
-                                d = d + 1 ;
+                                Node * tmp = x ;
+                                x = y ;
+                                y = tmp ;
                             }
-                            assert( d < N );
-                            A[d] = x ;
+                            //HeapLink(y,x);
+                            DelayHeapLinkInfo tmp{ y , x } ;
+                            delayinfos.push_back( tmp );
+                            A[d] = NULL ;
+                            d = d + 1 ;
                         }
-                        while( a_son != min );
-                        for( size_t i = 0 ; i < delayinfos.size() ; i++ )
-                        {
-                            HeapLink(delayinfos[i].y , delayinfos[i].x);
-                        }
-                        min = NULL ;
-                        for( int i = 0 ; i < N ; i ++ )
-                        {
-                            if( A[i] == NULL ) 
-                                continue ;
-                            assert(A[i]->father == NULL );
-                            if( min == NULL ||  A[i]->key < min->key )
-                                min = A[i] ;
-                        }
-
+                        assert( d < N );
+                        A[d] = x ;
                     }
-
-                    void HeapLink(Node * y , Node * x )
+                    while( a_son != min );
+                    for( size_t i = 0 ; i < delayinfos.size() ; i++ )
                     {
-                        assert( x != NULL && y != NULL );
-                        assert( x->father== NULL && y->father == NULL );
-                        y->DeleteMe();
-                        x->AddChild(*y);
-                        y->mark = false ;
+                        HeapLink(delayinfos[i].y , delayinfos[i].x);
                     }
+                    min = NULL ;
+                    for( int i = 0 ; i < N ; i ++ )
+                    {
+                        if( A[i] == NULL ) 
+                            continue ;
+                        assert(A[i]->father == NULL );
+                        if( min == NULL ||  A[i]->key < min->key )
+                            min = A[i] ;
+                    }
+
+                }
+
+                void HeapLink(Node * y , Node * x )
+                {
+                    assert( x != NULL && y != NULL );
+                    assert( x->father== NULL && y->father == NULL );
+                    y->DeleteMe();
+                    x->AddChild(*y);
+                    y->mark = false ;
+                }
             };
 
     }

@@ -12,7 +12,7 @@
 #include "utils/misc/mapHelper.h"
 #include "utils/misc/contigIndex.h"
 
-#include "stLFR/TrunkGap.h"
+#include "stLFR/ContigOrder.h"
 
 #include "stLFR/ScaffInfo.h"
 
@@ -337,7 +337,7 @@ struct AppConfig
         int value ;
     };
 
-    std::map<int , std::vector<BGIQD::stLFR::TrunkGap<GapExtra> >> gaps;
+    std::map<int , std::vector<BGIQD::stLFR::OrderItem<GapExtra> >> gaps;
     //  std::map<unsigned int , GapPos> contigPos;
     std::map<unsigned int, GapFill> gapfills;
     std::map<unsigned int, GapFill> pefills;

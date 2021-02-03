@@ -24,7 +24,7 @@ namespace BGIQD {
     namespace stLFR {
 
         template<class T>
-            struct TrunkGap
+            struct OrderItem
             {
                 typedef T  Data;
                 unsigned int prev ;
@@ -32,10 +32,11 @@ namespace BGIQD {
                 Data data;
             };
 
+        // Load the orders of contigs from file
         template<class T>
-            void Load_MST_Trunk_Linear( std::istream & ist , std::map<int ,std::vector<TrunkGap<T> > >& data )
+            void Load_MST_Trunk_Linear( std::istream & ist , std::map<int ,std::vector<OrderItem<T> > >& data )
             {
-                typedef TrunkGap<T> DataItem;
+                typedef OrderItem<T> DataItem;
                 std::string line ;
                 unsigned int prev = -1 ;
                 int id = 0;

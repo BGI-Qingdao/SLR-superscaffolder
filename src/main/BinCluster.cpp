@@ -15,7 +15,7 @@
 #include "utils/misc/fileName.h"
 
 #include "stLFR/ContigBinBarcode.h"
-#include "stLFR/TrunkGap.h"
+#include "stLFR/ContigOrder.h"
 
 #include <algorithm>
 #include <iostream>
@@ -279,7 +279,7 @@ struct AppConfig
         auto in  = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.mintreetrunklinear());
         if( in == NULL )
             FATAL(" failed to open xxx.mintree_trunk_linear for read!!! ");
-        typedef BGIQD::stLFR::TrunkGap<int> GapInfo;
+        typedef BGIQD::stLFR::OrderItem<int> GapInfo;
         std::map<int,std::vector<GapInfo>> gaps;
         BGIQD::stLFR::Load_MST_Trunk_Linear(*in, gaps);
         int i = 0 ;

@@ -9,7 +9,7 @@
 
 #include "utils/misc/fileName.h"
 #include "stLFR/ContigBinBarcode.h"
-#include "stLFR/TrunkGap.h"
+#include "stLFR/ContigOrder.h"
 
 
 #include <map>
@@ -101,7 +101,7 @@ struct AppConfig
         float sim ;
     };
 
-    typedef BGIQD::stLFR::TrunkGap<GapExtra> GapInfo;
+    typedef BGIQD::stLFR::OrderItem<GapExtra> GapInfo;
     std::map<int,std::vector<GapInfo>> gaps;
     BGIQD::stLFR::BinRelationArray  bra;
     BGIQD::LOG::logger loger;

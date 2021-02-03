@@ -22,6 +22,7 @@
 namespace BGIQD {
     namespace stLFR {
 
+        // Define details of a in-scaffold contig with 
         struct ContigDetail
         {
             unsigned int contig_id ;
@@ -34,12 +35,9 @@ namespace BGIQD {
             void InitFromString(const std::string & line) ;
 
             std::string ToString() const ;
-
-            std::map<std::string , std::string> extra ;
-
-            static const std::string ONT_FILL  ;
         };
 
+        // A scaffold : a collection of contigs
         struct ScaffInfo
         {
             int scaff_id ;
@@ -51,6 +49,7 @@ namespace BGIQD {
             void FormatStartPos();
         };
 
+        // Handle scaffolds : many scaffold and their relation with contigs
         struct ScaffInfoHelper
         {
             void PrintAllScaff( std::ostream & ost ) const ;
@@ -68,6 +67,7 @@ namespace BGIQD {
             std::map<unsigned int , ContigIndex>  contig_indexs ;
 
             ContigDetail & GetContig( unsigned int contig_id ) ;
+
             void FormatAllIndex()
             {
                 for( auto & pair : all_scaff )

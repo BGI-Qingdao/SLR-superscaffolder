@@ -9,7 +9,7 @@
 
 #include "utils/misc/fileName.h"
 #include "stLFR/ContigBinBarcode.h"
-#include "stLFR/TrunkGap.h"
+#include "stLFR/ContigOrder.h"
 
 #include "utils/linear_fitting/Minimum_multiplication.h"
 
@@ -25,7 +25,7 @@ struct AppConfig
 
     typedef BGIQD::LINEARFITTING::Item<int,float> item;
     typedef BGIQD::LINEARFITTING::Linear<int,float> LC;
-    typedef BGIQD::stLFR::TrunkGap<int> GapInfo;
+    typedef BGIQD::stLFR::OrderItem<int> GapInfo;
 
     std::map<int,std::vector<GapInfo>> gaps;
     BGIQD::stLFR::BinRelationArray  bra;

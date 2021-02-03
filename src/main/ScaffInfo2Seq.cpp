@@ -154,18 +154,9 @@ struct AppConfig
                         , (detail.orientation ? '+' : '-' )
                         ) ;
 
-                if( detail.extra.find(BGIQD::stLFR::ContigDetail::ONT_FILL) 
-                        != detail.extra.end() )
-                {
-                    str += detail.extra.at(BGIQD::stLFR::ContigDetail::ONT_FILL);
-                    s2a.AddN(detail.extra.at(BGIQD::stLFR::ContigDetail::ONT_FILL).size());
-                }
-                else
-                {
-                    int gap_size = detail.gap_size > min_n ?  detail.gap_size : min_n ;
-                    str += std::string(gap_size,'N');
-                    s2a.AddN(gap_size);
-                }
+                int gap_size = detail.gap_size > min_n ?  detail.gap_size : min_n ;
+                str += std::string(gap_size,'N');
+                s2a.AddN(gap_size);
             }
             else if ( detail.gap_size < 0 )
             {

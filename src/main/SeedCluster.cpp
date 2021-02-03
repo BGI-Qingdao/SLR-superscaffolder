@@ -12,7 +12,7 @@
 #include "utils/misc/fileName.h"
 
 #include "stLFR/ContigBinBarcode.h"
-#include "stLFR/TrunkGap.h"
+#include "stLFR/ContigOrder.h"
 
 #include <set>
 
@@ -30,7 +30,7 @@ struct AppConfig
         unsigned int next ;
         std::set<unsigned int> relations;
     };*/
-    typedef BGIQD::stLFR::TrunkGap<int> GapInfo ;
+    typedef BGIQD::stLFR::OrderItem<int> GapInfo ;
     typedef BGIQD::Collection::Collection<unsigned int>  Cols;
     std::map<unsigned int , Cols> relations;
     std::set<unsigned int> trunk_seeds;

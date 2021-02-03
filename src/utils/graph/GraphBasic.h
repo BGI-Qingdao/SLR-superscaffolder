@@ -11,9 +11,19 @@
 #include <iostream>
 #include <algorithm>
 #include <tuple>
+/**********************************************************
+ *
+ * @Brief
+ *  A simple implement of Graph structure.
+ *      + one un-directed graph
+ *      + one directed graph
+ *
+ * *******************************************************/
+
 namespace BGIQD {
     namespace GRAPH {
 
+        // An un-directed edge
         template<class NodeId ,  class EdgeId >
             struct IGraphEdgeBasic
             {
@@ -82,6 +92,7 @@ namespace BGIQD {
                 static const EdgeId invalid = -1 ;
             };
 
+        // A directed edge
         template<class NodeId ,  class EdgeId >
             struct IDigraphEdgeBase : public IGraphEdgeBasic<NodeId, EdgeId>
             {
@@ -115,6 +126,11 @@ namespace BGIQD {
                 }
             };
 
+        // A node struct.
+        //
+        // This node contain all ids of its out-edges but struct edge is not stored by node.
+        //
+        // Notice : for undirected graph, all edges are out-edge.
         template<class NodeId ,  class EdgeId >
             struct IGraphNodeBasic
             {
@@ -165,6 +181,12 @@ namespace BGIQD {
                 std::set<EdgeId>               edge_ids;
             };
 
+        //
+        //
+        // GraphBaisc.
+        //
+        // This graph can be iteratered by both nodes and edges.
+        //
         template<class TNode 
             , class TEdge
             , class TNodes = std::map<typename TNode::NodeNodeId , TNode>
@@ -313,6 +335,7 @@ namespace BGIQD {
 
                 typedef IGraphBasic<TNode , TEdge, TNodes , TEdges> Basic;
 
+                // Add edge and manager correspondence nodes
                 void AddEdge(const TEdge &tmp)
                 {
                     auto from = tmp.from ;
@@ -384,6 +407,7 @@ namespace BGIQD {
 
                 typedef IGraphBasic<TNode , TEdge, TNodes , TEdges> Basic;
 
+                // Add edge and manager correspondence nodes
                 void AddEdge(const TEdge &tmp)
                 {
                     auto from = tmp.from ;

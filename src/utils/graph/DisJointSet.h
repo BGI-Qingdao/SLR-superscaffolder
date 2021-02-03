@@ -5,6 +5,14 @@
 #include <vector>
 #include <cassert>
 
+/**********************************************************
+ *
+ * @Brief :
+ *  The implement of disjoin set algorithm which strict follow the book "Introduction to Algorithms".
+ *
+ *  See the wiki from https://en.wikipedia.org/wiki/Disjoint-set_data_structure
+ *
+ * *******************************************************/
 namespace BGIQD{
 namespace Algorithm
 {
