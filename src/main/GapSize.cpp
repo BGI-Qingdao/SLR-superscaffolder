@@ -11,7 +11,7 @@
 #include "stLFR/ContigBinBarcode.h"
 #include "stLFR/ContigOrder.h"
 
-#include "utils/linear_fitting/Minimum_multiplication.h"
+#include "utils/linear_fitting/Linear.h"
 
 #include <map>
 #include <vector>

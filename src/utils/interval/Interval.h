@@ -5,16 +5,18 @@
 #include <algorithm>
 #include <string>
 
+/**********************************************************
+ *
+ * @Brief :
+ *   Define struct for interval like [1,7] or (10,20)
+ *   Implement interface to detect contain or overlap between 2 interval.
+ *   Implement interface to detect contain between one point and one interval.
+ *  
+ * *******************************************************/
 namespace BGIQD{
     namespace INTERVAL{
 
-        //struct IntervalType_Left_Close_Right_Close
-        //{
-        //    static bool IsLeftOpen() { return false ; }
-        //    static bool IsRightOpen() { return false ; }
-        //};
-
-
+        // Define traits to handle [] [) (] and ()
         enum IntervalType
         {
             Unknow = 0,
@@ -25,7 +27,7 @@ namespace BGIQD{
             Invalid = 5
         };
 
-
+        // extract traits
         template<IntervalType type>
             struct IntervalInfo
             {
@@ -57,6 +59,7 @@ namespace BGIQD{
                 static const bool RightOpen = false ;
             };
 
+        // The interval class
         template<class T , IntervalType t = IntervalType::Left_Close_Right_Close>
             struct Interval
             {
@@ -127,6 +130,7 @@ namespace BGIQD{
                     return ret;
                 }
 
+                // Is a point contained by this interval ?
                 bool IsContain(const ValueType& x ) const
                 {
                     if( type == Type::Left_Close_Right_Close )
@@ -154,6 +158,7 @@ namespace BGIQD{
                     return max - min ;
                 }
 
+                // Is an other interval contained by this interval ?
                 bool IsContain( const Interval & other ) const 
                 {
                     if( min > other.min )
