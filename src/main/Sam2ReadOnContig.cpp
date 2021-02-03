@@ -4,16 +4,12 @@
 #include "utils/files/file_reader.h"
 #include "utils/files/file_writer.h"
 #include "utils/multithread/MultiThread.h"
-
-#include "utils/sam/pair_sam_parser.h"
-#include "utils/seq/fastq.h"
-
-
 #include "utils/misc/contigIndex.h"
 #include "utils/misc/fileName.h"
-
-#include "utils/sam/EasySam.h"
 #include "utils/misc/TagId.h"
+#include "utils/sam/EasySam.h"
+#include "utils/sam/sam_parser.h"
+#include "utils/seq/fastq.h"
 
 #include <iostream>
 #include <string>
@@ -80,8 +76,6 @@ struct AppConfig
             tmp.insert_size = d.insert_size ;
             easy_cache.push_back(tmp);
         };
-        // parse sam and print
-        //BGIQD::SAM::PairedSAMParser parser(sam_in);
         long long count = 0 ;
         auto parseline = [&](const std::string & line)
         {
@@ -110,16 +104,6 @@ struct AppConfig
         }
         delete b2r_out;
     }
-
-    //void PrintBarcodeList()
-    //{
-    //    // print barcodeList
-    //    if( barcode_2_num_file.empty() )
-    //    {
-    //        BGIQD::stLFR::BarcodeIdHelper::Print(fName.barcodeList());
-    //    }
-    //}
-
 }config;
 
 

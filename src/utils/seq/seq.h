@@ -2,6 +2,15 @@
 #define __BIOCOMMON_SEQ_SEQ_H__
 
 #include <string>
+/**********************************************************
+ *
+ * @Brief :
+ *    struct seq to represent sequence.
+ *
+ *    this struct is used by FASTA and FASTQ so that they 
+ *    only need to handle headers.
+ *
+ * *******************************************************/
 
 namespace BGIQD {
     namespace SEQ {
@@ -27,7 +36,6 @@ namespace BGIQD {
             int GCLen() const ;
 
             void AddPartSeq( const std::string & line ) { atcgs += line ; }
-
             void Reset() { atcgs.clear() ; }
         };
     }

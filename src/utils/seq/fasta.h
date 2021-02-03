@@ -9,6 +9,18 @@
 #include "utils/seq/seq.h"
 #include "utils/misc/flags.h"
 
+/**********************************************************
+ *
+ * @Brief :
+ *      Load and parse fasta format from file.
+ *
+ * Default support
+ *      + normal header
+ *      + Id description header
+ *      + SOAPdenovo2 contig header
+ *      +
+ *
+ * *******************************************************/
 namespace BGIQD {
 
     namespace SEQ {
@@ -54,37 +66,6 @@ namespace BGIQD {
             std::string Head() const ;
 
             void Reset(){ contigId = 0 ; is_tip = 0 ; cov = 0 ; len = 0;  } ;
-        };
-
-        struct ScaffSplitGapHead
-        {
-            int scaff_id ;
-            int gap_index ;
-            int prev_base_contig;
-            int next_base_contig;
-            int prev_contig ;
-            int next_contig ;
-
-            enum GapType {
-                UNKNOW = 0 ,
-                PE =1 ,
-                PE_TRUNK = 2 ,
-                TRUNK = 3
-            } gap_type ;
-
-            void Init( const std::string & line ) ;
-
-            std::string Head() const ;
-
-            void Reset(){
-                scaff_id = 0 ;
-                gap_index = 0 ;
-                prev_contig = 0 ;
-                next_contig = 0;
-                prev_base_contig = 0 ;
-                next_base_contig = 0;
-                gap_type = GapType::UNKNOW;
-            } ;
         };
 
         template<class T>

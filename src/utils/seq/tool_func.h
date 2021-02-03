@@ -4,9 +4,17 @@
 #include <string>
 #include <sstream>
 
+/**********************************************************
+ *
+ * @Brief :
+ *      three common function to handle sequences.
+ *
+ * *******************************************************/
+
 namespace BGIQD{
     namespace SEQ{
 
+        // Print sequnce in the same width.
         static std::string blockSeq(const std::string & atcgs , int weight )
         {
             if( weight < 1 )
@@ -26,6 +34,7 @@ namespace BGIQD{
             }
         }
 
+        // reverse complete
         static std::string seqCompleteReverse(const std::string & line)
         {
             std::string ret ;
@@ -47,6 +56,8 @@ namespace BGIQD{
             return ret;
         }
 
+        // Detect sequence like AGCTGCT 
+        // because its reverse complete sequence is itself
         static bool isSeqPalindrome(const std::string & line)
         {
             if( line.size() % 2  == 1 )

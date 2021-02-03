@@ -6,46 +6,6 @@
 namespace BGIQD{
     namespace SAM{
 
-        bool MDData::InitFromStr( const std::string &line )
-        {
-            if (line[0] != 'M')
-                return false ;
-            if(line[1] != 'D')
-                return false ;
-            if(line[2] != ':')
-                return false ;
-            if(line[3] != 'Z')
-                return false ;
-            if(line[4] != ':')
-                return false ;
-
-            total_same = 0 ;
-            std::string int_value;
-            for ( int i = 5 ; i < (int)line.size() ; i++ )
-            {
-                char c = line[i] ;
-                if( std::isdigit( c ) )
-                {
-                    int_value.push_back( c) ;
-                }
-                else
-                {
-                    if( ! int_value.empty() )
-                    {
-                        total_same += std::stoi(int_value);
-                        int_value.clear();
-                    }
-                }
-            }
-            if( ! int_value.empty() )
-            {
-                total_same += std::stoi(int_value);
-                int_value.clear();
-            }
-            return total_same > 0 ;
-        }
-
-
         int MatchData::total_del_len()  const 
         {
             int ret = 0 ;
@@ -314,7 +274,6 @@ namespace BGIQD{
                 ist>>extra;
                 if(extra.size() >1 &&  extra[0]  == 'M' && extra[1] == 'D' ) 
                 {
-                    data.md_data.InitFromStr(extra);
                     data.MD = true ;
                 }
                 if(extra.size() >1 &&  extra[0]  == 'X' && extra[1] == 'A' )

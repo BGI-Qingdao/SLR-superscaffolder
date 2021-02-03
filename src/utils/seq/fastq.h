@@ -9,8 +9,19 @@
 #include "utils/seq/seq.h"
 #include "utils/misc/flags.h"
 
+/**********************************************************
+ *
+ * @Brief :
+ *      Load and parse fastq format from file.
+ *
+ * Default support
+ *      + normal header
+ *      + stLFR header
+ *
+ * *******************************************************/
+
 namespace BGIQD {
-    namespace SEQ{
+    namespace SEQ {
 
         struct FqNormalHead
         {

@@ -4,6 +4,16 @@
 #include <string>
 #include <vector>
 
+/**********************************************************
+ *
+ * @Brief   :
+ *      some useful string tools
+ *          + trim
+ *          + split
+ *          + replace
+ *
+ * *******************************************************/
+
 namespace BGIQD{
 namespace STRING{
 

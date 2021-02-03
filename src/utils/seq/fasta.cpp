@@ -26,23 +26,6 @@ namespace BGIQD {
                 <<"_tip_"<<is_tip;
             return ost.str();
         }
-
-
-        void ScaffSplitGapHead::Init(const std::string & line)
-        {
-            int t ;
-            sscanf(line.c_str() 
-                    ,">%d_%d\t%u\t%u\t%u\t%u\t%d"
-                    ,&scaff_id
-                    ,&gap_index
-                    ,&prev_base_contig
-                    ,&next_base_contig
-                    ,&prev_contig
-                    ,&next_contig
-                    ,&t
-                  );
-            gap_type = static_cast<GapType>(t);
-        }
     }
 
 }

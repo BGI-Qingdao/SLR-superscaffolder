@@ -21,7 +21,6 @@ source_cpp =	../utils/files/file_reader.cpp \
 				../utils/string/stringtools.cpp\
 				../utils/args/argsparser.cpp\
 		   		../utils/sam/sam_parser.cpp\
-		   		../utils/sam/pair_sam_parser.cpp\
 				../utils/seq/fasta.cpp\
 				../utils/seq/fastq.cpp\
 				../utils/seq/seq.cpp\

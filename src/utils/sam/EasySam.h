@@ -5,10 +5,18 @@
 #include <sstream>
 #include <cassert>
 
+/**********************************************************
+ *
+ * @Brief :
+ *       define some structure to store alignments.
+ *
+ *********************************************************/
+
 namespace BGIQD {
 
     namespace EASY_SAM
     {
+        // info about a single aligment.
         struct EasySam
         {
             long long read_id ;
@@ -49,6 +57,7 @@ namespace BGIQD {
 
         };
 
+        // Item for PEInfo.
         struct PE_Single
         {
             long long  read1;
@@ -76,6 +85,7 @@ namespace BGIQD {
             }
         };
 
+        // info for a proper mapped read pair. 
         struct PEInfo
         {
             long long read1;
@@ -135,6 +145,7 @@ namespace BGIQD {
             }
         };
 
+        // A statistics for all read-pair
         struct PE_Baisc
         {
             int expect ;
