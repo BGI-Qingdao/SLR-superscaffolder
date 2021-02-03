@@ -9,13 +9,13 @@
 
 #include "utils/sam/sam_parser.h"
 
-#include "stLFR/contigPEGraph.h"
-#include "stLFR/CBB.h"
+#include "stLFR/ContigBinBarcode.h"
 #include "utils/sam/EasySam.h"
 
 #include "utils/misc/fileName.h"
 #include "utils/misc/contigIndex.h"
 
+#include <algorithm>
 struct AppConfig
 {
 

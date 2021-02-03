@@ -11,7 +11,7 @@
 
 #include "utils/misc/fileName.h"
 
-#include "stLFR/CBB.h"
+#include "stLFR/ContigBinBarcode.h"
 #include "stLFR/TrunkGap.h"
 
 #include <set>

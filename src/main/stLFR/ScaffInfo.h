@@ -5,6 +5,20 @@
 #include <iostream>
 #include <map>
 
+/**********************************************************
+ *
+ * @Brief :
+ *  Define a ScaffInfo format to store scaffolding infomations.
+ *
+ *  This format was replaced by AGP at final result but not all
+ *  codes have been re-writed.
+ *
+ * The ScaffInfo format was used in :
+ *   + Trunk2ScaffInfo
+ *   + ScaffInfo2Seq
+ *
+ * *******************************************************/
+
 namespace BGIQD {
     namespace stLFR {
 

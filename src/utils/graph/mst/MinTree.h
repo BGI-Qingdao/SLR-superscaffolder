@@ -61,7 +61,7 @@ namespace BGIQD {
                             return ;
                         }
 
-                        if( n.edge_ids.empty() )
+                        if( n.EdgeNum() )
                         {
                             assert(0);
                             return ;
@@ -78,14 +78,16 @@ namespace BGIQD {
                     auto add_node_into_mintree = [&](const Node & node ) -> void 
                     {
                         ret.AddNode(node);
-                        ret.GetNode(node.id).edge_ids.clear();
-                        if( node.edge_ids.empty() )
+                        ret.GetNode(node.id).CleanEdges();
+                        if( node.EdgeNum() ==0 )
                         {
                             return ;
                         }
-                        for( const auto edge_id : node.edge_ids )
+                        typename Node::NodeEdgeIdIterator begin,end;
+                        std::tie(begin,end) = node.GetEdges();
+                        for( auto x = begin ; x!=end; x++ )
                         {
-                            const auto & edge = base.GetEdge(edge_id);
+                            const auto & edge = base.GetEdge(*x);
                             auto oppo = edge.OppoNode(node.id);
                             if( ret.HasNode(oppo) )
                                 continue ;

@@ -8,7 +8,7 @@
 #include <set>
 
 //
-// file stLFR/CBB.h
+// file stLFR/ContigBinBarcode.h
 //
 // struct of Contig &  Bin  & Barcode ...
 //

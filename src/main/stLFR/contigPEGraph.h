@@ -45,9 +45,9 @@ namespace BGIQD {
             }
         };
 
-        struct ContigPEGraph : public BGIQD::GRAPH::ListDigraph<ContigNode , PEEdge >
+        struct ContigPEGraph : public BGIQD::GRAPH::Digraph<ContigNode , PEEdge >
         {
-            typedef BGIQD::GRAPH::ListDigraph<ContigNode , PEEdge > Basic;
+            typedef BGIQD::GRAPH::Digraph<ContigNode , PEEdge > Basic;
             // Must guarantee contigId +1 is the compelete reverse contig if this one.
             void AddNode( unsigned int contigId , int len)
             {
@@ -63,17 +63,18 @@ namespace BGIQD {
             {
                 auto & node = GetNode(id);
                 node.edge_id = Edge::invalid ;
-                if( node.edge_ids.empty() )
+                if( node.EdgeNum() == 0)
                 {
                     return ;
                 }
 
                 std::vector<std::tuple<int,long> >  edges;
-
-                for( auto i : node.edge_ids )
+                ContigPEGraph::Node::NodeEdgeIdIterator begin, end;
+                std::tie(begin,end) = node.GetEdges();
+                for(auto x = begin ; x!= end ; x++ )
                 {
-                    auto & edge = GetEdge(i);
-                    edges.push_back(std::make_tuple(edge.count, i) );
+                    auto & edge = GetEdge(*x);
+                    edges.push_back(std::make_tuple(edge.count, *x) );
                 }
 
                 std::sort(edges.rbegin() ,edges.rend());

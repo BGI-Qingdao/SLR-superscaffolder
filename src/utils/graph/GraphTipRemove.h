@@ -12,29 +12,27 @@ namespace BGIQD{
         /////////////////////////////////////////////////////////////
         //
         // Brief :
-        //          Remove tips from a graph.
+        //          Remove tips from a graph iteraterly.
+        //
+        //          A tip start from tip node and end with junction node.
         //
         //          notice : 
-        //              1. it is detect all tip .
-        //              2. delete tips that shorter than tip_cut_num.
+        //              1. it detect all tip .
+        //              2. delete tips that shorter than tip_max_num.
         //
         /////////////////////////////////////////////////////////////
 
-        template < class TListGraph , class TNode = typename TListGraph::Node >
+        template < class TGraph , class TNode = typename TGraph::Node >
             struct TipRemoveHelper
             {
-                typedef TListGraph  Graph;
-                typedef TNode       Node ;
+                typedef TGraph  Graph;
+                typedef TNode   Node ;
 
                 typedef typename Graph::NodeId   NodeId ;
                 typedef typename Graph::EdgeId   EdgeId ;
                 typedef typename Graph::Edge     Edge ;
 
                 typedef std::vector<NodeId> tip ;
-
-                // return true if tip is still short enough.
-                //        false otherwise .
-                typedef std::function<bool(const tip & )> TipChecker;
 
                 bool debuger ;
 
@@ -56,13 +54,13 @@ namespace BGIQD{
                     }
                 };
 
-                TipChecker  checker;
+                int tip_max_num;
 
                 TipRemoveResult result ;
 
-                void Init( TipChecker c ,bool dd = false )
+                void Init( int max ,bool dd = false )
                 {
-                    checker = c ;
+                    tip_max_num = max;
                     debuger = dd ;
                 }
 
@@ -83,11 +81,13 @@ namespace BGIQD{
                             NodeId curr_id = x.id ;
                             tmp_tip.push_back(x.id);
                             const auto & node = base.GetNode(curr_id) ;
-                            auto edge_id = *(node.edge_ids.begin());
+                            typename Node::NodeEdgeIdIterator begin , end;
+                            std::tie(begin,end) = node.GetEdges();
+                            auto edge_id = *(begin);
                             const auto & edge = base.GetEdge(edge_id);
                             auto next = edge.OppoNode(curr_id) ;
                             auto prev = curr_id ;
-                            while( checker(tmp_tip) )
+                            while( tmp_tip.size() < tip_max_num )
                             {
                                 const auto & node = base.GetNode(next) ;
                                 if ( node.EdgeNum() == 0 )
@@ -102,7 +102,9 @@ namespace BGIQD{
                                     // this is
                                     //      NOT A TIP 
                                     // but a short linear graph.
-                                    auto edge_id = *(node.edge_ids.begin());
+                                    typename Node::NodeEdgeIdIterator begin , end;
+                                    std::tie(begin,end) = node.GetEdges();
+                                    auto edge_id = *(begin);
                                     const auto & edge = base.GetEdge(edge_id);
                                     auto next1 = edge.OppoNode(next) ;
                                     assert(next1 == prev );
@@ -113,9 +115,11 @@ namespace BGIQD{
                                     // tip continue by linear node
                                     tmp_tip.push_back(next);
                                     bool found = false ;
-                                    for( auto x : node.edge_ids )
+                                    typename Node::NodeEdgeIdIterator begin , end;
+                                    std::tie(begin,end) = node.GetEdges();
+                                    for( auto x = begin ; x != end ; x++ )
                                     {
-                                        const auto & edge = base.GetEdge(x);
+                                        const auto & edge = base.GetEdge(*x);
                                         auto next1 = edge.OppoNode(next) ;
                                         if( next1 != prev ) 
                                         {
@@ -161,8 +165,8 @@ namespace BGIQD{
                 //          cyclic remove tips from a graph.
                 //
                 //          loop :
-                //              1. it is detect all tip .
-                //              2. delete tips that shorter than tip_cut_num
+                //              1. it detect all tip .
+                //              2. delete tips that shorter than tip_max_num
                 //
                 /////////////////////////////////////////////////////
                 TipRemoveResult DeepTipRemove( Graph & base )

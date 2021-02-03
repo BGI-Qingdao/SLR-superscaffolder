@@ -12,7 +12,6 @@
 #include "utils/misc/mapHelper.h"
 #include "utils/misc/contigIndex.h"
 
-#include "stLFR/CBB.h"
 #include "stLFR/TrunkGap.h"
 
 #include "stLFR/ScaffInfo.h"
@@ -21,6 +20,37 @@
 
 #include "utils/interval/Interval.h"
 
+struct GapFill
+{
+    unsigned int prev ;
+    unsigned int next ;
+    unsigned int true_prev;
+    unsigned int true_next ;
+    std::vector<unsigned int> extra;
+
+    void InitFromString( const std::string & str)
+    {
+        std::istringstream ist(str); ;
+        ist>>prev>>next>>true_prev>>true_next;
+        unsigned int f ;
+        while(! ist.eof() )
+        {
+            ist>>f ;
+            extra.push_back(f);
+        }
+    }
+
+    std::string ToString() const 
+    {
+        std::ostringstream ost ;
+        ost<<prev<<'\t'<<next<<'\t'<<true_prev<<'\t'<<true_next;
+        for(unsigned int i : extra)
+        {
+            ost<<'\t'<<i;
+        }
+        return ost.str() ;
+    }
+};
 struct AppConfig
 {
     typedef BGIQD::INTERVAL::Interval<float, BGIQD::INTERVAL::IntervalType::Left_Open_Right_Close> SimArea;
@@ -309,8 +339,8 @@ struct AppConfig
 
     std::map<int , std::vector<BGIQD::stLFR::TrunkGap<GapExtra> >> gaps;
     //  std::map<unsigned int , GapPos> contigPos;
-    std::map<unsigned int, BGIQD::stLFR::GapFill> gapfills;
-    std::map<unsigned int, BGIQD::stLFR::GapFill> pefills;
+    std::map<unsigned int, GapFill> gapfills;
+    std::map<unsigned int, GapFill> pefills;
     std::vector<ContigOrientation> scaffs;
     int K ;
     void LoadGapArea()
@@ -377,7 +407,7 @@ struct AppConfig
             FATAL(" failed to open xxx.gap_oo for read!!! ");
         auto fill = [this](const std::string & line) ->void
         {
-            BGIQD::stLFR::GapFill fill;
+            GapFill fill;
             fill.InitFromString(line);
             gapfills[fill.prev] = fill ;
             gapfills[fill.prev+1] = fill ;
@@ -409,7 +439,7 @@ struct AppConfig
             return ;
         auto fill = [this](const std::string & line) ->void
         {
-            BGIQD::stLFR::GapFill fill;
+            GapFill fill;
             fill.InitFromString(line);
             pefills[fill.prev] = fill ;
             pefills[fill.prev+1] = fill ;

@@ -1,4 +1,4 @@
-#include "stLFR/CBB.h"
+#include "stLFR/ContigBinBarcode.h"
 #include "sstream"
 #include "utils/string/stringtools.h"
 #include "utils/files/file_writer.h"

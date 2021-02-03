@@ -11,7 +11,7 @@
 #include "utils/misc/contigIndex.h"
 #include "utils/misc/contigIndex.h"
 
-#include "stLFR/CBB.h"
+#include "stLFR/ContigBinBarcode.h"
 
 #include <vector>
 #include <map>

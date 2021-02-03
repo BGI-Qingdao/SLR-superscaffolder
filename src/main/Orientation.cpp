@@ -8,7 +8,7 @@
 #include "utils/misc/freq.h"
 
 #include "utils/misc/fileName.h"
-#include "stLFR/CBB.h"
+#include "stLFR/ContigBinBarcode.h"
 #include "stLFR/TrunkGap.h"
 
 

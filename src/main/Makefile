@@ -29,7 +29,7 @@ source_cpp =	../utils/files/file_reader.cpp \
 				../utils/misc/contigIndex.cpp\
 				../utils/misc/TagId.cpp\
                 stLFR/ScaffInfo.cpp\
-				stLFR/CBB.cpp\
+				stLFR/ContigBinBarcode.cpp\
 
 source_o		= ${source_cpp:%.cpp=%.o}
 

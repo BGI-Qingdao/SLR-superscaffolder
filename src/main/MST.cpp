@@ -2,29 +2,240 @@
 #include "utils/files/file_reader.h"
 #include "utils/files/file_writer.h"
 #include "utils/misc/Error.h"
+#include "utils/misc/freq.h"
 #include "utils/log/log.h"
 #include "utils/log/logfilter.h"
-#include "utils/misc/freq.h"
 
-#include "stLFR/CBB.h"
-#include "stLFR/contigSimGraph.h"
-#include "stLFR/CBB.h"
+#include "utils/graph/GraphBasic.h"
+#include "utils/graph/mst/MinTree.h"
+#include "utils/graph/DisJointSet.h"
+#include "utils/graph/GraphTipRemove.h"
 
+#include "stLFR/ContigBinBarcode.h"
 #include "utils/misc/fileName.h"
 
 #include <set>
 #include <vector>
 #include <stack>
+#include <map>
 #include <sstream>
 
+typedef BGIQD::GRAPH::IGraphNodeBasic<unsigned int , long> Node;
+
+struct Edge : public BGIQD::GRAPH::IGraphEdgeBasic<unsigned int , long >
+{
+    float sim ;
+
+    std::string AttrString() const
+    {
+        std::ostringstream ost;
+        //ost<<" id= "<<id<<" sim= "<<sim;
+        ost<<"label=\""<<sim<<"\"";
+        return ost.str();
+    }
+    std::string ToString() const
+    {
+        std::ostringstream ost;
+        ost<<from<<"\t--\t"<<to<<" [ "<<AttrString()<<" ]";
+        return ost.str();
+    }
+};
+
+// Extract edge weight for MST algorithm
+struct EdgeAttr
+{
+    float GetValue(const Edge & e ) const 
+    {
+        return 1.0f - e.sim ;
+    }
+};
+
+struct ContigSimGraph : public BGIQD::GRAPH::Graph<Node,Edge>
+{
+
+    typedef BGIQD::GRAPH::Graph<Node,Edge> Basic ;
+    typedef Basic::NodeId NodeId;
+    typedef Basic::EdgeId EdgeId;
+
+
+    void AddEdgeSim( unsigned int from , unsigned int to , float sim)
+    {
+        Edge tmp ;
+        tmp.from = from ;
+        tmp.to = to ;
+        tmp.sim = sim ;
+        if( ! HasNode(from) ) {
+            Node tnode ;
+            tnode.id = from ;
+            Basic::AddNode(tnode);
+        }
+        if( ! HasNode(to) ) {
+            Node tnode ;
+            tnode.id = to;
+            Basic::AddNode(tnode);
+        }
+        Basic::AddEdge(tmp);
+    }
+
+    typedef BGIQD::GRAPH::MinTreeHelper<ContigSimGraph, float , EdgeAttr> MTHelper;
+    typedef BGIQD::GRAPH::TipRemoveHelper<ContigSimGraph> TipHelper ;
+    typedef TipHelper::TipRemoveResult TipRemoveResult;
+
+    typedef BGIQD::Algorithm::DisJoin_Set<NodeId> DJ_Sets;
+
+
+    static TipRemoveResult RemoveTip_n2( ContigSimGraph & mintree )
+    {
+        TipHelper tip_helper ;
+        tip_helper.Init(2);
+        return tip_helper.DeepTipRemove(mintree);
+    }
+
+
+    static std::vector<NodeId> DetectJunctions( const ContigSimGraph & mintree)
+    {
+        std::vector<NodeId> ret ;
+        for( const auto & pair : mintree.nodes )
+        {
+            const auto & node = pair.second ;
+            if( node.EdgeNum() > 2 )
+            {
+                ret.push_back( node.id ) ;
+            }
+        }
+        return ret;
+    }
+
+    // Get MST by prime-MST algorithm
+    ContigSimGraph  MinTree() const 
+    {
+        EdgeAttr attr ;
+        MTHelper helper;
+        return helper.MinTree(*this , attr);
+    };
+
+    // Get connect componets by disjion set algorithm
+    static std::map<NodeId , ContigSimGraph>  UnicomGraph(const ContigSimGraph & mintree)
+    {
+        std::map<NodeId , ContigSimGraph> ret;
+        DJ_Sets dj_sets;
+        for( const auto & edge : mintree.edges )
+        {
+            if( edge.IsValid())
+                dj_sets.AddConnect(edge.from , edge.to);
+        }
+        for( const auto & edge : mintree.edges )
+        {
+            if( ! edge.IsValid() )
+                continue;
+            auto rep = dj_sets.GetGroup(edge.from);
+            if( ! ret[rep].HasNode(edge.from) )
+            {
+                ret[rep].AddNode(mintree.GetNode(edge.from));
+                ret[rep].GetNode(edge.from).CleanEdges();
+            }
+            if( ! ret[rep].HasNode(edge.to) )
+            {
+                ret[rep].AddNode(mintree.GetNode(edge.to));
+                ret[rep].GetNode(edge.to).CleanEdges();
+            }
+            ret[rep].AddEdge(edge);
+        }
+        return ret ;
+    }
+
+    // Print as DOT
+    void PrintAsDOT(std::ostream & out) const
+    {
+        out<<Edge::DOTHead()<<std::endl;
+        std::set<int> multis;
+        for( const auto & e : edges )
+        {
+            out<<"\t"<<e.ToString()<<std::endl;
+            if( GetNode(e.from).EdgeNum() > 2 )
+                multis.insert(e.from);
+            if(  GetNode(e.to).EdgeNum()>2 )
+                multis.insert(e.to);
+        }
+        for( int i : multis )
+        {
+            out<<i<< " [ shape=box]  "<<std::endl;
+        }
+        out<<"}"<<std::endl;
+    }
+
+    // Extract the linear order from a already lineared graph.
+    //
+    static std::vector<NodeId> TrunkLinear(const ContigSimGraph &  base )
+    {
+        std::vector<NodeId> ret ;
+        NodeId starter ;
+        // Find a tip node
+        for( const auto & pair : base.nodes )
+        {
+            auto & node = pair.second ;
+            if( node.EdgeNum() == 1 )
+            {
+                starter = node.id ;
+                break;
+            }
+            else
+            {
+                assert( node.EdgeNum() == 2 );
+            }
+        }
+        ret.push_back( starter ) ;
+
+        auto & node = base.GetNode(starter);
+        ContigSimGraph::Node::NodeEdgeIdIterator begin,end;
+        std::tie(begin,end) = node.GetEdges();
+        auto edge_id = *begin;
+        auto & edge = base.GetEdge(edge_id);
+        NodeId next = edge.OppoNode(starter);
+        NodeId curr = starter;
+        // Travel to the other tip node
+        while(1)
+        {
+            auto & next_node = base.GetNode(next) ;
+            ret.push_back(next);
+            if( next_node.EdgeNum() == 1 )
+            {
+                break;
+            }
+            else
+            {
+                assert( next_node.EdgeNum() == 2 );
+                ContigSimGraph::Node::NodeEdgeIdIterator begin,end;
+                std::tie(begin,end) = next_node.GetEdges();
+                auto edge_id1 = *(begin);
+                auto edge_id2 = *(std::next(begin));
+                auto &edge1 = base.GetEdge(edge_id1);
+                auto &edge2 = base.GetEdge(edge_id2);
+                // Find next step.
+                if( edge1.OppoNode(next) != curr)
+                {
+                    curr = next ;
+                    next = edge1.OppoNode(next) ;
+                }
+                else
+                {
+                    assert(edge2.OppoNode(next) != curr);
+                    curr = next ;
+                    next = edge2.OppoNode(next);
+                }
+            }
+        }
+        return ret ;
+    }
+};
 struct AppConf
 {
 
-    typedef std::vector<BGIQD::stLFR::ContigSimGraph::NodeId> LinearOrder;
+    typedef std::vector<ContigSimGraph::NodeId> LinearOrder;
 
     struct MST_correct
     {
-        typedef std::vector<BGIQD::stLFR::ContigSimGraph::NodeId> JunctionResults;
+        typedef std::vector<ContigSimGraph::NodeId> JunctionResults;
 
         struct simplify_log
         {
@@ -35,7 +246,7 @@ struct AppConf
 
             int mst_node_num ;
 
-            BGIQD::stLFR::ContigSimGraph::TipRemoveResult tip_result;
+            ContigSimGraph::TipRemoveResult tip_result;
 
             JunctionResults junction_result;
 
@@ -49,7 +260,7 @@ struct AppConf
             }
         };
 
-        void Init( const  BGIQD::stLFR::ContigSimGraph & basic , int mr , float df )
+        void Init( const ContigSimGraph & basic , int mr , float df )
         {
             base_contig_sim_graph = basic ;
             max_correct_loop_num = mr ;
@@ -57,9 +268,9 @@ struct AppConf
             basic_num = base_contig_sim_graph.nodes.size();
         }
 
-        BGIQD::stLFR::ContigSimGraph base_contig_sim_graph ;
+        ContigSimGraph base_contig_sim_graph ;
 
-        BGIQD::stLFR::ContigSimGraph maximum_span_graph ;
+        ContigSimGraph maximum_span_graph ;
 
         std::stack<simplify_log> logs;
 
@@ -100,9 +311,9 @@ struct AppConf
             maximum_span_graph = base_contig_sim_graph.MinTree();
             if ( maximum_span_graph.nodes.size() > 3 )
             {
-                curr_log.tip_result = BGIQD::stLFR::ContigSimGraph
+                curr_log.tip_result = ContigSimGraph
                     ::RemoveTip_n2(maximum_span_graph) ;
-                curr_log.junction_result = BGIQD::stLFR::ContigSimGraph
+                curr_log.junction_result = ContigSimGraph
                     ::DetectJunctions(maximum_span_graph) ;
 
                 if( curr_log.junction_result.size() > 0 )
@@ -164,25 +375,25 @@ struct AppConf
                     masked_nodes.insert(x);
                 }
             }
-            auto splits = BGIQD::stLFR::ContigSimGraph::UnicomGraph(maximum_span_graph);
+            auto splits = ContigSimGraph::UnicomGraph(maximum_span_graph);
             for( auto & pair : splits)
             {
-                auto a_line = BGIQD::stLFR::ContigSimGraph::TrunkLinear(pair.second);
+                auto a_line = ContigSimGraph::TrunkLinear(pair.second);
                 if( a_line.size() > 1)
                     ret.push_back(a_line);
             }
             return ret ;
         }
-        std::set< BGIQD::stLFR::ContigSimGraph::NodeId > masked_nodes;
+        std::set< ContigSimGraph::NodeId > masked_nodes;
     };
 
     BGIQD::MISC::FileNames fNames ;
 
-    BGIQD::stLFR::ContigSimGraph graph;
+    ContigSimGraph graph;
 
     BGIQD::LOG::logger lger;
 
-    std::map< BGIQD::stLFR::ContigSimGraph::NodeId , MST_correct>  split_graphs;
+    std::map< ContigSimGraph::NodeId , MST_correct>  split_graphs;
 
     int max_correct_loop_num ;
 
@@ -199,7 +410,6 @@ struct AppConf
 
     void LoadContigSimGraph()
     {
-        graph.use_salas = false;
         auto in = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fNames.cluster("mst"));
         if( in == NULL )
             FATAL("failed to open xxx.cluster for read!!! ");
