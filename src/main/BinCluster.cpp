@@ -1,3 +1,13 @@
+/**********************************************************
+ *
+ * @Brief :
+ *      Calculate similarity between all pair of bins.
+ *
+ *      Two strategy supported:
+ *          + Jaccard similarity
+ *          + Shared barcode count
+ * *******************************************************/
+
 #include "utils/incr_array/incr_array.h"
 #include "utils/collection/collection.h"
 

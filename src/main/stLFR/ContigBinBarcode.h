@@ -13,6 +13,9 @@
  *  Define some common data structures for store contig/bin/barcde
  *  and their relationships.
  *
+ *  More than 50% of application in this scaffolder need this
+ *  structures.
+ *
  * *******************************************************/
 
 namespace BGIQD{

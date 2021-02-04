@@ -6,9 +6,21 @@
 
 #include <sstream>
 
+/**********************************************************
+ *
+ * @Brief  :
+ *
+ *     The contig-PE graph used by
+ *          + PEGraph
+ *          + FillTrunkByPE
+ *
+ * *******************************************************/
+
 namespace BGIQD {
     namespace stLFR {
 
+        // Node of PE graph.
+        // To achive a new edge iterator , we add edge_id to store the strongest PE link edge
         struct ContigNode : public BGIQD::GRAPH::IGraphNodeBasic<unsigned int , long >
         {
             typedef BGIQD::GRAPH::IGraphNodeBasic<unsigned int , long >  Basic;
@@ -16,11 +28,12 @@ namespace BGIQD {
             long edge_id;
         };
 
+        // Edge of PE graph.
         struct PEEdge : public BGIQD::GRAPH::IDigraphEdgeBase<unsigned int ,long>
         {
-            int count ;
-            int len;
-            long next ; // to use the SPFsearch code .
+            int count ; // PE linkage count.
+            int len   ; // gap size estimated by PE.
+            long next ; // to use the Search code . This search code will be replaced soon.
 
             std::string AttrString() const
             {
@@ -45,6 +58,7 @@ namespace BGIQD {
             }
         };
 
+        // contig-PE graph for local scaffolding.
         struct ContigPEGraph : public BGIQD::GRAPH::Digraph<ContigNode , PEEdge >
         {
             typedef BGIQD::GRAPH::Digraph<ContigNode , PEEdge > Basic;
@@ -59,6 +73,7 @@ namespace BGIQD {
                 Basic::AddNode(tmp);
             }
 
+            // Sort edges of one node by the PE linkage count and chained in list.
             void MakeEdgeNext(const NodeId & id)
             {
                 auto & node = GetNode(id);

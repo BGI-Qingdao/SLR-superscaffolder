@@ -1,3 +1,13 @@
+/**********************************************************
+ *
+ * @Brief :
+ *      Chop contig into bins, there strategy are supported:
+ *        + chop bin with same size back to back
+ *        + chop only two bin : head and tail
+ *        + treat entire contig with 1 bin.
+ *
+ * *******************************************************/
+
 #include "utils/interval/Interval.h"
 #include "utils/files/file_reader.h"
 #include "utils/files/file_writer.h"

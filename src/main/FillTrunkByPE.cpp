@@ -7,7 +7,6 @@
 #include "utils/misc/Error.h"
 #include "utils/misc/freq.h"
 #include "utils/misc/fileName.h"
-
 #include "stLFR/contigPEGraph.h"
 
 #include <map>
@@ -21,87 +20,19 @@
 
 using namespace BGIQD::stLFR;
 
-template<class Graph>
-struct EdgeIterator
-{
-    public:
 
-        typedef typename Graph::EdgeId        Id;
-        typedef typename Graph::Edge          Edge;
-
-        EdgeIterator() : curr(NULL) ,accessor( NULL ) { }
-
-        EdgeIterator(const Edge & e , Graph & acc )
-        {
-            node_id = e.from;
-            if( e.id != Edge::invalid )
-                curr = &e;
-            else
-                curr = NULL ;
-            accessor = &acc ;
-        }
-
-        EdgeIterator( const EdgeIterator & ei )
-        {
-            node_id = ei.node_id;
-            curr = ei.curr ;
-            accessor = ei.accessor ;
-        }
-
-        EdgeIterator & operator = ( const EdgeIterator & ei )
-        {
-            if( &ei != this )
-            {
-                node_id = ei.node_id ;
-                curr = ei.curr ;
-                accessor = ei.accessor ;
-            }
-            return *this;
-        }
-
-        // ONLY detect curr.
-        // ONLY use == with End() .
-        bool operator == ( const EdgeIterator & ei )const
-        {
-            return curr == ei.curr ;
-        }
-
-        // ONLY detect curr.
-        // ONLY use == with End() .
-        bool operator != ( const EdgeIterator & ei )const
-        {
-            return curr != ei.curr ;
-        }
-
-        const Edge & operator*() const  { return *curr ; }
-
-        const Edge * operator->() const  { return curr ; }
-
-        EdgeIterator & operator ++() {
-            if( curr != NULL && accessor != NULL )
-            {
-                Id next = curr->next ;
-                if( next != Edge::invalid )
-                    curr = &(accessor->GetEdge(next));
-                else
-                    curr = NULL ;
-            }
-            else
-                curr = NULL ;
-            return *this ;
-        }
-
-        static EdgeIterator & end() 
-        {
-            static EdgeIterator end;
-            return end ;
-        }
-        typename Edge::EdgeNodeId node_id ;
-    private:
-        const Edge * curr ;
-        Graph      * accessor ;
-};
-
+/*********************************************************
+ *
+ * We wrote an customized shortest-path-search algorithm 
+ * based on depth-first search to support an special feature.
+ *
+ * Awkwardly, the feature that need to design this customized
+ * algorithm was abandoned now.
+ *
+ * Therefor, we will replace this algorithm with a standard
+ * shortest-path-search algorithm like Dijkstra.
+ *
+ * ******************************************************/
 enum DepthSearchEdgeType
 {
     Invalid = -1 ,
@@ -186,6 +117,87 @@ struct DepthSearchNode
     }
 };
 
+// Design an special edge iterator because the edge should be iterated after sorted by PE linkage weight.
+template<class Graph>
+struct EdgeIterator
+{
+    public:
+
+        typedef typename Graph::EdgeId        Id;
+        typedef typename Graph::Edge          Edge;
+
+        EdgeIterator() : curr(NULL) ,accessor( NULL ) { }
+
+        EdgeIterator(const Edge & e , Graph & acc )
+        {
+            node_id = e.from;
+            if( e.id != Edge::invalid )
+                curr = &e;
+            else
+                curr = NULL ;
+            accessor = &acc ;
+        }
+
+        EdgeIterator( const EdgeIterator & ei )
+        {
+            node_id = ei.node_id;
+            curr = ei.curr ;
+            accessor = ei.accessor ;
+        }
+
+        EdgeIterator & operator = ( const EdgeIterator & ei )
+        {
+            if( &ei != this )
+            {
+                node_id = ei.node_id ;
+                curr = ei.curr ;
+                accessor = ei.accessor ;
+            }
+            return *this;
+        }
+
+        // ONLY detect curr.
+        // ONLY use == with End() .
+        bool operator == ( const EdgeIterator & ei )const
+        {
+            return curr == ei.curr ;
+        }
+
+        // ONLY detect curr.
+        // ONLY use == with End() .
+        bool operator != ( const EdgeIterator & ei )const
+        {
+            return curr != ei.curr ;
+        }
+
+        const Edge & operator*() const  { return *curr ; }
+
+        const Edge * operator->() const  { return curr ; }
+
+        EdgeIterator & operator ++() {
+            if( curr != NULL && accessor != NULL )
+            {
+                Id next = curr->next ;
+                if( next != Edge::invalid )
+                    curr = &(accessor->GetEdge(next));
+                else
+                    curr = NULL ;
+            }
+            else
+                curr = NULL ;
+            return *this ;
+        }
+
+        static EdgeIterator & end() 
+        {
+            static EdgeIterator end;
+            return end ;
+        }
+        typename Edge::EdgeNodeId node_id ;
+    private:
+        const Edge * curr ;
+        Graph      * accessor ;
+};
 template<class Graph
 , class EdgeItr
 , class PathEnder
