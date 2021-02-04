@@ -57,17 +57,12 @@ namespace BGIQD{
             PartB leftb ;
 
             std::string ToString() const;
-            static bool IsAGPStringValid( const std::string & str) ;
-            void InitFromString( const std::string & str) ;
         };
 
         // Define rows of AGP_Items as AGPFile, and implement Print function.
         struct AGPFile
         {
             std::vector<AGP_Item> data;
-
-            // not implement yet.
-            void Load( std::istream & ist );
             // implement.
             void Print( std::ostream & ost ) const ;
         };

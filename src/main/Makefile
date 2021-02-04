@@ -10,7 +10,6 @@ CXXFLAGS   =	-std=c++11\
 				-lpthread\
 
 DEUBG_CXX  =	${CXXFLAGS} -g
-RELEASE_CXX=	${CXXFLAGS}
 
 source_cpp =	../utils/files/file_reader.cpp \
 		   		../utils/files/file_writer.cpp \
@@ -37,9 +36,7 @@ source_o		= ${source_cpp:%.cpp=%.o}
 
 jobs = BinCluster ChopBin FillTrunkByPE FakeSOAPContig GapSize MST Orientation ParseReadName PEGraph Sam2ReadOnContig ScaffInfo2Seq SeedCluster SplitInfo StaticsticUnique Trunk2ScaffInfo
 
-all :  ${jobs}
-
-
+all :  ${jobs} test
 
 
 BinCluster_cpp = BinCluster.cpp
@@ -178,6 +175,33 @@ Trunk2ScaffInfo : clean ${Trunk2ScaffInfo_o} ${source_o} ../bin
 jobs_o=  ${BinCluster_o} ${ChopBin_o} ${FillTrunkByPE_o} ${FakeSOAPContig_o} ${GapSize_o} ${MST_o} ${Orientation_o} ${ParseReadName_o} ${PEGraph_o} ${Sam2ReadOnContig_o} ${ScaffInfo2Seq_o} ${SeedCluster_o} ${SplitInfo_o} ${StaticsticUnique_o} ${Trunk2ScaffInfo_o}
 
 dirty	   =${jobs_o} ${jobs} ${source_o}
+
+unittest_cpp = ../utils/string/stringtools_test.cpp \
+			   ../utils/agp/agp_test.cpp \
+			   ../utils/args/argsparser_test.cpp \
+			   ../utils/collection/collection_test.cpp \
+			   ../utils/files/file_test.cpp \
+			   ../utils/incr_array/incr_array_test.cpp \
+			   ../utils/linear_fitting/Minimum_multiplication_test.cpp \
+			   ../utils/log/timetools_test.cpp \
+			   ../utils/sam/sam_parser_test.cpp \
+			   ../utils/seq/fasta_test.cpp \
+			   ../utils/seq/fastq_test.cpp \
+			   ../utils/seq/seq_test.cpp \
+
+#			   ../utils/multithread/
+#			   ../utils/graph/
+#			   ../utils/misc/
+
+
+
+unittest_o		= ${unittest_cpp:%.cpp=%.o}
+
+test_cpp = test.cpp
+test_o = test.o
+test : clean ${test_o} ${source_o} ${unittest_o} ../bin
+	${CXX} ${test_o} ${source_o} ${unittest_o} ${DEUBG_CXX} -o test
+	mv $@ ../bin/
 
 ../bin:
 	mkdir -p ../bin

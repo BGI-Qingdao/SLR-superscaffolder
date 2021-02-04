@@ -1,5 +1,5 @@
 #include "utils/incr_array/incr_array.h"
-#include "utils/test/Test.h"
+#include "utils/unittest/Test.h"
 
 TEST_MODULE_INIT(IncrArray)
 
