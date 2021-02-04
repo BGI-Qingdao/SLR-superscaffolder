@@ -67,7 +67,7 @@ namespace BGIQD {
                             return ;
                         }
 
-                        if( n.EdgeNum() )
+                        if( n.EdgeNum() ==0 )
                         {
                             assert(0);
                             return ;
