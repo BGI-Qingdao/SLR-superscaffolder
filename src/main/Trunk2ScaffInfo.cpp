@@ -1,3 +1,14 @@
+/**********************************************************
+ *
+ * @Brief :
+ *        Gather all information and constrcut scaffold.
+ *             order
+ *           + orientation
+ *           + gap filling 
+ *           + gap size 
+ *           = scaffolds
+ *
+ * *******************************************************/
 #include "utils/args/argsparser.h"
 #include "utils/log/log.h"
 #include "utils/log/logfilter.h"
@@ -20,6 +31,7 @@
 
 #include "utils/interval/Interval.h"
 
+// Define details of a gap the how to fill it
 struct GapFill
 {
     unsigned int prev ;

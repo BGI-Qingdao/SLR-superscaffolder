@@ -1,3 +1,10 @@
+/**********************************************************
+ *
+ * @Brief  :
+ *
+ *   Parse SAM and print in customized format.
+ *
+ * *******************************************************/
 #include "utils/args/argsparser.h"
 #include "utils/log/log.h"
 #include "utils/log/logfilter.h"

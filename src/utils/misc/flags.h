@@ -1,6 +1,11 @@
 #ifndef __COMMON_FLAGS_FLAGS_H__
 #define __COMMON_FLAGS_FLAGS_H__
 
+/**********************************************************
+ *
+ * To manager bit flags
+ *
+ * ********************************************************/
 #include <bitset>
 
 #define FLAGS_INT std::bitset<32> flags;

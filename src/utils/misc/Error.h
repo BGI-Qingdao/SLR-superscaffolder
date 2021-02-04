@@ -1,6 +1,12 @@
 #ifndef __COMMON_ERROR_H__
 #define __COMMON_ERROR_H__
 
+/**********************************************************
+ *
+ *  to report import error or warnings
+ *  or bad things happened before log system started.
+ *
+ * ********************************************************/
 #include <cassert>
 #include <iostream>
 

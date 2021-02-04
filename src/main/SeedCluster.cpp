@@ -1,3 +1,10 @@
+/**********************************************************
+ * 
+ * @Brief  :
+ *     Cluster candidate contigs to close a gap 
+ *     based on their co-barcoding relationship.
+ *
+ * ********************************************************/
 #include "utils/args/argsparser.h"
 #include "utils/log/log.h"
 #include "utils/log/logfilter.h"

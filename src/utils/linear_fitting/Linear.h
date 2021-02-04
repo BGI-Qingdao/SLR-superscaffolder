@@ -1,6 +1,11 @@
 #ifndef __ALGORITHM_LINEAR_FITTING_LINEAR_H__
 #define __ALGORITHM_LINEAR_FITTING_LINEAR_H__
-
+/**********************************************************
+ *
+ * @Brief :
+ *   A simple linear fitting code.
+ *
+ * ********************************************************/
 #include <vector>
 #include <cmath>
 namespace BGIQD {

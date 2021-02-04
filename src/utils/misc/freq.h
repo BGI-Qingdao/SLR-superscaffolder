@@ -1,5 +1,10 @@
 #ifndef __COMMON_FREQ_FREQ_H__
 #define __COMMON_FREQ_FREQ_H__
+/**********************************************************
+ *
+ * To count frequences
+ *
+ * ********************************************************/
 #include <map>
 #include <sstream>
 namespace BGIQD{

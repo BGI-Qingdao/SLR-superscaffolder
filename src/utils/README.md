@@ -21,11 +21,10 @@ One interface to read/write both normal files and gzip format files.
 
 ## graph
 
-A simple vertex-edge graph implementation.
+Some simple vertex-edge graph implementation include an undirected graph and a directed graph.
 
 Support classic algorithm :
 
-* Depth-First-Search 
 * Disjoint-Set
 * Minimum-Span-Tree
 

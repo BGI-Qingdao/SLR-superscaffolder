@@ -1,3 +1,11 @@
+/**********************************************************
+ *
+ * @Brief   :
+ *      Generate final scaffolding sequnces and AGP format
+ *      data by scaff_info format data and original contig
+ *      sequences.
+ *
+ * ********************************************************/
 #include "utils/args/argsparser.h"
 #include "utils/log/log.h"
 #include "utils/log/logfilter.h"
@@ -18,7 +26,7 @@
 #include <set>
 #include <sstream>
 
-
+// Convert the informations if one scaffold into an array of AGPItems
 struct Scaff2AGPItem
 {
     public:
@@ -37,6 +45,7 @@ struct Scaff2AGPItem
         std::string scaff_name ;
         std::vector<BGIQD::AGP::AGP_Item> data;
 };
+
 void Scaff2AGPItem::InitName(const std::string & n)
 {
     scaff_name = n ;

@@ -3,7 +3,11 @@
 
 #include <string>
 #include <sys/time.h>
-
+/**********************************************************
+ *
+ * Some timer to benchmark the CPU and wall clock time comsumption.
+ *
+ * *******************************************************/
 namespace BGIQD{
 namespace TIME{
 

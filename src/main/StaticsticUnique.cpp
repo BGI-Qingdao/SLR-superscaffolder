@@ -1,3 +1,10 @@
+/*********************************************************
+ *
+ * @Brief  :
+ *      Choose seed contig based on length and coverage
+ *      of reads.
+ *
+ * *******************************************************/
 #include "utils/args/argsparser.h"
 #include "utils/log/log.h"
 #include "utils/log/logfilter.h"

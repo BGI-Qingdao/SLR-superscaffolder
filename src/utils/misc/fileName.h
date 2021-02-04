@@ -1,6 +1,11 @@
 #ifndef __SOAP2_FILENAME_H__
 #define __SOAP2_FILENAME_H__
 
+/**********************************************************
+ *
+ * To manager all suffix of files. 
+ *
+ * ********************************************************/
 #include <string>
 #include "utils/string/stringtools.h"
 

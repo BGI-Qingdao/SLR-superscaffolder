@@ -1,3 +1,10 @@
+/**********************************************************
+ *
+ * @Brief :
+ *      Load the result of Sam2ReadOnContig and further 
+ *      parse the PE informations.
+ *
+ * *******************************************************/
 #include "utils/args/argsparser.h"
 #include "utils/log/log.h"
 #include "utils/log/logfilter.h"

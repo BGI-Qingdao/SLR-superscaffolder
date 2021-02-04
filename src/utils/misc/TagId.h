@@ -4,6 +4,13 @@
 #include <string>
 #include <map>
 
+/**********************************************************
+ *
+ *  A string <---> number mapping system.
+ *
+ *  Use number to replace string to save MEMORY
+ *
+ * ********************************************************/
 namespace BGIQD {
     namespace MISC {
 

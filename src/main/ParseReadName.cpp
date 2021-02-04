@@ -1,3 +1,13 @@
+/**********************************************************
+ *
+ * @Brief  :
+ *
+ *   Parse the read names of read1 and collect informations:
+ *      + map string readnames to numbers
+ *      + map string barcodes to numbers
+ *      + filter low quality barcodes.
+ *
+ * *******************************************************/
 #include "utils/args/argsparser.h"
 #include "utils/files/file_reader.h"
 #include "utils/files/file_writer.h"

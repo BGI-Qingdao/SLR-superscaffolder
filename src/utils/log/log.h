@@ -6,6 +6,14 @@
 #include <sstream>
 #include "utils/log/timetools.h"
 
+/**********************************************************
+ *
+ * @Brief :
+ *
+ *   To make uniform logs by easy-to-use interface.
+ *
+ * *******************************************************/
+
 namespace BGIQD{
 namespace LOG{
 

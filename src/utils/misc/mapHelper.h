@@ -2,6 +2,11 @@
 #define __COMMON_STL_MAPHELPER_H__
 #include <map>
 
+/**********************************************************
+ *
+ * To incr or decr values in map
+ *
+ * ********************************************************/
 namespace BGIQD{
     namespace MISC{
         template<class Map>

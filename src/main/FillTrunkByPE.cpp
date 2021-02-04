@@ -1,8 +1,12 @@
 /**********************************************************
  *
- *
- *
- *
+ * @Brief :
+ *    Fill gaps by local scaffolding :
+ *      + construct contig-PE graph
+ *      + foreach gap
+ *            + get sub-graph based on results of seedcluster
+ *            + find the short-path between gap
+ *      + end
  *
  * *******************************************************/
 #include "utils/args/argsparser.h"
@@ -31,7 +35,7 @@ using namespace BGIQD::stLFR;
 /*********************************************************
  *
  * We wrote an customized shortest-path-search algorithm 
- * based on depth-first search to support an special feature.
+ * based on depth-first-visit to support an special feature.
  *
  * Awkwardly, the feature that need to design this customized
  * algorithm was abandoned now.
@@ -494,6 +498,7 @@ struct DepthEnder
 //
 struct AppConfig
 {
+    // details for one gap
     struct GapInfo
     {
         unsigned int prev ;

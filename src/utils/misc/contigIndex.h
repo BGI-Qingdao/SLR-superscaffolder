@@ -1,6 +1,10 @@
 #ifndef __SOAP2_CONTIGINDEX_H__
 #define __SOAP2_CONTIGINDEX_H__
-
+/**********************************************************
+ *
+ * Functions to parse SOAPdenovo2 format header of contigs 
+ *
+ * ********************************************************/
 #include <string>
 #include <map>
 #include <iostream>

@@ -1,6 +1,26 @@
 #ifndef __COMMON_MULTITHREAD_MULTITHREAD_H__
 #define __COMMON_MULTITHREAD_MULTITHREAD_H__
-    
+
+/**********************************************************
+ *
+ * @Brief :
+ *     A therad pool implementation.
+ *
+ *     How to use it in main thread :
+ *
+ *      MultiThread mt;
+ *      mt.Start(8);              <-- 8 worker thread will be created
+ *
+ *      mt.AddJob(xxx) ....       <-- add all jobs
+ *
+ *      mt.End();                 <-- declare no more jobs will come
+ *
+ *      mt.WaitingStop();         <-- block until all jobs are done.
+ *
+ *    // Enjob it ~
+ * *******************************************************/
+
+
 #include <functional>
 #include <queue>
 #include <condition_variable>

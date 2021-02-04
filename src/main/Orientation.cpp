@@ -1,7 +1,8 @@
 /**********************************************************
  *
  * @Brief  :
- *      Get the orientation of contigs.
+ *      Get the orientation of contigs by found the
+ *      strongest JS and make it shortest.
  *
  * *******************************************************/
 #include "utils/args/argsparser.h"

@@ -1,3 +1,9 @@
+/**********************************************************
+ *
+ * @Brief : 
+ *      Construct contig  PE graph by parse Pair-End mapped reads.
+ *
+ * *******************************************************/
 #include "utils/args/argsparser.h"
 #include "utils/log/log.h"
 #include "utils/log/logfilter.h"
