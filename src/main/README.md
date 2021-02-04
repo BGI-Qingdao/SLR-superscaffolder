@@ -78,6 +78,9 @@ Notice: These two programs will be integrated in the future.
 
 Contain some structures special designed for this scaffolder. All of those structures are used in at least two applications.
 
+## test
+
+Do unittest for all codes in utils.
 
 --------------------------
 

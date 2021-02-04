@@ -1,14 +1,26 @@
 #ifndef __LFR_TEST_TEST_H__
 #define __LFR_TEST_TEST_H__
 
-#include "utils/unittest/Check.h"
 #include <vector>
 #include <iostream>
 #include <string>
 #include <map>
 #include <functional>
+
 #include "utils/log/log.h"
 #include "utils/log/logfilter.h"
+
+/**********************************************************
+ *
+ * A simple framework for unittest
+ *
+ * How to use it ? 
+ *
+ *   + the main file is in main/test.cpp
+ *   + find examples in other folders under utils to add more unittest.
+ *
+ * ********************************************************/
+
 struct Test
 {
     typedef std::function<void()> testFunc ;
@@ -119,6 +131,5 @@ struct Test
         std::cerr<<__FILE__<<":"<<__LINE__<<" expect "<<expect<<" but "<<value<<std::endl;\
         action \
     }
-
 
 #endif //__LFR_TEST_TEST_H_
