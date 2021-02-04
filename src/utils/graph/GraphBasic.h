@@ -235,12 +235,20 @@ namespace BGIQD {
 
                 Edge & GetEdge( const EdgeId & id )
                 {
-                    return edges[id] ;
+                    if( id == Edge::invalid ) 
+                        return get_invalid_edge();
+                    if( id >=0 && id <edges.size() )
+                        return edges.at(id);
+                    assert(0);
                 }
 
                 const Edge & GetEdge( const EdgeId &id ) const
                 {
-                    return edges[id] ;
+                    if( id == Edge::invalid ) 
+                        return get_invalid_edge();
+                    if( id >=0 && id <edges.size() )
+                        return edges.at(id);
+                    assert(0);
                 }
 
                 bool CheckEdge(const NodeId & from ,const  NodeId & to ) const
@@ -310,6 +318,12 @@ namespace BGIQD {
                         out<<"\t"<<e.ToString()<<std::endl;
                     }
                     out<<"}"<<std::endl;
+                }
+                private:
+                static Edge & get_invalid_edge(){
+                    static Edge none_edge;
+                    none_edge.id = Edge::invalid;
+                    return  none_edge;
                 }
             };
 
