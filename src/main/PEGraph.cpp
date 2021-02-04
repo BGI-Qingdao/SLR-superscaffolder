@@ -11,6 +11,9 @@
 #include "utils/sam/EasySam.h"
 #include "utils/misc/fileName.h"
 
+//
+// Struct to wrap all global variables and functions
+//
 struct AppConfig
 {
     BGIQD::LOG::logger loger;
@@ -46,8 +49,6 @@ struct AppConfig
         }
         delete in ;
     };
-
-
 
     void LoadPEInfo()
     {

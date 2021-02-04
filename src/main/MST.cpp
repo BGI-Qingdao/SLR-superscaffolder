@@ -228,6 +228,9 @@ struct ContigSimGraph : public BGIQD::GRAPH::Graph<Node,Edge>
         return ret ;
     }
 };
+//
+// Struct to wrap all global variables and functions
+//
 struct AppConf
 {
 

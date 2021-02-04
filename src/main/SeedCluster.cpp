@@ -16,6 +16,9 @@
 
 #include <set>
 
+//
+// Struct to wrap all global variables and functions
+//
 struct AppConfig
 {
     BGIQD::LOG::logger loger;
@@ -23,13 +26,6 @@ struct AppConfig
     BGIQD::MISC::Freq<int> freqs;
     float min;
     int loop_num;
-    /*
-    struct GapInfo
-    {
-        unsigned int prev ;
-        unsigned int next ;
-        std::set<unsigned int> relations;
-    };*/
     typedef BGIQD::stLFR::OrderItem<int> GapInfo ;
     typedef BGIQD::Collection::Collection<unsigned int>  Cols;
     std::map<unsigned int , Cols> relations;
@@ -52,28 +48,6 @@ struct AppConfig
         auto in  = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.mintreetrunklinear());
         if( in == NULL )
             FATAL(" failed to open xxx.mintree_trunk_linear for read!!! ");
-        /*
-        std::string line ;
-        unsigned int prev = -1 ;
-        while(! std::getline(*in,line).eof() )
-        {
-            if( line[0] == '-' )
-            {
-                prev = -1 ;
-                continue ;
-            }
-            unsigned int now = std::stoul(line);
-            trunk_seeds.insert(now);
-            if( prev != (unsigned int )-1 )
-            {
-                GapInfo info ;
-                info.prev = prev ;
-                info.next = now ;
-                infos.push_back(info);
-            }
-            prev = now ;
-        }
-        */
         BGIQD::stLFR::Load_MST_Trunk_Linear(*in,infos);
         delete in ;
         for(auto & pair: infos)

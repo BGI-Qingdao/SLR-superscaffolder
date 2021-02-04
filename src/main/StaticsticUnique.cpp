@@ -11,6 +11,9 @@
 #include <set>
 #include <map>
 
+//
+// Struct to wrap all global variables and functions
+//
 struct AppConfig
 {
     struct ContigInfo

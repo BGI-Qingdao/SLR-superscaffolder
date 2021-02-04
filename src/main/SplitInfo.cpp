@@ -16,6 +16,11 @@
 #include "utils/misc/contigIndex.h"
 
 #include <algorithm>
+
+//
+// Struct to wrap all global variables and functions
+//
+
 struct AppConfig
 {
 

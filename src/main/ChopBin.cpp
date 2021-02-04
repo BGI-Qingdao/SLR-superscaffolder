@@ -20,8 +20,12 @@
 #include <sstream>
 #include <random>
 
+//
+// Struct to wrap all global variables and functions
+//
 struct AppConfig
 {
+    //                    contigId        info for one contig
     typedef std::map<unsigned int, BGIQD::stLFR::ContigBarcodeInfo>  BarcodeOnContig;
     typedef BGIQD::INTERVAL::Interval<int,
                 BGIQD::INTERVAL::Left_Close_Right_Close > BinInterval;
@@ -34,7 +38,6 @@ struct AppConfig
 
     float bin_factor ;
 
-    bool flatten ;
 
     enum WorkingMode
     {
@@ -60,30 +63,9 @@ struct AppConfig
 
     std::tuple<bool , int > IsBarcodeInBin( const BinInterval & bin , int barcode_start_pos )
     {
-        if( ! flatten )
-        {
-            bool in = bin.IsContain(barcode_start_pos);
-            int len = in ? 1 : 0 ;
-            return std::make_tuple( in , len );
-        }
-
-        if( barcode_start_pos >= bin.min && barcode_start_pos <= bin.max )
-        {
-            int total_in_bin = ( bin.max - barcode_start_pos + 1 ) > 100 ?
-                100 : ( bin.max - barcode_start_pos + 1 ) ;
-            return std::make_tuple(  true , total_in_bin );
-        }
-        else if ( barcode_start_pos <  bin.min && barcode_start_pos + 99 >= bin.min )
-        {
-            int right = barcode_start_pos + 99 ;
-            if (right > bin.max ) 
-                right = bin.max ;
-            return std::make_tuple( true , right - bin.min +1 );
-        }
-        else
-        {
-            return std::make_tuple( false , 0 );
-        }
+        bool in = bin.IsContain(barcode_start_pos);
+        int len = in ? 1 : 0 ;
+        return std::make_tuple( in , len );
     }
 
     std::map<int ,BinInterval> MakeBin(int contig_len)
@@ -253,19 +235,6 @@ struct AppConfig
         delete in;
     }
 
-    void PrintBarcodeOnContig()
-    {
-        auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName(fName.BarcodeOnContig());
-        if( out == NULL )
-            FATAL( "open .barcodeOnContig file to write failed" );
-
-        for( const auto & i : boc )
-        {
-            (*out)<<i.second.ToString()<<std::endl;
-        }
-        delete out;
-    }
-
 
     void ChopBin()
     {
@@ -329,14 +298,12 @@ int main(int argc , char ** argv)
 
     DEFINE_ARG_OPTIONAL(float ,bin_factor , "factor of smallest bin in the middle", "0.5");
     DEFINE_ARG_OPTIONAL(int,  max_bin_size , "max bin area from head & tail " ,"15000");
-    DEFINE_ARG_OPTIONAL(bool,  flatten, "flatten mode " ,"false");
     DEFINE_ARG_OPTIONAL(std::string,  middle_name, "the middle name of output suffix " ,"");
     DEFINE_ARG_OPTIONAL(float ,sample_factor, "random sample barcodes to reduce cluster time. [0.1,1]", "1");
     END_PARSE_ARGS
 
     config.work_mode = static_cast<AppConfig::WorkingMode>(work_mode.to_int());
     config.max_bin_size = max_bin_size.to_int();
-    config.flatten = flatten.to_bool() ;
     config.sample_fac = sample_factor.to_float() ;
     config.middle_name = middle_name.to_string() ;
     config.Init( prefix.to_string() , bin_size.to_int() , bin_factor.to_float());
@@ -355,6 +322,6 @@ int main(int argc , char ** argv)
     config.ChopBin();
 
     config.PrintBinInfo();
-    
+
     return 0;
 }

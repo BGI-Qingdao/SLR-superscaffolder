@@ -84,6 +84,9 @@ void Scaff2AGPItem::AddN(int n_size)
     data.emplace_back(std::move(tmp));
 }
 
+//
+// Struct to wrap all global variables and functions
+//
 struct AppConfig
 {
     BGIQD::MISC::FileNames fNames;

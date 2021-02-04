@@ -17,6 +17,9 @@
 #include <array>
 #include <algorithm>
 
+//
+// Struct to wrap all global variables and functions
+//
 struct AppConfig
 {
     bool ptest;

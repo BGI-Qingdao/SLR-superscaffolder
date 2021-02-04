@@ -51,6 +51,10 @@ struct GapFill
         return ost.str() ;
     }
 };
+
+//
+// Struct to wrap all global variables and functions
+//
 struct AppConfig
 {
     typedef BGIQD::INTERVAL::Interval<float, BGIQD::INTERVAL::IntervalType::Left_Open_Right_Close> SimArea;
@@ -388,18 +392,6 @@ struct AppConfig
         loger<<BGIQD::LOG::lstart() << "Load Trunk done "<<BGIQD::LOG::lend() ;
     }
 
-    //    void BuildGapPos()
-    //    {
-    //        for( const auto & p : gaps )
-    //        {
-    //            for( size_t i = 0 ; i < p.second.size() ; i++)
-    //            {
-    //                const auto gap = p.second[i];
-    //                contigPos[gap.prev] = GapPos{ p.first , (int)i } ;
-    //            }
-    //        }
-    //    }
-
     void LoadGapOO()
     {
         auto in  = BGIQD::FILES::FileReaderFactory::GenerateReaderFromFileName(fName.gap_oo());
@@ -421,7 +413,7 @@ struct AppConfig
 
     int GetGapLen(float s)
     {
-        for( const auto p : gapArea )
+        for( const auto & p : gapArea )
         {
             if( p.first.IsContain(s) )
                 return p.second ;
@@ -554,13 +546,6 @@ struct AppConfig
         }
         loger<<BGIQD::LOG::lstart()<<'\n'<<pfreq.ToString()<<BGIQD::LOG::lend();
     }
-
-   // struct ContigInScaffDetails
-   // {
-   //     unsigned int base ;
-   //     bool plus ;
-   //     int gap ;
-   // };
 
     BGIQD::stLFR::ScaffInfoHelper helper ;
     void BuildScaff()

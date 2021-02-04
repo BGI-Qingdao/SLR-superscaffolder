@@ -463,6 +463,9 @@ struct DepthEnder
     bool IsEnd() const { return ender_flag ; }
 };
 
+//
+// Struct to wrap all global variables and functions
+//
 struct AppConfig
 {
     struct GapInfo

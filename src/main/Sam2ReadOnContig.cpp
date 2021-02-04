@@ -15,6 +15,9 @@
 #include <string>
 #include <cassert>
 
+//
+// Struct to wrap all global variables and functions
+//
 struct AppConfig
 {
     BGIQD::LOG::logger loger;
@@ -105,8 +108,6 @@ struct AppConfig
         delete b2r_out;
     }
 }config;
-
-
 
 int main(int argc , char ** argv)
 {

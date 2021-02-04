@@ -21,10 +21,15 @@
 #include <iostream>
 #include <string>
 
+//
+// Struct to wrap all global variables and functions
+//
 struct AppConfig
 {
+    //                barcode      bins
     typedef std::map< int , std::set<int> > BinIndexOnBarcode;
 
+    //                contig                                contig             JS
     typedef std::map<BGIQD::SOAP2::ContigId ,std::map< BGIQD::SOAP2::ContigId ,float> > ContigSims;
 
     BGIQD::stLFR::BarcodeOnBinArray barcodeOnBin ;
