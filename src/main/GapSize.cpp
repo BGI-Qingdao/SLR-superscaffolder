@@ -1,3 +1,10 @@
+/**********************************************************
+ *
+ * @Brief  :
+ *      Estamate gapsize by linear regression model.
+ *
+ * *******************************************************/
+
 #include "utils/args/argsparser.h"
 #include "utils/log/log.h"
 #include "utils/log/logfilter.h"
@@ -6,18 +13,20 @@
 #include "utils/string/stringtools.h"
 #include "utils/misc/Error.h"
 #include "utils/misc/freq.h"
-
 #include "utils/misc/fileName.h"
+#include "utils/linear_fitting/Linear.h"
+
 #include "stLFR/ContigBinBarcode.h"
 #include "stLFR/ContigOrder.h"
-
-#include "utils/linear_fitting/Linear.h"
 
 #include <map>
 #include <vector>
 #include <array>
 #include <algorithm>
 
+//
+// Struct to wrap all global variables and functions
+//
 struct AppConfig
 {
     BGIQD::LOG::logger loger;

@@ -1,3 +1,13 @@
+/**********************************************************
+ *
+ * @Brief :
+ *     Get the order of contigs by
+ *      + construct contig-sim graph
+ *      + simplify graph by screening algorithm
+ *      + extract branches of MST of contig-sim graph
+ *
+ * *******************************************************/
+
 #include "utils/args/argsparser.h"
 #include "utils/files/file_reader.h"
 #include "utils/files/file_writer.h"
@@ -20,8 +30,9 @@
 #include <map>
 #include <sstream>
 
+// A simple node
 typedef BGIQD::GRAPH::IGraphNodeBasic<unsigned int , long> Node;
-
+// Edge of contig-sim graoh
 struct Edge : public BGIQD::GRAPH::IGraphEdgeBasic<unsigned int , long >
 {
     float sim ;
@@ -50,6 +61,7 @@ struct EdgeAttr
     }
 };
 
+// the contig-sim graph
 struct ContigSimGraph : public BGIQD::GRAPH::Graph<Node,Edge>
 {
 

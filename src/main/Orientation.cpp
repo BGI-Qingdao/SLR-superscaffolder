@@ -1,3 +1,9 @@
+/**********************************************************
+ *
+ * @Brief  :
+ *      Get the orientation of contigs.
+ *
+ * *******************************************************/
 #include "utils/args/argsparser.h"
 #include "utils/log/log.h"
 #include "utils/log/logfilter.h"
@@ -23,6 +29,7 @@
 struct AppConfig
 {
     bool ptest;
+    // 
     struct ContigBinPosSimHeadTail
     {
         int s1 , s2 , e1 ,e2 ;

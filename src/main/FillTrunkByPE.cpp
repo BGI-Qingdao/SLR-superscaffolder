@@ -1,3 +1,10 @@
+/**********************************************************
+ *
+ *
+ *
+ *
+ *
+ * *******************************************************/
 #include "utils/args/argsparser.h"
 #include "utils/log/log.h"
 #include "utils/log/logfilter.h"
@@ -42,6 +49,7 @@ enum DepthSearchEdgeType
     EndPoint  = 3 ,
 };
 
+// The node for searched path graph, follow links of prev can travel to path.
 template<class Node>
 struct DepthSearchNode
 {
@@ -119,18 +127,19 @@ struct DepthSearchNode
 
 // Design an special edge iterator because the edge should be iterated after sorted by PE linkage weight.
 template<class Graph>
-struct EdgeIterator
+struct NodeEdgeIterator
 {
     public:
 
         typedef typename Graph::EdgeId        Id;
+        typedef typename Graph::Node          Node;
         typedef typename Graph::Edge          Edge;
 
-        EdgeIterator() : curr(NULL) ,accessor( NULL ) { }
+        NodeEdgeIterator() : curr(NULL) ,accessor( NULL ) { }
 
-        EdgeIterator(const Edge & e , Graph & acc )
+        NodeEdgeIterator(const Node & n,const Edge & e , Graph & acc )
         {
-            node_id = e.from;
+            node_id = n.id ;
             if( e.id != Edge::invalid )
                 curr = &e;
             else
@@ -138,14 +147,14 @@ struct EdgeIterator
             accessor = &acc ;
         }
 
-        EdgeIterator( const EdgeIterator & ei )
+        NodeEdgeIterator( const NodeEdgeIterator & ei )
         {
             node_id = ei.node_id;
             curr = ei.curr ;
             accessor = ei.accessor ;
         }
 
-        EdgeIterator & operator = ( const EdgeIterator & ei )
+        NodeEdgeIterator & operator = ( const NodeEdgeIterator & ei )
         {
             if( &ei != this )
             {
@@ -158,14 +167,14 @@ struct EdgeIterator
 
         // ONLY detect curr.
         // ONLY use == with End() .
-        bool operator == ( const EdgeIterator & ei )const
+        bool operator == ( const NodeEdgeIterator & ei )const
         {
             return curr == ei.curr ;
         }
 
         // ONLY detect curr.
         // ONLY use == with End() .
-        bool operator != ( const EdgeIterator & ei )const
+        bool operator != ( const NodeEdgeIterator & ei )const
         {
             return curr != ei.curr ;
         }
@@ -174,7 +183,7 @@ struct EdgeIterator
 
         const Edge * operator->() const  { return curr ; }
 
-        EdgeIterator & operator ++() {
+        NodeEdgeIterator & operator ++() {
             if( curr != NULL && accessor != NULL )
             {
                 Id next = curr->next ;
@@ -188,9 +197,9 @@ struct EdgeIterator
             return *this ;
         }
 
-        static EdgeIterator & end() 
+        static NodeEdgeIterator & end() 
         {
-            static EdgeIterator end;
+            static NodeEdgeIterator end;
             return end ;
         }
         typename Edge::EdgeNodeId node_id ;
@@ -198,9 +207,9 @@ struct EdgeIterator
         const Edge * curr ;
         Graph      * accessor ;
 };
-template<class Graph
-, class EdgeItr
-, class PathEnder
+template<class Graph /* the graph to be searched*/
+, class EdgeItr      /* an iterator to visit all edge for a node*/
+, class PathEnder    /* detecter to give up a search*/
 , class DepthNode = DepthSearchNode<typename Graph::Node > >
 struct DepthSearch
 {
@@ -245,7 +254,7 @@ struct DepthSearch
 
         curr.InitRoot(root,step);
 
-        path.push(EdgeItr(accesser->GetEdge(root.edge_id ) , *accesser));
+        path.push(EdgeItr(root,accesser->GetEdge(root.edge_id ) , *accesser));
         ender.Start();
         bool new_node_in_path = true ;
         NodeId prev ;
@@ -363,7 +372,7 @@ struct DepthSearch
             EdgeId next_edge_id = next_node.edge_id;
             EdgeBase & next_edge = accesser->GetEdge( next_edge_id) ;
             //assert(path.size() == ender.nodes.size() );
-            path.push(EdgeItr(next_edge, *accesser));
+            path.push(EdgeItr(next_node,next_edge, *accesser));
             ender.AddEdge(next_edge);
 
             new_node_in_path = true ;
@@ -373,6 +382,11 @@ struct DepthSearch
     }
 };
 
+//
+// Give up a search when
+//  1. path too depth or too long
+//  2. searched a already in ordered-chain contig.
+//
 struct DepthEnder
 {
     bool ender_flag ;
@@ -517,7 +531,7 @@ struct AppConfig
     BGIQD::MISC::Freq<int> fill_freq;
     int is_max;
     int min_count ;
-    bool use_all_pe_graph;
+
     void LoadSeedCluster()
     {
         auto parseline = [this](const std::string & line) -> void 
@@ -569,7 +583,7 @@ struct AppConfig
                 return DepthEnder::NodeType::Others;
         };
 
-        typedef EdgeIterator<BGIQD::stLFR::ContigPEGraph> EdgeItr;
+        typedef NodeEdgeIterator<BGIQD::stLFR::ContigPEGraph> EdgeItr;
 
         typedef DepthSearch<
             BGIQD::stLFR::ContigPEGraph,
@@ -616,20 +630,12 @@ struct AppConfig
         {
             BGIQD::stLFR::ContigPEGraph cluster_sub_graph;
             BGIQD::stLFR::ContigPEGraph * sub_graph_ptr ;
-            if( !use_all_pe_graph )
-            {
-                cluster_sub_graph = pe_graph.SubGraph(gap.relations);
-                sub_graph_ptr = &cluster_sub_graph ;
-            }
-            else 
-                sub_graph_ptr = &pe_graph ;
+            cluster_sub_graph = pe_graph.SubGraph(gap.relations);
+            sub_graph_ptr = &cluster_sub_graph ;
             BGIQD::stLFR::ContigPEGraph & sub_graph = *(sub_graph_ptr);
-            if( ! use_all_pe_graph )
+            for(auto & node : sub_graph.nodes )
             {
-                for(auto & node : sub_graph.nodes )
-                {
-                    sub_graph.MakeEdgeNext(node.second.id);
-                }
+                sub_graph.MakeEdgeNext(node.second.id);
             }
             std::vector<std::vector<unsigned int> > paths;
             unsigned int s1 , e1 ;
@@ -654,7 +660,7 @@ struct AppConfig
             }
             // try another order
             {
-                typedef EdgeIterator<BGIQD::stLFR::ContigPEGraph> EdgeItr;
+                typedef NodeEdgeIterator<BGIQD::stLFR::ContigPEGraph> EdgeItr;
 
                 typedef DepthSearch<
                     BGIQD::stLFR::ContigPEGraph,
@@ -709,34 +715,14 @@ struct AppConfig
         }
         delete out ;
     }
-    void PrintTest()
-    {
-        auto out = BGIQD::FILES::FileWriterFactory::GenerateWriterFromFileName("test.fill");
-        if( out == NULL )
-            FATAL(" failed to open test.fill to write !! ");
-        for( const auto & gap :all_gaps )
-        {
-            if( gap.path.empty() )
-                continue ;
 
-            (*out)<<gap.path.size();
-            for( auto i : gap.path )
-            {
-                (*out)<<'\t'<<i;
-            }
-            (*out)<<'\n';
-        }
-        delete out ;
-    }
-
-    void Init(const std::string & prefix , int search_len_max , int max_is , bool  use_pe)
+    void Init(const std::string & prefix , int search_len_max , int max_is )
     {
         fName.Init(prefix);
         searchMax = search_len_max ;
         BGIQD::LOG::logfilter::singleton().get("FillTrunkByPE", BGIQD::LOG::loglevel::INFO,loger);
         total_fill = 0 ;
         is_max = max_is ;
-        use_all_pe_graph = use_pe;
     }
 
     void LoadSeeds()
@@ -765,10 +751,8 @@ int main(int argc , char ** argv)
         DEFINE_ARG_OPTIONAL(int, searchMax,"max search length." ,"5000");
         DEFINE_ARG_OPTIONAL(int, insert_max,"max insert_size avaliable." ,"1000");
         DEFINE_ARG_OPTIONAL(int, min_count ,"min valid count ." ,"2");
-        DEFINE_ARG_OPTIONAL(bool,use_all_pe_graph,"use all pe_graph instead of cluster sub graph." ,"false");
-        //DEFINE_ARG_OPTIONAL(bool,ptest,"print date for test." ,"false");
     END_PARSE_ARGS;
-    config.Init(prefix.to_string() , searchMax.to_int(),insert_max.to_int(),use_all_pe_graph.to_bool());
+    config.Init(prefix.to_string() , searchMax.to_int(),insert_max.to_int());
     config.min_count = min_count.to_int();
     BGIQD::LOG::timer t(config.loger,"FillTrunkByPE");
     config.LoadSeedCluster();
@@ -776,7 +760,5 @@ int main(int argc , char ** argv)
     config.LoadPEGraph();
     config.CalcAll();
     config.PrintFillResult();
-    //if( ptest.to_bool() )
-    //    config.PrintTest();
     return 0;
 }
