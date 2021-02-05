@@ -72,6 +72,11 @@ TEST(IncrArrayDeepClean)
 TEST(IncrArrayResize)
 {
     auto & test = GetTestData() ;
-    test.resize(100);
-    CHECK(100,test.size());
+    test.resize(99);
+    CHECK(88,test.size());
+    CHECK(100,test.capacity());
+    // as designed : if resize little than real size, nothing happened!
+    test.resize(10);
+    CHECK(88,test.size());
+    CHECK(100,test.capacity());
 }

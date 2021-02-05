@@ -156,7 +156,6 @@ namespace BGIQD {
                     m_headers.clear();
                     m_curr = 0 ;
                     m_capacity = 0 ;
-                    m_block_size = 0 ;
                 }
 
                 size_t size() const { return m_curr ; }
