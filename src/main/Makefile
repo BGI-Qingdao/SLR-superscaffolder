@@ -182,6 +182,7 @@ unittest_cpp = ../utils/string/stringtools_test.cpp \
 			   ../utils/collection/collection_test.cpp \
 			   ../utils/files/file_test.cpp \
 			   ../utils/incr_array/incr_array_test.cpp \
+			   ../utils/interval/Interval_test.cpp \
 			   ../utils/linear_fitting/Minimum_multiplication_test.cpp \
 			   ../utils/log/timetools_test.cpp \
 			   ../utils/sam/sam_parser_test.cpp \

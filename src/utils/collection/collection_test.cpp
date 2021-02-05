@@ -62,6 +62,13 @@ TEST(Jaccard)
     CHECK( 0.25 , CharCollect::Jaccard(t1,t2) );
 }
 
+TEST(Collectio_Incr){
+    CharCollect t1 = InitC1();
+    CharCollect t2 = InitC2();
+    t2.IncreaseElement('l');
+    CHECK( 3/8 , CharCollect::Jaccard(t1,t2) );
+}
+
 TEST(CollectIterator)
 {
     std::map<char , int > t;

@@ -17,7 +17,24 @@
  * How to use it ? 
  *
  *   + the main file is in main/test.cpp
+ *   + write a xxx_test.cpp and link it after compiler then all test code will automatic hooked into bin/test
  *   + find examples in other folders under utils to add more unittest.
+ *
+ * A simple example
+ *
+ *   TEST_MODULE(example)
+ *   TEST(test_01)
+ *   {
+ *       CHECK(1 ,3-2)   <-- this check will pass 
+ *       CHECK(2 ,3-2)   <-- this check will fail
+ *   }
+ *
+ *   TEST(test_02)
+ *   {
+ *       CHECK(1 ,3-2)   <-- this check will pass 
+ *       CHECK(2 ,3-2)   <-- this check will fail
+ *   }
+ *   ...
  *
  * ********************************************************/
 

@@ -32,7 +32,6 @@
  *              * bool
  *              * float
  *              * string
- *              * vector<string>  
  *
  *          notice: 
  *              * previous value will be overwrited by 
@@ -53,9 +52,7 @@ namespace BGIQD{
                 is_bool = 0,
                 is_string = 1,
                 is_int = 2,
-                is_long = 3,
                 is_float = 4,
-                is_vector_string = 5,
             };
 
             union data 
@@ -88,14 +85,10 @@ namespace BGIQD{
                     return "[ no arg ]";
                 if( t == is_int)
                     return "[ int arg ]";
-                if( t == is_long)
-                    return "[ long arg ]";
                 if( t == is_float)
                     return "[ float arg ]";
                 if( t == is_string)
                     return "[ string arg ]";
-                if( t == is_vector_string)
-                    return "[ vector_string arg ] ";
                 return "";
             }
 
@@ -105,22 +98,10 @@ namespace BGIQD{
                     return d.b ? "true" : "false";
                 if( t == is_int)
                     return std::to_string(d.i);
-                if( t == is_long)
-                    return std::to_string(d.l);
                 if( t == is_float)
                     return std::to_string(d.f);
                 if( t == is_string)
                     return to_string();
-                if( t == is_vector_string)
-                {
-                    std::string ret ;
-                    for(const auto & i : to_vector_string())
-                    {
-                        ret += "\t";
-                        ret += i;
-                    }
-                    return ret ;
-                }
                 return "";
             }
 
@@ -141,14 +122,10 @@ namespace BGIQD{
                 {
                     d.s = NULL;
                 }
-                if ( t != is_string && t != is_vector_string )
-                    d.l = 0 ;
                 if ( t == is_float )
                     d.f = 0.0f ;
                 if ( t == is_string )
                     d.s = new std::string("");
-                if ( t == is_vector_string )
-                    d.vs = new std::vector<std::string>();
             }
 
             void set_value( const  char * value , bool df )
@@ -165,21 +142,9 @@ namespace BGIQD{
                 {
                     d.i = std::stoi(std::string(value));
                 }
-                if( t == BGIQD::ARGS::args_union::is_long)
-                {
-                    d.l = std::stol(std::string(value));
-                }
                 if( t == BGIQD::ARGS::args_union::is_float)
                 {
                     d.f = std::stod(std::string(value));
-                }
-                if( t == BGIQD::ARGS::args_union::is_vector_string)
-                {
-                    if( d.vs == NULL )
-                    {
-                        d.vs = new std::vector<std::string>() ;
-                    }
-                    (*(d.vs)).push_back(std::string(value));
                 }
             }
 
@@ -189,17 +154,10 @@ namespace BGIQD{
                 return *d.s;
             }
 
-            std::vector<std::string> to_vector_string() const 
-            {
-                assert( t == is_vector_string && d.vs );
-                return *d.vs;
-            }
-
             bool to_bool() const { assert(t == is_bool); return d.b ; }
 
             int to_int() const { assert( t == is_int) ; return d.i ; }
 
-            long to_long() const { assert(t == is_long) ;return d.l ; }
 
             float to_float() const { assert( t== is_float) ; return d.f ; }
 
@@ -207,8 +165,6 @@ namespace BGIQD{
             {
                 if( t == is_string && d.s )
                     delete d.s ;
-                if ( t== is_vector_string && d.vs )
-                    delete d.vs ;
             }
         };
 
@@ -232,22 +188,9 @@ namespace BGIQD{
             };
 
         template<>
-            struct args_traits<long>
-            {
-                args_union::type type() { return args_union::type::is_int ; }
-            };
-
-
-        template<>
             struct args_traits<float>
             {
                 args_union::type type() { return args_union::type::is_float; }
-            };
-
-        template<>
-            struct args_traits<std::vector<std::string> >
-            {
-                args_union::type type() { return args_union::type::is_vector_string; }
             };
 
         template<>

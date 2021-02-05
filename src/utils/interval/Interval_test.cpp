@@ -1,5 +1,5 @@
 #include "utils/interval/Interval.h"
-#include "utils/test/Test.h"
+#include "utils/unittest/Test.h"
 
 TEST_MODULE_INIT(Interval)
 
