@@ -74,7 +74,4 @@ TEST(IncrArrayResize)
     auto & test = GetTestData() ;
     test.resize(100);
     CHECK(100,test.size());
-    test.resize(10);
-    CHECK(10,test.size());
-    CHECK(100,test.capacity());
 }
