@@ -5,7 +5,6 @@ TEST_MODULE_INIT(IncrArray)
 
 typedef BGIQD::INCRARRAY::IncrArray<int> IntArray;
 
-
 IntArray & GetTestData()
 {
     static IntArray test(10);
@@ -54,3 +53,28 @@ TEST(IncrArrayAcess)
     CHECK( 88 , j );
 }
 
+TEST(IncrArrayClean)
+{
+    auto & test = GetTestData() ;
+    test.clear();
+    CHECK(0,test.size());
+    CHECK(90,test.capacity());
+}
+
+TEST(IncrArrayDeepClean)
+{
+    auto & test = GetTestData() ;
+    test.deep_clean();
+    CHECK(0,test.size());
+    CHECK(0,test.capacity());
+}
+
+TEST(IncrArrayResize)
+{
+    auto & test = GetTestData() ;
+    test.resize(100);
+    CHECK(100,test.size());
+    test.resize(10);
+    CHECK(10,test.size());
+    CHECK(100,test.capacity());
+}
