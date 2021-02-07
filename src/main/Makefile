@@ -137,6 +137,9 @@ unittest_cpp = ../utils/string/stringtools_test.cpp \
 			   ../utils/log/log_test.cpp \
 			   ../utils/graph/GraphTipRemove_test.cpp \
 			   ../utils/graph/GraphBasic_test.cpp \
+			   ../utils/graph/DisJointSet_test.cpp \
+			   ../utils/graph/mst/fib_heap_test.cpp \
+			   ../utils/graph/mst/MinTree_test.cpp
 
 
 

@@ -1,5 +1,5 @@
-#include "utils/test/Test.h"
-#include "utils/graph/fib_heap.h"
+#include "utils/unittest/Test.h"
+#include "utils/graph/mst/fib_heap.h"
 
 TEST_MODULE_INIT(FibHeap)
 

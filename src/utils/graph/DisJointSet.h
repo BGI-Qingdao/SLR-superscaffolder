@@ -14,13 +14,11 @@
  *
  * *******************************************************/
 namespace BGIQD{
-namespace Algorithm
+namespace GRAPH
 {
 
     template< class Key  >
         class DisJoin_Set{
-            struct Node ;
-            typedef std::map<Key , Node * > nodeHash;
                 struct Node
                 {
                     Key key;
@@ -96,6 +94,7 @@ namespace Algorithm
                     if( a->parent != ret ) a->parent = ret ;
                     return ret ;
                 }
+                typedef std::map<Key , Node * > nodeHash;
                 nodeHash m_nodeHash;
                 std::vector<Node*> m_parentVector;
         };

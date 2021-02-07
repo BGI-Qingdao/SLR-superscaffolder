@@ -92,7 +92,7 @@ struct ContigSimGraph : public BGIQD::GRAPH::Graph<Node,Edge>
     typedef BGIQD::GRAPH::TipRemoveHelper<ContigSimGraph> TipHelper ;
     typedef TipHelper::TipRemoveResult TipRemoveResult;
 
-    typedef BGIQD::Algorithm::DisJoin_Set<NodeId> DJ_Sets;
+    typedef BGIQD::GRAPH::DisJoin_Set<NodeId> DJ_Sets;
 
 
     static TipRemoveResult RemoveTip_n2( ContigSimGraph & mintree )

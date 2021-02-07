@@ -20,7 +20,8 @@
  *      + one directed graph
  *
  *  Notice : always add all nodes first, then add edges;
- *           add a node twice lead to lost previous informations.
+ *           add a node twice lead to bug that node losts 
+ *           the previous informations.
  *
  * *******************************************************/
 
@@ -191,7 +192,7 @@ namespace BGIQD {
         //
         // GraphBaisc.
         //
-        // This graph can be iteratered by both nodes and edges.
+        // This graph can be iteratored by both nodes and edges.
         //
         template<class TNode 
             , class TEdge
@@ -227,18 +228,13 @@ namespace BGIQD {
                     return nodes.find(id) != nodes.end() ;
                 }
 
-                // Access Edge:
-                //
                 size_t NodesSize() const 
                 {
                     return nodes.size();
                 }
 
-                size_t EdgesSize() const 
-                {
-                    return edges.size();
-                }
-
+                // Access Edge:
+                //
                 Edge & GetEdge( const EdgeId & id )
                 {
                     if( id == Edge::invalid ) 
@@ -279,25 +275,6 @@ namespace BGIQD {
                 void AddNode(const Node & n )
                 {
                     nodes[n.id] = n ;
-                }
-
-                bool RemoveNode( const NodeId & id )
-                {
-                    if ( nodes.find(id) != nodes.end() )
-                    {
-                        auto & n1 = GetNode( id );
-                        if( n1.EdgeNum() > 0 ) {
-                            std::set<EdgeId> ids_to_del;
-                            typename Node::NodeEdgeIdIterator begin, end ;
-                            std::tie(begin,end) = n1.GetEdges();
-                            for( auto x = begin ; x != end ; x++) ids_to_del.insert(*x);
-                            for( auto eid : ids_to_del ) RemoveEdge(eid);
-                        }
-                        nodes.erase(id);
-                        return true ;
-                    }
-                    else
-                        return false ;
                 }
 
                 // Modify edge
@@ -375,6 +352,27 @@ namespace BGIQD {
                     Basic::GetNode(from).AddEdge(nId);
                     Basic::GetNode(to).AddEdge(nId);
                 }
+
+                // Remove node
+                // also will remove all edges of that node
+                bool RemoveNode( const NodeId & id )
+                {
+                    if ( Basic::nodes.find(id) != Basic::nodes.end() )
+                    {
+                        auto & n1 = Basic::GetNode( id );
+                        if( n1.EdgeNum() > 0 ) {
+                            std::set<EdgeId> ids_to_del;
+                            typename Node::NodeEdgeIdIterator begin, end ;
+                            std::tie(begin,end) = n1.GetEdges();
+                            for( auto x = begin ; x != end ; x++) ids_to_del.insert(*x);
+                            for( auto eid : ids_to_del ) Basic::RemoveEdge(eid);
+                        }
+                        Basic::nodes.erase(id);
+                        return true ;
+                    }
+                    else
+                        return false ;
+                }
                 // get a subgraph based on given node set
                 template<class Me>
                 Me SubGraph(const std::set<NodeId>& subs) const 
@@ -400,7 +398,7 @@ namespace BGIQD {
                             std::tie(begin,end) = node.GetEdges();
                             for(auto i = begin; i!=end; i++)
                             {
-                                const auto & edge = GetEdge(*i);
+                                const auto & edge = Basic::GetEdge(*i);
                                 if( ret.HasNode( edge.from) && ret.HasNode(edge.to) )
                                     ret.AddEdge(edge);
                             }
