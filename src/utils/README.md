@@ -54,10 +54,6 @@ A simple log class with a timer.
 
 A simple multi-threads implementation follow the threads-pool strategy.
 
-## sam
-
-Classes for parsing SAM format. See details of SAM format by [downloading document here](https://samtools.github.io/hts-specs/SAMv1.pdf).
-
 ## string
 
 Functions to handle std::string like trim / split.

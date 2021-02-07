@@ -11,12 +11,16 @@
 #include <iostream>
 #include <algorithm>
 #include <tuple>
+
 /**********************************************************
  *
  * @Brief
  *  A simple implement of Graph structure.
  *      + one un-directed graph
  *      + one directed graph
+ *
+ *  Notice : always add all nodes first, then add edges;
+ *           add a node twice lead to lost previous informations.
  *
  * *******************************************************/
 
@@ -151,6 +155,8 @@ namespace BGIQD {
                     return edge_ids.size() ;
                 }
 
+                // iterator all edge ids for a node
+                // Do not modify edges while iteratoring visit them !!!
                 std::pair<NodeEdgeIdIterator,NodeEdgeIdIterator> GetEdges() const
                 {
                     return std::make_pair(edge_ids.begin() , edge_ids.end());
@@ -259,6 +265,7 @@ namespace BGIQD {
                     if( ! HasNode( from ) || !HasNode(to) )
                         return false ;
                     auto fNode = GetNode(from) ;
+                    if( fNode.EdgeNum() < 1 ) return false ;
                     typename Node::NodeEdgeIdIterator begin, end ;
                     std::tie(begin,end) = fNode.GetEdges();
                     for( auto x = begin ; x != end ; x++)
@@ -279,11 +286,12 @@ namespace BGIQD {
                     if ( nodes.find(id) != nodes.end() )
                     {
                         auto & n1 = GetNode( id );
-                        typename Node::NodeEdgeIdIterator begin, end ;
-                        std::tie(begin,end) = n1.GetEdges();
-                        for( auto x = begin ; x != end ; x++)
-                        {
-                            RemoveEdge(*x);
+                        if( n1.EdgeNum() > 0 ) {
+                            std::set<EdgeId> ids_to_del;
+                            typename Node::NodeEdgeIdIterator begin, end ;
+                            std::tie(begin,end) = n1.GetEdges();
+                            for( auto x = begin ; x != end ; x++) ids_to_del.insert(*x);
+                            for( auto eid : ids_to_del ) RemoveEdge(eid);
                         }
                         nodes.erase(id);
                         return true ;
@@ -315,7 +323,8 @@ namespace BGIQD {
                     out<<Edge::DOTHead()<<std::endl;
                     for( const auto & e : edges )
                     {
-                        out<<"\t"<<e.ToString()<<std::endl;
+                        if(e.IsValid() )
+                            out<<"\t"<<e.ToString()<<std::endl;
                     }
                     out<<"}"<<std::endl;
                 }
@@ -387,12 +396,14 @@ namespace BGIQD {
                             continue;
                         const auto & node = Basic::GetNode(id);
                         typename Node::NodeEdgeIdIterator begin, end ;
-                        std::tie(begin,end) = node.GetEdges();
-                        for(auto i = begin; i!=end; i++)
-                        {
-                            const auto & edge = GetEdge(*i);
-                            if( ret.HasNode( edge.from) && ret.HasNode(edge.to) )
-                                ret.AddEdge(edge);
+                        if( node.EdgeNum() > 0 ) {
+                            std::tie(begin,end) = node.GetEdges();
+                            for(auto i = begin; i!=end; i++)
+                            {
+                                const auto & edge = GetEdge(*i);
+                                if( ret.HasNode( edge.from) && ret.HasNode(edge.to) )
+                                    ret.AddEdge(edge);
+                            }
                         }
                     }
                     return ret;
@@ -458,13 +469,15 @@ namespace BGIQD {
                         if( !Basic::HasNode( id ) )
                             continue;
                         const auto & node = Basic::GetNode(id);
-                        typename Node::NodeEdgeIdIterator begin, end ;
-                        std::tie(begin,end) = node.GetEdges();
-                        for(auto i = begin; i!=end; i++)
-                        {
-                            const auto & edge = Basic::GetEdge(*i);
-                            if( ret.HasNode( edge.from) && ret.HasNode(edge.to) )
-                                ret.AddEdge(edge);
+                        if(node.EdgeNum() > 0 ) {
+                            typename Node::NodeEdgeIdIterator begin, end ;
+                            std::tie(begin,end) = node.GetEdges();
+                            for(auto i = begin; i!=end; i++)
+                            {
+                                const auto & edge = Basic::GetEdge(*i);
+                                if( ret.HasNode( edge.from) && ret.HasNode(edge.to) )
+                                    ret.AddEdge(edge);
+                            }
                         }
                     }
                     return ret;

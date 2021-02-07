@@ -42,7 +42,7 @@ namespace BGIQD{
                     int tip_num ;
                     int tip_node_num ;
                     int base_left_node_num ;
-                    std::vector<unsigned int> tip_contigs;
+                    std::vector<NodeId> tip_contigs;
 
                     void Init()
                     {
@@ -174,10 +174,12 @@ namespace BGIQD{
                     TipRemoveResult ret ;
                     ret.Init() ;
                     ret.base_node_num = base.nodes.size();
+                    int round_num = 0;
                     do
                     {
+                        round_num++;
                         if( debuger )
-                            std::cerr<<"    tip round ..."<<std::endl;
+                            std::cerr<<"delete tip round "<<round_num<<" ... "<<std::endl;
                         std::vector<tip> tips ;
                         tips = TipDetect( base );
                         if( tips.empty() )

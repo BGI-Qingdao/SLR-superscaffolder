@@ -135,9 +135,9 @@ unittest_cpp = ../utils/string/stringtools_test.cpp \
 			   ../utils/linear_fitting/Linear_test.cpp \
 			   ../utils/multithread/MultiThread_test.cpp \
 			   ../utils/log/log_test.cpp \
+			   ../utils/graph/GraphTipRemove_test.cpp \
+			   ../utils/graph/GraphBasic_test.cpp \
 
-#			   ../utils/graph/
-#			   ../utils/misc/
 
 
 unittest_o		= ${unittest_cpp:%.cpp=%.o}

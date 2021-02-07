@@ -85,7 +85,7 @@ namespace BGIQD {
                     {
                         ret.AddNode(node);
                         ret.GetNode(node.id).CleanEdges();
-                        if( node.EdgeNum() ==0 )
+                        if( node.EdgeNum() < 1 )
                         {
                             return ;
                         }

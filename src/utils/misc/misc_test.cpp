@@ -1,6 +1,6 @@
 /*********************
  *
- * codes in MISC are too simple.
+ * Codes in MISC are too simple.
  * No unittest added ~
  *
  * *******************/

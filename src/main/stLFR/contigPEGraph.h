@@ -89,7 +89,7 @@ namespace BGIQD {
                 for(auto x = begin ; x!= end ; x++ )
                 {
                     auto & edge = GetEdge(*x);
-                    edges.push_back(std::make_tuple(edge.count, *x) );
+                    edges.push_back( std::make_tuple(edge.count, *x) );
                 }
 
                 std::sort(edges.rbegin() ,edges.rend());

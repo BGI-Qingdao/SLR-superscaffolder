@@ -180,6 +180,7 @@ struct ContigSimGraph : public BGIQD::GRAPH::Graph<Node,Edge>
     static std::vector<NodeId> TrunkLinear(const ContigSimGraph &  base )
     {
         std::vector<NodeId> ret ;
+        if( base.NodesSize() < 2 ) return ret;
         NodeId starter ;
         // Find a tip node
         for( const auto & pair : base.nodes )
