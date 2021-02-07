@@ -7,7 +7,6 @@
  *
  * ********************************************************/
 #include <string>
-#include "utils/string/stringtools.h"
 
 namespace BGIQD {
     namespace MISC {
@@ -29,7 +28,7 @@ namespace BGIQD {
                 }\
                 else\
                 {\
-                    return m_prefix + suffix +"_round_"+BGIQD::STRING::itos(round) ;\
+                    return m_prefix + suffix +"_round_"+std::to_string(round) ;\
                 }\
             }\
             std::string name(std::string middle) const \

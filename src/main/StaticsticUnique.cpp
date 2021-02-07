@@ -7,7 +7,6 @@
  * *******************************************************/
 #include "utils/args/argsparser.h"
 #include "utils/log/log.h"
-#include "utils/log/logfilter.h"
 #include "utils/files/file_reader.h"
 #include "utils/files/file_writer.h"
 
@@ -55,7 +54,7 @@ struct AppConfig
         UniqueHigh = 0 ;
         contigInfo.clear();
         fName.Init(prefix);
-        BGIQD::LOG::logfilter::singleton().get("StatictisUnique",BGIQD::LOG::loglevel::INFO,log);
+        log.Init("StatictisUnique");
     }
 
     void LoadContigInfo()

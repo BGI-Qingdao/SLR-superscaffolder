@@ -9,6 +9,10 @@
  *
  * @Brief :
  *       define some structure to store alignments.
+ *       used in 
+ *          +Sam2ReadOnContig
+ *          +SplitInfo
+ *          +PEGraph
  *
  *********************************************************/
 

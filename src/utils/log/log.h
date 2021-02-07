@@ -2,120 +2,119 @@
 #define __COMMON_LOG_LOG_H__
 
 #include <string>
-#include <ostream>
+#include <iostream>
+#include <sys/time.h>
 #include <sstream>
-#include "utils/log/timetools.h"
 
 /**********************************************************
  *
  * @Brief :
  *
- *   To make uniform logs by easy-to-use interface.
+ *   * To make uniform logs by easy-to-use interface.
+ *   * Automatic benchmark the cpu and wall clock time.
  *
  * *******************************************************/
 
 namespace BGIQD{
-namespace LOG{
+    namespace LOG{
 
-class ilogtheme
-{
-    public:
-        virtual std::string logstring(const std::string & str) = 0 ;
-        virtual ~ilogtheme() {}
-};
+        // empty class for template
+        struct lstart {};
+        struct lend{};
 
-class detaillog
-{
-    public:
-        virtual std::string logstring(const std::string & str) final ;
-        virtual ~detaillog() {}
-        detaillog( const std::string m, const std::string l)
-            : module(m)
-            , level(l) {}
-    private:
-        std::string module;
-        std::string level;
-};
-
-class simplelog
-{
-    public:
-        virtual std::string logstring(const std::string & str) final
+        // stream like logger :
+        // logger<<lstart()<<xxx<<xxx<<yyy<<lend();
+        class logger
         {
-            return std::string(">\t")+str;
-        }
-        virtual ~simplelog() {}
+            public:
+                void Init(std::string name) 
+                {
+                    module = name ;
+                }
+                // clean buffer
+                logger & operator << (const lstart & )
+                {
+                    buffer.str("");
+                    return *this;
+                }
+                // Cache all log
+                template< class T >
+                    logger & operator << (const T & t)
+                    {
+                        buffer<<t;
+                        return *this;
+                    }
+                // print all log into stderr
+                logger & operator << (const lend & )
+                {
+                    std::cerr<<logstring(buffer.str())<<std::endl;
+                    buffer.str("");
+                    return *this;
+                }
 
-};
+            private:
+                std::ostringstream buffer;
+                std::string logstring(const std::string & str);
+                std::string module;
+        };
 
-class logfilter ;
+        struct timeperoid;
 
-struct lstart {};
-struct lend{};
-
-class logger
-{
-    public:
-        // log some staff , but how and where to write those staff
-        // depends on what theme and ost is .
-  //      void log( const char * fmt , ... ) const ;
-
-        template< class T >
-        logger & operator << (const T & t)
+        // A special time point. 
+        struct timepoint
         {
-            buffer<<t;
-            return *this;
-        }
+            public:
+                timeval wall;
+                clock_t cpu;
 
-        logger & operator << (const lstart & )
+            public:
+                static timepoint now() 
+                {
+                    timepoint ret ;
+                    gettimeofday( &ret.wall ,NULL);
+                    ret.cpu = clock();
+                    return ret;
+                }
+
+                timeperoid operator-(const timepoint & prev_point ) const ;
+                std::string to_string() const ;
+        };
+
+        // A special time period. 
+        struct timeperoid 
         {
-            buffer.str("");
-            return *this;
-        }
+            public:
+                timeval wall;
+                clock_t cpu;
+            public:
+                std::string to_string() const ;
+        };
 
-        logger & operator << (const lend & )
+        // timer to log the running time use above structures.
+        class timer
         {
-            if( ost != NULL && theme != NULL )
-            {
-                (*ost)<<theme->logstring(buffer.str())
-                      <<std::endl;
-            }
-            buffer.str("");
-            return *this;
-        }
+            public:
+                // get a time tag while constructing
+                timer( logger & a_logger , const std::string &job_description)
+                    : start(timepoint::now())
+                      , l(a_logger)
+                      , jobdec(job_description) {
+                          (l)<<lstart()<<jobdec<< " start now ... "<<lend();
+                      }
+                // calculate time period and print it when destructing.
+                ~timer()
+                {
+                    timepoint end = timepoint::now();
+                    std::string last = (end-start).to_string();
+                    (l)<<lstart()<<jobdec<< " finish. used "<<last<<lend();
+                }
+            private:
+                timepoint start ;
+                logger & l;
+                std::string jobdec;
+        };
 
-        friend class logfilter;
-    private:
-        // NOTICE : logge doesn't free ost1 or theme1 .
-        //          it's user's duty to manager their life cycle.
-        std::ostringstream buffer;
-        std::ostream * ost;
-        ilogtheme * theme;
-};
-
-class timer
-{
-    public:
-        timer( logger & a_logger , const std::string &job_description)
-            : start(TIME::timepoint::now())
-            , l(a_logger)
-            , jobdec(job_description) {
-                (l)<<lstart()<<jobdec<< " start now ... "<<lend();
-            }
-
-        ~timer()
-        {
-            TIME::timepoint end = TIME::timepoint::now();
-                std::string last = (end-start).to_string();
-                (l)<<lstart()<<jobdec<< " finish. used "<<last<<lend();
-        }
-    private:
-        TIME::timepoint start ;
-        logger & l;
-        std::string jobdec;
-};
-
-}//LOG
+    }//LOG
 }//BGIQD
 
 #endif //__COMMON_LOG_LOG_H__

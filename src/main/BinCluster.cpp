@@ -17,7 +17,6 @@
 #include "utils/misc/mapHelper.h"
 #include "utils/log/log.h"
 #include "utils/misc/Error.h"
-#include "utils/log/logfilter.h"
 #include "utils/files/file_reader.h"
 #include "utils/misc/freq.h"
 
@@ -79,7 +78,7 @@ struct AppConfig
         barcodeOnBin.Init(1024);
         relations.Init(1024);
         contig_relations.Init(1024);
-        BGIQD::LOG::logfilter::singleton().get("BinCluster",BGIQD::LOG::INFO,lger);
+        lger.Init("BinCluster");
         lger<<BGIQD::LOG::lstart()<<"Init finsish ..."<<BGIQD::LOG::lend();
     }
 

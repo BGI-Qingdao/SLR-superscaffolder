@@ -19,6 +19,10 @@
 //  * DO NOT suppert earse element.
 //  * DO NOT suppert copy-construct and assign-construct.
 //      * can support but why need this ?
+// notice:
+//  * call deep_clean to free the memory.
+//  * resize will not work if new size little than curr size.
+//
 //
 
 namespace BGIQD {

@@ -11,7 +11,6 @@
  * *******************************************************/
 #include "utils/args/argsparser.h"
 #include "utils/log/log.h"
-#include "utils/log/logfilter.h"
 #include "utils/files/file_writer.h"
 #include "utils/files/file_reader.h"
 #include "utils/string/stringtools.h"
@@ -725,7 +724,7 @@ struct AppConfig
     {
         fName.Init(prefix);
         searchMax = search_len_max ;
-        BGIQD::LOG::logfilter::singleton().get("FillTrunkByPE", BGIQD::LOG::loglevel::INFO,loger);
+        loger.Init("FillTrunkByPE");
         total_fill = 0 ;
         is_max = max_is ;
     }

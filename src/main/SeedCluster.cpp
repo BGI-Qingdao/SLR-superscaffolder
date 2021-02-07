@@ -7,7 +7,6 @@
  * ********************************************************/
 #include "utils/args/argsparser.h"
 #include "utils/log/log.h"
-#include "utils/log/logfilter.h"
 #include "utils/files/file_writer.h"
 #include "utils/files/file_reader.h"
 #include "utils/string/stringtools.h"
@@ -44,7 +43,7 @@ struct AppConfig
     void Init( const std::string & prefix, float m , int s)
     {
         fName.Init(prefix);
-        BGIQD::LOG::logfilter::singleton().get("SeedCluster",BGIQD::LOG::loglevel::INFO, loger);
+        loger.Init("SeedCluster");
         min = m;
         strategy = s;
     }

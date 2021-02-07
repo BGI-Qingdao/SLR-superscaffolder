@@ -14,7 +14,6 @@
 #include "utils/misc/Error.h"
 #include "utils/misc/freq.h"
 #include "utils/log/log.h"
-#include "utils/log/logfilter.h"
 
 #include "utils/graph/GraphBasic.h"
 #include "utils/graph/mst/MinTree.h"
@@ -420,7 +419,7 @@ struct AppConf
     {
         fNames.Init(prefix);
         smallest = f ;
-        BGIQD::LOG::logfilter::singleton().get("MST", BGIQD::LOG::loglevel::INFO,lger);
+        lger.Init("MST");
     }
 
     void LoadContigSimGraph()

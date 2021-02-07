@@ -7,17 +7,14 @@
  * *******************************************************/
 #include "utils/args/argsparser.h"
 #include "utils/log/log.h"
-#include "utils/log/logfilter.h"
 #include "utils/files/file_writer.h"
 #include "utils/files/file_reader.h"
 #include "utils/string/stringtools.h"
 #include "utils/misc/Error.h"
 #include "utils/misc/freq.h"
 
-#include "utils/sam/sam_parser.h"
-
 #include "stLFR/ContigBinBarcode.h"
-#include "utils/sam/EasySam.h"
+#include "stLFR/EasySam.h"
 
 #include "utils/misc/fileName.h"
 #include "utils/misc/contigIndex.h"
@@ -53,7 +50,7 @@ struct AppConfig
     void Init(const std::string & prefix)
     {
         fName.Init(prefix);
-        BGIQD::LOG::logfilter::singleton().get("SplitInfo",BGIQD::LOG::loglevel::INFO, loger);
+        loger.Init("SplitInfo");
     }
 
     void LoadContigIndex()

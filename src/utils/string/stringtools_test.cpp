@@ -51,9 +51,8 @@ TEST(stringsplit)
     CHECK_STRUCT_AND_ONERR(expect4,split(test8),print_vec(split(test8)););
 }
 
-TEST(stringtrim)
+TEST(testIsNum)
 {
-    CHECK("ltrim\t\n \r",ltrim("\t\n \rltrim\t\n \r"));
-    CHECK("\t\n \rrtrim",rtrim("\t\n \rrtrim\t\n \r"));
-    CHECK("ltrim",trim("\t\n \rltrim\t\n \r"));
+    CHECK(true, IsNum("123")) ;
+    CHECK(false, IsNum("a23")) ;
 }

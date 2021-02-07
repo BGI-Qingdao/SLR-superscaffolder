@@ -2,7 +2,7 @@
 #define __BIOCOMMON_AGP_H__
 /******************************************
  *
- * Tools code for "AGP Specification v2.0"
+ * codes for print info in AGP format: "AGP Specification v2.0"
  * https://www.ncbi.nlm.nih.gov/assembly/agp/AGP_Specification/
  *
  * ****************************************/

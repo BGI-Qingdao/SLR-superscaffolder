@@ -1,23 +1,10 @@
 #include "utils/unittest/Test.h"
-#include "utils/log/timetools.h"
-#include <unistd.h>
 #include "utils/multithread/MultiThread.h"
-TEST_MODULE_INIT(timetools)
+#include "utils/log/log.h"
 
-using namespace BGIQD::TIME;
+TEST_MODULE_INIT(multi_thread_test);
 using namespace BGIQD::LOG;
-
-TEST(timepoint_test)
-{
-    timepoint start = timepoint::now();
-    sleep(2);
-    timepoint end = timepoint::now();
-    (test_logger)<<lstart()<<start.to_string()<<lend();
-    (test_logger)<<lstart()<<end.to_string()<<lend();
-    (test_logger)<<lstart()<<(end-start).to_string()<<lend();
-}
-
-
+using namespace BGIQD::MultiThread;
 TEST( multi_thread_run)
 {
     timepoint start = timepoint::now();

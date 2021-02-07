@@ -1,12 +1,11 @@
 /**********************************************************
  *
  * @Brief : 
- *      Construct contig  PE graph by parse Pair-End mapped reads.
+ *      Construct contig PE graph by parse Pair-End mapped reads.
  *
  * *******************************************************/
 #include "utils/args/argsparser.h"
 #include "utils/log/log.h"
-#include "utils/log/logfilter.h"
 #include "utils/files/file_writer.h"
 #include "utils/files/file_reader.h"
 #include "utils/string/stringtools.h"
@@ -14,7 +13,7 @@
 #include "utils/misc/freq.h"
 
 #include "stLFR/contigPEGraph.h"
-#include "utils/sam/EasySam.h"
+#include "stLFR/EasySam.h"
 #include "utils/misc/fileName.h"
 
 //
@@ -35,7 +34,7 @@ struct AppConfig
     void Init(const std::string & prefix)
     {
         fName.Init(prefix);
-        BGIQD::LOG::logfilter::singleton().get("PEGraph",BGIQD::LOG::loglevel::INFO, loger);
+        loger.Init("PEGraph");
     }
 
     void LoadSeeds()

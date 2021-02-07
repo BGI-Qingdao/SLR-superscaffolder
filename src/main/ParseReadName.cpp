@@ -8,21 +8,178 @@
  *      + filter low quality barcodes.
  *
  * *******************************************************/
+#include "utils/log/log.h"
 #include "utils/args/argsparser.h"
 #include "utils/files/file_reader.h"
 #include "utils/files/file_writer.h"
 #include "utils/misc/Error.h"
-#include "utils/log/log.h"
-#include "utils/log/logfilter.h"
 #include "utils/string/stringtools.h"
 #include "utils/misc/freq.h"
-
 #include "utils/misc/fileName.h"
 #include "utils/misc/TagId.h"
-#include "utils/seq/fastq.h"
+#include "utils/misc/flags.h"
+
+#include "stLFR/stLFRRead.h"
 
 #include <set>
+#include <string>
+#include <cassert>
+#include <vector>
+#include <iostream>
 
+// define a stLFR read in fastq format
+struct Fastq
+{
+    typedef BGIQD::stLFR::stLFRHeader Header;
+
+    FLAGS_INT ;
+
+    ADD_A_FLAG(1,UnSet);
+    ADD_A_FLAG(2,Set_head);
+    ADD_A_FLAG(3,Set_seq);
+    ADD_A_FLAG(4,Set_3);
+    ADD_A_FLAG(5,Set_quality);
+
+    void Reset() 
+    {
+        head.Reset();
+        flags = 0 ;
+        Set_UnSet();
+    }
+
+    Header head;
+
+    void AddHead(const std::string & line)
+    {
+        Clean_UnSet();
+        Set_Set_head();
+        head.Init(line);
+    }
+
+    void AddSeq(const std::string & /*line*/ )
+    {
+        if( Is_UnSet() || ! Is_Set_head() )
+        {
+            assert(0);
+        }
+        Set_Set_seq();
+    }
+
+    void Add3(const std::string & )
+    {
+        if( Is_UnSet()
+                || ! Is_Set_head() 
+                || ! Is_Set_seq() )
+        {
+            assert(0);
+        }
+        Set_Set_3();
+    }
+
+    void AddQuality( const std::string & /*line*/ )
+    {
+
+        if( Is_UnSet() || ! Is_Set_3() )
+        {
+            assert(0);
+        }
+        Set_Set_quality();
+    }
+
+    bool Is_Setted() const { 
+        return  (!Is_UnSet() )
+            && Is_Set_head() 
+            && Is_Set_seq()
+            && Is_Set_3() 
+            && Is_Set_quality();
+    }
+};
+// wrap basic functions for loading and parsing fastq
+struct FastqReader
+{
+    static bool IsHead(const std::string & line)
+    {
+        return ( ! line.empty()) && line[0] == '@' ;
+    }
+    static bool Is_3(const std::string & line)
+    {
+        return ( ! line.empty()) && line[0] == '+' ;
+    }
+
+    static void LoadAllFastq( 
+            std::istream & ist 
+            , std::vector<Fastq> & buffer )
+    {
+        std::string line ;
+        Fastq fq;
+        fq.Reset();
+        long index = 0 ;
+        while ( ! std::getline(ist,line).eof() )
+        {
+            index ++ ;
+            if( index % 4 == 1 )
+            {
+                assert(IsHead(line) && "fastq format invalid!!!");
+                if(fq.Is_Setted())
+                {
+                    buffer.push_back(fq);
+                }
+                fq.Reset();
+                fq.AddHead(line);
+            }
+            else if ( index % 4 == 2 )
+            {
+                fq.AddSeq(line);
+            }
+            else if ( index % 4 == 3 )
+            {
+                assert( Is_3(line) && "fastq format invalid!!!" );
+                fq.Add3(line);
+            }
+            else 
+            {
+                fq.AddQuality(line);
+            }
+        }
+        if(fq.Is_Setted())
+        {
+            buffer.push_back(fq);
+        }
+        fq.Reset();
+    }
+
+    static bool LoadNextFastq(std::istream & ist , Fastq & fq)
+    {
+        std::string line ;
+        int index = 0;
+        fq.Reset();
+        while ( ! std::getline(ist,line).eof() )
+        {
+            index ++ ;
+            if( index % 4 == 1 )
+            {
+                assert(IsHead(line) && "fastq format invalid!!!");
+                fq.AddHead(line);
+            }
+            else if ( index % 4 == 2 )
+            {
+                fq.AddSeq(line);
+            }
+            else if ( index % 4 == 3 )
+            {
+                assert( Is_3(line) && "fastq format invalid!!!" );
+                fq.Add3(line);
+            }
+            else 
+            {
+                fq.AddQuality(line);
+            }
+            if( index == 4 )
+                break ;
+        }
+        return fq.Is_Setted();
+    }
+};
 
 /**********************************************************
  *
@@ -32,10 +189,8 @@
  * ********************************************************/
 struct AppConfig
 {
-    typedef BGIQD::SEQ::stLFRHeader::ReadType Type ;
-    // only stLFR reads supported
-    typedef BGIQD::SEQ::Fastq<BGIQD::SEQ::stLFRHeader> Fastq;
-    typedef BGIQD::SEQ::FastqReader<Fastq> Reader;
+    typedef BGIQD::stLFR::stLFRHeader::ReadType Type ;
+    typedef FastqReader Reader;
 
     BGIQD::LOG::logger loger;
 
@@ -57,7 +212,7 @@ struct AppConfig
     {
         read1 = in ;
         fNames.Init(prefix);
-        BGIQD::LOG::logfilter::singleton().get("ParseReadName",BGIQD::LOG::DEBUG,loger);
+        loger.Init("ParseReadName");
     }
 
     // loading read1 line by line and parse the read names.

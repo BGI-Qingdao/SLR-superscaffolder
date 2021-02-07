@@ -13,7 +13,6 @@
 #include "utils/files/file_writer.h"
 #include "utils/args/argsparser.h"
 #include "utils/log/log.h"
-#include "utils/log/logfilter.h"
 #include "utils/string/stringtools.h"
 #include "utils/misc/Error.h"
 
@@ -216,7 +215,7 @@ struct AppConfig
         bin_size = bin;
         del_at_tail = 0;
         bin_factor = bin_f;
-        BGIQD::LOG::logfilter::singleton().get("ChopBin",BGIQD::LOG::loglevel::INFO,log);
+        log.Init("ChopBin");
         fName.Init(prefix);
         b2b_array.Init(1024);
         log<<BGIQD::LOG::lstart()<<"Init finsish ..."<<BGIQD::LOG::lend();

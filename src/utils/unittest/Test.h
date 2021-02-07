@@ -8,7 +8,6 @@
 #include <functional>
 
 #include "utils/log/log.h"
-#include "utils/log/logfilter.h"
 
 /**********************************************************
  *
@@ -49,7 +48,7 @@ struct Test
     static TestMap & the_map()
     {
         static TestMap themap;
-        BGIQD::LOG::logfilter::singleton().get("TEST_main",BGIQD::LOG::loglevel::DEBUG,Test::log);
+        Test::log.Init("TEST_main");
         return themap;
     }
 
@@ -98,7 +97,7 @@ struct Test
         static Test::TestVec * thevec = nullptr;\
         if(thevec == nullptr)\
         {\
-            BGIQD::LOG::logfilter::singleton().get("TEST_"#name,BGIQD::LOG::loglevel::DEBUG,test_logger);\
+            test_logger.Init("TEST_"#name);\
             thevec = new Test::TestVec();\
             Test::TRun(#name,thevec);\
         }\
