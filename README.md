@@ -18,6 +18,7 @@ Here is an illustration of this pipeline:
     - [General usage](#usage)
     - [Output results](#results)
     - [Configuration](#conf)
+    - [MinHash](#minhash)
 - [Miscellaneous](#misc)
 - [Reference](#ref)
 - [Contact](#contact)
@@ -76,7 +77,8 @@ cd YOUR-DOWNLOAD-DIR
 │   ├── SeedCluster
 │   ├── SplitInfo
 │   ├── StaticsticUnique
-│   └── Trunk2ScaffInfo
+│   ├── Trunk2ScaffInfo
+│   └── test
 └── stLFR_barcode_split         # a backup script for splitting reads and obtain barcodes
     ├── barcode_list.txt        # the barcode whitelist of stLFR reads
     ├── split_barcode.pl        # the splitting main script
@@ -213,7 +215,7 @@ PREFIX="chr19_soap2"                        # the prefix of you contig/ContigInd
 ###############################################################################
 # Control parameter settings 
 #
-
+SAMPLING_RATIO=1.0                          # random sample barcode to reduce clusting time. valid value : [0.1,1.0]
 ###################################################
 # for step 1 bwa mem
 BWA_K=53                                    # the mapping k-value for bwa
@@ -250,6 +252,14 @@ MIN_SCONTIG=300                             # the min sequence length that allow
 MIN_N=10                                    # the min N size between 2 gapped contigs.
 MIN_C=1                                     # the min N size between 2 overlaped contigs.
 ```
+
+### <a name=minhash>MinHash</a>
+
+Calculating Jaccard similarities for N*N bins is compute-intensive for large genome ( > 1GB).
+To reduce the running time, use can open the minhash strategy( random sample barcodes ) by set SAMPLING_RATIO=n (0.1<n<1.0).
+Notice: based on our benchmark, the minhash strategy can dramaticly ( faster than linear ) reduce the running-time for large genome but will
+sightly reduce the quality of final results.
+
 ## <a name=misc>Miscellaneous</a>
 
 - Requirements
