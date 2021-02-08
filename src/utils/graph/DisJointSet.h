@@ -1,102 +1,47 @@
 #ifndef __ALGORITHM_DISJOIN_SET_DISJOIN_SET_H__
 #define __ALGORITHM_DISJOIN_SET_DISJOIN_SET_H__
 
-#include <map>
 #include <vector>
 #include <cassert>
-
+#include <boost/config.hpp>
+#include <iostream>
+#include <algorithm>
+#include <utility>
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/connected_components.hpp>
 /**********************************************************
  *
  * @Brief :
- *  The implement of disjoin set algorithm which strict follow the book "Introduction to Algorithms".
- *
- *  See the wiki from https://en.wikipedia.org/wiki/Disjoint-set_data_structure
- *
+ *      Get connection component by BGL.
+ *      I keep the old function names to suit the old logic codes.
  * *******************************************************/
+using namespace boost;
 namespace BGIQD{
 namespace GRAPH
 {
 
-    template< class Key  >
         class DisJoin_Set{
-                struct Node
-                {
-                    Key key;
-                    Node * parent;
-                    unsigned depth;
-                };
             public :
-                void AddConnect( const Key a , const Key b )
+                void AddConnect( const int a , const int b )
                 {
-                    auto aptr = GetRepresentation(a);
-                    auto bptr = GetRepresentation(b);
-                    if( aptr->key != bptr->key )
-                    {
-                        JoinNode(aptr , bptr);
-                    }
+                    add_edge(a, b, G);
                 }
 
-                Key GetGroup( const Key a )
+                int GetGroup( const int a ) const
                 {
-                    return GetRepresentation(a)->key;
+                    return results.at(a);
                 }
 
-                ~DisJoin_Set() {
-                    for( auto & i : m_nodeHash )
-                    {
-                        delete i.second ;
-                    }
-                    m_nodeHash.clear();
-                    for ( auto & i : m_parentVector )
-                        delete i;
-                    m_parentVector.clear();
+                // call this after add all connections
+                // and before any GetGroups
+                void GenAllResult() {
+                    results.resize(num_vertices(G));
+                    connected_components(G, &results[0]);
                 }
             private:
-
-                void JoinNode(Node * a , Node * b)
-                {
-                    if( a->depth < b->depth ){
-                        a->parent = b ;
-                    }else if ( b->depth < a->depth ){
-                        b->parent = a ;
-                    }else {
-                        Node * np = new Node();
-                        np->key = a->key ;
-                        np->depth = a->depth +1 ;
-                        np->parent = NULL ;
-                        a->parent = np ;
-                        b->parent = np ;
-                        m_parentVector.push_back(np);
-                    }
-                }
-
-                Node * GetRepresentation(Key a)
-                {
-                    auto itr = m_nodeHash.find(a) ;
-                    if( itr == m_nodeHash.end() )
-                    {
-                        Node * aptr  = new Node();
-                        aptr->key = a;
-                        aptr->parent = NULL; 
-                        aptr->depth = 0 ;
-                        m_nodeHash[a] = aptr;
-                        return aptr;
-                    }
-                    return get_representation(itr->second);
-                }
-
-                Node * get_representation( Node * a )
-                {
-                    if ( a == NULL ) assert(0) ;
-                    if ( a->parent == NULL ) 
-                        return a ;
-                    Node * ret = get_representation( a->parent );
-                    if( a->parent != ret ) a->parent = ret ;
-                    return ret ;
-                }
-                typedef std::map<Key , Node * > nodeHash;
-                nodeHash m_nodeHash;
-                std::vector<Node*> m_parentVector;
+                std::vector<int> results;
+                typedef adjacency_list< vecS, vecS, undirectedS > Graph;
+                Graph G;
         };
 } // namespace Algorithm
 } // namespace BGIQD

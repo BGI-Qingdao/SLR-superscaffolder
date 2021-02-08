@@ -5,9 +5,9 @@
 TEST_MODULE_INIT(MinTree)
 
 
-typedef BGIQD::GRAPH::IGraphNodeBasic<std::string , int > MTestNode ;
+typedef BGIQD::GRAPH::IGraphNodeBasic<int , int > MTestNode ;
 
-typedef BGIQD::GRAPH::IGraphEdgeBasic<std::string , int > MTestEdge;
+typedef BGIQD::GRAPH::IGraphEdgeBasic<int , int > MTestEdge;
 
 struct MTEdge : public MTestEdge
 {
@@ -28,12 +28,21 @@ struct EAttr
     }
 };
 
+static int a = 0;
+static int b = 1;
+static int c = 2;
+static int d = 3;
+static int e = 4;
+static int f = 5;
+static int g = 6;
+static int h = 7;
+static int i = 8;
 
 struct MTestGraphBasic : public BGIQD::GRAPH::Graph<MTestNode , MTEdge>
 {
     typedef BGIQD::GRAPH::Graph<MTestNode , MTEdge> Basic;
 
-    void AddEdgeValue( const std::string & from , const std::string & to, int value )
+    void AddEdgeValue( const int  from , const int  to, int value )
     {
         MTEdge tmp ;
         tmp.from = from ;
@@ -45,38 +54,36 @@ struct MTestGraphBasic : public BGIQD::GRAPH::Graph<MTestNode , MTEdge>
     void AddNode(const MTestNode & n){
         Basic::AddNode(n);
     }
-    void AddNode(const std::string & str){
+    void AddNode(int str){
         MTestNode tmp;
         tmp.id = str;
         AddNode(tmp);
     }
-
     static MTestGraphBasic TestData() {
         MTestGraphBasic test ;
-        test.AddNode("a");
-        test.AddNode("b");
-        test.AddNode("c");
-        test.AddNode("d");
-        test.AddNode("e");
-        test.AddNode("f");
-        test.AddNode("g");
-        test.AddNode("h");
-        test.AddNode("i");
-        test.AddNode("i");
-        test.AddEdgeValue( "a" , "b",4);
-        test.AddEdgeValue( "a" , "h",8);
-        test.AddEdgeValue( "b" , "c",8);
-        test.AddEdgeValue( "b" , "h",11);
-        test.AddEdgeValue( "c" , "d",7);
-        test.AddEdgeValue( "c" , "f",4);
-        test.AddEdgeValue( "h" , "i" ,7);
-        test.AddEdgeValue( "h" , "g" ,1);
-        test.AddEdgeValue( "i" , "c" ,2);
-        test.AddEdgeValue( "i" , "g" ,6);
-        test.AddEdgeValue( "g" , "f" ,2);
-        test.AddEdgeValue( "f" , "d" ,17);
-        test.AddEdgeValue( "d" , "e" ,9);
-        test.AddEdgeValue( "f" , "e" ,10);
+        test.AddNode(a);
+        test.AddNode(b);
+        test.AddNode(c);
+        test.AddNode(d);
+        test.AddNode(e);
+        test.AddNode(f);
+        test.AddNode(g);
+        test.AddNode(h);
+        test.AddNode(i);
+        test.AddEdgeValue( a , b,4);
+        test.AddEdgeValue( a , h,8);
+        test.AddEdgeValue( b , c,8);
+        test.AddEdgeValue( b , h,11);
+        test.AddEdgeValue( c , d,7);
+        test.AddEdgeValue( c , f,4);
+        test.AddEdgeValue( h , i ,7);
+        test.AddEdgeValue( h , g ,1);
+        test.AddEdgeValue( i , c ,2);
+        test.AddEdgeValue( i , g ,6);
+        test.AddEdgeValue( g , f ,2);
+        test.AddEdgeValue( f , d ,17);
+        test.AddEdgeValue( d , e ,9);
+        test.AddEdgeValue( f , e ,10);
         return test;
     }
 
@@ -115,19 +122,19 @@ TEST(MinTree)
     EAttr attr;
     auto m = mtHelper.MinTree(test,attr);
     m.PrintAsDOT(std::cout);
-    CHECK(true, m.CheckEdge("a","b"));
-    CHECK(true, m.CheckEdge("a","h"));
-    CHECK(true, m.CheckEdge("h","g"));
-    CHECK(true, m.CheckEdge("g","f"));
-    CHECK(true, m.CheckEdge("c","f"));
-    CHECK(true, m.CheckEdge("i","c"));
-    CHECK(true, m.CheckEdge("d","e"));
-    CHECK(true, m.CheckEdge("c","d"));
+    CHECK(true, m.CheckEdge(a,b));
+    CHECK(true, m.CheckEdge(a,h));
+    CHECK(true, m.CheckEdge(h,g));
+    CHECK(true, m.CheckEdge(g,f));
+    CHECK(true, m.CheckEdge(c,f));
+    CHECK(true, m.CheckEdge(i,c));
+    CHECK(true, m.CheckEdge(d,e));
+    CHECK(true, m.CheckEdge(c,d));
 
-    CHECK(false, m.CheckEdge("b","c"));
-    CHECK(false, m.CheckEdge("b","h"));
-    CHECK(false, m.CheckEdge("h","i"));
-    CHECK(false, m.CheckEdge("i","g"));
-    CHECK(false, m.CheckEdge("f","d"));
-    CHECK(false, m.CheckEdge("f","e"));
+    CHECK(false, m.CheckEdge(b,c));
+    CHECK(false, m.CheckEdge(b,h));
+    CHECK(false, m.CheckEdge(h,i));
+    CHECK(false, m.CheckEdge(i,g));
+    CHECK(false, m.CheckEdge(f,d));
+    CHECK(false, m.CheckEdge(f,e));
 }

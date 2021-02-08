@@ -6,6 +6,7 @@ CXX 	   =	g++
 CXXFLAGS   =	-std=c++11\
 				-I../\
 				-I./\
+				-I/home/ubuntu/work/boost/boost_1_75_0/\
 				-lz\
 				-lpthread\
 
@@ -138,7 +139,6 @@ unittest_cpp = ../utils/string/stringtools_test.cpp \
 			   ../utils/graph/GraphTipRemove_test.cpp \
 			   ../utils/graph/GraphBasic_test.cpp \
 			   ../utils/graph/DisJointSet_test.cpp \
-			   ../utils/graph/mst/fib_heap_test.cpp \
 			   ../utils/graph/mst/MinTree_test.cpp
 
 
