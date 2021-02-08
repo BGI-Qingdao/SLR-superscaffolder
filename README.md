@@ -255,8 +255,10 @@ MIN_C=1                                     # the min N size between 2 overlaped
 
 ### <a name=minhash>MinHash</a>
 
-Calculating Jaccard similarities for N*N bins is compute-intensive for large genome ( > 1GB).
-To reduce the running time, use can open the minhash strategy( random sample barcodes ) by set SAMPLING_RATIO=n (0.1<n<1.0).
+Calculating Jaccard similarities for N*N bins is compute-intensive for large genome (> 1GB).
+
+To reduce the running time, user can open the minhash strategy( random sample barcodes ) by set SAMPLING_RATIO=n (0.1<n<1.0).
+
 Notice: based on our benchmark, the minhash strategy can dramaticly ( faster than linear ) reduce the running-time for large genome but will
 sightly reduce the quality of final results.
 
